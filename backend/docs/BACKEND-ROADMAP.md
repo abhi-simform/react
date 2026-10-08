@@ -1,0 +1,30 @@
+# Backend & Admin Roadmap
+
+Claude builds one phase at a time, **just before** you reach the matching frontend stage in `learning-plan.md`. To start a phase, tell Claude Code: _"Build backend phase B3 per BACKEND-ROADMAP.md, with tests and docs."_
+
+Each phase = models + routes + Zod schemas + tests + OpenAPI entries + seed data + an update to `API-CONVENTIONS.md` + the admin screens listed.
+
+| Phase     | Scope                                                                                                                                                                                                                                            | Unlocks learning stage         | Admin screens                                       |
+| --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------ | --------------------------------------------------- |
+| **B0 ✅** | Scaffold, Docker, env, logging, errors, validation, auth (register/login/refresh rotation/logout/verify/forgot/reset/change password), users/me, categories tree, products list/detail (search, filters, sort, pagination), seed, tests, OpenAPI | 4–6 (hooks, routing, fetching) | –                                                   |
+| **B1**    | Category & brand CRUD, product facets endpoint (`/products/facets` brand/price/rating counts), product create/update/archive (seller/admin), image upload (local → Cloudinary-ready adapter), variants/SKUs                                      | 6, 7                           | Products, Categories, Brands CRUD with image upload |
+| **B2**    | Wishlist, saved addresses (CRUD + default), pincode serviceability + delivery estimate                                                                                                                                                           | 6–9 (CRUD, optimistic UI)      | Users list                                          |
+| **B3**    | Cart (guest cart by cart-id cookie, merge on login, quantity/stock validation, save-for-later, price-change warnings)                                                                                                                            | 8, 9                           | –                                                   |
+| **B4**    | Coupons (percent/flat/min-cart/first-order/usage limits), deals & flash sales (time windows, deal price, stock-limited), banners/home-page content                                                                                               | 9, 11                          | Coupons, Deals, Banners                             |
+| **B5**    | Orders: checkout, **transactional** stock reservation, order state machine (placed → confirmed → packed → shipped → delivered / cancelled / returned), cancel, invoice PDF                                                                       | 11                             | Orders management, status transitions               |
+| **B6**    | **Razorpay** (test mode): create order, verify signature, webhooks (idempotent), COD, refunds. Provider-adapter with a mock gateway fallback                                                                                                     | 11                             | Payments list, refunds                              |
+| **B7**    | Reviews & ratings (verified purchase, photos, helpful votes, rating aggregates), product Q&A, moderation                                                                                                                                         | 7, 9, 12                       | Reviews moderation                                  |
+| **B8**    | Search autocomplete + suggestions, recently viewed, similar products, "customers also bought", personalised home rows, product compare                                                                                                           | 13                             | –                                                   |
+| **B9**    | Notifications (in-app + email), real-time via **Socket.io**, order tracking events, return/refund requests                                                                                                                                       | 11, 13                         | Notification templates, returns queue               |
+| **B10**   | Google OAuth sign-in, account linking, sessions list/revoke, 2FA (optional)                                                                                                                                                                      | 10                             | –                                                   |
+| **B11**   | Seller portal API (own products/orders), admin analytics (revenue, orders, top products, funnel via aggregation pipelines), user management, audit log                                                                                           | Admin track                    | Dashboard charts, sellers, users                    |
+| **B12**   | Hardening & ops: Redis cache + rate-limit store, BullMQ jobs (emails, stock alerts, abandoned cart), pagination cursors, idempotency keys, soft-delete, request tracing, Sentry, load test, deploy config (Render/Railway + Atlas)               | 14                             | Audit log, system health                            |
+
+## Standards every phase must meet
+
+1. Zod schema for every input; no raw `req.body` use.
+2. Service layer holds business rules; controllers stay thin; models hold schema + indexes.
+3. Multi-document changes (stock, orders, payments) use Mongo transactions.
+4. Every list is paginated with a stable sort; every query has a supporting index.
+5. Tests: happy path + auth/role failure + validation failure + a concurrency/edge case.
+6. No secrets in git; new env vars added to `env.ts` **and** `.env.example`.

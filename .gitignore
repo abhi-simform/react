@@ -1,0 +1,19 @@
+node_modules/
+dist/
+build/
+coverage/
+.react-router/
+.tanstack/
+.output/
+.nitro/
+*.log
+.DS_Store
+
+# env files (keep the examples)
+.env
+.env.*
+!.env.example
+
+# uploads created by the local backend
+backend/uploads/*
+!backend/uploads/.gitkeep
