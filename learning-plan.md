@@ -447,8 +447,12 @@ frontend/
         profile.tsx
         addresses.tsx
         security.tsx
-      auth/login.tsx, register.tsx, forgot-password.tsx, reset-password.tsx
-      not-found.tsx
+      auth/
+        login.tsx 
+        register.tsx 
+        forgot-password.tsx 
+        reset-password.tsx
+        not-found.tsx
     features/                # one folder per product capability
       catalog/
         components/          #   ProductCard, ProductGrid, FilterSidebar, PriceHistogram
