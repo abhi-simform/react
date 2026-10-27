@@ -5,7 +5,8 @@
 You already ship good static React UI, you know `useState`, and JS/React fundamentals are solid. This plan does not re-teach what you know. It spends your time on the capabilities you do not yet have, and every one of them is learned inside a real feature of a real product.
 
 - **You write:** `/frontend` (the customer storefront), by hand.
-- **Claude builds:** `/backend` (phase by phase, `B0`..`B12`) and `/admin` (TanStack Start dashboard).
+- **You also write:** `/admin` (the admin and seller portal, TanStack Start), in the [Admin track](#admin-track-build-the-admin-portal).
+- **Claude builds:** only `/backend` (phase by phase, `B0`..`B12`).
 - **Duration:** about 14 to 16 weeks part-time (roughly 10 to 12 hours per week). See [Pacing](#9-pacing).
 
 ---
@@ -37,7 +38,7 @@ You already ship good static React UI, you know `useState`, and JS/React fundame
    - [Stage 12: Quality: testing, debugging, accessibility](#stage-12-quality-testing-debugging-accessibility)
    - [Stage 13: Performance and polish](#stage-13-performance-and-polish)
    - [Stage 14: Production and deep dives](#stage-14-production-and-deep-dives)
-   - [Optional admin track](#optional-admin-track)
+   - [Admin track: build the admin portal](#admin-track-build-the-admin-portal)
 5. [Library map](#5-library-map)
 6. [Milestone checklist](#6-milestone-checklist)
 7. [AI-assisted development prompts per stage](#7-ai-assisted-development-prompts-per-stage)
@@ -123,7 +124,7 @@ The repo is a single root git repo (see the root README). Work like a team membe
 
 ## 2. The product: ShopSphere
 
-ShopSphere is a multi-vendor marketplace: customers browse, search, compare and buy; sellers manage their own listings; admins run the platform. You build the **customer storefront** (`/frontend`, SPA on `http://localhost:5173`). Claude builds the **API** (`/backend`, `http://localhost:4000/api/v1`) and the **admin** (`/admin`, TanStack Start on `http://localhost:3000`). The full feature set below is the *destination*; stages deliver it in slices.
+ShopSphere is a multi-vendor marketplace: customers browse, search, compare and buy; sellers manage their own listings; admins run the platform. You build the **customer storefront** (`/frontend`, SPA on `http://localhost:5173`) and the **admin portal** (`/admin`, TanStack Start on `http://localhost:3000`). Claude builds only the **API** (`/backend`, `http://localhost:4000/api/v1`). The full feature set below is the *destination*; stages deliver it in slices.
 
 ### 2.1 Feature catalogue
 
@@ -260,11 +261,11 @@ Priority: **MVP** = needed for a complete purchase journey; **Core** = expected 
 | Feature | Detail | Pri | Stage |
 | --- | --- | --- | --- |
 | Become a seller | Application form with validation | Plus | 10, 11 |
-| Seller home | Own products list, stock editing, orders to fulfil (a simple role-gated area; heavy tooling lives in `/admin`) | Plus | Admin track |
+| Seller home | Own products list, stock editing, orders to fulfil (a simple role-gated area; heavy tooling lives in your `/admin` app) | Plus | Admin track |
 
-#### M. Admin (built by Claude in `/admin`)
+#### M. Admin (built by you in `/admin`)
 
-Analytics (revenue, orders, conversion, top products), product/category/brand CRUD with image upload, orders management and status updates, users and roles, coupons and deals, reviews/Q&A moderation, return approvals, inventory, audit log viewer. You read this code in the [Admin track](#optional-admin-track) to learn TanStack Router/Start by comparison.
+Analytics (revenue, orders, conversion, top products), product/category/brand CRUD with image upload, orders management and status updates, users and roles, coupons and deals, reviews/Q&A moderation, return approvals, inventory, audit log viewer. You build all of it in the [Admin track](#admin-track-build-the-admin-portal), which also teaches TanStack Router/Start by comparison with React Router.
 
 #### N. Cross-cutting production features
 
@@ -313,7 +314,7 @@ All routes are customer-app routes in `/frontend` unless marked. `Guard`: `publi
 | `/help`, `/policies/:slug` | Static pages | public | 5 | none |
 | `/offline` | Offline fallback (PWA) | public | 13 | none |
 | `*` | 404 not found | public | 5 | none |
-| *(admin app, `:3000`)* `/`, `/products`, `/orders`, `/users`, `/coupons`, `/reviews`, `/analytics` | Built by Claude | role:admin | Admin track | B11 |
+| *(admin app, `:3000`)* `/`, `/products`, `/orders`, `/users`, `/coupons`, `/reviews`, `/analytics` | Built by you (Admin track) | role:admin | Admin track | B11 |
 
 ### 2.3 Data model overview
 
@@ -378,7 +379,7 @@ Claude builds one phase at a time. **Rule:** ask for the next phase when you sta
 | **B8** | Search autocomplete + recommendations + recently viewed | `GET /search/suggest?q=`, `GET /products/:id/similar`, `GET /recommendations`, `POST/GET /me/recently-viewed` | S11, S13 | before autocomplete topic in S11 |
 | **B9** | Notifications (Socket.io) + order tracking | `GET /notifications`, mark read, Socket.io namespace with JWT auth, order status events | S11 | before tracking topic in S11 |
 | **B10** | Google OAuth + email verification/reset | `GET /auth/google`, `GET /auth/google/callback`, `POST /auth/verify-email`, `POST /auth/forgot-password`, `POST /auth/reset-password`, sessions list | S10 | start of S10 |
-| **B11** | Seller + admin endpoints + analytics | `/seller/*`, `/admin/*`, aggregation endpoints (revenue, funnel, top products) | Admin track | before Admin track |
+| **B11** | Seller + admin endpoints + analytics | `/seller/*`, `/admin/*`, aggregation endpoints (revenue, funnel, top products) | Admin track (A.6, A.7) | before A.6 |
 | **B12** | Jobs, caching, audit log, hardening | BullMQ jobs (emails, price-drop alerts), Redis cache, `ETag`/cache headers, audit log, rate limits, CSP | S13, S14 | start of S13 |
 
 > Endpoint names above are the plan, not a promise. After each phase, Claude updates Swagger and `docs/API-CONVENTIONS.md`. The source of truth is always `http://localhost:4000/api/docs`. Read it before coding against a new endpoint.
@@ -3453,7 +3454,7 @@ You will test what you built, so you learn what makes code testable (and refacto
 2. Convert **only** the PDP route to a `loader` that fetches the product server-side (the API base URL for server-to-server calls may differ from the browser one); use it for `meta`, JSON-LD and the first render, while reviews/recommendations stay client-side Query. Seed Query with loader data via `initialData`.
 3. Verify **View Source** contains the title, price and structured data; compare Lighthouse SEO and LCP with the SPA version in your perf log.
 4. Convert the login form to an `action` with `<Form>` and compare to your RHF + mutation version (what do you gain: progressive enhancement; what do you lose: client-side validation ergonomics).
-5. Open `/admin` (TanStack Start): find the router config, a route with a `loader`, a `createServerFn` call and compare the data-loading model to RR's.
+5. Look at your own `/admin` (TanStack Start): find the router config, a route `loader` and a `createServerFn` example in the TanStack docs, and compare the data-loading model to RR's.
 6. Write an ADR: "Would I ship ShopSphere as SPA or SSR? Why?".
 
 **Acceptance criteria**
@@ -3493,87 +3494,196 @@ You will test what you built, so you learn what makes code testable (and refacto
 
 ---
 
-## Optional admin track
+## Admin track: build the admin portal
 
 | | |
 | --- | --- |
-| **Purpose** | Read and extend code you did not write: the `/admin` app (TanStack Start + TanStack Router + shadcn). Reading unfamiliar code is a core job skill; this also contrasts file-based routing and server functions with your React Router app |
-| **Needs** | **B11** (seller + admin endpoints + analytics). Claude builds `/admin` against B11 after you finish Stage 11 (or earlier, in parallel) |
-| **Time** | 1 to 2 weeks, optional |
-| **Branch prefix** | `admin/` (in the admin folder's own tasks) |
+| **Purpose** | You build `/admin` yourself (TanStack Start + TanStack Router + shadcn). Same API, different product surface: dense data tables, role-gated layouts, charts, bulk actions. It re-applies Stages 4 to 13 in a second app and teaches a second routing model by contrast with React Router. |
+| **Needs** | Backend phases arrive as you reach each section: **B1** (catalog CRUD + uploads), **B4** (coupons/deals/banners), **B5** (orders), **B6** (refunds), **B7** (reviews/Q&A), **B9** (returns), **B11** (admin/seller + analytics), **B12** (audit log). Claude builds only the API for these. |
+| **When** | Start after **Stage 9** (you need Query) and finish alongside Stages 11 to 14; or do it as a block after Stage 11. Part of the core plan now, not optional. |
+| **Time** | 3 to 4 weeks part-time |
+| **Branch prefix** | `admin/` |
+| **Ground rules** | `/admin` shares **no code** with `/frontend`. Copy what you need (API client, `ApiError`, types) and feel the duplication; note it in your pain journal. Do not ask AI to generate whole pages. Use it to explain, review and unblock (Stage 14 AI rules). |
 
-### A.1 Orientation: TanStack Router file routes and Start
+### What the admin portal must do (scope)
 
-**Concept.** TanStack Router uses **file-based routes** in `src/routes/` (a generated `routeTree.gen.ts`), type-safe `Link`/`navigate`, route `loader`, `beforeLoad` (guards), and **validated search params** (`validateSearch`, Zod adapter). TanStack Start adds SSR and **server functions** (`createServerFn`) on top. Dev port is 3000 (`vite dev --port 3000`).
+| Area | Screens |
+| --- | --- |
+| Dashboard | Revenue and orders over time, orders by status, top products, category share, low-stock list, conversion funnel |
+| Catalog | Products (table, create/edit with variants, images, specs, status), categories (tree, reorder), brands |
+| Orders | List with filters, detail, status transitions, shipment info, cancel, refund |
+| Customers and sellers | Users table, role change, deactivate, seller approvals, seller detail |
+| Marketing | Coupons, deals/flash sales, home banners |
+| Moderation | Reviews, Q&A, return requests queue |
+| Platform | Audit log, system health, settings |
+| Seller mode | Same app, role `seller`: sees only own products/orders (API-enforced) |
 
-**Why it matters in ShopSphere.** Same product, different architecture. Comparing the two teaches you which ideas are universal (nested layouts, params, data loading, guards) and which are framework-specific.
+### A.0 Orientation: scaffold, routing and rendering mode
 
-**Library/API.** `@tanstack/react-router` (`createFileRoute`, `createRootRoute`, `Outlet`, `Link`, `redirect`), `@tanstack/react-start`, `tsr generate` (`npm run generate-routes`), devtools.
+**Concept.** TanStack Router uses **file-based routes** in `src/routes/` (a generated `routeTree.gen.ts`), type-safe `Link`/`navigate`, route `loader`, `beforeLoad` (guards) and **validated search params** (`validateSearch`). TanStack Start adds SSR and **server functions** (`createServerFn`) on top. The scaffold dev port is 3000 (`vite dev --port 3000`).
 
-**Hands-on task.** Run `/admin` (`npm run dev`). Draw a map of its route tree. For each of five routes, note: path, file, loader (if any), guard (`beforeLoad`), and the API calls. Write a table "RR (frontend) vs TanStack Router (admin)" for: route definition, layouts, params, search params, data loading, guards, error/404, code splitting, type-safety. Find where admin auth (role `admin`) is enforced.
+**Why it matters in ShopSphere.** An admin console is a logged-in, client-heavy tool: SEO is irrelevant and auth tokens live in the browser. You will use Start mostly as a client-rendered app and learn what you can skip.
 
-**Acceptance criteria**
-- [ ] Table has at least 9 rows, each verified in the code, not assumed.
-- [ ] You can explain how a search-param filter on an admin table is validated and typed.
+**Library/API.** `@tanstack/react-router` (`createFileRoute`, `createRootRoute`, `Outlet`, `Link`, `redirect`), `@tanstack/react-start`, `tsr generate` (`npm run generate-routes`), router devtools. Check the current Start docs for how to disable SSR globally or per route (a client-only/SPA configuration) before you rely on `window` or in-memory auth.
 
-**Resources.** TanStack Router docs: https://tanstack.com/router/latest · File-based routing: https://tanstack.com/router/latest/docs/framework/react/routing/file-based-routing · Search params: https://tanstack.com/router/latest/docs/framework/react/guide/search-params · TanStack Start: https://tanstack.com/start/latest
-
-### A.2 Data tables: TanStack Table
-
-**Concept.** TanStack Table is a **headless** table engine: you define columns; it provides sorting, filtering, pagination, selection and visibility state; you render the markup. For large datasets use **server-side** pagination/sorting/filtering (state sent as query params to the API).
-
-**Why it matters in ShopSphere.** Orders, users, products, coupons and reviews moderation are tables.
-
-**Library/API.** `@tanstack/react-table`: `useReactTable`, `getCoreRowModel`, `getSortedRowModel`, `getPaginationRowModel`, `ColumnDef`, `manualPagination`, `manualSorting`, `flexRender`; shadcn `table` and the data-table recipe.
-
-**Hands-on task.** Read the admin orders table implementation. Then build (in your frontend or the admin, your choice) a table component for **your** `/orders` page on desktop: sortable columns, status filter, server pagination from URL state, column visibility toggle, row selection for "Download invoices".
-
-**Acceptance criteria**
-- [ ] Sort/filter/page state lives in the URL and drives the API query.
-- [ ] Keyboard and screen-reader semantics are intact (real `<table>`, `scope` headers, `aria-sort`).
-- [ ] You can state the difference between client-side and manual (server-side) modes.
-
-**Resources.** TanStack Table: https://tanstack.com/table/latest · Introduction: https://tanstack.com/table/latest/docs/introduction · shadcn data table: https://ui.shadcn.com/docs/components/data-table
-
-### A.3 Charts: Recharts and analytics dashboards
-
-**Concept.** Dashboards turn aggregation endpoints (B11: revenue by day, orders by status, conversion funnel, top products, category share) into charts. Keep charts accessible: titles, text alternatives, tables as fallback, colorblind-safe palettes; avoid animating on every refetch.
-
-**Why it matters in ShopSphere.** Admin analytics and the seller dashboard.
-
-**Library/API.** `recharts` (`LineChart`, `BarChart`, `PieChart`, `ResponsiveContainer`, `Tooltip`, `Legend`) or shadcn `chart` (built on Recharts); Query for data with `staleTime`; date-fns for ranges; `Intl` formatting for axes.
-
-**Hands-on task.** Read the admin dashboard; then build a "My spending" page in your account area (orders by month bar chart, spend by category donut, average order value) from existing order data with `useQuery` + `select` transforms.
+**Hands-on task.**
+1. Run `/admin` (`pnpm dev`, port 3000). Read `src/router.tsx`, `src/routes/__root.tsx`, `src/routes/index.tsx`. Draw the route tree you plan (see the table above) as `src/routes/` files: `_authed.tsx` layout, `_authed/products/index.tsx`, `_authed/products/$productId.tsx`, `login.tsx`.
+2. Configure the app so pages render **client-side only** (consult docs), and note what changed in View Source.
+3. Write the table "React Router (your storefront) vs TanStack Router (admin)" for: route definition, layouts, params, search params, data loading, guards, error/404, code splitting, type safety. Fill it **as you build**, not upfront.
+4. Add `VITE_API_URL`, a typed `api()` client, `ApiError` and shared TS types for responses (copied, not shared).
+5. Install and wire TanStack Query + devtools (reuse Stage 9 knowledge): `QueryClientProvider` in `__root.tsx`, and a router `context` carrying `queryClient`.
 
 **Acceptance criteria**
-- [ ] Charts resize responsively; tooltips are formatted in the active locale/currency.
-- [ ] A data table equivalent of each chart is available (accessibility).
-- [ ] Empty and loading states exist; no animation on refetch of identical data.
+- [ ] Route tree exists as files, `npm run typecheck` passes, `routeTree.gen.ts` is committed.
+- [ ] You can explain how a file path becomes a route (`$param`, `_layout`, `index`, dot-nesting).
+- [ ] The comparison table has at least 9 rows, each verified in code.
 
-**Resources.** Recharts: https://recharts.org/en-US/ · shadcn charts: https://ui.shadcn.com/docs/components/chart · date-fns: https://date-fns.org/docs/Getting-Started
+**Resources.** TanStack Router: https://tanstack.com/router/latest · File-based routing: https://tanstack.com/router/latest/docs/framework/react/routing/file-based-routing · TanStack Start: https://tanstack.com/start/latest · Router + Query integration: https://tanstack.com/router/latest/docs/framework/react/guide/external-data-loading
 
-### A.4 Role-gated layouts and seller flows
+### A.1 Authentication and the role-gated shell
 
-**Concept.** Admin and seller areas are separate product surfaces with role-based access: layout-level guards, API-enforced permissions, audit logs for sensitive actions.
+**Concept.** Admin auth reuses the API's `POST /auth/login` and refresh cookie, but the UI gate is a **layout route** that checks the session in `beforeLoad` and redirects. The API enforces roles (`403 FORBIDDEN`); the UI only hides what the user cannot use.
 
-**Why it matters in ShopSphere.** Real marketplaces have three audiences; mixing them in one UI is a security and UX smell.
+**Why it matters in ShopSphere.** Admin actions are destructive and sensitive. A guard that is only visual is a vulnerability.
 
-**Library/API.** Route guards (`beforeLoad` in TanStack Router; layout routes in RR), role helpers, audit log viewer (B12), image upload for products (B7).
+**Library/API.** `beforeLoad` + `redirect({ to: "/login", search: { redirect } })`, router `context.auth`, in-memory access token and refresh-on-load (Stage 10 flow), role helper `can(user, "orders:update")`, `useRouter().invalidate()` after login/logout.
 
-**Hands-on task.** In your `/seller` area (frontend): products list (own products only), stock quick-edit (inline, optimistic), "Orders to fulfil" with status actions respecting the order state machine. Then read how `/admin` handles the same ideas at larger scale (users, coupons, reviews moderation, audit log) and write 5 observations about what you would change.
+**Hands-on task.** Build login, logout, session restore on reload, an `_authed` layout with sidebar + topbar + breadcrumbs (from `useMatches`), a "no permission" screen for `customer`, and a `can()` permission map that hides nav items per role (`admin` all, `seller` own products/orders only). Handle `TOKEN_EXPIRED` with the single-flight refresh queue you built in Stage 10.
 
 **Acceptance criteria**
-- [ ] A seller cannot see or edit another seller's product (verified by API rejection, not just UI hiding).
-- [ ] Status actions offered match the state machine (`canTransition`).
-- [ ] Audit log shows your changes with actor and timestamp (B12).
+- [ ] Deep link to `/orders/123` while logged out lands on login, then returns to the same URL.
+- [ ] A `customer` account is rejected with a clear screen and no admin data flashes.
+- [ ] Calling an admin endpoint as `customer` in DevTools returns 403 (proof the API, not the UI, protects data).
+- [ ] No token in localStorage.
 
-**Resources.** TanStack Router authenticated routes: https://tanstack.com/router/latest/docs/framework/react/guide/authenticated-routes · OWASP authorization cheat sheet: https://cheatsheetseries.owasp.org/cheatsheets/Authorization_Cheat_Sheet.html
+**Resources.** Authenticated routes: https://tanstack.com/router/latest/docs/framework/react/guide/authenticated-routes · OWASP authorization cheat sheet: https://cheatsheetseries.owasp.org/cheatsheets/Authorization_Cheat_Sheet.html
+
+### A.2 Data tables: TanStack Table with URL state
+
+**Concept.** TanStack Table is **headless**: you define columns; it provides sorting, filtering, pagination, selection and visibility state; you render the markup. For real datasets use **manual (server-side)** pagination, sorting and filtering, with state kept in the **URL** and sent to the API.
+
+**Why it matters in ShopSphere.** Products, orders, users, coupons, reviews and returns are all tables.
+
+**Library/API.** `@tanstack/react-table` (`useReactTable`, `ColumnDef`, `getCoreRowModel`, `manualPagination`, `manualSorting`, `flexRender`), shadcn `table` and data-table recipe, `validateSearch` with Zod for typed search params, `keepPreviousData`/`placeholderData` for smooth paging, `Route.useSearch()`.
+
+**Hands-on task.** Build a generic `<DataTable>` once, then use it for **Products** and **Orders**: sortable columns, debounced search, status/category filters, page size, column visibility, row selection with a bulk action bar ("Archive selected"), sticky header, empty and error states, CSV export of the current filtered view (from the API, not the page).
+
+**Acceptance criteria**
+- [ ] Sort/filter/page state is in the URL, survives reload and back/forward, and drives the API query.
+- [ ] Changing a filter resets to page 1; page transitions do not flash empty.
+- [ ] Real `<table>` semantics, `aria-sort`, keyboard-operable row actions.
+- [ ] You can state client-side vs manual mode and when each is correct.
+
+**Resources.** TanStack Table: https://tanstack.com/table/latest · Pagination guide: https://tanstack.com/table/latest/docs/guide/pagination · shadcn data table: https://ui.shadcn.com/docs/components/data-table · Search params: https://tanstack.com/router/latest/docs/framework/react/guide/search-params
+
+### A.3 Catalog management: forms, uploads and optimistic edits
+
+**Concept.** CRUD at scale: complex nested forms (variants, specs, images), file upload with progress, dirty-state protection and optimistic inline edits.
+
+**Why it matters in ShopSphere.** Product data quality drives the storefront. This is the hardest form work in the project.
+
+**Library/API.** React Hook Form `useFieldArray` (variants, specs, highlights), Zod schemas mirroring the API's, `FormData`/multipart upload with `XMLHttpRequest` or `fetch` + progress, `dnd-kit` for image reordering, router `useBlocker` (unsaved changes), Query mutations with `onMutate` rollback. **Needs B1.**
+
+**Hands-on task.** Build: product create/edit page (tabs: General, Pricing & stock, Variants, Images, Specs, SEO), image uploader with preview/progress/reorder/remove, inline price/stock editing in the table with optimistic update and rollback toast, category tree manager (create, rename, move, reorder), brand CRUD, and "duplicate product". Map `422 VALIDATION_ERROR.details[].path` (e.g. `variants.0.sku`) back onto nested fields.
+
+**Acceptance criteria**
+- [ ] Server field errors appear under the right nested inputs.
+- [ ] Leaving a dirty form prompts; successful save clears dirty state.
+- [ ] Upload failure of one image does not lose the others; progress is shown.
+- [ ] Optimistic stock edit rolls back visibly when the API rejects it.
+- [ ] Price shown to the user is rupees, sent as integers; no float bugs.
+
+**Resources.** `useFieldArray`: https://react-hook-form.com/docs/usefieldarray · dnd-kit: https://dndkit.com · MDN FormData: https://developer.mozilla.org/en-US/docs/Web/API/FormData · TanStack Router blocking navigations: https://tanstack.com/router/latest/docs/framework/react/guide/navigation-blocking
+
+### A.4 Orders, returns and refunds: state machines in the UI
+
+**Concept.** Orders move through a fixed state machine (placed, confirmed, packed, shipped, delivered, cancelled, returned). The UI must offer only legal transitions, and the API must enforce them. Money actions (refunds) must be **idempotent** and require confirmation.
+
+**Why it matters in ShopSphere.** This is where a console becomes operationally useful and where UI bugs cost money.
+
+**Library/API.** A shared-in-spirit `canTransition(from, to)` helper (copy of the API's rules), shadcn `AlertDialog` for destructive confirms, Query invalidation of list + detail, polling or Socket.io for live order inflow (B9), `Intl.DateTimeFormat` for timelines. **Needs B5, B6, B9.**
+
+**Hands-on task.** Build order detail (items, address, payment status, timeline, notes), a status action bar that shows only legal next states, ship dialog (carrier + tracking id), cancel with reason, partial/full refund dialog with amount validation and idempotency key, returns queue (approve/reject with reason), and a live "new orders" indicator.
+
+**Acceptance criteria**
+- [ ] Illegal transitions are not offered; forcing one via DevTools yields an API error shown cleanly.
+- [ ] Double-clicking "Refund" cannot refund twice.
+- [ ] Every state change appears in the order timeline without a full reload.
+- [ ] Destructive actions need explicit confirmation and show the amount/impact.
+
+**Resources.** shadcn AlertDialog: https://ui.shadcn.com/docs/components/alert-dialog · Razorpay refunds: https://razorpay.com/docs/api/refunds/ · Stripe idempotency (concept): https://docs.stripe.com/api/idempotent_requests
+
+### A.5 Marketing and moderation
+
+**Concept.** Operational CRUD with scheduling and queues: coupons with rules and validity windows, flash-sale deals with time and stock limits, banners, review/Q&A moderation.
+
+**Why it matters in ShopSphere.** These screens create the data your Stage 11 storefront features display, closing the loop between the two apps.
+
+**Library/API.** `react-day-picker`/shadcn calendar + `date-fns` for ranges and time zones, RHF cross-field validation (`superRefine`), keyboard shortcuts for review queues (`useHotkeys`-style by hand), Query `useInfiniteQuery` for queues. **Needs B4, B7.**
+
+**Hands-on task.** Coupon form (type percent/flat, min cart, max discount, usage limits, first-order only, validity range, preview "how it shows to the customer"), deals scheduler with overlap detection, banner manager with preview in desktop/mobile widths, review moderation queue (approve/reject/flag, bulk, keyboard `j/k/a/r`), Q&A answers.
+
+**Acceptance criteria**
+- [ ] End date cannot precede start date; overlapping deals on the same product are rejected with a field error.
+- [ ] A coupon created here works in your storefront checkout (verify end to end).
+- [ ] Moderation can be done entirely from the keyboard.
+
+**Resources.** date-fns: https://date-fns.org/docs/Getting-Started · shadcn calendar: https://ui.shadcn.com/docs/components/calendar · Zod `superRefine`: https://zod.dev/api
+
+### A.6 Analytics dashboard: charts
+
+**Concept.** Dashboards turn aggregation endpoints (revenue by day, orders by status, funnel, top products, category share) into charts. Keep them accessible (titles, text alternatives, data-table fallback, colorblind-safe palette) and avoid animating on every refetch.
+
+**Why it matters in ShopSphere.** It is the first screen admins see and it exercises aggregation-backed APIs. **Needs B11.**
+
+**Library/API.** `recharts` (`LineChart`, `BarChart`, `PieChart`, `ResponsiveContainer`, `Tooltip`, `Legend`) or shadcn `chart`; Query with `staleTime` and `refetchInterval`; `select` transforms; `Intl` formatting for axes; date range presets.
+
+**Hands-on task.** KPI cards with deltas vs previous period, revenue line chart with date range picker (7/30/90 days, custom) stored in the URL, orders-by-status donut, top-products bar chart, low-stock table, funnel (views, cart, checkout, paid). Add a "My spending" chart to your storefront account page too.
+
+**Acceptance criteria**
+- [ ] Changing the range refetches once, keeps previous data visible, and updates the URL.
+- [ ] Tooltips use INR formatting; every chart has a table alternative.
+- [ ] Loading, empty and error states exist; identical refetch does not re-animate.
+
+**Resources.** Recharts: https://recharts.org/en-US/ · shadcn charts: https://ui.shadcn.com/docs/components/chart
+
+### A.7 Users, sellers and the audit trail
+
+**Concept.** Multi-tenant authorization: sellers see only their own data. Sensitive actions leave an **audit log** (who, what, when, before/after).
+
+**Why it matters in ShopSphere.** Real marketplaces have three audiences; mixing them carelessly is a security flaw. **Needs B11, B12.**
+
+**Library/API.** Role/ownership checks in the API (not UI), `beforeLoad` role guards per route, JSON diff viewer component, Query keys including the role/seller id so caches never leak across accounts.
+
+**Hands-on task.** Users table (search, role filter, deactivate/reactivate, change role with confirmation), seller applications review, seller-mode behaviour (log in as `seller@`: only own products/orders appear), audit log viewer with filters (actor, action, entity, date) and expandable before/after diff.
+
+**Acceptance criteria**
+- [ ] A seller cannot read or edit another seller's product, proven by an API 403/404 test via DevTools, not only by hidden buttons.
+- [ ] Switching accounts clears Query cache (no stale cross-account data).
+- [ ] Every role change and refund appears in the audit log with actor and timestamp.
+
+**Resources.** TanStack Query caching: https://tanstack.com/query/latest/docs/framework/react/guides/caching · OWASP broken access control: https://owasp.org/Top10/A01_2021-Broken_Access_Control/
+
+### A.8 Quality and shipping for the admin
+
+**Concept.** Apply Stages 12 to 14 to a second app.
+
+**Hands-on task.** RTL + MSW tests for `<DataTable>`, the product form and the order status bar; a Playwright flow "login as admin, create product, see it in the storefront"; axe pass on three screens; Lighthouse note (budget is relaxed for an internal tool but record it); separate `Dockerfile` or static/Node deployment, env vars, and its own CI job; README for `/admin`.
+
+**Acceptance criteria**
+- [ ] The cross-app Playwright flow passes against local servers.
+- [ ] Admin is deployed behind its own URL and the API `CORS_ORIGINS` includes it.
+- [ ] You wrote down five things you would extract into a shared package in a larger codebase, and why you did not.
+
+**Resources.** Playwright: https://playwright.dev/docs/intro · Testing Library: https://testing-library.com/docs/react-testing-library/intro/
 
 ### Checkpoint: explain it without notes (Admin track)
-1. How does a file path become a route in TanStack Router, and how does RR config differ?
-2. What does "headless" mean for TanStack Table and why is it a good fit for shadcn?
-3. Why must seller isolation be enforced by the API?
-4. When would you pick TanStack Start over RR framework mode for a project?
+1. How does a file path become a route in TanStack Router, and how does React Router config differ?
+2. What does "headless" mean for TanStack Table and why does it suit shadcn?
+3. Why must seller isolation be enforced by the API, and how did you prove it?
+4. Why keep table state in the URL?
+5. How do you make a refund idempotent end to end?
+6. When would you pick TanStack Start over React Router framework mode?
 
 **Tag:** `git tag admin-track-done`.
 
@@ -3609,8 +3719,8 @@ You will test what you built, so you learn what makes code testable (and refacto
 | ESLint + typescript-eslint + react-hooks + jsx-a11y | Static checks | 0, 4, 12 | Biome, oxlint | Core |
 | Prettier + tailwind plugin | Formatting | 0 | Biome | Core (set up) |
 | TanStack Virtual | List virtualization | 13 | react-window, react-virtuoso | Stage-bound |
-| TanStack Table | Headless data tables | Admin track | AG Grid, MUI DataGrid | Optional |
-| Recharts / shadcn charts | Charts | Admin track | Visx, Chart.js, ECharts | Optional |
+| TanStack Table | Headless data tables | Admin track | AG Grid, MUI DataGrid | Yes (admin) |
+| Recharts / shadcn charts | Charts | Admin track | Visx, Chart.js, ECharts | Yes (admin) |
 | Motion (`motion/react`) | Animation | 13 | CSS transitions, react-spring, GSAP | Optional |
 | date-fns | Date utilities (prefer `Intl` first) | 13 | Day.js, Luxon, Temporal (future) | Optional |
 | react-i18next | Translations | 13 | react-intl, Lingui, Paraglide | Optional |
@@ -3644,7 +3754,7 @@ Tick a box when every acceptance criterion of that item is met **and** the branc
 - [ ] **B8** Search autocomplete + recommendations + recently viewed (before 11.7)
 - [ ] **B9** Notifications (Socket.io) + order tracking (before 11.9)
 - [ ] **B10** Google OAuth + email verification/reset (before S10)
-- [ ] **B11** Seller + admin endpoints + analytics (before Admin track)
+- [ ] **B11** Seller + admin endpoints + analytics (before A.6 and A.7)
 - [ ] **B12** Jobs, caching, audit log, hardening (before S13)
 
 ### Frontend stages (you build)
@@ -3818,11 +3928,16 @@ Tick a box when every acceptance criterion of that item is met **and** the branc
 - [ ] 14.9 Release checklist + retrospective
 - [ ] Checkpoint, `stage-14-done`, `v1.0.0`
 
-**Admin track (optional)**
-- [ ] A.1 TanStack Router/Start comparison table
-- [ ] A.2 Data table
-- [ ] A.3 Charts
-- [ ] A.4 Role-gated flows
+**Admin track (you build `/admin`)**
+- [ ] A.0 Scaffold, route tree, client-only rendering, API client, Query setup
+- [ ] A.1 Login, session restore, role-gated shell
+- [ ] A.2 Generic `<DataTable>` with URL state (Products, Orders)
+- [ ] A.3 Product/category/brand management with uploads
+- [ ] A.4 Orders, returns, refunds
+- [ ] A.5 Coupons, deals, banners, moderation
+- [ ] A.6 Analytics dashboard
+- [ ] A.7 Users, sellers, audit log
+- [ ] A.8 Tests, cross-app e2e, deploy
 
 ---
 
@@ -3925,7 +4040,7 @@ Goal by the end: no row below **2**, and rows marked ★ at **3**.
 
 ## 9. Pacing
 
-About **14 to 16 weeks** at roughly 10 to 12 hours per week. If you have more time, compress; if less, stretch, but do not skip Stages 4, 9, 10 and 12: they are the gap the plan exists to close.
+About **14 to 16 weeks** for the storefront plus **3 to 4 weeks** for the admin portal, at roughly 10 to 12 hours per week. If you have more time, compress; if less, stretch, but do not skip Stages 4, 9, 10 and 12: they are the gap the plan exists to close.
 
 | Week | Stage | Focus | Backend to request | Deliverable |
 | --- | --- | --- | --- | --- |
@@ -3945,7 +4060,8 @@ About **14 to 16 weeks** at roughly 10 to 12 hours per week. If you have more ti
 | 14 | 11 | Razorpay, orders/returns, reviews | **B6, B7** | paid order, reviews |
 | 15 | 11 + 12 | Autocomplete, recs, sockets; testing | **B8, B9** | live notifications; unit/RTL/MSW tests |
 | 16 | 12 + 13 | E2E, bug-hunt, a11y; performance, polish | **B12** | e2e suite, perf log |
-| 17+ | 14 (+ Admin) | CI, deploy, Sentry, docs; SSR deep dive | **B11** (admin) | public URL, v1.0.0 |
+| 17+ | 14 | CI, deploy, Sentry, docs; SSR deep dive | | public URL, v1.0.0 (storefront) |
+| 18 to 21 | Admin track A.0 to A.8 | Build `/admin`: auth shell, tables, forms, orders, charts, audit | **B11**, B12 (others as you reach them) | admin deployed, cross-app e2e |
 
 **Buffer rule:** each stage ends with one buffer half-day. If you are behind by more than a week, drop stretches (not acceptance criteria) before dropping topics. If you are ahead, do the stretches marked **(recommended)**.
 
@@ -3991,7 +4107,7 @@ About **14 to 16 weeks** at roughly 10 to 12 hours per week. If you have more ti
 | Accessibility | https://www.w3.org/WAI/WCAG22/quickref/ · https://www.w3.org/WAI/ARIA/apg/ · https://developer.mozilla.org/en-US/docs/Web/Accessibility |
 | Web platform | https://developer.mozilla.org/ (Fetch, AbortController, Intl, IntersectionObserver, Web Storage, Service Worker, HTTP, CORS, Cookies) |
 | Production | https://vite.dev/guide/build · https://docs.github.com/en/actions · https://docs.sentry.io/platforms/javascript/guides/react/ · https://www.mongodb.com/docs/atlas/ · https://vercel.com/docs · https://docs.docker.com/ |
-| Admin track | https://tanstack.com/router/latest · https://tanstack.com/start/latest · https://tanstack.com/table/latest · https://recharts.org |
+| Admin track (build) | https://tanstack.com/router/latest · https://tanstack.com/start/latest · https://tanstack.com/table/latest · https://recharts.org |
 
 ### A note on versions
 

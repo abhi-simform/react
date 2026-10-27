@@ -2,9 +2,9 @@
 
 Claude builds one phase at a time, **just before** you reach the matching frontend stage in `learning-plan.md`. To start a phase, tell Claude Code: _"Build backend phase B3 per BACKEND-ROADMAP.md, with tests and docs."_
 
-Each phase = models + routes + Zod schemas + tests + OpenAPI entries + seed data + an update to `API-CONVENTIONS.md` + the admin screens listed.
+Each phase = models + routes + Zod schemas + tests + OpenAPI entries + seed data + an update to `API-CONVENTIONS.md` + the admin screens listed (which YOU build in `/admin`; Claude builds only the API).
 
-| Phase     | Scope                                                                                                                                                                                                                                            | Unlocks learning stage         | Admin screens                                       |
+| Phase     | Scope                                                                                                                                                                                                                                            | Unlocks learning stage         | Admin screens you build |
 | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------ | --------------------------------------------------- |
 | **B0 ✅** | Scaffold, Docker, env, logging, errors, validation, auth (register/login/refresh rotation/logout/verify/forgot/reset/change password), users/me, categories tree, products list/detail (search, filters, sort, pagination), seed, tests, OpenAPI | 4–6 (hooks, routing, fetching) | –                                                   |
 | **B1**    | Category & brand CRUD, product facets endpoint (`/products/facets` brand/price/rating counts), product create/update/archive (seller/admin), image upload (local → Cloudinary-ready adapter), variants/SKUs                                      | 6, 7                           | Products, Categories, Brands CRUD with image upload |

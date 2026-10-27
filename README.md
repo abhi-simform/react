@@ -6,8 +6,8 @@ Three independent projects in one repo — they deliberately share **no code or 
 | Folder | What | Stack | Who builds it | Port |
 |---|---|---|---|---|
 | [`frontend/`](frontend) | Customer storefront | React 19, React Router 8 (SPA mode), Tailwind 4, shadcn/ui | **You** (learning) | 5173 |
-| [`admin/`](admin) | Admin / seller dashboard | TanStack Start + Router, shadcn/ui | Claude | 3000 |
-| [`backend/`](backend) | REST API | Node 24, Express 5, TypeScript, MongoDB (Mongoose), Zod | Claude (phased) | 4000 |
+| [`admin/`](admin) | Admin / seller portal | TanStack Start + Router, shadcn/ui | **You** (learning, Admin track) | 3000 |
+| [`backend/`](backend) | REST API | Node 24, Express 5, TypeScript, MongoDB (Mongoose), Zod | Claude (phased, API only) | 4000 |
 
 Supporting services run in Docker ([`docker-compose.yml`](docker-compose.yml)): MongoDB (replica set), Mongo Express (DB browser), Mailpit (fake inbox), optional Redis.
 
