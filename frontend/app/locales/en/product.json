@@ -1,0 +1,10 @@
+{
+  "addToCart": "Add to cart",
+  "buyNow": "Buy now",
+  "quantity": "Quantity",
+  "wishlist": "Wishlist",
+  "noRatings": "No ratings yet",
+  "listed": "Listed {{listed}}, updated {{updated}}",
+  "priceChanged": "Price changed from {{price}}",
+  "loadingDetails": "Loading the full details..."
+}

@@ -174,12 +174,12 @@ function Badge({ a }: { a: Answer }) {
   return (
     <>
       {a.badge && (
-        <span className="ml-1 rounded bg-sky-100 px-1 py-0.5 text-xs text-sky-900">
+        <span className="ms-1 rounded bg-sky-100 px-1 py-0.5 text-xs text-sky-900">
           {a.badge === "seller" ? "Seller" : "ShopSphere"}
         </span>
       )}
       {a.verifiedBuyer && (
-        <span className="ml-1 rounded bg-emerald-100 px-1 py-0.5 text-xs text-emerald-900">
+        <span className="ms-1 rounded bg-emerald-100 px-1 py-0.5 text-xs text-emerald-900">
           Verified buyer
         </span>
       )}
@@ -247,7 +247,7 @@ function QuestionItem({
       {answers.length === 0 ? (
         <p className="text-xs text-muted-foreground">Not answered yet.</p>
       ) : (
-        <ul className="ml-3 flex flex-col gap-2 border-l pl-3">
+        <ul className="ms-3 flex flex-col gap-2 border-s ps-3">
           {answers.map((a) => (
             <li key={a.id}>
               <p>A: {a.text}</p>
@@ -332,7 +332,7 @@ function AnswerForm({
   return (
     <form
       noValidate
-      className="mt-1 ml-3 flex flex-col gap-1"
+      className="ms-3 mt-1 flex flex-col gap-1"
       onSubmit={handleSubmit(async (v) => {
         try {
           await answer.mutateAsync(v.text)

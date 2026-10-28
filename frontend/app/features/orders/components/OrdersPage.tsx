@@ -143,7 +143,7 @@ export function OrdersPage() {
                     {o.items.length === 1 ? "item" : "items"}
                   </p>
                 </div>
-                <div className="text-right">
+                <div className="text-end">
                   <OrderStatusBadge status={o.status} />
                   <p>{formatRupees(o.pricing.total)}</p>
                 </div>

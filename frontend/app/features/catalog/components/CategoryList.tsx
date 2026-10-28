@@ -35,7 +35,7 @@ export function CategoryList({ activeSlug }: { activeSlug?: string }) {
       aria-current={node.slug === activeSlug ? "page" : undefined}
       className={cn(
         "flex justify-between rounded px-1 py-0.5",
-        nested && "pl-4",
+        nested && "ps-4",
         node.slug === activeSlug && "bg-muted font-medium"
       )}
     >

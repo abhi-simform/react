@@ -1,0 +1,37 @@
+{
+  "nav": {
+    "products": "उत्पाद",
+    "deals": "ऑफ़र",
+    "compare": "तुलना",
+    "categories": "श्रेणियाँ",
+    "login": "लॉग इन",
+    "signup": "साइन अप"
+  },
+  "header": {
+    "compareTray": "तुलना सूची",
+    "cart": "कार्ट",
+    "openCart_one": "कार्ट खोलें, {{count}} वस्तु",
+    "openCart_other": "कार्ट खोलें, {{count}} वस्तुएँ",
+    "searchPlaceholder": "उत्पाद खोजें (/ दबाएँ)"
+  },
+  "account": {
+    "account": "खाता",
+    "orders": "ऑर्डर",
+    "security": "सुरक्षा",
+    "seller": "विक्रेता डैशबोर्ड",
+    "logout": "लॉग आउट"
+  },
+  "theme": {
+    "label": "थीम: {{current}}। बदलकर {{next}} करें",
+    "light": "लाइट",
+    "dark": "डार्क",
+    "system": "सिस्टम"
+  },
+  "switcher": {
+    "language": "भाषा",
+    "currency": "मुद्रा"
+  },
+  "money": {
+    "chargedInr": "कीमतें केवल जानकारी के लिए {{currency}} में दिखाई गई हैं। शुल्क INR में लिया जाएगा।"
+  }
+}

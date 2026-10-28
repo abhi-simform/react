@@ -1,3 +1,4 @@
+import { useT } from "@/features/i18n"
 import { useState } from "react"
 import { useNavigate } from "react-router"
 
@@ -40,6 +41,7 @@ export function ProductDetailView({
   // State: only the chosen attribute values. Everything below is derived.
   const [selection, setSelection] = useState<Selection>({})
   const [qty, setQty] = useState(1)
+  const t = useT("product")
   const addToCart = useAddToCart()
   const navigate = useNavigate()
   const variant = findVariant(variants, selection)
@@ -90,17 +92,22 @@ export function ProductDetailView({
         {product.rating ? (
           <Rating value={product.rating.value} count={product.rating.count} />
         ) : (
-          <p className="text-sm text-muted-foreground">No ratings yet</p>
+          <p className="text-sm text-muted-foreground">{t("noRatings")}</p>
         )}
         <Price price={priceVM} className="text-lg" />
         {product.deal && <DealEndsNote endsAt={product.deal.endsAt} />}
         {previousPrice !== undefined && previousPrice !== price && (
           <p className="text-sm text-muted-foreground">
-            Price changed from {toPriceVM(previousPrice, undefined).current}
+            {t("priceChanged", {
+              price: toPriceVM(previousPrice, undefined).current,
+            })}
           </p>
         )}
         <p className="text-xs text-muted-foreground">
-          Listed {product.listedOn}, updated {product.updatedAgo}
+          {t("listed", {
+            listed: product.listedOn,
+            updated: product.updatedAgo,
+          })}
         </p>
         <VariantPicker
           variants={variants}
@@ -110,7 +117,7 @@ export function ProductDetailView({
         <p role="status">{stockMessage(variant)}</p>
         <QuantityStepper value={quantity} onValueChange={setQty} max={maxQty} />
         <Button disabled={!canBuy} onClick={() => void add()}>
-          Add to cart
+          {t("addToCart")}
         </Button>
         <OffersPanel />
         <DeliveryCheck />
@@ -121,7 +128,7 @@ export function ProductDetailView({
             productName={product.name}
             className="border"
           />
-          <span aria-hidden>Wishlist</span>
+          <span aria-hidden>{t("wishlist")}</span>
           <ShareButton title={product.name} />
           <CompareToggle
             item={{
@@ -143,7 +150,7 @@ export function ProductDetailView({
         {detailsPending ? (
           // Same box the tabs will fill: no layout jump when the real detail arrives.
           <div aria-busy="true" className="min-h-48 rounded border p-3 text-sm">
-            <p role="status">Loading the full details...</p>
+            <p role="status">{t("loadingDetails")}</p>
           </div>
         ) : (
           <ProductTabs product={product} />

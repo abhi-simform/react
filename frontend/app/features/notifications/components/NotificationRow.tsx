@@ -50,7 +50,7 @@ export function NotificationRow({
         ) : (
           <button
             type="button"
-            className="text-left underline"
+            className="text-start underline"
             onClick={() => onOpen(n)}
           >
             {title}

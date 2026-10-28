@@ -2,6 +2,7 @@ import { ShoppingCart } from "lucide-react"
 import { Suspense, useEffect, useState } from "react"
 
 import { Button } from "@/components/ui/button"
+import { useLocale, useT } from "@/features/i18n"
 import { lazyNamed } from "@/lib/lazyNamed"
 import { cn } from "@/lib/utils"
 
@@ -22,6 +23,7 @@ const CartSheet = lazyNamed(loadSheet, "CartSheet")
  * The button calls `toggleDrawer` through `getState()` (an event handler needs no subscription).
  */
 export function CartDrawer() {
+  const { version } = useLocale()
   const open = useCartUi((s) => s.drawerOpen)
   const [wanted, setWanted] = useState(false)
   // Adjusting state while rendering, guarded: "has it ever been opened?" is derived from props/state.
@@ -42,7 +44,7 @@ export function CartDrawer() {
       {wanted && (
         // No visual fallback: the sheet is an overlay, so nothing in the page shifts while it loads.
         <Suspense fallback={null}>
-          <CartSheet />
+          <CartSheet key={version} />
         </Suspense>
       )}
     </>
@@ -50,6 +52,7 @@ export function CartDrawer() {
 }
 
 function CartButton() {
+  const t = useT("common")
   const count = useCartCount()
   // The badge "bumps" when the count CHANGES (not on first paint): a counter that only ever goes up while
   // the same count is shown, and a key that changes with it so the CSS animation restarts (13.6).
@@ -64,13 +67,13 @@ function CartButton() {
       data-cart-target
       variant="outline"
       size="sm"
-      aria-label={`Open cart, ${count} ${count === 1 ? "item" : "items"}`}
+      aria-label={t("header.openCart", { count })}
       onPointerEnter={() => void loadSheet()}
       onFocus={() => void loadSheet()}
       onClick={() => useCartUi.getState().toggleDrawer()}
     >
       <ShoppingCart aria-hidden className="size-4" />
-      Cart{" "}
+      {t("header.cart")}{" "}
       <span
         key={bumps}
         data-testid="cart-badge"

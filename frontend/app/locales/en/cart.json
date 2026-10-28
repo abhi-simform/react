@@ -1,0 +1,19 @@
+{
+  "title": "Your cart ({{count}})",
+  "titleEmpty": "Your cart",
+  "clear": "Clear cart",
+  "emptyTitle": "Your cart is empty",
+  "emptyDescription": "Add something you like and it will wait here.",
+  "browse": "Browse products",
+  "nothing": "Nothing in your cart right now.",
+  "summary": "Order summary",
+  "subtotal": "Subtotal",
+  "couponDiscount": "Coupon discount",
+  "shipping": "Shipping",
+  "free": "Free",
+  "tax": "Tax (GST)",
+  "total": "Total",
+  "save": "You save {{amount}} on this order",
+  "proceed": "Proceed to checkout",
+  "resolve": "Resolve the items above to continue."
+}

@@ -56,7 +56,7 @@ export function VirtualProductGrid({
             data-index={row.index}
             ref={virtualizer.measureElement}
             className={cn(
-              "absolute top-0 left-0 grid w-full gap-3 pb-3",
+              "absolute start-0 top-0 grid w-full gap-3 pb-3",
               view === "grid"
                 ? "grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5"
                 : "grid-cols-1"

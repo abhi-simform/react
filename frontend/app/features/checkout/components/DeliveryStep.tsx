@@ -81,7 +81,7 @@ export function DeliveryStep() {
           <tbody>
             {days.map((day) => (
               <tr key={isoDay(day)}>
-                <th scope="row" className="pr-2 text-left font-normal">
+                <th scope="row" className="pe-2 text-start font-normal">
                   {formatDate(day, { weekday: "short", year: undefined })}
                 </th>
                 {SLOT_WINDOWS.map((w) => (

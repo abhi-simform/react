@@ -20,7 +20,7 @@ export function CartIssues() {
       className="mb-2 rounded border border-destructive/50 bg-destructive-muted p-2 text-sm text-destructive"
     >
       <p className="font-medium">Fix these before you check out</p>
-      <ul className="list-disc pl-5">
+      <ul className="list-disc ps-5">
         {issues.outOfStock.map((i) => (
           <li key={`o-${i.productId}`}>{i.name} is out of stock.</li>
         ))}

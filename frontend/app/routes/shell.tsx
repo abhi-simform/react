@@ -1,4 +1,4 @@
-import { useRef } from "react"
+import { Fragment, useRef } from "react"
 import { Outlet, useMatches } from "react-router"
 
 import { OfflineBanner } from "@/components/common/OfflineBanner"
@@ -8,6 +8,7 @@ import { Footer } from "@/components/layout/Footer"
 import { Header } from "@/components/layout/Header"
 import { StoresSync } from "@/components/common/StoresSync"
 import { VerifyEmailBanner } from "@/features/auth"
+import { useLocale } from "@/features/i18n"
 import { CompareTray } from "@/features/compare"
 import { useRouteFocus } from "@/hooks/useRouteFocus"
 
@@ -30,6 +31,7 @@ export function clientLoader() {
 
 /** Landmarks: header (banner), nav (inside Header), main, footer (contentinfo). */
 export default function ShellLayout() {
+  const { version } = useLocale()
   const mainRef = useRef<HTMLElement>(null)
   const liveRef = useRef<HTMLDivElement>(null)
   useRouteFocus(mainRef, liveRef)
@@ -42,7 +44,7 @@ export default function ShellLayout() {
       {/* First tab stop: hidden until focused, jumps over the header/nav. */}
       <a
         href="#main"
-        className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50 focus:rounded focus:bg-background focus:p-2 focus:shadow"
+        className="sr-only focus:not-sr-only focus:absolute focus:start-2 focus:top-2 focus:z-50 focus:rounded focus:bg-background focus:p-2 focus:shadow"
       >
         Skip to content
       </a>
@@ -57,7 +59,11 @@ export default function ShellLayout() {
         className="flex-1 focus:outline-none"
       >
         {hasStaticCrumbs && <Breadcrumbs />}
-        <Outlet />
+        {/* Prices, dates and strings are computed during render: a language or currency change re-mounts the
+            page content so every one of them is recomputed (the header and providers stay put). */}
+        <Fragment key={version}>
+          <Outlet />
+        </Fragment>
       </main>
       <Footer />
       <CompareTray />

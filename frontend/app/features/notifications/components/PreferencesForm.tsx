@@ -37,23 +37,23 @@ export function PreferencesForm() {
       ) : (
         <table className="text-sm">
           <thead>
-            <tr className="text-left">
-              <th className="pr-6 font-medium">Notify me about</th>
-              <th className="pr-6 font-medium">In the app</th>
+            <tr className="text-start">
+              <th className="pe-6 font-medium">Notify me about</th>
+              <th className="pe-6 font-medium">In the app</th>
               <th className="font-medium">By email</th>
             </tr>
           </thead>
           <tbody>
             {ROWS.map((r) => (
               <tr key={r.key}>
-                <td className="py-1 pr-6">
+                <td className="py-1 pe-6">
                   {r.label}
                   <span className="block text-xs text-muted-foreground">
                     {r.hint}
                   </span>
                 </td>
                 {(["inApp", "email"] as const).map((channel) => (
-                  <td key={channel} className="pr-6">
+                  <td key={channel} className="pe-6">
                     <Switch
                       aria-label={`${r.label}: ${channel === "inApp" ? "in the app" : "by email"}`}
                       checked={prefs.data[r.key][channel]}

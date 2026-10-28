@@ -89,7 +89,7 @@ export function CompareTable({
         Show only differences
       </label>
       <div className="overflow-x-auto">
-        <table className="w-full border-collapse text-left text-sm">
+        <table className="w-full border-collapse text-start text-sm">
           <caption className="sr-only">
             Product comparison. Rows that differ are marked.
           </caption>
@@ -129,7 +129,7 @@ export function CompareTable({
                   <th scope="row" className="p-2 font-medium">
                     {row.label}
                     {different && (
-                      <span className="ml-1 text-xs font-normal">
+                      <span className="ms-1 text-xs font-normal">
                         (differs)
                       </span>
                     )}

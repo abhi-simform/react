@@ -1,5 +1,6 @@
 import { useIsMutating } from "@tanstack/react-query"
 import { ShoppingCart } from "lucide-react"
+import { ChargedInInr, useT } from "@/features/i18n"
 import { Link } from "react-router"
 
 import { AsyncView } from "@/components/common/AsyncView"
@@ -19,6 +20,7 @@ import { FreeShippingBar } from "./FreeShippingBar"
 
 /** `/cart`: the server cart (guest by token, user by JWT) through the `useCart` facade. */
 export function CartPage() {
+  const t = useT("cart")
   const cart = useCart()
   const { totals, lines, saved } = cart
   // A cart request is in flight (quantity edit, move, coupon...): do not let the shopper leave
@@ -35,14 +37,14 @@ export function CartPage() {
         {() =>
           lines.length === 0 && saved.length === 0 ? (
             <div className="mx-auto max-w-3xl">
-              <h1 className="mb-3 text-xl font-medium">Your cart</h1>
+              <h1 className="mb-3 text-xl font-medium">{t("titleEmpty")}</h1>
               <EmptyState
                 icon={<ShoppingCart className="size-8" />}
-                title="Your cart is empty"
-                description="Add something you like and it will wait here."
+                title={t("emptyTitle")}
+                description={t("emptyDescription")}
                 action={
                   <Link className="underline" to={paths.products()}>
-                    Browse products
+                    {t("browse")}
                   </Link>
                 }
               />
@@ -52,18 +54,16 @@ export function CartPage() {
               <section aria-label="Cart items">
                 <div className="mb-2 flex items-center justify-between">
                   <h1 className="text-xl font-medium">
-                    Your cart ({lines.length})
+                    {t("title", { count: lines.length })}
                   </h1>
                   <Button variant="outline" size="sm" onClick={cart.clear}>
-                    Clear cart
+                    {t("clear")}
                   </Button>
                 </div>
                 <CartIssues />
                 <FreeShippingBar subtotal={totals.subtotal - totals.discount} />
                 {lines.length === 0 ? (
-                  <p className="py-3 text-sm">
-                    Nothing in your cart right now.
-                  </p>
+                  <p className="py-3 text-sm">{t("nothing")}</p>
                 ) : (
                   <CartLineList>
                     {lines.map((line) => (
@@ -93,25 +93,25 @@ export function CartPage() {
                   </section>
                 )}
               </section>
-              <aside aria-label="Order summary" className="flex flex-col gap-3">
+              <aside aria-label={t("summary")} className="flex flex-col gap-3">
                 <dl className="grid grid-cols-[1fr_auto] gap-x-4 gap-y-1 text-sm">
-                  <dt>Subtotal</dt>
+                  <dt>{t("subtotal")}</dt>
                   <dd>{formatCurrency(totals.subtotal)}</dd>
                   {totals.discount > 0 && (
                     <>
-                      <dt>Coupon discount</dt>
+                      <dt>{t("couponDiscount")}</dt>
                       <dd>-{formatCurrency(totals.discount)}</dd>
                     </>
                   )}
-                  <dt>Shipping</dt>
+                  <dt>{t("shipping")}</dt>
                   <dd>
                     {totals.shipping === 0
-                      ? "Free"
+                      ? t("free")
                       : formatCurrency(totals.shipping)}
                   </dd>
-                  <dt>Tax (GST)</dt>
+                  <dt>{t("tax")}</dt>
                   <dd>{formatCurrency(totals.tax)}</dd>
-                  <dt className="border-t pt-1 font-medium">Total</dt>
+                  <dt className="border-t pt-1 font-medium">{t("total")}</dt>
                   <dd className="border-t pt-1 font-medium">
                     {formatCurrency(totals.total)}
                   </dd>
@@ -121,21 +121,20 @@ export function CartPage() {
                     className="text-sm text-success"
                     data-testid="cart-savings"
                   >
-                    You save {formatCurrency(totals.savings)} on this order
+                    {t("save", { amount: formatCurrency(totals.savings) })}
                   </p>
                 )}
+                <ChargedInInr />
                 <CouponBox />
                 <Button
                   nativeButton={false}
                   disabled={lines.length === 0 || blocked || busy}
                   render={<Link to={paths.checkout()} />}
                 >
-                  Proceed to checkout
+                  {t("proceed")}
                 </Button>
                 {blocked && (
-                  <p className="text-xs text-destructive">
-                    Resolve the items above to continue.
-                  </p>
+                  <p className="text-xs text-destructive">{t("resolve")}</p>
                 )}
               </aside>
             </div>

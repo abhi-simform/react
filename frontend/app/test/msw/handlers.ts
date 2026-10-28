@@ -287,6 +287,18 @@ export const handlers: RequestHandler[] = [
 
   // ---- shell and home chatter (quiet, valid, empty)
   http.get(`${API}/banners`, () => ok([])),
+  // 13.8: display-only currency rates (the real endpoint is B12's GET /config/public).
+  http.get(`${API}/config/public`, () =>
+    ok({
+      baseCurrency: "INR",
+      currencies: {
+        INR: { rate: 1, symbol: "₹" },
+        USD: { rate: 0.0119, symbol: "$" },
+        EUR: { rate: 0.0102, symbol: "€" },
+      },
+      asOf: "2026-10-01",
+    })
+  ),
   http.get(`${API}/deals`, () => ok([])),
   http.get(`${API}/time`, () =>
     ok({ epochMs: Date.now(), now: new Date().toISOString() })

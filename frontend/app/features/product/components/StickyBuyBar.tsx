@@ -1,3 +1,4 @@
+import { useT } from "@/features/i18n"
 import { useEffect, useState } from "react"
 
 import { Button } from "@/components/ui/button"
@@ -29,6 +30,7 @@ export function StickyBuyBar({
   onAdd: () => void
   onBuyNow: () => void
 }) {
+  const t = useT("product")
   const [typing, setTyping] = useState(false)
   useEffect(() => {
     const on = (e: FocusEvent) => setTyping(isTextField(e.target))
@@ -53,10 +55,10 @@ export function StickyBuyBar({
         disabled={disabled}
         onClick={onAdd}
       >
-        Add to cart
+        {t("addToCart")}
       </Button>
       <Button type="button" disabled={disabled} onClick={onBuyNow}>
-        Buy now
+        {t("buyNow")}
       </Button>
     </div>
   )

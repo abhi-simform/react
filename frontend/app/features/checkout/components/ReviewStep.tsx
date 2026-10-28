@@ -7,6 +7,7 @@ import { toast } from "sonner"
 import { addressQueries } from "@/features/account"
 import { useAuth } from "@/features/auth"
 import { CouponBox, describeCouponReason } from "@/features/cart"
+import { ChargedInInr, useT } from "@/features/i18n"
 import { usePlaceOrder } from "@/features/orders"
 import { Button } from "@/components/ui/button"
 import { useSingleFlight } from "@/hooks/useSingleFlight"
@@ -32,6 +33,7 @@ import { withDelivery } from "../totals"
  * Success navigates with `replace` so Back from the confirmation does not land on this step.
  */
 export function ReviewStep() {
+  const t = useT("checkout")
   const { getValues } = useFormContext<CheckoutInput>()
   const { user } = useAuth()
   const navigate = useNavigate()
@@ -150,7 +152,7 @@ export function ReviewStep() {
 
   return (
     <div className="flex flex-col gap-3">
-      <h1 className="text-xl font-medium">Review order</h1>
+      <h1 className="text-xl font-medium">{t("reviewTitle")}</h1>
       <dl>
         {row(
           "Deliver to",
@@ -202,6 +204,7 @@ export function ReviewStep() {
           {error}
         </p>
       )}
+      <ChargedInInr />
       <div className="flex flex-wrap gap-2">
         <Button
           type="button"
@@ -209,10 +212,10 @@ export function ReviewStep() {
           onClick={() => void submit()}
         >
           {place.isPending
-            ? "Placing order..."
+            ? t("placing")
             : values.payment === "cod"
-              ? "Place order"
-              : "Place order and continue to payment"}
+              ? t("placeOrder")
+              : t("placeOrderPay")}
         </Button>
       </div>
     </div>

@@ -1,3 +1,5 @@
+import { resetLocaleForTests } from "@/lib/locale"
+import "@/lib/i18n"
 import "@testing-library/jest-dom/vitest"
 
 import { cleanup } from "@testing-library/react"
@@ -73,6 +75,7 @@ afterEach(() => {
   server.resetHandlers()
   resetDb()
   clearAccessToken()
+  resetLocaleForTests() // language/currency back to English + INR for the next test
   localStorage.clear()
   sessionStorage.clear()
 })

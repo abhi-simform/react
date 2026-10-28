@@ -67,7 +67,7 @@ export function CartLineRow({
         <p>
           {formatCurrency(line.unitPrice)} each
           {line.deal && (
-            <span className="ml-1 rounded bg-warning-muted px-1 text-xs text-warning">
+            <span className="ms-1 rounded bg-warning-muted px-1 text-xs text-warning">
               Deal price
             </span>
           )}

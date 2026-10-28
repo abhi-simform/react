@@ -38,7 +38,7 @@ export function ReviewCard({
       <p className="mt-1 text-xs text-muted-foreground">
         {r.author}
         {r.verifiedPurchase && (
-          <span className="ml-1 rounded bg-emerald-100 px-1 py-0.5 text-emerald-900">
+          <span className="ms-1 rounded bg-emerald-100 px-1 py-0.5 text-emerald-900">
             Verified purchase
           </span>
         )}{" "}

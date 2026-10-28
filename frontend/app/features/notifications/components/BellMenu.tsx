@@ -47,7 +47,7 @@ export function BellMenu() {
             <span
               data-testid="bell-badge"
               aria-hidden
-              className="ml-1 rounded-full bg-red-600 px-1.5 text-xs text-white"
+              className="ms-1 rounded-full bg-red-600 px-1.5 text-xs text-white"
             >
               {count > 99 ? "99+" : count}
             </span>

@@ -1,0 +1,10 @@
+{
+  "addToCart": "कार्ट में जोड़ें",
+  "buyNow": "अभी खरीदें",
+  "quantity": "मात्रा",
+  "wishlist": "विशलिस्ट",
+  "noRatings": "अभी कोई रेटिंग नहीं",
+  "listed": "सूचीबद्ध {{listed}}, अपडेट {{updated}}",
+  "priceChanged": "कीमत {{price}} से बदली",
+  "loadingDetails": "पूरा विवरण लोड हो रहा है..."
+}

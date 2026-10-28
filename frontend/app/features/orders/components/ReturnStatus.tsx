@@ -32,7 +32,7 @@ export function ReturnStatus({ order }: { order: Order }) {
             : "to be calculated"}
         </strong>
       </p>
-      <ul className="list-disc pl-5">
+      <ul className="list-disc ps-5">
         {r.items.map((i) => (
           <li key={i.productId}>
             {i.title} x {i.qty}

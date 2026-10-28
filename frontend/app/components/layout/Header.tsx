@@ -7,6 +7,7 @@ import { CartDrawer } from "@/features/cart"
 import { NotificationBell } from "@/features/notifications"
 import { ConnectionIndicator } from "@/features/realtime"
 import { SearchBox } from "@/features/search"
+import { LocaleSwitcher, useT } from "@/features/i18n"
 import { ThemeToggle } from "@/features/theme"
 import { WishlistLink } from "@/features/wishlist"
 import { useMediaQuery } from "@/hooks/useMediaQuery"
@@ -21,6 +22,7 @@ const navClass = ({ isActive }: { isActive: boolean }) =>
   cn("rounded px-1", isActive && "bg-muted font-medium")
 
 export function Header() {
+  const t = useT("common")
   // Only ONE of the two menus is ever in the DOM (not hidden with CSS).
   const isDesktop = useMediaQuery("(min-width: 1024px)")
   return (
@@ -41,13 +43,13 @@ export function Header() {
         className="flex flex-wrap items-center gap-4 text-sm"
       >
         <NavLink to={paths.products()} className={navClass} prefetch="intent">
-          Products
+          {t("nav.products")}
         </NavLink>
         <NavLink to={paths.deals()} className={navClass} prefetch="intent">
-          Deals
+          {t("nav.deals")}
         </NavLink>
         <NavLink to={paths.compare()} className={navClass} prefetch="intent">
-          Compare
+          {t("nav.compare")}
         </NavLink>
         {import.meta.env.DEV && (
           <NavLink to={paths.dev()} className={navClass}>
@@ -60,6 +62,7 @@ export function Header() {
           <NotificationBell />
         </SectionBoundary>
         <ConnectionIndicator />
+        <LocaleSwitcher />
         <ThemeToggle />
         <WishlistLink />
         <CompareTrayButton />

@@ -2,11 +2,13 @@ import { useRef, useState } from "react"
 import { Link } from "react-router"
 
 import { useCategoryTree } from "@/features/catalog"
+import { useT } from "@/features/i18n"
 import { useOnClickOutside } from "@/hooks/useOnClickOutside"
 import { paths } from "@/lib/paths"
 
 /** Desktop navigation: a disclosure panel with the real category tree (B1). */
 export function MegaMenu() {
+  const t = useT("common")
   const [open, setOpen] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
   useOnClickOutside(ref, () => setOpen(false))
@@ -28,13 +30,13 @@ export function MegaMenu() {
         onClick={() => setOpen((o) => !o)}
         className="rounded border px-2 py-1 text-sm"
       >
-        Categories
+        {t("nav.categories")}
       </button>
       {open && (
         <div
           id="mega-menu-panel"
           data-testid="mega-menu"
-          className="absolute top-full left-0 z-20 mt-1 w-[32rem] rounded border bg-background p-3 text-sm shadow"
+          className="absolute start-0 top-full z-20 mt-1 w-[32rem] rounded border bg-background p-3 text-sm shadow"
         >
           {tree.status === "success" ? (
             <ul className="grid grid-cols-2 gap-4">

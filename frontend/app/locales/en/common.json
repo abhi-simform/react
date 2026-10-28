@@ -1,0 +1,37 @@
+{
+  "nav": {
+    "products": "Products",
+    "deals": "Deals",
+    "compare": "Compare",
+    "categories": "Categories",
+    "login": "Log in",
+    "signup": "Sign up"
+  },
+  "header": {
+    "compareTray": "Compare tray",
+    "cart": "Cart",
+    "openCart_one": "Open cart, {{count}} item",
+    "openCart_other": "Open cart, {{count}} items",
+    "searchPlaceholder": "Search products (press /)"
+  },
+  "account": {
+    "account": "Account",
+    "orders": "Orders",
+    "security": "Security",
+    "seller": "Seller dashboard",
+    "logout": "Log out"
+  },
+  "theme": {
+    "label": "Theme: {{current}}. Switch to {{next}}",
+    "light": "light",
+    "dark": "dark",
+    "system": "system"
+  },
+  "switcher": {
+    "language": "Language",
+    "currency": "Currency"
+  },
+  "money": {
+    "chargedInr": "Prices are shown in {{currency}} for reference only. You are charged in INR."
+  }
+}

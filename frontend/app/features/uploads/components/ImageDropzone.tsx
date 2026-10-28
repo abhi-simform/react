@@ -188,7 +188,7 @@ function Thumb({
         disabled={disabled}
         onClick={onRemove}
         aria-label={`Remove ${file.name}`}
-        className="absolute -top-2 -right-2 rounded-full border bg-background p-0.5"
+        className="absolute -end-2 -top-2 rounded-full border bg-background p-0.5"
       >
         <X aria-hidden className="size-3" />
       </button>

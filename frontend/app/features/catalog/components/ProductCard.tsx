@@ -75,7 +75,7 @@ function ProductCardBase({
           priority={imagePriority}
           className={cn(outOfStock && "opacity-40")}
         />
-        <div className="absolute top-1 left-1 flex flex-col items-start gap-1">
+        <div className="absolute start-1 top-1 flex flex-col items-start gap-1">
           {children ??
             (product.deal && (
               <ProductCardBadge>
@@ -86,7 +86,7 @@ function ProductCardBase({
         <WishlistHeart
           productId={product.id}
           productName={product.name}
-          className="absolute top-1 right-1 z-10"
+          className="absolute end-1 top-1 z-10"
         />
       </div>
 

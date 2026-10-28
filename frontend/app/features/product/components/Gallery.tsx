@@ -92,17 +92,17 @@ export function Gallery({
               type="button"
               aria-label="Previous image"
               onClick={() => go(-1)}
-              className="absolute top-1/2 left-1 -translate-y-1/2 rounded-full bg-background/90 p-1 shadow"
+              className="absolute start-1 top-1/2 -translate-y-1/2 rounded-full bg-background/90 p-1 shadow"
             >
-              <ChevronLeft aria-hidden className="size-5" />
+              <ChevronLeft aria-hidden className="size-5 rtl:rotate-180" />
             </button>
             <button
               type="button"
               aria-label="Next image"
               onClick={() => go(1)}
-              className="absolute top-1/2 right-1 -translate-y-1/2 rounded-full bg-background/90 p-1 shadow"
+              className="absolute end-1 top-1/2 -translate-y-1/2 rounded-full bg-background/90 p-1 shadow"
             >
-              <ChevronRight aria-hidden className="size-5" />
+              <ChevronRight aria-hidden className="size-5 rtl:rotate-180" />
             </button>
           </>
         )}

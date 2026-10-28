@@ -1,6 +1,7 @@
 import { useFormContext } from "react-hook-form"
 import { Link, useLocation } from "react-router"
 
+import { useT } from "@/features/i18n"
 import { paths } from "@/lib/paths"
 
 import type { CheckoutInput } from "../schemas"
@@ -16,6 +17,7 @@ import {
  * announced with `aria-current="step"`. Steps up to the first incomplete one are links.
  */
 export function CheckoutStepper() {
+  const t = useT("checkout")
   const { pathname } = useLocation()
   const { getValues } = useFormContext<CheckoutInput>()
   const current = stepIndexFromPath(pathname)
@@ -24,11 +26,11 @@ export function CheckoutStepper() {
 
   return (
     <ol
-      aria-label="Checkout progress"
+      aria-label={t("progress")}
       className="mb-4 flex flex-wrap gap-4 text-sm"
     >
       {CHECKOUT_STEPS.map((step, i) => {
-        const label = `${i + 1}. ${step.label}`
+        const label = `${i + 1}. ${t(`steps.${step.slug}`)}`
         const done = completed.includes(i)
         return (
           <li
@@ -50,10 +52,10 @@ export function CheckoutStepper() {
               label
             )}
             {done && i !== current && (
-              <span className="sr-only"> (completed)</span>
+              <span className="sr-only"> {t("completed")}</span>
             )}
             {done && (
-              <span aria-hidden className="ml-1">
+              <span aria-hidden className="ms-1">
                 ✓
               </span>
             )}

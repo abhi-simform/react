@@ -1,0 +1,14 @@
+{
+  "progress": "चेकआउट की प्रगति",
+  "completed": "(पूरा हुआ)",
+  "steps": {
+    "address": "पता",
+    "delivery": "डिलीवरी",
+    "payment": "भुगतान",
+    "review": "समीक्षा"
+  },
+  "reviewTitle": "ऑर्डर की समीक्षा",
+  "placing": "ऑर्डर दिया जा रहा है...",
+  "placeOrder": "ऑर्डर करें",
+  "placeOrderPay": "ऑर्डर करें और भुगतान पर जाएँ"
+}

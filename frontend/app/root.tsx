@@ -10,6 +10,7 @@ import { CartSessionSync } from "@/features/cart"
 import { RealtimeSync } from "@/features/realtime"
 import { RecentlyViewedSync } from "@/features/recommendations"
 import { WishlistSessionSync } from "@/features/wishlist"
+import { LocaleProvider } from "@/features/i18n"
 import { ThemeProvider, themeInitScript } from "@/features/theme"
 import { ToastProvider } from "@/features/toast"
 import { env } from "@/lib/env"
@@ -85,19 +86,21 @@ export default function App() {
   // user (wishlist). Each one is a separate, small context: no mega-context.
   return (
     <QueryClientProvider client={queryClient}>
-      <ThemeProvider>
-        <AuthProvider>
-          <SessionCacheSync />
-          <IdleWarning />
-          <CartSessionSync />
-          <WishlistSessionSync />
-          <RecentlyViewedSync />
-          <RealtimeSync />
-          <ToastProvider>
-            <Outlet />
-          </ToastProvider>
-        </AuthProvider>
-      </ThemeProvider>
+      <LocaleProvider>
+        <ThemeProvider>
+          <AuthProvider>
+            <SessionCacheSync />
+            <IdleWarning />
+            <CartSessionSync />
+            <WishlistSessionSync />
+            <RecentlyViewedSync />
+            <RealtimeSync />
+            <ToastProvider>
+              <Outlet />
+            </ToastProvider>
+          </AuthProvider>
+        </ThemeProvider>
+      </LocaleProvider>
       {import.meta.env.DEV && <ReactQueryDevtools initialIsOpen={false} />}
     </QueryClientProvider>
   )

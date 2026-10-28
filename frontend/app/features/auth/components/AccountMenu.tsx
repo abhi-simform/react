@@ -1,3 +1,4 @@
+import { useT } from "@/features/i18n"
 import { Link, NavLink, useNavigate } from "react-router"
 
 import { paths } from "@/lib/paths"
@@ -13,6 +14,7 @@ const navClass = ({ isActive }: { isActive: boolean }) =>
  * (`/seller/*` answers 403 to a customer however the link got there).
  */
 export function AccountMenu() {
+  const t = useT("common")
   const { status, user, logout } = useAuth()
   const navigate = useNavigate()
 
@@ -26,10 +28,10 @@ export function AccountMenu() {
     return (
       <>
         <NavLink to={paths.login()} className={navClass}>
-          Log in
+          {t("nav.login")}
         </NavLink>
         <NavLink to={paths.register()} className={navClass}>
-          Sign up
+          {t("nav.signup")}
         </NavLink>
       </>
     )
@@ -39,24 +41,26 @@ export function AccountMenu() {
       <summary className="cursor-pointer rounded px-1 select-none">
         {user.name}
         {user.role !== "customer" && (
-          <span className="ml-1 text-xs text-muted-foreground">
+          <span className="ms-1 text-xs text-muted-foreground">
             ({user.role})
           </span>
         )}
       </summary>
-      <ul className="absolute right-0 z-20 mt-1 flex min-w-44 flex-col gap-1 rounded border bg-background p-2 shadow">
+      <ul className="absolute end-0 z-20 mt-1 flex min-w-44 flex-col gap-1 rounded border bg-background p-2 shadow">
         <li>
-          <Link to={paths.account()}>Account</Link>
+          <Link to={paths.account()}>{t("account.account")}</Link>
         </li>
         <li>
-          <Link to={paths.orders()}>Orders</Link>
+          <Link to={paths.orders()}>{t("account.orders")}</Link>
         </li>
         <li>
-          <Link to={paths.accountPage("security")}>Security</Link>
+          <Link to={paths.accountPage("security")}>
+            {t("account.security")}
+          </Link>
         </li>
         {(user.role === "seller" || user.role === "admin") && (
           <li>
-            <Link to={paths.seller()}>Seller dashboard</Link>
+            <Link to={paths.seller()}>{t("account.seller")}</Link>
           </li>
         )}
         <li>
@@ -68,7 +72,7 @@ export function AccountMenu() {
               navigate(paths.home()) // (from a protected page the guard also goes home)
             }}
           >
-            Log out
+            {t("account.logout")}
           </button>
         </li>
       </ul>

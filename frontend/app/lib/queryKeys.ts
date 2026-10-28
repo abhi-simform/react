@@ -8,6 +8,11 @@
  */
 type Filters = Record<string, unknown>
 
+export const configKeys = {
+  all: ["config"] as const,
+  public: ["config", "public"] as const,
+}
+
 export const authKeys = {
   all: ["auth"] as const,
   me: ["auth", "me"] as const,

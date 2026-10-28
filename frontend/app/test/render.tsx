@@ -13,6 +13,7 @@ import { AuthProvider, SessionCacheSync } from "@/features/auth"
 import { CartSessionSync } from "@/features/cart"
 import { WishlistSessionSync } from "@/features/wishlist"
 import { appRoutes } from "./appRoutes"
+import { LocaleProvider } from "@/features/i18n"
 import { ThemeProvider } from "@/features/theme"
 import { ToastProvider } from "@/features/toast"
 
@@ -68,11 +69,13 @@ export async function renderWithProviders(
         path,
         element: (
           <QueryClientProvider client={client}>
-            <ThemeProvider>
-              <AuthProvider>
-                <ToastProvider>{ui}</ToastProvider>
-              </AuthProvider>
-            </ThemeProvider>
+            <LocaleProvider>
+              <ThemeProvider>
+                <AuthProvider>
+                  <ToastProvider>{ui}</ToastProvider>
+                </AuthProvider>
+              </ThemeProvider>
+            </LocaleProvider>
           </QueryClientProvider>
         ),
       },
@@ -115,16 +118,18 @@ export async function renderApp({
       {
         element: (
           <QueryClientProvider client={client}>
-            <ThemeProvider>
-              <AuthProvider>
-                <SessionCacheSync />
-                <CartSessionSync />
-                <WishlistSessionSync />
-                <ToastProvider>
-                  <Outlet />
-                </ToastProvider>
-              </AuthProvider>
-            </ThemeProvider>
+            <LocaleProvider>
+              <ThemeProvider>
+                <AuthProvider>
+                  <SessionCacheSync />
+                  <CartSessionSync />
+                  <WishlistSessionSync />
+                  <ToastProvider>
+                    <Outlet />
+                  </ToastProvider>
+                </AuthProvider>
+              </ThemeProvider>
+            </LocaleProvider>
           </QueryClientProvider>
         ),
         children: appRoutes,

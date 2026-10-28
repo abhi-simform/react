@@ -57,7 +57,7 @@ export function ProductTabs({ product }: { product: ProductDetailVM }) {
       </TabsList>
       <TabsContent value="description" className="text-sm">
         <p>{product.description}</p>
-        <ul className="mt-2 list-disc pl-5">
+        <ul className="mt-2 list-disc ps-5">
           {product.highlights.map((h) => (
             <li key={h}>{h}</li>
           ))}

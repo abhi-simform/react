@@ -44,7 +44,7 @@ export function RatingHistogram({
                   style={{ width: `${pct}%` }}
                 />
               </span>
-              <span aria-hidden className="text-right">
+              <span aria-hidden className="text-end">
                 {n}
               </span>
             </button>

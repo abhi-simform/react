@@ -1,0 +1,14 @@
+{
+  "progress": "Checkout progress",
+  "completed": "(completed)",
+  "steps": {
+    "address": "Address",
+    "delivery": "Delivery",
+    "payment": "Payment",
+    "review": "Review"
+  },
+  "reviewTitle": "Review order",
+  "placing": "Placing order...",
+  "placeOrder": "Place order",
+  "placeOrderPay": "Place order and continue to payment"
+}

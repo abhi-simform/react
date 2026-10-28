@@ -1,3 +1,4 @@
+import { useT } from "@/features/i18n"
 import { useId, useMemo, useRef, useState } from "react"
 import { useNavigate } from "react-router"
 
@@ -23,6 +24,7 @@ const DEBOUNCE_MS = 250
  * `buildGroups` (pure) -> `SuggestionList`. Arrow keys move an index over the flat options.
  */
 export function SearchBox() {
+  const t = useT("common")
   const navigate = useNavigate()
   const id = useId()
   const listId = `${id}-list`
@@ -157,7 +159,7 @@ export function SearchBox() {
         autoCapitalize="off"
         spellCheck={false}
         enterKeyHint="search"
-        placeholder="Search products (press /)"
+        placeholder={t("header.searchPlaceholder")}
         value={term}
         onChange={(e) => {
           setTerm(e.target.value)
@@ -175,7 +177,7 @@ export function SearchBox() {
       <div
         hidden={!isOpen}
         aria-busy={waiting}
-        className="absolute top-full right-0 left-0 z-20 mt-1 max-h-96 min-w-72 overflow-y-auto rounded border bg-background p-1 text-sm shadow"
+        className="absolute start-0 end-0 top-full z-20 mt-1 max-h-96 min-w-72 overflow-y-auto rounded border bg-background p-1 text-sm shadow"
       >
         {isOpen && suggestions.isError && typed.length >= MIN_TERM && (
           <p role="alert" className="px-2 py-1 text-destructive">

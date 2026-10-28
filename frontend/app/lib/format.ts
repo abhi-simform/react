@@ -1,24 +1,52 @@
+import {
+  currentIntlLocale,
+  displayCurrency,
+  getRate,
+  type Currency,
+} from "@/lib/locale"
+
+/**
+ * Money for DISPLAY (13.8). Everything is stored and charged in INR; `rupees` is always INR. With no
+ * explicit `currency` the amount is converted to the shopper's display currency (see `lib/locale.ts`) and
+ * formatted in their language. An explicit `currency` means "this number is already in that currency":
+ * no conversion. INR (and an explicit currency) show `inrDigits` decimals; converted display currencies show 2.
+ */
+function displayMoney(
+  rupees: number,
+  inrDigits: number,
+  locale: string,
+  currency?: string
+): string {
+  const code = currency ?? displayCurrency()
+  const converted =
+    currency === undefined && code !== "INR"
+      ? rupees * getRate(code as Currency)
+      : rupees
+  // A converted amount (USD 16.11) needs cents; INR, or a currency the caller named, keeps the caller's precision.
+  const digits = currency === undefined && code !== "INR" ? 2 : inrDigits
+  return new Intl.NumberFormat(locale, {
+    style: "currency",
+    currency: code,
+    minimumFractionDigits: digits,
+    maximumFractionDigits: digits,
+  }).format(converted)
+}
+
 /** Format integer paise (1/100 rupee) for display. Only call this at the UI edge. */
 export function formatCurrency(
   paise: number,
-  currency = "INR",
-  locale = "en-IN"
+  currency?: string,
+  locale = currentIntlLocale()
 ): string {
-  return new Intl.NumberFormat(locale, {
-    style: "currency",
-    currency,
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  }).format(paise / 100)
+  return displayMoney(paise / 100, 2, locale, currency)
 }
 
 /** Format whole rupees (what the API sends for `price`/`mrp`). Only call this at the UI edge. */
-export function formatRupees(rupees: number, locale = "en-IN"): string {
-  return new Intl.NumberFormat(locale, {
-    style: "currency",
-    currency: "INR",
-    maximumFractionDigits: 0,
-  }).format(rupees)
+export function formatRupees(
+  rupees: number,
+  locale = currentIntlLocale()
+): string {
+  return displayMoney(rupees, 0, locale)
 }
 
 // ---- 6.7: display formatting (all Intl, locale and currency are parameters) ----
@@ -29,7 +57,7 @@ type Locale = string
 export function formatDate(
   value: string | Date,
   {
-    locale = "en-IN",
+    locale = currentIntlLocale(),
     ...options
   }: Intl.DateTimeFormatOptions & { locale?: Locale } = {}
 ): string {
@@ -55,7 +83,10 @@ const RELATIVE_UNITS: readonly [Intl.RelativeTimeFormatUnit, number][] = [
 /** "3 days ago" / "in 2 hours". `now` is a parameter so it is testable. */
 export function formatRelative(
   value: string | Date,
-  { now = new Date(), locale = "en-IN" }: { now?: Date; locale?: Locale } = {}
+  {
+    now = new Date(),
+    locale = currentIntlLocale(),
+  }: { now?: Date; locale?: Locale } = {}
 ): string {
   const date = typeof value === "string" ? new Date(value) : value
   if (Number.isNaN(date.getTime())) return ""
@@ -70,7 +101,10 @@ export function formatRelative(
 }
 
 /** 1234 -> "1.2K". NB the default locale is en-IN, so 100000 -> "1L" (lakh): correct for India. */
-export function formatCount(value: number, locale: Locale = "en-IN"): string {
+export function formatCount(
+  value: number,
+  locale: Locale = currentIntlLocale()
+): string {
   return new Intl.NumberFormat(locale, {
     notation: "compact",
     maximumFractionDigits: 1,
@@ -93,13 +127,8 @@ export function toPriceVM(
   mrp: number | undefined,
   options: { locale?: Locale; currency?: string } = {}
 ): PriceVM {
-  const { locale = "en-IN", currency = "INR" } = options
-  const money = (rupees: number) =>
-    new Intl.NumberFormat(locale, {
-      style: "currency",
-      currency,
-      maximumFractionDigits: 0,
-    }).format(rupees)
+  const { locale = currentIntlLocale(), currency } = options
+  const money = (rupees: number) => displayMoney(rupees, 0, locale, currency)
   const hasDiscount = mrp !== undefined && mrp > price
   const discountPercent = hasDiscount
     ? Math.round(((mrp - price) / mrp) * 100)
