@@ -18,7 +18,7 @@ Decision order: derive it? -> does the URL describe it? -> does the server own i
 form? -> does one component care? (local) -> else global client.
 
 Legend for the last column: OK = already right, MIGRATED = fixed in Stage 8 (commit named),
-S9 = moves to TanStack Query in Stage 9, NOTE = right today, caveat explained.
+MIGRATED (9.x) = moved to TanStack Query in Stage 9 (the "where it lives now" column is the Stage 9 state), NOTE = right today, caveat explained.
 
 | # | State | Where it lives now | Right home | Why (one sentence) | Status |
 | - | ----- | ------------------ | ---------- | ------------------ | ------ |
@@ -28,29 +28,29 @@ S9 = moves to TanStack Query in Stage 9, NOTE = right today, caveat explained.
 | 4 | Gallery image index | `useState` in `Gallery` | local | One component; nothing outside should remember it. | OK |
 | 5 | PDP active tab (description / specs / reviews / Q&A) | Tabs' internal state | URL (`?tab=reviews`) | Linking to the reviews tab, reload and Back should work. | MIGRATED (8.4 migration 1) |
 | 6 | "Write a review" editor open | `useState` in `ProductTabs` | local | Transient UI of one panel. | OK |
-| 7 | Guest cart lines | Zustand `useCartStore` + `persist` | global client + persistent browser (logged-in cart: server cache, S9) | Many distant readers (badge, drawer, page, cards) and a guest has no server. | OK (S9: logged-in) |
+| 7 | Guest cart lines | Server cart via Query (`useCart`), guest token in `localStorage` | server cache (cart) + persistent browser (guest TOKEN only) | B3 gives guests a server cart too (token header); one facade hook hides the split. | MIGRATED (9.6) |
 | 8 | Cart totals, savings, shipping, tax | `useCartTotals` (`useMemo` over `lines`) | derived | A second stored copy drifts on every action. | OK |
 | 9 | Free-shipping progress | `freeShippingProgress(subtotal)` in render | derived | Function of the subtotal. | OK |
 | 10 | Cart drawer open flag | Zustand `drawerOpen` (not persisted) | global client | Product cards' "View cart" toast action opens it from far away; a reload must not reopen it. | OK |
 | 11 | Compare list (max 4) | Zustand `useCompareStore` + `persist` | global client + persistent browser | Cards, PDP, tray and page share it; it should survive a reload. | OK |
-| 12 | Compare product data (prices, specs) | `useProductsByIds` (effect + `useState`) | server cache | Server data; the store keeps ids only, on purpose. | S9 |
+| 12 | Compare product data (prices, specs) | `useProductsByIds` = `useQueries` (one cached query per id) | server cache | Server data; the store keeps ids only, on purpose. | MIGRATED (9.2) |
 | 13 | Compare "only differences" switch | `useState` in `CompareTable` | URL (`?diff=1`) | A view of the comparison worth sharing and surviving reload/Back. | MIGRATED (8.4 migration 2) |
-| 14 | Wishlist ids | `WishlistContext` over `useFetch` | server cache | It is server data living in a Context; Context should only deliver. | S9 (Context goes away, a Query + optimistic mutation replaces it) |
-| 15 | Wishlist "pending" ids | `useState` in `WishlistProvider` | local to the mutation (Query `isPending`/`variables`) | Bookkeeping of in-flight requests. | S9 |
-| 16 | Wishlist product list (/wishlist page) | `useWishlistProducts` | server cache | Server data. | S9 |
-| 17 | Address list | `useFetch` in `useAddresses` | server cache | Server data; mutations should invalidate it. | S9 |
+| 14 | Wishlist ids | `wishlistKeys.ids()` query (`useWishlist`), Context deleted | server cache | It is server data living in a Context; Context should only deliver. | MIGRATED (9.5) |
+| 15 | Wishlist "pending" ids | `useMutationState` over the membership mutation | mutation state | Bookkeeping of in-flight requests. | MIGRATED (9.5) |
+| 16 | Wishlist product list (/wishlist page) | `useWishlistProducts` = `useQuery(wishlistQueries.list())` | server cache | Server data. | MIGRATED (9.2) |
+| 17 | Address list | `useQuery(addressQueries.list())` | server cache | Server data; mutations should invalidate it. | MIGRATED (9.2, 9.4) |
 | 18 | Address row pending/error | `useReducer` in `useAddresses` | local | Per-row mutation bookkeeping of one screen. | OK |
 | 19 | Address dialog target (new / edit which) | `useState` in `AddressBook` | local | One dialog, one owner. | OK |
 | 20 | Address form values and errors | React Hook Form | form | Dirty/touched/error state is exactly what RHF is for. | OK |
 | 21 | Pincode input text | `useState` / RHF field | local / form | A draft value. | OK |
-| 22 | Pincode serviceability result | `usePincodeCheck` over `useFetch` | server cache | Server answer keyed by pincode; the hook also derives the 6 UI states. | S9 |
+| 22 | Pincode serviceability result | `usePincodeCheck` over `useQuery(pincodeQueries.check)` | server cache | Server answer keyed by pincode; the hook also derives the 6 UI states. | MIGRATED (9.11) |
 | 23 | Listing filters, sort, page, "more" mode | URL (`useProductFilters`) | URL | Shareable, Back-friendly; no `useState` copy exists. | OK |
 | 24 | Price range draft text | `useState` in `PriceRangeFilter` | local | Typing must not hit the URL on every keystroke; commit on blur/Enter. | OK |
-| 25 | Listing facets (kept while the next page loads) | `useState` copy in `ProductListingPage` | server cache (`keepPreviousData`) | A copy of server data held only to avoid a flash. | S9 |
-| 26 | Listing results, categories tree, brands | `useFetch` | server cache | Server data (the tree is nearly static: long stale time). | S9 |
+| 25 | Listing facets (kept while the next page loads) | `useInfiniteQuery` select / `placeholderData: keepPreviousData` (the `useState` copy remains for the sidebar) | server cache | A copy of server data held only to avoid a flash. | MIGRATED (9.3, 9.8); the facets `useState` copy is the one leftover: still a copy of server data, kept so the sidebar does not blank. NOTE |
+| 26 | Listing results, categories tree, brands | `useQuery` (`productQueries`, `categoryQueries`, `brandQueries`) | server cache | Server data (the tree is nearly static: long stale time). | MIGRATED (9.1, 9.2) |
 | 27 | Listing view preference (grid/list, default sort) | `useLocalStorage` in `useProductFilters` | persistent browser | A user preference, not shareable. | OK |
 | 28 | Search box text, open flag, highlighted option | `useState` in `SearchBox` | local | Ephemeral UI of one widget; the committed search term goes to the URL. | OK |
-| 29 | Search suggestions | `useSuggestions` (effect + `useState`) | server cache (+ debounced value, derived) | Server data keyed by term. | S9 |
+| 29 | Search suggestions | `useQuery(searchQueries.suggestions(term))` | server cache | Server data keyed by term. | MIGRATED (9.11) |
 | 30 | Recently viewed product ids | `useLocalStorage` | persistent browser | Pure client history. (Products shown from it are server cache.) | OK |
 | 31 | Remembered delivery pincode | `useLocalStorage` | persistent browser | A user convenience. | OK |
 | 32 | Auth status + user | Context (`AuthProvider`) | global client (Context) | Low-frequency, read everywhere; Stage 10 may feed it from Query `/auth/me`. | OK |
@@ -72,7 +72,7 @@ S9 = moves to TanStack Query in Stage 9, NOTE = right today, caveat explained.
 | 48 | Desktop vs mobile layout | `useMediaQuery` | external store | Browser API as a store. | OK |
 | 49 | Mega menu / mobile menu open | `useState` in each menu | local | Transient UI; closing on navigation is the component's job. | OK |
 | 50 | Seller product form (variants, specs) | RHF `useFieldArray` | form | Dynamic rows with their own errors. | OK |
-| 51 | Orders list / order detail | fixtures (no query yet) | server cache | Server data (Stage 11 backend + S9 Query). | S9 |
+| 51 | Orders list / order detail | `orderQueries` over a stubbed API (`useInfiniteQuery`, polled detail) | server cache | Server data (Stage 11 backend + S9 Query). | MIGRATED (9.10; real API in Stage 11) |
 | 52 | Compare table rows | `buildRows(products)` in render | derived | Function of the fetched products. | OK |
 
 Counts: 52 items. Already right: 37. Migrated in Stage 8: 3 (5, 13, 34). Waiting for Stage 9
@@ -101,3 +101,23 @@ with a caveat: 2 (41, 43). Items 7 and 43 have a Stage 9 part (logged-in cart, a
 - Persistent browser because it must survive a reload (and it is only ever read through a store
   or hook, never scattered `localStorage` calls).
 - Derived because it is a pure function of other state: storing it creates a sync bug.
+
+## Stage 9 update (9.11)
+
+Where the ten "waiting for Stage 9" items went: all ten are server-cache entries now (12, 14, 15,
+16, 17, 22, 25 (partly), 26, 29, 51), plus the logged-in/guest cart (#7, now Query + a guest
+token). New client state added in Stage 9, and why it is NOT server state:
+
+| State | Home | Why |
+| --- | --- | --- |
+| Cart drawer open flag | Zustand `useCartUi` | Distant components open it (toast action); not persisted. |
+| Per-line 409 warning (`lineMessages`) | Zustand `useCartUi` | Describes what happened to a user ACTION; cleared by the next success. |
+| Guest cart token | `localStorage` (`cartToken.ts`) | Names a server cart; survives reload; is not the cart. |
+| Pending quantity edits (timers, burst base) | module-level maps in `cartMutation.ts` | In-flight debounce bookkeeping that must outlive a re-render; not rendered. |
+| Order list filters (`status`, `q`) | URL | Shareable/Back-friendly. |
+| Review editor open | local `useState` (`ProductTabs`) | Transient UI of one panel. |
+
+Boundary rule used all through Stage 9: **Query owns server state** (lines, wishlist ids, orders),
+**Zustand/Context own client state** (drawer flag, theme, auth), **RHF owns form state**, **the URL
+owns shareable state**. Where they overlapped (the cart lines lived in Zustand AND on the server;
+the wishlist ids lived in a Context AND in an API) one side was deleted.
