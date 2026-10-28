@@ -6,6 +6,8 @@ import {
   filterProducts,
   filterWithFacets,
   priceHistogram,
+  sortProducts,
+  type SortKey,
 } from "@/features/catalog/utils"
 import type { Product, ProductFilters } from "@/features/catalog/types"
 import snapshot from "@/test/fixtures/products.json"
@@ -22,8 +24,10 @@ function toNumber(value: string): number | undefined {
 
 export default function ScratchExplorer() {
   const [filters, setFilters] = useState<ProductFilters>({})
+  const [sortKey, setSortKey] = useState<SortKey>("relevance")
 
-  const { items, facets } = filterWithFacets(products, filters)
+  const { items: filtered, facets } = filterWithFacets(products, filters)
+  const items = sortProducts(filtered, sortKey)
   const brandOptions = Object.entries(facets.brands).sort(
     (a, b) => b[1] - a[1] || a[0].localeCompare(b[0])
   )
@@ -144,6 +148,21 @@ export default function ScratchExplorer() {
         <p role="status" className="mb-2 font-medium">
           {items.length} of {products.length} products
         </p>
+        <label className="mb-2 flex gap-2 text-sm">
+          Sort
+          <select
+            className="border"
+            value={sortKey}
+            onChange={(e) => setSortKey(e.target.value as SortKey)}
+          >
+            <option value="relevance">Relevance</option>
+            <option value="price_asc">Price: low to high</option>
+            <option value="price_desc">Price: high to low</option>
+            <option value="rating">Rating</option>
+            <option value="newest">Newest</option>
+            <option value="discount">Discount</option>
+          </select>
+        </label>
         <p className="mb-2 text-sm">
           Top brands overall:{" "}
           {topBrands.map((b) => `${b.brand} (${b.count})`).join(", ")}

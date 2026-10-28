@@ -115,3 +115,74 @@ export function brandCounts(
     .map(([brand, items]) => ({ brand, count: items.length }))
     .sort((a, b) => b.count - a.count || a.brand.localeCompare(b.brand))
 }
+
+// ---- sorting
+
+export type SortKey =
+  "relevance" | "price_asc" | "price_desc" | "rating" | "newest" | "discount"
+
+type Selector<T> = {
+  get: (item: T) => string | number
+  dir?: "asc" | "desc"
+}
+
+const collator = new Intl.Collator("en", { sensitivity: "base" })
+
+/**
+ * Compose comparators: the first selector decides, later ones break ties.
+ * Strings use Intl.Collator (accents and case sort sensibly), numbers subtract.
+ */
+export function compareBy<T>(
+  ...selectors: Selector<T>[]
+): (a: T, b: T) => number {
+  return (a, b) => {
+    for (const { get, dir = "asc" } of selectors) {
+      const x = get(a)
+      const y = get(b)
+      const result =
+        typeof x === "string" && typeof y === "string"
+          ? collator.compare(x, y)
+          : Number(x) - Number(y)
+      if (result !== 0) return dir === "asc" ? result : -result
+    }
+    return 0
+  }
+}
+
+const byRatingThenName = [
+  { get: (p: Product) => p.ratingAvg, dir: "desc" as const },
+  { get: (p: Product) => p.name },
+]
+
+const comparators: Record<
+  Exclude<SortKey, "relevance">,
+  (a: Product, b: Product) => number
+> = {
+  price_asc: compareBy({ get: (p: Product) => p.price }, ...byRatingThenName),
+  price_desc: compareBy(
+    { get: (p: Product) => p.price, dir: "desc" },
+    ...byRatingThenName
+  ),
+  rating: compareBy(
+    { get: (p: Product) => p.ratingAvg, dir: "desc" },
+    { get: (p: Product) => p.ratingCount, dir: "desc" },
+    { get: (p: Product) => p.name }
+  ),
+  newest: compareBy(
+    { get: (p: Product) => Date.parse(p.createdAt), dir: "desc" },
+    ...byRatingThenName
+  ),
+  discount: compareBy(
+    { get: (p: Product) => p.discountPercent, dir: "desc" },
+    ...byRatingThenName
+  ),
+}
+
+/** Returns a new array; `relevance` keeps the incoming (server) order. */
+export function sortProducts(
+  products: readonly Product[],
+  sortKey: SortKey
+): Product[] {
+  if (sortKey === "relevance") return [...products]
+  return products.toSorted(comparators[sortKey])
+}
