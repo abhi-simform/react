@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button"
 import { ImageDropzone, uploadImage } from "@/features/uploads"
 import { isAbortError } from "@/lib/async"
 import { toApiError } from "@/lib/api/errors"
+import { safeImageSrc } from "@/lib/safeUrl"
 
 type State =
   | { status: "idle" }
@@ -53,9 +54,9 @@ export function AvatarUploader({
   return (
     <section aria-label="Profile photo" className="flex flex-col gap-2">
       <h2 className="font-medium">Profile photo</h2>
-      {currentUrl ? (
+      {safeImageSrc(currentUrl) ? (
         <img
-          src={currentUrl}
+          src={safeImageSrc(currentUrl) ?? undefined}
           alt={`${name}'s current photo`}
           className="size-24 rounded-full border object-cover"
         />

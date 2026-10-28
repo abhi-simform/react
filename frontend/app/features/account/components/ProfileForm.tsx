@@ -11,6 +11,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query"
 
 import { profileKeys } from "@/lib/queryKeys"
 import { toAsyncState } from "@/lib/queryState"
+import { useFormDraft } from "@/hooks/useFormDraft"
 import { useSingleFlight } from "@/hooks/useSingleFlight"
 import { toApiError } from "@/lib/api/errors"
 import { applyApiError } from "@/lib/forms/applyApiError"
@@ -61,16 +62,19 @@ function DetailsForm({
   profile: Profile
   onSaved: (saved: Profile) => void
 }) {
+  const form = useForm<ProfileFormInput, unknown, ProfileFormOutput>({
+    resolver: zodResolver(profileFormSchema),
+    defaultValues: { name: profile.name, phone: profile.phone ?? "" },
+  })
   const {
     register,
     handleSubmit,
     setError,
     reset,
     formState: { errors, isSubmitting, isDirty },
-  } = useForm<ProfileFormInput, unknown, ProfileFormOutput>({
-    resolver: zodResolver(profileFormSchema),
-    defaultValues: { name: profile.name, phone: profile.phone ?? "" },
-  })
+  } = form
+  // 10.7: if the session expires while this is open, the typing survives the login round trip.
+  const draft = useFormDraft(`profile:${profile.id}`, form)
 
   const save = useSingleFlight(async (values: ProfileFormOutput) => {
     try {
@@ -79,6 +83,7 @@ function DetailsForm({
         ...(values.phone ? { phone: values.phone } : {}),
       })
       onSaved(saved)
+      draft.clear()
       reset({ name: saved.name, phone: saved.phone ?? "" }) // saved values are the new baseline: not dirty any more
       toast.success("Profile saved")
     } catch (err) {

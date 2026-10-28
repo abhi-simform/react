@@ -1,9 +1,9 @@
-import { PlaceholderPage } from "@/components/common/PlaceholderPage"
+import { SecurityPage } from "@/features/account"
 import { pageTitle } from "@/lib/pageTitle"
 import type { RouteHandle } from "@/types/route-handle"
 
 export default function AccountSecurityRoute() {
-  return <PlaceholderPage title="Security" builtIn="10" />
+  return <SecurityPage />
 }
 
 export function meta() {
