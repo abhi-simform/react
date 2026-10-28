@@ -1,6 +1,7 @@
-import { useId, useState } from "react"
+import { useId, useRef, useState } from "react"
 
 import { useDebounce } from "@/hooks/useDebounce"
+import { useFocusShortcut } from "@/hooks/useFocusShortcut"
 
 import { useSuggestions } from "../hooks/useSuggestions"
 
@@ -18,6 +19,8 @@ export function SearchBox() {
   const [term, setTerm] = useState("")
   const [open, setOpen] = useState(false)
   const [active, setActive] = useState(-1) // highlighted option index, -1 = none
+  const inputRef = useRef<HTMLInputElement>(null)
+  useFocusShortcut(inputRef) // "/" focuses the search box
 
   const trimmed = term.trim()
   const debounced = useDebounce(trimmed, DEBOUNCE_MS)
@@ -82,6 +85,7 @@ export function SearchBox() {
         Search products
       </label>
       <input
+        ref={inputRef}
         id={`${listId}-input`}
         type="text"
         role="combobox"
@@ -92,7 +96,7 @@ export function SearchBox() {
           isOpen && active >= 0 ? `${listId}-option-${active}` : undefined
         }
         autoComplete="off"
-        placeholder="Search products"
+        placeholder="Search products (press /)"
         value={term}
         onChange={(e) => {
           setTerm(e.target.value)

@@ -2,8 +2,10 @@ import { useState } from "react"
 
 import { Price } from "@/components/common/Price"
 import { Rating } from "@/components/common/Rating"
+import { usePrevious } from "@/hooks/usePrevious"
 import { QuantityStepper } from "@/components/common/QuantityStepper"
 import { Button } from "@/components/ui/button"
+import { formatRupees } from "@/lib/format"
 import type { ProductDetail } from "@/features/catalog"
 import type { Variant } from "@/types/domain"
 
@@ -27,6 +29,7 @@ export function ProductDetailView({
   const variant = findVariant(variants, selection)
   const price = variant?.price ?? product.price
   const mrp = variant?.mrp ?? product.mrp
+  const previousPrice = usePrevious(price)
   const canBuy = variant !== undefined && variant.stock > 0
   // Derived: if a variant with less stock is picked, the shown quantity is
   // capped in render. No effect to "fix up" state afterwards.
@@ -41,6 +44,11 @@ export function ProductDetailView({
         <h1 className="text-xl font-medium">{product.name}</h1>
         <Rating value={product.ratingAvg} count={product.ratingCount} />
         <Price price={price} mrp={mrp} className="text-lg" />
+        {previousPrice !== undefined && previousPrice !== price && (
+          <p className="text-sm text-neutral-600">
+            Price changed from {formatRupees(previousPrice)}
+          </p>
+        )}
         <VariantPicker
           variants={variants}
           selection={selection}

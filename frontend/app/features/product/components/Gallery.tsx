@@ -1,5 +1,5 @@
 import { ChevronLeft, ChevronRight } from "lucide-react"
-import { useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { preload } from "react-dom"
 
 import { cn } from "@/lib/utils"
@@ -16,6 +16,21 @@ export function Gallery({
   // The ONLY state is the index. The current image, the next image and the
   // "2 of 4" label are all derived from it during render.
   const [index, setIndex] = useState(0)
+  // DOM refs: the scrolling strip and each thumbnail button (a mutable Map in a
+  // ref: changing it must NOT re-render).
+  const stripRef = useRef<HTMLUListElement>(null)
+  const thumbRefs = useRef(new Map<number, HTMLButtonElement>())
+
+  // Keep the selected thumbnail visible. Scrolls only the strip itself
+  // (scrollIntoView could also scroll the whole page on first paint).
+  useEffect(() => {
+    const strip = stripRef.current
+    const thumb = thumbRefs.current.get(index)
+    if (!strip || !thumb) return
+    const target =
+      thumb.offsetLeft - (strip.clientWidth - thumb.offsetWidth) / 2
+    strip.scrollTo({ left: Math.max(0, target), behavior: "smooth" })
+  }, [index])
   const count = images.length
   if (count === 0) return <div className="aspect-square bg-neutral-100" />
 
@@ -73,16 +88,22 @@ export function Gallery({
       <p aria-live="polite" className="sr-only">
         Image {index + 1} of {count}
       </p>
-      <ul className="flex gap-2">
+      <ul ref={stripRef} className="relative flex gap-2 overflow-x-auto">
         {images.map((image, i) => (
           <li key={image.url}>
             <button
+              ref={(el) => {
+                if (el) thumbRefs.current.set(i, el)
+                return () => {
+                  thumbRefs.current.delete(i)
+                }
+              }}
               type="button"
               aria-label={`Show image ${i + 1} of ${count}`}
               aria-current={i === index}
               onClick={() => setIndex(i)}
               className={cn(
-                "size-16 overflow-hidden rounded border-2",
+                "size-16 shrink-0 overflow-hidden rounded border-2",
                 i === index ? "border-black" : "border-transparent"
               )}
             >
