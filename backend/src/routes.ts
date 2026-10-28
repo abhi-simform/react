@@ -3,6 +3,9 @@ import { authRoutes } from "./modules/auth/auth.routes.js"
 import { brandRoutes, categoryRoutes } from "./modules/categories/category.routes.js"
 import { healthRoutes } from "./modules/health/health.routes.js"
 import { productRoutes } from "./modules/products/product.routes.js"
+import { addressRoutes } from "./modules/addresses/address.routes.js"
+import { pincodeRoutes } from "./modules/pincodes/pincode.routes.js"
+import { wishlistRoutes } from "./modules/wishlist/wishlist.routes.js"
 import { userRoutes } from "./modules/users/user.routes.js"
 
 // Every feature module mounts here. New module = new line.
@@ -13,3 +16,6 @@ routes.use("/users", userRoutes)
 routes.use("/categories", categoryRoutes)
 routes.use("/brands", brandRoutes)
 routes.use("/products", productRoutes)
+routes.use("/wishlist", wishlistRoutes)
+routes.use("/addresses", addressRoutes)
+routes.use("/pincodes", pincodeRoutes)
