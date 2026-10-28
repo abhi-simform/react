@@ -13,6 +13,7 @@ const LABS = [
   ["keys", "3.5 index keys bug"],
   ["forms", "7.1 form re-render counts"],
   ["state", "8.1-8.3 state ownership, context and store labs"],
+  ["auth", "10.3 single-flight refresh: six parallel requests"],
 ] as const
 
 export default function DevIndexRoute() {

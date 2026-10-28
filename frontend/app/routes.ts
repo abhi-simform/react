@@ -76,6 +76,7 @@ export default [
       route("keys", "routes/dev/keys.tsx"),
       route("forms", "routes/dev/forms.tsx"),
       route("state", "routes/dev/state.tsx"),
+      route("auth", "routes/dev/auth.tsx"),
     ]),
 
     route("*", "routes/not-found.tsx"),

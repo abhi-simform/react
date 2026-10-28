@@ -11,7 +11,7 @@ import {
   paginatedWithMetaSchema,
 } from "./schemas"
 
-// ---- configuration (Stage 10 plugs the real session in here) ---------------
+// ---- configuration (the auth feature plugs the real session in here, Stage 10) ----
 
 type ApiConfig = {
   /** Called for every `auth: true` request. Returns the in-memory access token. */
@@ -20,7 +20,11 @@ type ApiConfig = {
    * Called on a 401 of an `auth: true` request. Return (or resolve) `true`
    * when a new token is now available: the request is then retried ONCE.
    */
-  onUnauthorized?: (error: ApiError) => boolean | Promise<boolean>
+  onUnauthorized?: (
+    error: ApiError,
+    /** The token the FAILED request carried: lets the handler see that someone already refreshed. */
+    context: { token: string | null }
+  ) => boolean | Promise<boolean>
 }
 
 let config: ApiConfig = {}
@@ -76,10 +80,29 @@ function isRawBody(body: unknown): body is BodyInit {
   )
 }
 
+/**
+ * 401 can mean "your token is old" (refresh and retry) or "that credential is wrong" (a wrong
+ * current password: INVALID_CREDENTIALS). Only the first is worth a refresh.
+ */
+const TOKEN_PROBLEMS = new Set([
+  "TOKEN_EXPIRED",
+  "INVALID_TOKEN",
+  "UNAUTHORIZED",
+])
+const isTokenProblem = (err: ApiError) =>
+  err.status === 401 && TOKEN_PROBLEMS.has(err.code)
+
+/** The session-lifecycle endpoints never trigger a refresh themselves (no loops). */
+const isAuthEndpoint = (path: string) =>
+  /^\/auth\/(login|register|refresh|logout|google|forgot-password|reset-password|verify-email)/.test(
+    path
+  )
+
 async function send<T>(
   path: string,
   options: ApiOptions<T>
 ): Promise<{ status: number; body: unknown }> {
+  let usedToken: string | null = null
   const attempt = () => {
     const headers: Record<string, string> = {
       Accept: "application/json",
@@ -95,7 +118,8 @@ async function send<T>(
       }
     }
     if (options.auth) {
-      const token = config.getAccessToken?.()
+      const token = config.getAccessToken?.() ?? null
+      usedToken = token
       if (token) headers.Authorization = `Bearer ${token}`
     }
     return getJson(`${env.VITE_API_URL}${appendQuery(path, options.query)}`, {
@@ -112,9 +136,14 @@ async function send<T>(
   try {
     return await attempt()
   } catch (err) {
-    if (options.auth && err instanceof ApiError && err.status === 401) {
-      const retry = await config.onUnauthorized?.(err)
-      if (retry === true) return attempt() // exactly once
+    if (
+      options.auth &&
+      err instanceof ApiError &&
+      isTokenProblem(err) &&
+      !isAuthEndpoint(path)
+    ) {
+      const retry = await config.onUnauthorized?.(err, { token: usedToken })
+      if (retry === true) return attempt() // exactly once: `attempt` is not re-wrapped
     }
     throw err
   }

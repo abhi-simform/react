@@ -29,13 +29,19 @@ export async function apiUpload<T>(
   form: FormData,
   { onProgress, signal, schema, timeoutMs = 60_000 }: Options<T> = {}
 ): Promise<T> {
-  const attempt = () => send(path, form, { onProgress, signal, timeoutMs })
+  let usedToken: string | null = null
+  const attempt = () => {
+    usedToken = getApiConfig().getAccessToken?.() ?? null
+    return send(path, form, { onProgress, signal, timeoutMs })
+  }
   let result
   try {
     result = await attempt()
   } catch (err) {
     if (err instanceof ApiError && err.status === 401) {
-      const retry = await getApiConfig().onUnauthorized?.(err)
+      const retry = await getApiConfig().onUnauthorized?.(err, {
+        token: usedToken,
+      })
       if (retry === true)
         result = await attempt() // exactly once
       else throw err
