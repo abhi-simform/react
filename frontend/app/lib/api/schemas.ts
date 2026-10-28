@@ -9,12 +9,16 @@ export const pageMetaSchema = z.object({
   hasPrev: z.boolean(),
 })
 
-/** Success envelope around any data schema: `{ success: true, data, meta? }`. */
+/**
+ * Success envelope around any data schema: `{ success: true, data, meta? }`. `api()` returns only
+ * `data`, so `meta` here is just "an object if present": paged lists validate theirs with
+ * `paginatedSchema`, and some plain endpoints carry their own (`GET /deals` sends `meta.now`).
+ */
 export function apiEnvelopeSchema<T extends z.ZodType>(dataSchema: T) {
   return z.object({
     success: z.literal(true),
     data: dataSchema,
-    meta: pageMetaSchema.optional(),
+    meta: z.record(z.string(), z.unknown()).optional(),
   })
 }
 

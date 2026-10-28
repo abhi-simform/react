@@ -55,7 +55,18 @@ export const wishlistKeys = {
 export const cartKeys = {
   all: ["cart"] as const,
   current: (owner: string) => [...cartKeys.all, owner] as const,
+  /** Nested UNDER the owner's cart key: invalidating the cart also refreshes which coupons apply. */
+  coupons: (owner: string) => [...cartKeys.current(owner), "coupons"] as const,
 }
+
+export const dealKeys = {
+  all: ["deals"] as const,
+  lists: () => [...dealKeys.all, "list"] as const,
+  list: (filters: Filters) => [...dealKeys.lists(), filters] as const,
+}
+
+/** The server clock offset (`serverTime - clientTime`), measured from `GET /time`. */
+export const timeKeys = { offset: ["time", "offset"] as const }
 
 export const orderKeys = {
   all: ["orders"] as const,

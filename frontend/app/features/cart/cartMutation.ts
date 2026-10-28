@@ -7,6 +7,7 @@ import { cartKeys } from "@/lib/queryKeys"
 import type { CartOwner } from "./cart.api"
 import { useCartUi } from "./cartUiStore"
 import type { ServerCart, ServerCartLine } from "./schemas"
+import { priceTotals } from "./serverTotals"
 
 /**
  * Who owns the cart RIGHT NOW. A signed-in user = the JWT cart; everyone else = the guest cart
@@ -39,6 +40,9 @@ function recount(
   const payable = (l: ServerCartLine) => Math.min(l.qty, l.availableQty)
   const subtotal = items.reduce((s, l) => s + l.unitPrice * payable(l), 0)
   const mrpTotal = items.reduce((s, l) => s + l.mrp * payable(l), 0)
+  // Optimistic estimate only: the coupon discount can not exceed what is in the cart; the
+  // server's response (shipping, GST, a re-evaluated percent coupon) replaces all of it.
+  const discount = Math.min(cart.totals.discount, subtotal)
   return {
     ...cart,
     items,
@@ -49,6 +53,8 @@ function recount(
       subtotal,
       mrpTotal,
       savings: mrpTotal - subtotal,
+      discount,
+      ...priceTotals(subtotal, discount),
     },
   }
 }
@@ -117,7 +123,8 @@ type Config<V> = {
  * warning on that line and refetches the truth; everything else is left to the global toast.
  */
 export function useCartMutation<V>(config: Config<V>) {
-  const { owner, key } = useCartOwner()
+  const { owner, ownerId, key } = useCartOwner()
+  const ownerKey = owner === "user" ? ownerId : "guest"
   const queryClient = useQueryClient()
   const lastOne = () =>
     queryClient.isMutating({ mutationKey: cartKeys.all }) <= 1 &&
@@ -138,6 +145,10 @@ export function useCartMutation<V>(config: Config<V>) {
       const id = config.productId?.(vars)
       if (id) useCartUi.getState().clearLineMessage(id)
       if (lastOne()) queryClient.setQueryData(key, cart)
+      // Which coupons apply depends on the cart contents.
+      void queryClient.invalidateQueries({
+        queryKey: cartKeys.coupons(ownerKey),
+      })
     },
     onError: (error, vars, context) => {
       if (context?.snapshot) queryClient.setQueryData(key, context.snapshot)

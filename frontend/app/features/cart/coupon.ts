@@ -1,45 +1,72 @@
-import { abortable } from "@/lib/async"
+import { toApiError } from "@/lib/api/errors"
+import { formatRupees } from "@/lib/format"
 
-import type { CouponRule } from "./types"
+/**
+ * Coupon validation is the SERVER's job (B4): `POST /cart/coupon` answers `422 COUPON_INVALID`
+ * with `details.reason`. This file only turns a reason into human copy; a raw code is never
+ * shown (11.2 acceptance). Amounts in `details` are whole rupees.
+ */
+export type CouponReason =
+  | "UNKNOWN"
+  | "NOT_STARTED"
+  | "EXPIRED"
+  | "MIN_ORDER"
+  | "ALREADY_USED"
+  | "NOT_APPLICABLE"
+  | "EXHAUSTED"
+  | "FIRST_ORDER_ONLY"
+  | "EMPTY_CART"
 
-/** Typed outcomes of checking a coupon: every case has its own message (7.6). */
-export type CouponOutcome =
-  | { status: "valid"; code: string; rule: CouponRule; label: string }
-  | { status: "expired"; code: string; expiredOn: string }
-  | { status: "min_order_not_met"; code: string; minOrder: number }
-  | { status: "unknown"; code: string }
+type Details = { minOrder?: number; shortBy?: number }
 
-type Entry = { rule: CouponRule; label: string; expiresOn?: string }
-
-// STUB until the coupon API (B4, Stage 11). Money in paise.
-const COUPONS: Record<string, Entry> = {
-  SAVE10: {
-    rule: { type: "percent", value: 10, maxDiscount: 20_000, minOrder: 50_000 },
-    label: "10% off, up to Rs 200 (orders from Rs 500)",
-  },
-  FLAT100: {
-    rule: { type: "flat", value: 10_000, minOrder: 200_000 },
-    label: "Rs 100 off (orders from Rs 2,000)",
-  },
-  OLD50: {
-    rule: { type: "percent", value: 50 },
-    label: "50% off",
-    expiresOn: "2026-09-30",
-  },
+export function describeCouponReason(
+  reason: string,
+  code: string,
+  details: Details = {}
+): string {
+  switch (reason as CouponReason) {
+    case "UNKNOWN":
+      return `We do not recognise "${code}". Check the spelling.`
+    case "NOT_STARTED":
+      return `${code} is not active yet.`
+    case "EXPIRED":
+      return `${code} has expired.`
+    case "MIN_ORDER":
+      return details.minOrder !== undefined
+        ? `${code} needs a cart of at least ${formatRupees(details.minOrder)}.${
+            details.shortBy
+              ? ` Add ${formatRupees(details.shortBy)} more to use it.`
+              : ""
+          }`
+        : `${code} needs a bigger cart.`
+    case "ALREADY_USED":
+      return `You have already used ${code}.`
+    case "NOT_APPLICABLE":
+      return `${code} does not apply to the items in your cart.`
+    case "EXHAUSTED":
+      return `${code} has been fully redeemed.`
+    case "FIRST_ORDER_ONLY":
+      return `${code} is only for your first order.`
+    case "EMPTY_CART":
+      return "Add something to your cart first."
+    default:
+      // A reason this build does not know yet: still a sentence, never the raw code.
+      return `${code} cannot be used on this cart.`
+  }
 }
 
-/** Pretends to call the server: 400 ms latency, cancellable. The server will be the authority. */
-export async function validateCoupon(
-  code: string,
-  { subtotal, signal }: { subtotal: number; signal?: AbortSignal }
-): Promise<CouponOutcome> {
-  await abortable(400, signal)
-  const entry = COUPONS[code]
-  if (!entry) return { status: "unknown", code }
-  if (entry.expiresOn && new Date(entry.expiresOn) < new Date())
-    return { status: "expired", code, expiredOn: entry.expiresOn }
-  const { minOrder } = entry.rule
-  if (minOrder !== undefined && subtotal < minOrder)
-    return { status: "min_order_not_met", code, minOrder }
-  return { status: "valid", code, rule: entry.rule, label: entry.label }
+/** Any error from applying a coupon -> one sentence for the box. */
+export function describeCouponError(err: unknown, code: string): string {
+  const e = toApiError(err)
+  if (
+    e.code === "COUPON_INVALID" &&
+    typeof e.details === "object" &&
+    e.details
+  ) {
+    const d = e.details as { reason?: string } & Details
+    return describeCouponReason(d.reason ?? "", code, d)
+  }
+  if (e.status === 401) return "Sign in to use a coupon."
+  if (e.isNetwork || e.isTimeout) return e.message
+  return "We could not apply that coupon. Try again."
 }

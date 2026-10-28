@@ -1,16 +1,22 @@
 import { useWatch } from "react-hook-form"
 
-import { computeTotals, type CartLine } from "@/features/cart"
 import { formatCurrency } from "@/lib/format"
 
-import { EXPRESS_FEE } from "../slots"
+import { useCheckoutCart } from "../cartContext"
 import type { CheckoutInput } from "../schemas"
+import { withDelivery } from "../totals"
 
-/** Sticky summary. Money is paise (`computeTotals` from Stage 1); the express fee follows the form. */
-export function OrderSummary({ lines }: { lines: readonly CartLine[] }) {
+/**
+ * Sticky summary. Money is paise, but every NUMBER is the server's (cart totals incl. coupon and
+ * GST, 11.1): only the delivery choice is applied on top (express replaces the standard fee).
+ */
+export function OrderSummary() {
   const method = useWatch<CheckoutInput, "method">({ name: "method" })
-  const totals = computeTotals(lines)
-  const express = method === "express" ? EXPRESS_FEE : 0
+  const { totals: cartTotals, lines } = useCheckoutCart()
+  const totals = withDelivery(
+    cartTotals,
+    method === "express" ? "express" : "standard"
+  )
   return (
     <>
       <h2 className="mb-2 font-medium">Order summary</h2>
@@ -23,23 +29,22 @@ export function OrderSummary({ lines }: { lines: readonly CartLine[] }) {
             <dd>-{formatCurrency(totals.discount)}</dd>
           </>
         )}
-        <dt>Shipping</dt>
+        <dt>{method === "express" ? "Express delivery" : "Shipping"}</dt>
         <dd>
           {totals.shipping === 0 ? "Free" : formatCurrency(totals.shipping)}
         </dd>
-        {express > 0 && (
-          <>
-            <dt>Express delivery</dt>
-            <dd>{formatCurrency(express)}</dd>
-          </>
-        )}
         <dt>Tax (GST)</dt>
         <dd>{formatCurrency(totals.tax)}</dd>
         <dt className="border-t pt-1 font-medium">Total</dt>
-        <dd className="border-t pt-1 font-medium">
-          {formatCurrency(totals.total + express)}
+        <dd className="border-t pt-1 font-medium" data-testid="checkout-total">
+          {formatCurrency(totals.total)}
         </dd>
       </dl>
+      {totals.savings > 0 && (
+        <p className="mt-2 text-xs text-green-800">
+          You save {formatCurrency(totals.savings)} on this order
+        </p>
+      )}
       <p className="mt-2 text-xs text-neutral-500">
         {lines.length} {lines.length === 1 ? "line" : "lines"} from your cart.
       </p>

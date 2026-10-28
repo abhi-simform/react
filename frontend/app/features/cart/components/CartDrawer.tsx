@@ -88,15 +88,21 @@ function DrawerBody() {
   }
   return (
     <div className="flex flex-1 flex-col gap-3 overflow-y-auto p-4">
-      <FreeShippingBar subtotal={totals.subtotal} />
+      <FreeShippingBar subtotal={totals.subtotal - totals.discount} />
       <ul>
         {lines.map((line) => (
           <CartLineRow key={line.productId} line={line} actions={cart} />
         ))}
       </ul>
+      {totals.discount > 0 && (
+        <p className="flex justify-between text-sm text-green-800">
+          <span>Coupon discount</span>
+          <span>-{formatCurrency(totals.discount)}</span>
+        </p>
+      )}
       <p className="flex justify-between font-medium">
         <span>Subtotal</span>
-        <span>{formatCurrency(totals.subtotal)}</span>
+        <span>{formatCurrency(totals.subtotal - totals.discount)}</span>
       </p>
       <div className="flex gap-2">
         <Button

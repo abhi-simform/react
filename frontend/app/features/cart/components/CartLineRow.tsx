@@ -52,7 +52,14 @@ export function CartLineRow({
         <Link to={paths.product(line.slug)} className="font-medium underline">
           {line.name}
         </Link>
-        <p>{formatCurrency(line.unitPrice)} each</p>
+        <p>
+          {formatCurrency(line.unitPrice)} each
+          {line.deal && (
+            <span className="ml-1 rounded bg-amber-100 px-1 text-xs text-amber-900">
+              Deal price
+            </span>
+          )}
+        </p>
         {line.priceChanged && (
           <p role="status" className="text-xs text-amber-700">
             Price changed from {formatCurrency(line.previousPrice)} to{" "}

@@ -7,9 +7,12 @@ import { toPaise } from "@/lib/money"
 import { toAsyncState } from "@/lib/queryState"
 
 import {
+  acknowledgeCartPrices,
   addCartItem,
+  applyCoupon as applyCouponRequest,
   clearServerCart,
   removeCartItem,
+  removeCoupon as removeCouponRequest,
   updateCartItem,
 } from "./cart.api"
 import {
@@ -26,8 +29,7 @@ import {
 import { useCartUi } from "./cartUiStore"
 import { cartQueries } from "./queries"
 import { EMPTY_CART, type ServerCart, type ServerCartLine } from "./schemas"
-import { computeTotals } from "./totals"
-import type { CartLine, CartTotals } from "./types"
+import type { CartTotals } from "./types"
 
 const QTY_DEBOUNCE_MS = 400
 
@@ -49,33 +51,37 @@ function toView(line: ServerCartLine): CartLineView {
 /**
  * The cart facade (9.6). Components never know whether the cart belongs to a guest (token
  * header) or a user (JWT): both are the same Query with a different owner, behind this one
- * hook. Totals decision: the SERVER owns line prices and stock (`unitPrice`, `availableQty`),
- * so those are trusted; the totals are DERIVED here with `computeTotals` from those lines,
- * because (1) the server does not own shipping, tax or coupons yet (B4/B5), and (2) a derived
- * total follows the OPTIMISTIC cache (quantity edits show instantly), while a stored server
- * total would lag one request behind. Only the payable quantity (`min(qty, availableQty)`)
- * counts, so an out-of-stock line never inflates the total.
+ * hook. Totals (11.1): since B4 the SERVER owns the whole price (line prices incl. deals,
+ * coupon discount, shipping, GST, total), so `totals` is the server's numbers converted to
+ * paise, not `computeTotals`: a client-side recomputation would round differently and the order
+ * total would not match. Optimistic edits patch the cached totals with the same rules
+ * (`priceTotals`) until the response replaces them.
+ *
+ * `revalidate`: checkout asks for a fresh read on mount (`staleTime: 0`, `refetchOnMount:
+ * "always"`); `revalidated` is true once that read has landed.
  */
-export function useCart() {
+export function useCart({ revalidate = false }: { revalidate?: boolean } = {}) {
   const { owner, ownerId, ready, key } = useCartOwner()
   const queryClient = useQueryClient()
   const query = useQuery({
     ...cartQueries.current(owner, ownerId),
     enabled: ready,
+    ...(revalidate ? { staleTime: 0, refetchOnMount: "always" as const } : {}),
   })
   const cart: ServerCart = query.data ?? EMPTY_CART
 
   const lines = cart.items.map(toView)
   const saved = cart.saved.map(toView)
-  const totalsLines: CartLine[] = lines
-    .map((l) => ({
-      sku: l.productId,
-      qty: Math.min(l.qty, l.availableQty),
-      unitPrice: l.unitPrice,
-      mrp: l.mrp,
-    }))
-    .filter((l) => l.qty > 0)
-  const totals: CartTotals = computeTotals(totalsLines)
+  const t = cart.totals
+  const totals: CartTotals = {
+    subtotal: toPaise(t.subtotal),
+    discount: toPaise(t.discount),
+    shipping: toPaise(t.shipping),
+    tax: toPaise(t.tax),
+    total: toPaise(t.total),
+    // "You save": the MRP markdown (deals included) plus the coupon.
+    savings: toPaise(t.mrpTotal - t.subtotal + t.discount),
+  }
 
   const addMutation = useCartMutation<{ productId: string; qty: number }>({
     mutationFn: (o, v) => addCartItem(o, v.productId, v.qty),
@@ -99,6 +105,15 @@ export function useCart() {
       productId: (v) => v.productId,
     }
   )
+  const couponMutation = useCartMutation<string>({
+    mutationFn: (_o, code) => applyCouponRequest(code),
+  })
+  const removeCouponMutation = useCartMutation<void>({
+    mutationFn: () => removeCouponRequest(),
+  })
+  const acknowledgeMutation = useCartMutation<void>({
+    mutationFn: (o) => acknowledgeCartPrices(o),
+  })
   const clearMutation = useCartMutation<void>({
     mutationFn: (o) => clearServerCart(o),
     optimistic: emptied,
@@ -204,6 +219,9 @@ export function useCart() {
     qtyMutation.isPending ||
     removeMutation.isPending ||
     moveMutation.isPending ||
+    couponMutation.isPending ||
+    removeCouponMutation.isPending ||
+    acknowledgeMutation.isPending ||
     clearMutation.isPending
 
   return {
@@ -214,11 +232,19 @@ export function useCart() {
     /** Lines in the cart (the header badge). */
     count: lines.length,
     hasIssues: cart.hasIssues,
-    /** Lines the user must fix before checkout. */
+    /** Lines the user must fix before checkout (out of stock / not enough left). */
     issueCount: lines.filter((l) => l.outOfStock || l.qtyReduced).length,
-    /** For the coupon box / checkout summary: the lines in the shape `computeTotals` takes. */
-    totalsLines,
+    /** Lines whose price moved since they were added: must be acknowledged. */
+    priceChangeCount: lines.filter((l) => l.priceChanged).length,
+    /** The applied coupon (or the reason it no longer applies); `null` = none. */
+    coupon: cart.coupon,
+    /** True once the read that started at mount (`revalidate`) has landed. */
+    revalidated: query.isFetchedAfterMount,
     isPending,
+    /** Rejects with the ApiError (`COUPON_INVALID` + `details.reason`): the caller words it. */
+    applyCoupon: (code: string) => couponMutation.mutateAsync(code),
+    removeCoupon: () => removeCouponMutation.mutateAsync(),
+    acknowledgePrices: () => acknowledgeMutation.mutateAsync(),
     add: (productId: string, qty = 1) =>
       addMutation.mutateAsync({ productId, qty }),
     setQty,
@@ -281,4 +307,74 @@ export function useAddToCart() {
       return false
     }
   }
+}
+
+// ---- cart issues (11.1) ----------------------------------------------------------------------
+
+export type CartIssues = {
+  outOfStock: { productId: string; name: string }[]
+  qtyReduced: {
+    productId: string
+    name: string
+    qty: number
+    availableQty: number
+  }[]
+  priceChanged: {
+    productId: string
+    name: string
+    from: number
+    to: number
+  }[]
+  /** Anything that must be resolved (or, for prices, acknowledged) before checkout. */
+  blocking: boolean
+}
+
+/** Pure: the issues of a cart, from the flags the API computes on every read. */
+export function deriveIssues(cart: ServerCart): CartIssues {
+  const outOfStock = cart.items
+    .filter((l) => l.outOfStock)
+    .map((l) => ({ productId: l.productId, name: l.name }))
+  const qtyReduced = cart.items
+    .filter((l) => l.qtyReduced)
+    .map((l) => ({
+      productId: l.productId,
+      name: l.name,
+      qty: l.qty,
+      availableQty: l.availableQty,
+    }))
+  const priceChanged = cart.items
+    .filter((l) => l.priceChanged)
+    .map((l) => ({
+      productId: l.productId,
+      name: l.name,
+      from: toPaise(l.previousPrice),
+      to: toPaise(l.unitPrice),
+    }))
+  return {
+    outOfStock,
+    qtyReduced,
+    priceChanged,
+    blocking: outOfStock.length + qtyReduced.length + priceChanged.length > 0,
+  }
+}
+
+/**
+ * The banner's data, derived with `select`: the component re-renders only when the ISSUES change
+ * (Query compares the selected value structurally), not on every quantity click.
+ */
+export function useCartIssues(): CartIssues {
+  const { owner, ownerId, ready } = useCartOwner()
+  const { data } = useQuery({
+    ...cartQueries.current(owner, ownerId),
+    enabled: ready,
+    select: deriveIssues,
+  })
+  return (
+    data ?? {
+      outOfStock: [],
+      qtyReduced: [],
+      priceChanged: [],
+      blocking: false,
+    }
+  )
 }

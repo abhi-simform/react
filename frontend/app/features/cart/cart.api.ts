@@ -1,7 +1,10 @@
 import { api } from "@/lib/api/client"
 
 import { getGuestToken, peekGuestToken } from "./cartToken"
+import { z } from "zod"
+
 import {
+  availableCouponSchema,
   EMPTY_CART,
   mergeResultSchema,
   serverCartSchema,
@@ -82,3 +85,29 @@ export const mergeGuestCart = (guestToken: string): Promise<MergeResult> =>
     schema: mergeResultSchema,
     auth: true,
   })
+
+/** Coupons need a real login (usage limits are per person): always `auth: true`. */
+export const applyCoupon = (code: string): Promise<ServerCart> =>
+  api("/cart/coupon", {
+    method: "POST",
+    body: { code },
+    schema: serverCartSchema,
+    auth: true,
+  })
+
+export const removeCoupon = (): Promise<ServerCart> =>
+  api("/cart/coupon", {
+    method: "DELETE",
+    schema: serverCartSchema,
+    auth: true,
+  })
+
+/** Every live coupon checked against THIS cart (guests too: they just cannot apply). */
+export function getAvailableCoupons(owner: CartOwner, signal?: AbortSignal) {
+  if (owner === "guest" && !peekGuestToken()) return Promise.resolve([])
+  return api("/coupons/available", {
+    schema: z.array(availableCouponSchema),
+    signal,
+    ...options(owner),
+  })
+}

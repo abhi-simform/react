@@ -4,9 +4,9 @@ import { FormProvider, useForm, useFormContext } from "react-hook-form"
 import { Navigate, Outlet, useLocation } from "react-router"
 
 import { useAuth } from "@/features/auth"
-import type { CartLine } from "@/features/cart"
 import { paths } from "@/lib/paths"
 
+import { CheckoutCartProvider, type CheckoutCart } from "../cartContext"
 import { DEFAULT_VALUES, loadDraft, saveDraft } from "../draft"
 import {
   checkoutSchema,
@@ -29,7 +29,7 @@ import { OrderSummary } from "./OrderSummary"
  * values (RHF's default `shouldUnregister: false`), which is why Back shows what you typed.
  * The draft is restored from sessionStorage once, and saved on every change.
  */
-export function CheckoutShell({ lines }: { lines: readonly CartLine[] }) {
+export function CheckoutShell({ cart }: { cart: CheckoutCart }) {
   const { user } = useAuth()
   const userId = user?.id ?? "anonymous" // RequireAuth guarantees a user; this keeps types honest
   const [draft] = useState(() => loadDraft(userId))
@@ -51,25 +51,27 @@ export function CheckoutShell({ lines }: { lines: readonly CartLine[] }) {
   )
 
   return (
-    <FormProvider {...form}>
-      <StepperProvider>
-        <StepperSync />
-        <div className="mx-auto grid max-w-5xl gap-6 p-4 md:grid-cols-[1fr_18rem]">
-          <div>
-            <CheckoutStepper />
-            <StepGuard>
-              <Outlet />
-            </StepGuard>
+    <CheckoutCartProvider value={cart}>
+      <FormProvider {...form}>
+        <StepperProvider>
+          <StepperSync />
+          <div className="mx-auto grid max-w-5xl gap-6 p-4 md:grid-cols-[1fr_18rem]">
+            <div>
+              <CheckoutStepper />
+              <StepGuard>
+                <Outlet />
+              </StepGuard>
+            </div>
+            <aside
+              aria-label="Order summary"
+              className="h-fit rounded border p-3 md:sticky md:top-4"
+            >
+              <OrderSummary />
+            </aside>
           </div>
-          <aside
-            aria-label="Order summary"
-            className="h-fit rounded border p-3 md:sticky md:top-4"
-          >
-            <OrderSummary lines={lines} />
-          </aside>
-        </div>
-      </StepperProvider>
-    </FormProvider>
+        </StepperProvider>
+      </FormProvider>
+    </CheckoutCartProvider>
   )
 }
 

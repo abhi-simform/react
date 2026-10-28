@@ -1,3 +1,4 @@
+import { useIsMutating } from "@tanstack/react-query"
 import { ShoppingCart } from "lucide-react"
 import { Link } from "react-router"
 
@@ -6,9 +7,11 @@ import { EmptyState } from "@/components/common/EmptyState"
 import { ListSkeleton } from "@/components/common/Skeletons"
 import { Button } from "@/components/ui/button"
 import { formatCurrency } from "@/lib/format"
+import { cartKeys } from "@/lib/queryKeys"
 import { paths } from "@/lib/paths"
 
 import { useCart } from "../useCart"
+import { CartIssues } from "./CartIssues"
 import { CartLineRow } from "./CartLineRow"
 import { CouponBox } from "./CouponBox"
 import { FreeShippingBar } from "./FreeShippingBar"
@@ -17,6 +20,10 @@ import { FreeShippingBar } from "./FreeShippingBar"
 export function CartPage() {
   const cart = useCart()
   const { totals, lines, saved } = cart
+  // A cart request is in flight (quantity edit, move, coupon...): do not let the shopper leave
+  // for checkout with numbers that are about to change.
+  const busy = useIsMutating({ mutationKey: cartKeys.all }) > 0
+  const blocked = cart.issueCount > 0 || cart.priceChangeCount > 0
 
   return (
     <div className="mx-auto max-w-5xl p-4">
@@ -50,17 +57,8 @@ export function CartPage() {
                     Clear cart
                   </Button>
                 </div>
-                {cart.issueCount > 0 && (
-                  <p
-                    role="alert"
-                    className="mb-2 rounded bg-red-50 p-2 text-sm text-red-800"
-                  >
-                    {cart.issueCount}{" "}
-                    {cart.issueCount === 1 ? "item needs" : "items need"} your
-                    attention before checkout.
-                  </p>
-                )}
-                <FreeShippingBar subtotal={totals.subtotal} />
+                <CartIssues />
+                <FreeShippingBar subtotal={totals.subtotal - totals.discount} />
                 {lines.length === 0 ? (
                   <p className="py-3 text-sm">
                     Nothing in your cart right now.
@@ -98,10 +96,10 @@ export function CartPage() {
                 <dl className="grid grid-cols-[1fr_auto] gap-x-4 gap-y-1 text-sm">
                   <dt>Subtotal</dt>
                   <dd>{formatCurrency(totals.subtotal)}</dd>
-                  {totals.savings > 0 && (
+                  {totals.discount > 0 && (
                     <>
-                      <dt>You save</dt>
-                      <dd>{formatCurrency(totals.savings)}</dd>
+                      <dt>Coupon discount</dt>
+                      <dd>-{formatCurrency(totals.discount)}</dd>
                     </>
                   )}
                   <dt>Shipping</dt>
@@ -117,14 +115,27 @@ export function CartPage() {
                     {formatCurrency(totals.total)}
                   </dd>
                 </dl>
-                <CouponBox lines={cart.totalsLines} />
+                {totals.savings > 0 && (
+                  <p
+                    className="text-sm text-green-800"
+                    data-testid="cart-savings"
+                  >
+                    You save {formatCurrency(totals.savings)} on this order
+                  </p>
+                )}
+                <CouponBox />
                 <Button
                   nativeButton={false}
-                  disabled={lines.length === 0 || cart.issueCount > 0}
+                  disabled={lines.length === 0 || blocked || busy}
                   render={<Link to={paths.checkout()} />}
                 >
                   Proceed to checkout
                 </Button>
+                {blocked && (
+                  <p className="text-xs text-red-700">
+                    Resolve the items above to continue.
+                  </p>
+                )}
               </aside>
             </div>
           )

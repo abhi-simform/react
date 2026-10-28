@@ -2,10 +2,13 @@ import { useEffect } from "react"
 import { useFormContext, useWatch } from "react-hook-form"
 
 import { PincodeStatus, usePincodeCheck } from "@/features/delivery"
+import { formatRupees } from "@/lib/format"
 
+import { useCheckoutCart } from "../cartContext"
 import type { CheckoutInput } from "../schemas"
+import { COD_MAX_TOTAL, withDelivery } from "../totals"
 
-/** Step 3: Razorpay or cash on delivery (no real payment until Stage 11). COD depends on the pincode. */
+/** Step 3: Razorpay or cash on delivery (online payment arrives in 11.4). COD depends on the pincode. */
 export function PaymentStep() {
   const {
     register,
@@ -15,8 +18,17 @@ export function PaymentStep() {
   } = useFormContext<CheckoutInput>()
   const pincode = useWatch<CheckoutInput, "pincode">({ name: "pincode" })
   const check = usePincodeCheck(pincode ?? "")
-  const codBlocked =
+  const method = useWatch<CheckoutInput, "method">({ name: "method" })
+  const { totals } = useCheckoutCart()
+  const total = withDelivery(
+    totals,
+    method === "express" ? "express" : "standard"
+  ).total
+  const pincodeBlocksCod =
     check.status === "serviceable" && !check.result.codAvailable
+  // The server refuses COD above a limit (422 COD_NOT_AVAILABLE): say so before it has to.
+  const tooBigForCod = total > COD_MAX_TOTAL
+  const codBlocked = pincodeBlocksCod || tooBigForCod
 
   // A draft may say "cod" for an address whose pincode does not allow it: drop the choice.
   useEffect(() => {
@@ -44,7 +56,10 @@ export function PaymentStep() {
             {...register("payment")}
           />
           Cash on delivery
-          {codBlocked && " (not available for your pincode)"}
+          {pincodeBlocksCod && " (not available for your pincode)"}
+          {!pincodeBlocksCod &&
+            tooBigForCod &&
+            ` (only for orders up to ${formatRupees(COD_MAX_TOTAL / 100)})`}
         </label>
         {errors.payment && (
           <p id="payment-error" role="alert" className="text-xs text-red-700">
