@@ -29,7 +29,16 @@ export function ListingResults({
   onGoToPage,
   onClearAll,
 }: ListingResultsProps) {
+  // `isRefreshing` + data = the previous page/filter is still shown while the next loads.
+  const updating = state.status === "success" && state.isRefreshing
   return (
+    <div className={updating ? "opacity-60 transition-opacity" : undefined}>
+      {updating && (
+        <div
+          aria-hidden
+          className="mb-2 h-0.5 w-full animate-pulse rounded bg-blue-500"
+        />
+      )}
     <AsyncView
       state={state}
       loading={<ProductGridSkeleton count={PAGE_SIZE} view={filters.view} />}
@@ -70,5 +79,6 @@ export function ListingResults({
         />
       )}
     </AsyncView>
+    </div>
   )
 }

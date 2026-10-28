@@ -36,7 +36,10 @@ export function ProductListingPage({
   // Two ways to browse the same result set; only the active one makes requests.
   const moreMode = filters.mode === "more"
   const query = toProductQuery(filters, categorySlug)
-  const state = useProducts(query, !moreMode)
+  const state = useProducts(query, {
+    enabled: !moreMode,
+    keepPrevious: true,
+  })
   const infinite = useInfiniteProducts(query, moreMode)
   const category = useCategory(categorySlug)
   const isDesktop = useMediaQuery("(min-width: 1024px)")

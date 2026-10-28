@@ -1,5 +1,6 @@
 import { queryOptions } from "@tanstack/react-query"
 
+import { STALE } from "@/lib/query-client"
 import { addressKeys, profileKeys } from "@/lib/queryKeys"
 
 import { getAddresses } from "./addresses.api"
@@ -10,6 +11,7 @@ export const addressQueries = {
     queryOptions({
       queryKey: addressKeys.list(),
       queryFn: ({ signal }) => getAddresses(signal),
+      staleTime: STALE.personal,
     }),
 }
 
@@ -18,5 +20,6 @@ export const profileQueries = {
     queryOptions({
       queryKey: profileKeys.me(),
       queryFn: ({ signal }) => getProfile(signal),
+      staleTime: STALE.personal,
     }),
 }

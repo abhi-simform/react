@@ -1,3 +1,4 @@
+import { STALE } from "@/lib/query-client"
 import { useState } from "react"
 
 import { EmptyState } from "@/components/common/EmptyState"
@@ -29,7 +30,7 @@ export function FlashSaleStrip({ endsAt }: { endsAt?: number }) {
   const [defaultEnd] = useState(() => Date.now() + DEFAULT_DURATION_MS)
   const serverOffsetMs = useServerTimeOffset()
   const countdown = useCountdown(endsAt ?? defaultEnd, { serverOffsetMs })
-  const state = useProducts(DEAL_QUERY)
+  const state = useProducts(DEAL_QUERY, { staleTime: STALE.deals })
 
   return (
     <section aria-labelledby="flash-sale-title" className="rounded border p-3">

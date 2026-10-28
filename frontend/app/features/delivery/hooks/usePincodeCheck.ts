@@ -1,7 +1,11 @@
 import { useDebounce } from "@/hooks/useDebounce"
-import { useFetch } from "@/hooks/useFetch"
+import { queryOptions, useQuery } from "@tanstack/react-query"
+
 import type { ApiError } from "@/lib/api/errors"
 import { PINCODE_RE } from "@/lib/fields"
+import { STALE } from "@/lib/query-client"
+import { pincodeKeys } from "@/lib/queryKeys"
+import { toAsyncState } from "@/lib/queryState"
 
 import { checkPincode } from "../api"
 import type { Serviceable } from "../schemas"
@@ -18,11 +22,20 @@ export type PincodeCheckState =
 
 const DEBOUNCE_MS = 400
 
+export const pincodeQueries = {
+  check: (pincode: string) =>
+    queryOptions({
+      queryKey: pincodeKeys.check(pincode),
+      queryFn: ({ signal }) => checkPincode(pincode, signal),
+      staleTime: STALE.static, // delivery zones rarely change
+    }),
+}
+
 /**
  * Async validation of a pincode (7.6), in layers:
  * 1. FORMAT is checked locally on every keystroke: instant, no request (`PINCODE_RE`).
  * 2. Only a valid-looking value is debounced (400 ms of silence) and sent.
- * 3. `useFetch` aborts the previous request when the value changes and ignores a settled
+ * 3. Query aborts the previous request when the value changes and ignores a settled
  *    result that belongs to another key, so a slow answer for an OLD pincode can never
  *    overwrite the newer one (the `result.pincode === value` check below is a second belt).
  * The answer is ADVICE for the UI. The server decides again when the address is saved.
@@ -31,10 +44,11 @@ export function usePincodeCheck(raw: string): PincodeCheckState {
   const value = raw.trim()
   const formatOk = PINCODE_RE.test(value)
   const settled = useDebounce(value, DEBOUNCE_MS)
-  const request = useFetch(
-    (signal) => checkPincode(settled, signal),
-    [settled],
-    { enabled: PINCODE_RE.test(settled) }
+  const request = toAsyncState(
+    useQuery({
+      ...pincodeQueries.check(settled),
+      enabled: PINCODE_RE.test(settled),
+    })
   )
 
   if (value === "") return { status: "empty" }

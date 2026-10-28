@@ -1,34 +1,21 @@
-import { useEffect, useState } from "react"
+import { queryOptions, useQuery } from "@tanstack/react-query"
 
-import { toApiError } from "@/lib/api/errors"
-import { getHealth, type Health } from "@/lib/api/health"
-import type { AsyncState } from "@/lib/asyncState"
+import { getHealth } from "@/lib/api/health"
+import { healthKeys } from "@/lib/queryKeys"
+import { toAsyncState } from "@/lib/queryState"
+
+const healthQuery = queryOptions({
+  queryKey: healthKeys.all,
+  queryFn: ({ signal }) => getHealth(signal),
+  staleTime: 10_000,
+})
 
 /**
- * 4.1: checks `/health` once on mount. The effect synchronises the component
- * with an external system (the API). In StrictMode (dev) React mounts, runs
- * cleanup and mounts again, so the console shows two start/cleanup pairs.
+ * 4.1 originally checked `/health` in an effect (and logged the StrictMode mount/cleanup pairs);
+ * 9.11 moved it to a query: the effect-based version was the last component-level fetch.
  */
 export function HealthBadge() {
-  const [state, setState] = useState<AsyncState<Health>>({ status: "loading" })
-
-  useEffect(() => {
-    console.log("HealthBadge: effect start")
-    let ignore = false // cleanup flips this: a result that arrives later is dropped
-    getHealth()
-      .then((data) => {
-        if (!ignore) setState({ status: "success", data })
-      })
-      .catch((err: unknown) => {
-        if (ignore) return
-        setState({ status: "error", error: toApiError(err) })
-      })
-    return () => {
-      console.log("HealthBadge: cleanup")
-      ignore = true
-    }
-  }, [])
-
+  const state = toAsyncState(useQuery(healthQuery))
   switch (state.status) {
     case "success":
       return (
