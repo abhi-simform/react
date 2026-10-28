@@ -109,14 +109,23 @@ bad(loginSchema, { email: "a@b.co", password: "" })
 const review = reviewSchema.parse({
   rating: "4",
   text: "  Really good product, works well.  ",
+  photos: [],
 })
 assert.equal(review.rating, 4)
 assert.equal(typeof review.rating, "number")
 assert.equal(review.text, "Really good product, works well.")
-bad(reviewSchema, { rating: "", text: "Really good product, works well." }) // "" coerces to 0
-bad(reviewSchema, { rating: "6", text: "Really good product, works well." })
-bad(reviewSchema, { rating: "3", text: "too short" })
-bad(reviewSchema, { rating: "3", text: "x".repeat(501) })
+bad(reviewSchema, {
+  rating: "",
+  text: "Really good product, works well.",
+  photos: [],
+}) // "" coerces to 0
+bad(reviewSchema, {
+  rating: "6",
+  text: "Really good product, works well.",
+  photos: [],
+})
+bad(reviewSchema, { rating: "3", text: "too short", photos: [] })
+bad(reviewSchema, { rating: "3", text: "x".repeat(501), photos: [] })
 
 // coupon: trimmed and upper-cased
 assert.equal(couponSchema.parse({ code: "  save10 " }).code, "SAVE10")
@@ -140,5 +149,62 @@ assert.equal(address.line2, undefined)
 assert.equal(address.landmark, undefined)
 bad(addressFormSchema, { ...address, state: "Atlantis" })
 bad(addressFormSchema, { ...address, state: "" })
+
+// images (7.8): real File objects, type and size checked, at most 5
+const img = (name: string, type: string, bytes = 10) =>
+  new File([new Uint8Array(bytes)], name, { type })
+const goodText = "Really good product, works well."
+ok(reviewSchema, {
+  rating: "5",
+  text: goodText,
+  photos: [
+    img("a.png", "image/png"),
+    img("b.webp", "image/webp"),
+    img("c.jpg", "image/jpeg"),
+  ],
+})
+bad(reviewSchema, {
+  rating: "5",
+  text: goodText,
+  photos: [img("a.gif", "image/gif")],
+}) // type
+bad(reviewSchema, {
+  rating: "5",
+  text: goodText,
+  photos: [img("big.jpg", "image/jpeg", 2 * 1024 * 1024 + 1)],
+}) // size
+ok(reviewSchema, {
+  rating: "5",
+  text: goodText,
+  photos: [img("edge.jpg", "image/jpeg", 2 * 1024 * 1024)],
+}) // exactly 2 MB is fine
+bad(reviewSchema, {
+  rating: "5",
+  text: goodText,
+  photos: Array.from({ length: 6 }, (_, i) => img(`p${i}.png`, "image/png")),
+}) // 6 > 5
+bad(reviewSchema, {
+  rating: "5",
+  text: goodText,
+  photos: [{ name: "a.png", size: 1, type: "image/png" }],
+}) // a plain object (JSON round-trip) is not a File
+const typeIssue = reviewSchema.safeParse({
+  rating: "5",
+  text: goodText,
+  photos: [img("a.gif", "image/gif")],
+})
+assert.equal(
+  !typeIssue.success && typeIssue.error.issues[0]?.message,
+  "a.gif: only JPEG, PNG or WebP images are accepted"
+)
+const sizeIssue = reviewSchema.safeParse({
+  rating: "5",
+  text: goodText,
+  photos: [img("big.jpg", "image/jpeg", 3 * 1024 * 1024)],
+})
+assert.equal(
+  !sizeIssue.success && sizeIssue.error.issues[0]?.message,
+  "big.jpg is 3.0 MB; the limit is 2.0 MB"
+)
 
 console.log("17-form-schemas: ok")

@@ -1,5 +1,7 @@
 import { z } from "zod"
 
+import { imageFilesSchema } from "@/lib/imageFiles"
+
 /**
  * A number typed into a text input. The INPUT is a string ("499"), the OUTPUT a number.
  * `min(1)` first so "" says "Required" instead of coercing to 0.
@@ -53,6 +55,7 @@ export const productFormSchema = z.object({
     .trim()
     .min(20, { error: "Describe the product in at least 20 characters" })
     .max(2000),
+  images: imageFilesSchema.min(1, { error: "Add at least one image" }),
   variants: z
     .array(variantSchema)
     .min(1, { error: "Add at least one variant" })

@@ -18,6 +18,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { useCategoryTree, type CategoryNode } from "@/features/catalog"
+import { ImageDropzone } from "@/features/uploads"
 
 import {
   productFormSchema,
@@ -39,6 +40,7 @@ const DEFAULTS: DefaultValues<ProductFormInput> = {
   brand: "",
   category: "",
   description: "",
+  images: [],
   variants: [EMPTY_VARIANT],
   specs: [],
 }
@@ -153,6 +155,19 @@ export function ProductForm() {
           />
         )}
       </FormField>
+
+      <Controller
+        control={control}
+        name="images"
+        render={({ field, fieldState }) => (
+          <ImageDropzone
+            label="Images"
+            value={field.value}
+            onChange={field.onChange}
+            error={fieldState.error?.message ?? errors.images?.root?.message}
+          />
+        )}
+      />
 
       <fieldset className="flex flex-col gap-2 rounded border p-2">
         <legend className="px-1 text-sm font-medium">Variants</legend>
@@ -329,7 +344,19 @@ export function ProductForm() {
             data-testid="payload"
             className="overflow-auto rounded bg-neutral-100 p-2 text-xs"
           >
-            {JSON.stringify(payload, null, 2)}
+            {/* A File serialises to {}: show what matters about each one. */}
+            {JSON.stringify(
+              {
+                ...payload,
+                images: payload.images.map((f) => ({
+                  name: f.name,
+                  type: f.type,
+                  size: f.size,
+                })),
+              },
+              null,
+              2
+            )}
           </pre>
         </section>
       )}

@@ -1,12 +1,12 @@
 import { DevThrowButton } from "@/components/common/DevThrowButton"
-import { PlaceholderPage } from "@/components/common/PlaceholderPage"
+import { ProfileForm } from "@/features/account"
 import { pageTitle } from "@/lib/pageTitle"
 import type { RouteHandle } from "@/types/route-handle"
 
 export default function AccountProfileRoute() {
   return (
     <>
-      <PlaceholderPage title="Profile" builtIn="7" />
+      <ProfileForm />
       <div className="p-4">
         <DevThrowButton />
       </div>

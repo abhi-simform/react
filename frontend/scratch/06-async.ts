@@ -43,10 +43,9 @@ await assert.rejects(api("/nope"), (e: unknown) => !isAbortError(e))
 // a fast request inside a generous timeout succeeds
 assert.equal(
   (
-    (await withTimeout(
-      (s) => api("/health", { signal: s }),
-      3000
-    )) as { status: string }
+    (await withTimeout((s) => api("/health", { signal: s }), 3000)) as {
+      status: string
+    }
   ).status,
   "ok"
 )

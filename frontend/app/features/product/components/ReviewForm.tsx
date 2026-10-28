@@ -1,9 +1,10 @@
 import { useId } from "react"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { useForm, useWatch, type Control } from "react-hook-form"
+import { Controller, useForm, useWatch, type Control } from "react-hook-form"
 
 import { FormField } from "@/components/form/FormField"
 import { Button } from "@/components/ui/button"
+import { ImageDropzone } from "@/features/uploads"
 
 import { reviewSchema, type ReviewInput, type ReviewOutput } from "../schemas"
 
@@ -35,7 +36,7 @@ export function ReviewForm({
     formState: { errors, isSubmitting },
   } = useForm<ReviewInput, unknown, ReviewOutput>({
     resolver: zodResolver(reviewSchema),
-    defaultValues: { rating: "", text: "" },
+    defaultValues: { rating: "", text: "", photos: [] },
     mode: "onSubmit", // first validation on submit, then on every change (reValidateMode)
   })
 
@@ -106,6 +107,19 @@ export function ReviewForm({
           />
         )}
       </FormField>
+      <Controller
+        control={control}
+        name="photos"
+        render={({ field, fieldState }) => (
+          // A drop zone is not a native input: Controller carries the File[] in and out.
+          <ImageDropzone
+            label="Photos (optional)"
+            value={field.value}
+            onChange={field.onChange}
+            error={fieldState.error?.message}
+          />
+        )}
+      />
       <Button type="submit" className="self-start" disabled={isSubmitting}>
         {isSubmitting ? "Submitting..." : "Submit review"}
       </Button>

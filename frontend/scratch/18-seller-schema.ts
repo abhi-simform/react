@@ -14,6 +14,7 @@ const variant = (over: Record<string, string> = {}) => ({
   ...over,
 })
 const base = {
+  images: [new File(["x"], "a.png", { type: "image/png" })],
   title: "Cotton T-shirt",
   brand: "Acme",
   category: "men",

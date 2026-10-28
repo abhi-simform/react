@@ -29,6 +29,9 @@ export function configureApi(next: ApiConfig): void {
   config = { ...config, ...next }
 }
 
+/** For the one other transport (`upload.ts`, XHR): same token and 401 handling as `api()`. */
+export const getApiConfig = (): Readonly<ApiConfig> => config
+
 // ---- options -----------------------------------------------------------------
 
 type Method = "GET" | "POST" | "PUT" | "PATCH" | "DELETE"

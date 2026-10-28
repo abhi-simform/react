@@ -64,3 +64,20 @@ Observations: the 429 arrived after about 17 attempts in my run because the earl
 ## Conditional requests (stretch)
 
 The server sends a weak `ETag` on every JSON response but no `Cache-Control`. `GET /products?limit=1` then the same with `If-None-Match: <etag>` gives `304 Not Modified` with an empty body. What it buys: bandwidth (no body), not server work (Express computes the full response, hits MongoDB, then hashes it to compare). Browsers revalidate like this automatically only if the response was cacheable; with no `Cache-Control`, they apply heuristics, so do not rely on it. TanStack Query (Stage 9) is the real answer for the client side.
+
+## Stage 7 additions (verified with curl against the running backend)
+
+New endpoint, built for 7.8 as the upload slice of B7 (`backend B7 (uploads):` commits): `POST /uploads/images`, Bearer, `multipart/form-data`, ONE file in the field `file`, JPEG/PNG/WebP decided from the first bytes, max 2 MB (`UPLOAD_MAX_BYTES`). Files are served from `GET /uploads/<name>` (outside `/api/v1`).
+
+| Case | Request | Status | Body |
+| --- | --- | --- | --- |
+| Happy path | `-F file=@avatar.png` | 201 | `{"key":"<userId>-<uuid>.png","url":"http://localhost:4000/uploads/<userId>-<uuid>.png","contentType":"image/png","bytes":7875}`; `GET <url>` is `200 image/png` |
+| No token | same, no header | 401 | `UNAUTHORIZED` |
+| HTML renamed to `.png` with `type=image/png` | `-F "file=@evil.png;type=image/png"` | 415 | `UNSUPPORTED_FILE_TYPE` (the declared type is ignored, the bytes decide) |
+| 3 MB PNG | `-F file=@big.png` | 413 | `FILE_TOO_LARGE`, "Image is too large (max 2 MB)" |
+| No file / wrong field name (`photo`) | `-F note=hi` | 422 | `details: [{in:"body", path:"file", message:'Send exactly one image in the "file" field'}]` |
+| JSON body instead of multipart | `-H content-type:application/json -d '{}'` | 422 | `details[0].path === "file"` |
+
+Browser notes: do NOT set `Content-Type` on a `FormData` request (the browser adds the multipart boundary); `credentials: "include"` / `withCredentials` is needed only for the refresh cookie, the upload itself uses the Bearer token. Images load cross-origin from `:4000` on `:5173` because helmet sends `Cross-Origin-Resource-Policy: cross-origin`. `PATCH /users/me { avatarUrl }` accepts any absolute URL, so the avatar is a two-step flow: upload, then PATCH with the returned `url`.
+
+Other contract facts the forms rely on (all re-checked this stage): `POST /auth/register` with an existing email is `409 EMAIL_TAKEN`; wrong password and unknown email are both `401 INVALID_CREDENTIALS` with the same message (no account enumeration); `POST /addresses` with a pincode that `GET /pincodes/:pincode` calls unserviceable is `422` with `details[0].path === "pincode"` ("We do not deliver to this pincode yet"); `GET /pincodes/:pincode` answers `{serviceable:false, pincode}` or the full object (two shapes, a discriminated union on `serviceable`).
