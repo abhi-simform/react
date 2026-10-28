@@ -13,6 +13,7 @@ import { PaymentPanel } from "@/features/payments"
 
 import { orderQueries, restartPendingPolling } from "../queries"
 import { OrderStatusBadge } from "./OrderStatusBadge"
+import { PayAnotherWay } from "./PayAnotherWay"
 
 /**
  * `/checkout/success/:orderId` (11.3). Loads the order by id, so it works after a refresh (the
@@ -53,6 +54,7 @@ export function OrderSuccessPage({ orderId }: { orderId: string }) {
         <PaymentPanel
           order={o}
           onCheckNow={() => restartPendingPolling(o._id)}
+          extra={<PayAnotherWay order={o} />}
         />
       ) : o.paymentMethod === "cod" ? (
         <p className="text-sm">

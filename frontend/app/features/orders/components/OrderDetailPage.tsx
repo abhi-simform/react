@@ -1,21 +1,33 @@
-import { useQuery } from "@tanstack/react-query"
+import { useInfiniteQuery, useQuery } from "@tanstack/react-query"
 import { Link } from "react-router"
 
 import { ErrorState } from "@/components/common/ErrorState"
 import { DetailSkeleton } from "@/components/common/Skeletons"
+import { PaymentPanel, paymentQueries } from "@/features/payments"
 import { toApiError } from "@/lib/api/errors"
 import { formatDate, formatRupees } from "@/lib/format"
 import { NotFoundError } from "@/lib/notFound"
 import { paths } from "@/lib/paths"
+import type { Order } from "@/types/domain"
 
-import { orderQueries } from "../queries"
+import {
+  ACTIVE_POLL_MS,
+  orderQueries,
+  PENDING_POLL_MS,
+  restartPendingPolling,
+} from "../queries"
 import { isTerminal, statusLabel } from "../status"
+import { OrderActions } from "./OrderActions"
 import { OrderStatusBadge } from "./OrderStatusBadge"
+import { OrderTimeline } from "./OrderTimeline"
+import { PayAnotherWay } from "./PayAnotherWay"
+import { ReturnStatus } from "./ReturnStatus"
 
 /**
- * `/orders/:orderId` (read-only, 9.10). The query polls every 5 s while the order is not in a
- * final status and stops on its own (`orderQueries.detail`). The "live" note is derived from the
- * same data and `isFetching`, never stored.
+ * `/orders/:orderId` (9.10, 11.5): tracking timeline from `statusHistory`, status-driven actions
+ * (cancel, return, invoice, buy again), payment and refund state, price breakdown. The query polls
+ * (3 s while waiting for a payment, 10 s while active) and stops at a terminal status; 11.9 swaps
+ * the polling for live events.
  */
 export function OrderDetailPage({ orderId }: { orderId: string }) {
   const q = useQuery(orderQueries.detail(orderId))
@@ -36,6 +48,8 @@ export function OrderDetailPage({ orderId }: { orderId: string }) {
   }
   const o = q.data
   const live = !isTerminal(o.status)
+  const seconds =
+    (o.status === "pending_payment" ? PENDING_POLL_MS : ACTIVE_POLL_MS) / 1000
   return (
     <div className="mx-auto max-w-3xl p-4">
       <p className="mb-2 text-sm">
@@ -54,31 +68,51 @@ export function OrderDetailPage({ orderId }: { orderId: string }) {
         data-testid="order-live"
       >
         {live
-          ? `Live: checking for updates every 5 seconds${q.isFetching ? " (updating...)" : ""}`
+          ? `Live: checking for updates every ${seconds} seconds${q.isFetching ? " (updating...)" : ""}`
           : `Final status: ${statusLabel(o.status)}. No more updates expected.`}
       </p>
-      <p className="mb-3 text-sm">
-        {o.paymentMethod === "cod"
-          ? `Cash on delivery: pay ${formatRupees(o.pricing.total)} when it arrives.`
-          : o.status === "pending_payment"
-            ? "Waiting for your payment."
-            : "Paid online."}{" "}
-        {o.delivery?.estimatedFrom && o.delivery.estimatedTo
-          ? `Estimated delivery ${formatDate(o.delivery.estimatedFrom)} to ${formatDate(o.delivery.estimatedTo)}.`
-          : ""}
-      </p>
-      <section aria-labelledby="history" className="mb-4">
-        <h2 id="history" className="font-medium">
-          Status history
+
+      {o.status === "pending_payment" && o.paymentMethod === "razorpay" && (
+        <div className="mb-4">
+          <PaymentPanel
+            order={o}
+            onCheckNow={() => restartPendingPolling(o._id)}
+            extra={<PayAnotherWay order={o} />}
+          />
+        </div>
+      )}
+
+      <OrderActions order={o} />
+
+      <section aria-labelledby="tracking" className="mb-4">
+        <h2 id="tracking" className="mb-1 font-medium">
+          Tracking
         </h2>
-        <ol className="text-sm">
-          {o.statusHistory.map((h) => (
-            <li key={h.status + h.at}>
-              {statusLabel(h.status)}, {formatDate(h.at)}
-            </li>
-          ))}
-        </ol>
+        <OrderTimeline order={o} eta={o.delivery?.estimatedTo} />
+        {o.delivery?.estimatedFrom && o.delivery.estimatedTo && live && (
+          <p className="mt-1 text-xs text-neutral-600">
+            Estimated delivery {formatDate(o.delivery.estimatedFrom)} to{" "}
+            {formatDate(o.delivery.estimatedTo)}.
+          </p>
+        )}
       </section>
+
+      <ReturnStatus order={o} />
+
+      <PaymentSummary order={o} />
+
+      <section aria-labelledby="address" className="mb-4 text-sm">
+        <h2 id="address" className="font-medium">
+          Delivery address
+        </h2>
+        <p>
+          {o.addressSnapshot.fullName}, {o.addressSnapshot.line1}
+          {o.addressSnapshot.line2 ? `, ${o.addressSnapshot.line2}` : ""},{" "}
+          {o.addressSnapshot.city}, {o.addressSnapshot.state}{" "}
+          {o.addressSnapshot.pincode}. Phone {o.addressSnapshot.phone}
+        </p>
+      </section>
+
       <section aria-labelledby="items" className="mb-4">
         <h2 id="items" className="font-medium">
           Items
@@ -113,5 +147,55 @@ export function OrderDetailPage({ orderId }: { orderId: string }) {
         <dd className="font-medium">{formatRupees(o.pricing.total)}</dd>
       </dl>
     </div>
+  )
+}
+
+/** Payment method and, for online orders, the money trail (paid, refund in progress, refunded). */
+function PaymentSummary({ order: o }: { order: Order }) {
+  const refunding = [
+    "refund_pending",
+    "partially_refunded",
+    "refunded",
+  ].includes(o.paymentStatus ?? "")
+  const payments = useInfiniteQuery({
+    ...paymentQueries.infinite({ orderId: o._id }),
+    enabled: o.paymentMethod === "razorpay" && refunding,
+  })
+  const payment = payments.data?.pages[0]?.items[0]
+  return (
+    <section aria-labelledby="payment" className="mb-4 text-sm">
+      <h2 id="payment" className="font-medium">
+        Payment
+      </h2>
+      <p data-testid="payment-summary">
+        {o.paymentMethod === "cod"
+          ? o.paymentStatus === "paid"
+            ? "Cash on delivery: paid."
+            : `Cash on delivery: pay ${formatRupees(o.pricing.total)} when it arrives.`
+          : o.status === "pending_payment"
+            ? "Online payment: waiting for your payment."
+            : o.paymentStatus === "refund_pending"
+              ? "Paid online. Refund in progress."
+              : o.paymentStatus === "refunded"
+                ? "Paid online. Refunded to your original payment method."
+                : o.paymentStatus === "partially_refunded"
+                  ? "Paid online. Partly refunded."
+                  : "Paid online."}
+      </p>
+      {payment && payment.refunds.length > 0 && (
+        <ul aria-label="Refunds" className="text-xs text-neutral-700">
+          {payment.refunds.map((r) => (
+            <li key={r.createdAt}>
+              {formatRupees(r.amount)}:{" "}
+              {r.status === "processed"
+                ? `refunded ${r.processedAt ? formatDate(r.processedAt) : ""}`
+                : r.status === "pending"
+                  ? "refund in progress (usually 5 to 7 working days for your bank)"
+                  : "refund failed, contact support"}
+            </li>
+          ))}
+        </ul>
+      )}
+    </section>
   )
 }

@@ -20,3 +20,4 @@ export {
 } from "./useCart"
 export type { CartIssues as CartIssuesData, CartLineView } from "./useCart"
 export { useCartUi } from "./cartUiStore"
+export { addCartItem } from "./cart.api"

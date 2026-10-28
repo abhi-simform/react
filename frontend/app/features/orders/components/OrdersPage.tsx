@@ -17,11 +17,14 @@ import { statusLabel } from "../status"
 import { OrderStatusBadge } from "./OrderStatusBadge"
 
 const CHIPS: readonly OrderStatus[] = [
+  "pending_payment",
   "placed",
   "packed",
   "shipped",
   "delivered",
   "cancelled",
+  "return_requested",
+  "refunded",
 ]
 const asStatus = (v: string | null): OrderStatus | undefined =>
   CHIPS.find((c) => c === v)

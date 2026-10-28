@@ -1,4 +1,4 @@
-import { api, apiPaginated } from "@/lib/api/client"
+import { api, apiBlob, apiPaginated } from "@/lib/api/client"
 import type { Paginated } from "@/lib/api/envelope"
 import type { Order, OrderStatus } from "@/types/domain"
 
@@ -52,3 +52,35 @@ export const placeOrder = (
     body: input,
     schema: orderSchema,
   })
+
+/** Cancel (only `pending_payment` / `placed`): the server rejects anything else with 409 INVALID_TRANSITION. */
+export const cancelOrder = (id: string, reason?: string): Promise<Order> =>
+  api(`/orders/${encodeURIComponent(id)}/cancel`, {
+    method: "POST",
+    auth: true,
+    body: reason ? { reason } : {},
+    schema: orderSchema,
+  })
+
+export type ReturnPayload = {
+  reason: string
+  note?: string
+  items: { productId: string; qty: number }[]
+  photos: string[]
+  pickupAddressId?: string
+}
+
+export const requestReturn = (
+  id: string,
+  payload: ReturnPayload
+): Promise<Order> =>
+  api(`/orders/${encodeURIComponent(id)}/return`, {
+    method: "POST",
+    auth: true,
+    body: payload,
+    schema: orderSchema,
+  })
+
+/** The invoice PDF as a Blob (needs the Authorization header, so not a plain link). */
+export const getInvoice = (id: string, signal?: AbortSignal) =>
+  apiBlob(`/orders/${encodeURIComponent(id)}/invoice`, { signal })

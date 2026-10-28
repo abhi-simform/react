@@ -145,7 +145,26 @@ export type Order = {
     estimatedTo?: ISODateString
   }
   cancelReason?: string
+  deliveredAt?: ISODateString
+  /** Set while a delivered order can still be returned (7 day window); absent otherwise. */
+  returnableUntil?: ISODateString
+  returnRequest?: ReturnRequest
   createdAt: ISODateString
+}
+
+export type ReturnStatus = "requested" | "approved" | "rejected" | "refunded"
+export type ReturnRequest = {
+  status: ReturnStatus
+  reason: string
+  note?: string
+  requestedAt: ISODateString
+  resolvedAt?: ISODateString
+  /** Whole rupees due back for the returned items. */
+  refundAmount?: Money
+  items: { productId: Id; title: string; qty: number; unitPrice: Money }[]
+  photos: string[]
+  pickupAddress?: Omit<Address, "_id" | "userId" | "isDefault">
+  history: { status: ReturnStatus; at: ISODateString; note?: string }[]
 }
 
 /** planned (B6) */

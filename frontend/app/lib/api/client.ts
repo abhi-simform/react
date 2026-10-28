@@ -4,6 +4,7 @@ import { env } from "@/lib/env"
 
 import { ApiError, ContractError } from "./errors"
 import { isApiSuccess, type PageMeta, type Paginated } from "./envelope"
+import { getBlob } from "./getBlob"
 import { getJson } from "./getJson"
 import {
   apiEnvelopeSchema,
@@ -218,3 +219,31 @@ export const apiPaginated = <T>(
   options: ApiOptions<T> = {}
 ): Promise<Paginated<T>> =>
   apiPaginatedWithMeta(path, { ...options, metaSchema: pageMetaSchema })
+
+/**
+ * Authenticated FILE download (invoice PDF): a plain `<a href>` cannot send the `Authorization`
+ * header, so the file is fetched as a Blob. Same token + single 401 refresh/retry as `api()`.
+ */
+export async function apiBlob(
+  path: string,
+  { signal }: { signal?: AbortSignal } = {}
+): Promise<{ blob: Blob; filename: string | null }> {
+  let usedToken: string | null = null
+  const attempt = () => {
+    usedToken = config.getAccessToken?.() ?? null
+    return getBlob(`${env.VITE_API_URL}${path}`, {
+      credentials: "include",
+      headers: usedToken ? { Authorization: `Bearer ${usedToken}` } : {},
+      signal,
+    })
+  }
+  try {
+    return await attempt()
+  } catch (err) {
+    if (err instanceof ApiError && isTokenProblem(err)) {
+      const retry = await config.onUnauthorized?.(err, { token: usedToken })
+      if (retry === true) return attempt()
+    }
+    throw err
+  }
+}
