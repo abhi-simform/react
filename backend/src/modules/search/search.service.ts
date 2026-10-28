@@ -125,7 +125,12 @@ export async function suggest(q: string, limit: number) {
       brand: p.brand,
       price: p.price,
       image: p.images[0]?.url ?? null,
-      category: (p.category as unknown as { name: string; slug: string } | null) ?? null,
+      category: p.category
+        ? {
+            name: (p.category as unknown as { name: string }).name,
+            slug: (p.category as unknown as { slug: string }).slug,
+          }
+        : null,
     })),
     categories: categories.map((c) => ({
       id: String(c._id),
