@@ -6,18 +6,32 @@ import * as c from "./auth.controller.js"
 import * as s from "./auth.schema.js"
 
 export const authRoutes = Router()
-authRoutes.use(authLimiter)
+// Brute-force limiter only on the endpoints an attacker can guess against. Refresh, logout and
+// the sessions endpoints are called by a signed-in SPA all day (every tab, every reload) and
+// stay under the global limiter, or ordinary use would lock people out of their own session.
+const guess = authLimiter
 
-authRoutes.post("/register", validate(s.registerSchema), c.register)
-authRoutes.post("/login", validate(s.loginSchema), c.login)
+authRoutes.post("/register", guess, validate(s.registerSchema), c.register)
+authRoutes.post("/login", guess, validate(s.loginSchema), c.login)
 authRoutes.post("/refresh", c.refresh) // uses the httpOnly cookie, no body
 authRoutes.post("/logout", c.logout)
-authRoutes.post("/verify-email", validate(s.verifyEmailSchema), c.verifyEmail)
+authRoutes.post("/verify-email", guess, validate(s.verifyEmailSchema), c.verifyEmail)
 authRoutes.post("/resend-verification", authenticate, c.resendVerification)
-authRoutes.post("/forgot-password", validate(s.forgotPasswordSchema), c.forgotPassword)
-authRoutes.post("/reset-password", validate(s.resetPasswordSchema), c.resetPassword)
+authRoutes.post(
+  "/forgot-password",
+  guess,
+  validate(s.forgotPasswordSchema),
+  c.forgotPassword
+)
+authRoutes.post(
+  "/reset-password",
+  guess,
+  validate(s.resetPasswordSchema),
+  c.resetPassword
+)
 authRoutes.post(
   "/change-password",
+  guess,
   authenticate,
   validate(s.changePasswordSchema),
   c.changePassword
@@ -34,6 +48,6 @@ authRoutes.delete(
 authRoutes.post("/logout-all", authenticate, c.logoutAll)
 
 // Google sign-in (B10): browser navigations, not fetch calls. See auth.controller.ts.
-authRoutes.get("/google", c.googleStart)
+authRoutes.get("/google", guess, c.googleStart)
 authRoutes.get("/google/mock", c.googleMockConsent)
 authRoutes.get("/google/callback", c.googleCallback)
