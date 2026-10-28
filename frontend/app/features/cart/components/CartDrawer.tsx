@@ -21,10 +21,13 @@ export function CartDrawer() {
     <Sheet>
       <SheetTrigger
         render={<Button variant="outline" size="sm" />}
-        aria-label="Open cart"
+        aria-label="Open cart, 0 items"
       >
         <ShoppingCart aria-hidden className="size-4" />
-        Cart
+        Cart{" "}
+        <span data-testid="cart-badge" className="rounded bg-neutral-200 px-1">
+          0
+        </span>
       </SheetTrigger>
       <SheetContent side="right">
         <SheetHeader>
