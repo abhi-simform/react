@@ -98,6 +98,7 @@ export async function listDeals(opts: {
     stock: 1,
     category: 1,
     ratingAvg: 1,
+    ratingCount: 1,
   })
     .populate("category", "name slug")
     .lean()
@@ -128,6 +129,8 @@ export async function listDeals(opts: {
           mrp: p.mrp,
           stock: p.stock,
           category: p.category,
+          ratingAvg: p.ratingAvg,
+          ratingCount: p.ratingCount,
         },
         discountPercent:
           p.mrp > 0 ? Math.round(((p.mrp - d.dealPrice) / p.mrp) * 100) : 0,
