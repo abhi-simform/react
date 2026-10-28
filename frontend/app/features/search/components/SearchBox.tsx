@@ -1,8 +1,10 @@
 import { useId, useRef, useState } from "react"
+import { useNavigate } from "react-router"
 
 import { useDebounce } from "@/hooks/useDebounce"
 import { useFocusShortcut } from "@/hooks/useFocusShortcut"
 import { useOnClickOutside } from "@/hooks/useOnClickOutside"
+import { paths } from "@/lib/paths"
 
 import { useSuggestions } from "../hooks/useSuggestions"
 
@@ -13,9 +15,9 @@ const DEBOUNCE_MS = 300
  * Header search with an autocomplete listbox (ARIA combobox pattern).
  * Data flow: input `term` -> `useDebounce` (300 ms) -> `useSuggestions`
  * (one aborted-on-change request per pause) -> dropdown.
- * The route targets arrive in Stage 5, so choosing logs the destination.
  */
 export function SearchBox() {
+  const navigate = useNavigate()
   const listId = useId()
   const [term, setTerm] = useState("")
   const [open, setOpen] = useState(false)
@@ -42,11 +44,10 @@ export function SearchBox() {
 
   function choose(index: number) {
     const product = items[index]
-    console.log(
-      "navigate to",
+    navigate(
       product
-        ? `/p/${product.slug}`
-        : `/products?search=${encodeURIComponent(trimmed)}`
+        ? paths.product(product.slug)
+        : paths.products({ search: trimmed })
     )
     setOpen(false)
   }

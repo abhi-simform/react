@@ -1,15 +1,16 @@
 import { NavLink } from "react-router"
 
 import { cn } from "@/lib/utils"
+import { paths } from "@/lib/paths"
 
 const LINKS = [
-  { to: "/account", label: "Overview", end: true },
-  { to: "/account/profile", label: "Profile" },
-  { to: "/account/addresses", label: "Addresses" },
-  { to: "/account/security", label: "Security" },
-  { to: "/account/notifications", label: "Notifications" },
-  { to: "/account/payments", label: "Payments" },
-  { to: "/orders", label: "Orders" },
+  { to: paths.account(), label: "Overview", end: true },
+  { to: paths.accountPage("profile"), label: "Profile" },
+  { to: paths.accountPage("addresses"), label: "Addresses" },
+  { to: paths.accountPage("security"), label: "Security" },
+  { to: paths.accountPage("notifications"), label: "Notifications" },
+  { to: paths.accountPage("payments"), label: "Payments" },
+  { to: paths.orders(), label: "Orders" },
 ] as const
 
 /** `end` makes "Overview" active only at exactly /account, not for every nested page. */

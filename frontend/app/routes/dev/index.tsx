@@ -1,4 +1,5 @@
 import { Link } from "react-router"
+import { paths } from "@/lib/paths"
 
 const LABS = [
   ["explorer", "Stage 1-2 explorer (fixtures, async lab, typed lab)"],
@@ -19,7 +20,7 @@ export default function DevIndexRoute() {
       <ul className="list-disc pl-5">
         {LABS.map(([path, label]) => (
           <li key={path}>
-            <Link className="underline" to={`/dev/${path}`}>
+            <Link className="underline" to={paths.dev(path)}>
               {label}
             </Link>
           </li>

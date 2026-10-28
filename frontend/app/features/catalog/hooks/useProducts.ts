@@ -1,58 +1,21 @@
-import { useEffect, useState } from "react"
-
-import { toApiError } from "@/lib/api/errors"
-import { isAbortError } from "@/lib/async"
 import type { Paginated } from "@/lib/api/envelope"
 import { toQueryString } from "@/lib/api/query"
 import type { AsyncState } from "@/lib/asyncState"
+import { useAsyncResource } from "@/hooks/useAsyncResource"
 
 import { getProductsByQuery } from "../api"
-import type { Product, ProductQuery } from "../types"
-
-type Settled =
-  | { key: string; status: "success"; data: Paginated<Product> }
-  | { key: string; status: "error"; error: ReturnType<typeof toApiError> }
+import type { Product, ProductListMeta, ProductQuery } from "../types"
 
 /**
  * Hand-rolled fetch (deleted in Stage 9 when TanStack Query replaces it).
- *
- * `loading` is DERIVED, not stored: the stored value remembers which request
- * (`key`) it answers, and if that is not the current request we are loading.
- * That avoids calling `setState({ status: "loading" })` synchronously inside
- * the effect (which the react-hooks lint rule flags: it adds a render and a
- * stale frame).
- *
- * The dependency is the query STRING, a primitive. Depending on the `params`
- * object would re-run the effect on every render (new object each time).
+ * The key is the query STRING, a primitive: depending on the `params` object
+ * would re-run the effect on every render (new object each time).
  */
 export function useProducts(
   params: ProductQuery
-): AsyncState<Paginated<Product>> & { reload: () => void } {
+): AsyncState<Paginated<Product, ProductListMeta>> & { reload: () => void } {
   const queryString = toQueryString(params)
-  // Changing this re-runs the effect: that is how "Retry" re-triggers a fetch.
-  const [reloadKey, setReloadKey] = useState(0)
-  const [settled, setSettled] = useState<Settled | null>(null)
-  const requestKey = `${queryString}#${reloadKey}`
-
-  useEffect(() => {
-    // Cleanup aborts the request of the previous page/retry, so a slow older
-    // response can never overwrite a newer one (4.3).
-    const controller = new AbortController()
-    getProductsByQuery(queryString, controller.signal)
-      .then((data) => setSettled({ key: requestKey, status: "success", data }))
-      .catch((err: unknown) => {
-        if (isAbortError(err)) return // superseded or unmounted: not a failure
-        const error = toApiError(err)
-        console.error("useProducts failed:", error.code)
-        setSettled({ key: requestKey, status: "error", error })
-      })
-    return () => controller.abort()
-  }, [queryString, requestKey])
-
-  const reload = () => setReloadKey((k) => k + 1)
-
-  if (settled?.key !== requestKey) return { status: "loading", reload }
-  return settled.status === "success"
-    ? { status: "success", data: settled.data, reload }
-    : { status: "error", error: settled.error, reload }
+  return useAsyncResource(queryString, (signal) =>
+    getProductsByQuery(queryString, signal)
+  )
 }

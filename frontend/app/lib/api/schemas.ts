@@ -26,3 +26,15 @@ export function paginatedSchema<T extends z.ZodType>(itemSchema: T) {
     meta: pageMetaSchema,
   })
 }
+
+/** Like `paginatedSchema`, but `meta` is a custom schema (e.g. page meta + facets). */
+export function paginatedWithMetaSchema<
+  T extends z.ZodType,
+  M extends z.ZodType,
+>(itemSchema: T, metaSchema: M) {
+  return z.object({
+    success: z.literal(true),
+    data: z.array(itemSchema),
+    meta: metaSchema,
+  })
+}

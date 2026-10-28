@@ -2,6 +2,7 @@ import { useRef, useState } from "react"
 import { Link } from "react-router"
 
 import { useOnClickOutside } from "@/hooks/useOnClickOutside"
+import { paths } from "@/lib/paths"
 
 import { NAV_CATEGORIES } from "./categories"
 
@@ -35,7 +36,7 @@ export function MegaMenu() {
           {NAV_CATEGORIES.map((c) => (
             <li key={c.slug}>
               <Link
-                to={`/products?category=${c.slug}`}
+                to={paths.category(c.slug)}
                 onClick={() => setOpen(false)}
                 className="block rounded p-1 hover:bg-neutral-100"
               >

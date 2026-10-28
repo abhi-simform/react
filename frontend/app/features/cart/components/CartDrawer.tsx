@@ -2,6 +2,7 @@ import { ShoppingCart } from "lucide-react"
 import { Link } from "react-router"
 
 import { Button } from "@/components/ui/button"
+import { paths } from "@/lib/paths"
 import {
   Sheet,
   SheetContent,
@@ -35,7 +36,7 @@ export function CartDrawer() {
           <SheetDescription>Your cart is empty.</SheetDescription>
         </SheetHeader>
         <div className="flex flex-col gap-2 p-4">
-          <Link to="/products" className="underline">
+          <Link to={paths.products()} className="underline">
             Browse products
           </Link>
         </div>

@@ -4,6 +4,7 @@ import { Link, NavLink } from "react-router"
 import { CartDrawer } from "@/features/cart/components/CartDrawer"
 import { SearchBox } from "@/features/search/components/SearchBox"
 import { useMediaQuery } from "@/hooks/useMediaQuery"
+import { paths } from "@/lib/paths"
 import { cn } from "@/lib/utils"
 
 import { MegaMenu } from "./MegaMenu"
@@ -20,7 +21,7 @@ export function Header() {
     <header className="flex flex-wrap items-center justify-between gap-3 border-b p-4">
       <div className="flex items-center gap-3">
         {!isDesktop && <MobileMenu />}
-        <Link to="/" className="font-semibold">
+        <Link to={paths.home()} className="font-semibold">
           ShopSphere
         </Link>
         {isDesktop && <MegaMenu />}
@@ -29,23 +30,23 @@ export function Header() {
         aria-label="Primary"
         className="flex flex-wrap items-center gap-4 text-sm"
       >
-        <NavLink to="/products" className={navClass}>
+        <NavLink to={paths.products()} className={navClass}>
           Products
         </NavLink>
-        <NavLink to="/deals" className={navClass}>
+        <NavLink to={paths.deals()} className={navClass}>
           Deals
         </NavLink>
-        <NavLink to="/compare" className={navClass}>
+        <NavLink to={paths.compare()} className={navClass}>
           Compare
         </NavLink>
         {import.meta.env.DEV && (
-          <NavLink to="/dev" className={navClass}>
+          <NavLink to={paths.dev()} className={navClass}>
             Dev
           </NavLink>
         )}
         <SearchBox />
         {/* Account menu placeholder: real menu arrives with auth (Stage 8/10). */}
-        <NavLink to="/account" className={navClass}>
+        <NavLink to={paths.account()} className={navClass}>
           Account
         </NavLink>
         <button

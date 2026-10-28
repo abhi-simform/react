@@ -2,6 +2,7 @@ import { Menu } from "lucide-react"
 import { Link } from "react-router"
 
 import { Button } from "@/components/ui/button"
+import { paths } from "@/lib/paths"
 import {
   Sheet,
   SheetClose,
@@ -32,10 +33,7 @@ export function MobileMenu() {
             <li key={c.slug}>
               <SheetClose
                 render={
-                  <Link
-                    to={`/products?category=${c.slug}`}
-                    className="block py-2"
-                  />
+                  <Link to={paths.category(c.slug)} className="block py-2" />
                 }
               >
                 {c.name}

@@ -1,7 +1,12 @@
 import type { Product } from "./schemas"
 
 export type {
+  Brand,
+  CategoryDetail,
+  CategoryNode,
+  Facets,
   Product,
+  ProductListMeta,
   ProductDetail,
   ProductQuery,
   ProductSort,

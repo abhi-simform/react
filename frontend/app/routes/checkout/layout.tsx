@@ -1,4 +1,5 @@
 import { Link, Outlet, useLocation } from "react-router"
+import { paths } from "@/lib/paths"
 
 const STEPS = [
   { slug: "address", label: "Address" },
@@ -39,12 +40,20 @@ export default function CheckoutLayout() {
       <Outlet />
       <div className="mt-4 flex gap-4 text-sm">
         {previous && (
-          <Link to={`/checkout/${previous.slug}`} replace className="underline">
+          <Link
+            to={paths.checkoutStep(previous.slug)}
+            replace
+            className="underline"
+          >
             Back
           </Link>
         )}
         {next && (
-          <Link to={`/checkout/${next.slug}`} replace className="underline">
+          <Link
+            to={paths.checkoutStep(next.slug)}
+            replace
+            className="underline"
+          >
             Continue to {next.label.toLowerCase()}
           </Link>
         )}

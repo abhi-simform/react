@@ -18,7 +18,10 @@ export type ApiErrorEnvelope = ApiFailure
 /** Discriminated by `success`: narrowing on it gives either `data` or `error`. */
 export type ApiResponse<T> = ApiSuccess<T> | ApiFailure
 
-export type Paginated<T> = { items: T[]; meta: PageMeta }
+export type Paginated<T, M extends PageMeta = PageMeta> = {
+  items: T[]
+  meta: M
+}
 
 /**
  * Hand-written type guard for the failure envelope. `x` is `unknown` because

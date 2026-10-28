@@ -5,6 +5,7 @@ import { Link } from "react-router"
 import { Price } from "@/components/common/Price"
 import { Rating } from "@/components/common/Rating"
 import { Button } from "@/components/ui/button"
+import { paths } from "@/lib/paths"
 import { cn } from "@/lib/utils"
 
 import type { Product, ProductCardData } from "../types"
@@ -82,7 +83,7 @@ export function ProductCard({
         <p className="text-xs text-neutral-500">{product.brand}</p>
         <h3 className="line-clamp-2 text-sm font-medium">
           <Link
-            to={`/p/${product.slug}`}
+            to={paths.product(product.slug)}
             className="after:absolute after:inset-0 focus:outline-none"
           >
             {product.name}

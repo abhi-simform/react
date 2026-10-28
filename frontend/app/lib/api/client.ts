@@ -3,9 +3,13 @@ import type { z } from "zod"
 import { env } from "@/lib/env"
 
 import { ApiError, ContractError } from "./errors"
-import { isApiSuccess, type Paginated } from "./envelope"
+import { isApiSuccess, type PageMeta, type Paginated } from "./envelope"
 import { getJson } from "./getJson"
-import { apiEnvelopeSchema, paginatedSchema } from "./schemas"
+import {
+  apiEnvelopeSchema,
+  pageMetaSchema,
+  paginatedWithMetaSchema,
+} from "./schemas"
 
 type Options<T> = RequestInit & {
   /** Validate `data` against this schema; `T` is inferred from it. */
@@ -60,20 +64,30 @@ export async function request<T>(
   return body.data as T // trusted generic: no schema, or validation is off
 }
 
-/** List endpoints: `data` is the array, `meta` carries paging. */
-export async function requestPaginated<T>(
+/**
+ * List endpoints: `data` is the array, `meta` carries paging. `metaSchema`
+ * lets a feature validate extra meta keys (catalog adds `facets`).
+ */
+export async function requestPaginatedWithMeta<T, M extends PageMeta>(
   path: string,
-  { schema, ...init }: Options<T> = {}
-): Promise<Paginated<T>> {
+  { schema, metaSchema, ...init }: Options<T> & { metaSchema: z.ZodType<M> }
+): Promise<Paginated<T, M>> {
   const body = await send(path, init)
 
   if (schema && VALIDATE) {
-    const result = paginatedSchema(schema).safeParse(body)
+    const result = paginatedWithMetaSchema(schema, metaSchema).safeParse(body)
     if (!result.success) throw contractError(path, result.error)
     return { items: result.data.data, meta: result.data.meta }
   }
   if (!isApiSuccess(body) || !Array.isArray(body.data) || !body.meta) {
     throw badEnvelope("Expected a list envelope with meta")
   }
-  return { items: body.data as T[], meta: body.meta } // trusted generic
+  // trusted generics: no schema, or validation is off
+  return { items: body.data as T[], meta: body.meta as M }
 }
+
+export const requestPaginated = <T>(
+  path: string,
+  options: Options<T> = {}
+): Promise<Paginated<T>> =>
+  requestPaginatedWithMeta(path, { ...options, metaSchema: pageMetaSchema })

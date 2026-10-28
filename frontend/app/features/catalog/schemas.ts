@@ -1,5 +1,7 @@
 import { z } from "zod"
 
+import { pageMetaSchema } from "@/lib/api/schemas"
+
 export const PRODUCT_SORTS = [
   "relevance",
   "price_asc",
@@ -96,7 +98,75 @@ export const productQuerySchema = z.object({
 /** What `getProducts` accepts: parsed values, all optional. (`z.input` would be the raw strings.) */
 export type ProductQuery = Partial<z.infer<typeof productQuerySchema>> & {
   inStock?: boolean
+  /** Ask the API for facet counts in `meta.facets`. */
+  facets?: boolean
 }
 
 /** Same coercion WITHOUT the guard, kept to demonstrate the "" -> 0 pitfall. */
 export const naiveMinPriceSchema = z.coerce.number().min(0).optional()
+
+// ---- facets (B1) ------------------------------------------------------------
+
+/** `GET /products?facets=true` adds these counts to `meta`. Each facet ignores its OWN filter. */
+export const facetsSchema = z.object({
+  brands: z.array(z.object({ value: z.string(), count: z.number().int() })),
+  price: z.object({ min: z.number(), max: z.number() }),
+  rating: z.array(z.object({ value: z.number(), count: z.number().int() })),
+  inStock: z.object({ count: z.number().int() }),
+})
+export type Facets = z.infer<typeof facetsSchema>
+
+export const productListMetaSchema = pageMetaSchema.extend({
+  facets: facetsSchema.optional(),
+})
+export type ProductListMeta = z.infer<typeof productListMetaSchema>
+
+// ---- categories and brands (B1) ----------------------------------------------
+
+export type CategoryNode = {
+  id: string
+  name: string
+  slug: string
+  image?: string | null
+  productCount: number
+  children: CategoryNode[]
+}
+
+/** The tree is recursive, so the schema refers to itself lazily. */
+export const categoryNodeSchema: z.ZodType<CategoryNode> = z.lazy(() =>
+  z.object({
+    id: z.string(),
+    name: z.string(),
+    slug: z.string(),
+    image: z.string().nullish(),
+    productCount: z.number().int(),
+    children: z.array(categoryNodeSchema),
+  })
+)
+
+const categoryBriefSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  slug: z.string(),
+})
+
+/** `GET /categories/:slug`: `ancestors` runs root -> parent (the breadcrumb trail). */
+export const categoryDetailSchema = categoryBriefSchema.extend({
+  image: z.string().nullable(),
+  parent: z.string().nullable(),
+  ancestors: z.array(categoryBriefSchema),
+  children: z.array(
+    categoryBriefSchema.extend({
+      image: z.string().nullable(),
+      productCount: z.number().int(),
+    })
+  ),
+  productCount: z.number().int(),
+})
+export type CategoryDetail = z.infer<typeof categoryDetailSchema>
+
+export const brandSchema = z.object({
+  name: z.string(),
+  count: z.number().int(),
+})
+export type Brand = z.infer<typeof brandSchema>
