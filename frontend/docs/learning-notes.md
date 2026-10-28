@@ -703,3 +703,62 @@ Backend B1 was built first (separate `backend B1:` commits): `GET /categories` n
 - `/orders` (`OrdersPage`): `useInfiniteQuery` + sentinel + "Load more orders", status chips and an order-number search whose values live in the URL (`?status=shipped&q=SS-10`, `replace`), the filter object is the key. `/orders/:orderId` (`OrderDetailPage`, read-only): status badge (`OrderStatusBadge` over the Stage 2 `statusLabel`/`statusColor` unions), status history, items, totals; 404 -> `NotFoundError`.
 - Polling: `refetchInterval: (query) => query.state.data && !isTerminal(query.state.data.status) ? 5000 : false`; `isTerminal` (new, `assertNever`-checked) = delivered | cancelled | returned | refunded. A dev button "place a simulated order" creates an order the "server" advances every 10 s (placed -> packed -> shipped -> out for delivery -> delivered, computed from the clock when asked). Verified: polling ran (2 data updates in 12 s, status changed to Packed), the page note switched to "Final status: Delivered. No more updates expected." and in the next 13 s there were 0 updates; for a new non-terminal order, navigating to /orders left 0 observers on its query and 0 updates in 12 s (no leaked interval). The interval also pauses in a hidden tab by default (`refetchIntervalInBackground: false`); not exercised.
 - The "live" note derives from the data + `isFetching`; nothing is stored. Stretch (backoff polling) skipped.
+
+## B10 (backend, built at the start of Stage 10)
+
+- What B0 already had: register, login, refresh with rotation + family reuse detection, logout, verify-email, resend, forgot/reset, change-password, mail to Mailpit. What B10 added: Google sign-in (auth-code flow with an httpOnly `state` cookie, account linking, an env-gated MOCK Google so it runs with no credentials), sessions list/revoke/logout-all (a session = a refresh-token family), distinct `INVALID_TOKEN` / `TOKEN_EXPIRED` for verify/reset (idempotent verify: a second click says `alreadyVerified`), a 60 s resend cooldown, change-password that keeps the current session, and a placeholder `GET /seller/me` so there is a real 403 to test. 2FA (optional) is not built. Details: `backend/docs/API-CONVENTIONS.md` ("Auth hardening, Google sign-in and sessions (B10)").
+- Security decision worth remembering: linking Google to an existing account that never verified its email DROPS that account's password and sessions (someone could have pre-registered the victim's address and know the password).
+
+## 10.1 The token model
+
+- Written up with the sequence diagram (register, login, call, expiry, refresh, rotation, logout, reuse) and the "Why not localStorage?" half page in `docs/auth-token-model.md`.
+- Checked in the browser: refresh cookie `HttpOnly; SameSite=Lax; Path=/api/v1/auth` (no `Secure` on http dev, `COOKIE_SECURE=true` in production); `document.cookie` is `""`; the access token decodes to `{sub, role, iat, exp}` with `exp - iat = 900`; `localStorage` has only a boolean hint.
+- Rotation + reuse detection: a refresh token is single use; replaying an old one means theft, so the whole family dies. The price is that two refreshes with the same cookie log you out (10.2/10.3).
+
+## 10.2 The real AuthProvider
+
+- `session.ts` now holds the in-memory token and the real calls; the dev stub (`loginAsDevRole`, `DEV_PASSWORD`, `DevAuthPanel`) is deleted, so the dev password is not in the bundle (grep). `useAuth()` keeps its shape (status, user, signIn, signUp, logout) and gains `refresh`, `reloadUser`.
+- Bootstrap: if the localStorage HINT says a session exists, ONE `POST /auth/refresh`; its response carries the user, so I do not call `/me` after it (deviation from "refresh then me": same result, one request fewer). Verified in the Network tab: exactly one `refresh` per page load, also under StrictMode (the shared in-flight promise). The user is also written to `authKeys.me`.
+- Logout: state first (instant UI), then `POST /auth/logout` (the server clears the cookie), `queryClient.clear()` (nothing of the previous user survives), guards go home. A guard race I hit: the protected page's guard redirected to `/login?from=<that page>` before the home navigation finished, so `signedOutByUser` tells the guard to go home instead.
+- Mistake caught on the way: `BroadcastChannel` objects with the same name in the SAME tab DO hear each other, so my own "login" broadcast made the tab refresh a second time. Messages now carry a tab id.
+
+## 10.3 401 handling and single-flight refresh
+
+- `api()` already retried once through `onUnauthorized`. Changes: it retries only for `TOKEN_EXPIRED | INVALID_TOKEN | UNAUTHORIZED` (a wrong current password is a 401 `INVALID_CREDENTIALS` and must not trigger a refresh), never for the `/auth/*` lifecycle calls (no loop), and passes the token the failed request used, so a request that fails late sees "someone already refreshed" and just retries.
+- Lab `/dev/auth`: "Invalidate access token" then "Fire 6 parallel requests" -> 6 x 401, ONE `/auth/refresh`, 6 x 200 (read from the Performance resource entries). With the refresh cookie gone: still one refresh (after I stopped late 401s from starting another doomed one by remembering the dead token), a "session expired" toast, and `RequireAuth` redirects to `/login?from=...`. Cross-tab: refresh runs inside a Web Lock so two tabs do not rotate the same cookie at once.
+- Query does not retry 401s (the 9.3 `shouldRetry` stops at any 4xx).
+
+## 10.4 Protected routes, roles, return-to
+
+- Guards read the real status; "loading" shows the skeleton. The intended URL travels in `?from=` (survives reload and the Google round trip) and `getReturnTo` validates it through `safeRedirect`: `https://evil.com`, `//evil.com`, `/\evil.com` are ignored (login page's Google link showed `redirect=%2F`). Opening `/orders/123` logged out -> login -> back on `/orders/123` (verified). `RequireRole` takes a list (`seller`, `admin`) and renders a 403 page; the API says 403 as well (`curl` as customer: 403). Account menu: Log in/Sign up, or name + Account, Orders, Security, Seller dashboard (seller/admin), Log out.
+- Attack for the checkpoint: `/login?from=//evil.com` mailed as "log in to continue"; after a REAL login the app would send the victim to the look-alike site, which asks for the password again.
+
+## 10.5 Email verification and password reset
+
+- Register shows "Check your email" (resend with a 60 s `useCountdown`; the server enforces the same cooldown) and the shell shows an unverified banner. `/verify-email` fires exactly one request (a ref guard; the token is read into state and the URL is rewritten with `replace`, plus `<meta name="referrer" content="no-referrer">`); results: success, already verified, expired (resend), invalid, retry on network failure. Second click -> "already verified". Verified against real Mailpit mails, in dev StrictMode: one verify call.
+- Forgot password: identical screen for a registered and an unregistered email (DOM text compared), mail only sent to the real one (Mailpit search: 0 for the unknown address). Reset: strong-password schema, token removed from the URL, success logs this browser out locally, toast, redirect to login; reusing the link shows "not valid". The server revokes every session on reset (backend test: the old session's refresh is 401).
+- Trade-off: reloading the reset page loses the token (it is no longer in the URL) and the user clicks the mail link again.
+
+## 10.6 Google sign-in
+
+- "Continue with Google" is a plain link to `GET {api}/auth/google?redirect=<safe from>`; the API redirects to Google, back to its callback, sets the refresh cookie and redirects to `/auth/google/callback`, which does `refresh()` (the same silent refresh as a reload), toasts "created" / "linked", and navigates to the safe `redirect`. Errors come as `?error=` (`access_denied`, `invalid_state`, `email_not_verified`, `account_disabled`, ...) and show friendly text with a way back.
+- Verified with the MOCK Google (no credentials exist here): cancel -> friendly message; new account -> lands on the original page with `user` identical to password login (header name, `providers: ["google"]`). NOT verified against real Google. Mock detail: the form-action CSP also applies to the redirects after the submit, so the mock page allows the SPA origin.
+- The secret lives only on the API; the browser holds redirects and cookies; `state` ties the callback to the browser that started it. How the owner enables real Google: `backend/docs/API-CONVENTIONS.md` ("What the owner supplies for real Google").
+
+## 10.7 Sessions, security page, expiry UX
+
+- `/account/security`: sign-in methods, change password (current + new + confirm; wrong current password lands under that field; other devices are signed out), active sessions (device label from the user agent, IP, started/last active, "This device", Sign out), "Log out of all devices". Revoking another session: that session's next refresh was 401 (curl, then the UI list updated).
+- Multi-tab logout: `BroadcastChannel`; tab B showed "You were signed out in another tab" within a second of the logout in tab A. A tab that becomes visible refreshes only when the token is about to expire.
+- Idle warning: after `VITE_IDLE_MINUTES` (default 30) a dialog counts down 60 s; "Stay signed in" refreshes the session, otherwise logout. Verified with 0.25 minutes (dialog at about 8 s, counted down, "stay" reset it, ignoring it logged out). A revoked session's access token still works for up to 15 minutes (stateless JWT): the price of not hitting the DB on every request.
+- Draft restore: `useFormDraft` keeps unsaved fields in `sessionStorage` (key has the user id); applied to the profile form. Expiry while editing -> `/login?from=/account/profile` -> login -> the page restores the typed name ("We restored your unsaved changes"). An explicit logout wipes drafts, an expiry does not.
+
+## 10.8 Login side effects: merge guest data
+
+- One rule: "the signed-in user id changed" runs the effects, whatever way you logged in. Cart: `CartSessionSync` merges via `POST /cart/merge`; now the toast says "We moved 3 items from your guest cart", a failure keeps the guest token and offers Retry (login is never blocked), and `merging` ref + clearing the token make it run once (StrictMode, fast navigation). Verified: guest cart with 3 lines (qty 2) + customer's seeded cart -> one merge request, toast, token removed, merged cart on `/cart`.
+- Wishlist: there is no guest wishlist (it is server only). The guest's intent is: hearting while signed out stores the product id in `sessionStorage` and sends them to login; `WishlistSessionSync` adds it once after login ("Added to your wishlist"). Verified.
+- Not done: "sync recently viewed" (B8 does not exist yet; recently viewed is local only today).
+
+## 10.9 Frontend security hygiene
+
+- Checklist with 18 verified items, a CSP plan and three XSS routes: `docs/security.md`. XSS probe `<img src=x onerror=...>` + `<script>` in a review body and as the profile name rendered as text; no node was created. `lib/safeUrl.ts` (`safeHref`, `safeImageSrc`, `externalLinkProps`) guards user-supplied URLs; the avatar uses it.
+- `npm audit`: 9 findings, all in the `shadcn` CLI tree; not fixed (no dependency changes in this stage).

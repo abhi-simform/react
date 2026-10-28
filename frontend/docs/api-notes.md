@@ -18,6 +18,12 @@ Envelope: success `{ success: true, data, meta? }`, failure `{ success: false, e
 | POST   | `/auth/reset-password`      | no     | `{token, password}`                                                                           | 200                                                                                               | 422, 400 invalid/expired token                                                                                         |
 | POST   | `/auth/resend-verification` | yes    | none                                                                                          | 200                                                                                               | 401 `INVALID_TOKEN` / `UNAUTHORIZED`                                                                                   |
 | POST   | `/auth/change-password`     | yes    | `{currentPassword, newPassword}`                                                              | 200                                                                                               | 422                                                                                                                    |
+| GET    | `/auth/sessions`            | yes+cookie | none                                                                                      | 200 `[{id, device, userAgent, ip, startedAt, lastActiveAt, current}]` (B10) |
+| DELETE | `/auth/sessions/:id`        | yes    | none                                                                                          | 204; that session cannot refresh any more; 404 foreign/unknown id (B10) |
+| POST   | `/auth/logout-all`          | yes    | none                                                                                          | 204, every session revoked (B10) |
+| GET    | `/auth/google?redirect=/x`  | no (navigation) | none                                                                                | 302 to Google (or the local mock consent page), sets httpOnly `oauthState` cookie (B10) |
+| GET    | `/auth/google/callback`     | no (navigation) | `code state` or `error`                                                              | 302 to `CLIENT_URL/auth/google/callback?redirect=..&created=1/linked=1` or `?error=<code>` (B10) |
+| GET    | `/seller/me`                | yes (seller/admin) | none                                                                             | 200 `{sellerId, role, productCount}`; **403** for a customer (B10 placeholder; first reproducible 403) |
 | GET    | `/users/me`                 | yes    | none                                                                                          | 200 user (`id`, not `_id`)                                                                        | 401                                                                                                                    |
 | PATCH  | `/users/me`                 | yes    | `{name?, phone?, avatarUrl?}`                                                                 | 200 user                                                                                          | 401, 422                                                                                                               |
 | GET    | `/categories`               | no     | none                                                                                          | 200 tree with `productCount`                                                                      | none                                                                                                                   |
@@ -36,7 +42,7 @@ Envelope: success `{ success: true, data, meta? }`, failure `{ success: false, e
 | DELETE | `/addresses/:id`            | yes    | none                                                                                          | 200 `{deletedId, newDefaultId}` (default is auto-promoted)                                        | 401, 404 (second delete), 422 bad id                                                                                   |
 | GET    | `/pincodes/:pincode`        | no     | none                                                                                          | 200 `{serviceable, zone, codAvailable, deliveryDays, estimatedDelivery}` or `{serviceable:false}` | 422 (`12`, `012345`)                                                                                                   |
 
-Admin-only routes do not exist yet, so **403 cannot be reproduced** with the current API (`authorize("admin")` is in the middleware but unused). It will appear with B1 admin endpoints / B11.
+(Stage 10: `GET /seller/me` now gives a real 403 for a customer.) Admin-only routes still do not exist, so a 403 on an admin route cannot be reproduced (`authorize("admin")` is in the middleware but unused). It will appear with B1 admin endpoints / B11.
 
 ## Error classes reproduced (exact envelopes)
 
@@ -93,3 +99,15 @@ New backend phase `backend B3:` (`GET/POST/PATCH/DELETE /cart[/items]`, `POST /c
 - Stock: `409 INSUFFICIENT_STOCK` with `details: { availableQty, requested, inCart }` for add and for qty/move changes; a line is capped at `min(stock, 10)`.
 - Merge: `POST /cart/merge { guestToken }` (Bearer): quantities add, capped; response = cart + `merge: { merged, adjusted[], skipped[] }`; the guest cart is deleted; calling it twice is safe.
 - Still stubbed on the frontend (no backend yet): orders (B5) and reviews/Q&A (B7); see `features/orders/orders.api.ts` and `features/product/reviews.api.ts`.
+
+
+## Stage 10 additions (B10), verified with curl and in the browser
+
+- `POST /auth/verify-email`: `200 {message, alreadyVerified}`; unknown token `400 INVALID_TOKEN`; expired `400 TOKEN_EXPIRED`. Clicking the same link twice is a 200 with `alreadyVerified: true`.
+- `POST /auth/reset-password`: `400 INVALID_TOKEN` (also for an already used link) / `400 TOKEN_EXPIRED` / `422` weak password. Success revokes every session of that user (verified: the old session's refresh is 401).
+- `POST /auth/resend-verification`: `429 RESEND_COOLDOWN` with `details.retryAfterSeconds` (60 s), `409 ALREADY_VERIFIED`.
+- `POST /auth/change-password`: keeps THIS session (needs the cookie) and revokes the others; `401 INVALID_CREDENTIALS` for a wrong current password (so the client must NOT treat that 401 as "token expired": `lib/api/client.ts` retries only `TOKEN_EXPIRED | INVALID_TOKEN | UNAUTHORIZED`); `409 NO_PASSWORD` for Google-only accounts.
+- The user object now has `providers: ("password"|"google")[]`.
+- Cookie as sent by the API in development: `refreshToken=...; Max-Age=2592000; Path=/api/v1/auth; HttpOnly; SameSite=Lax` (no `Secure` because dev runs on http: production sets `COOKIE_SECURE=true`).
+- Access token payload: `{sub, role, iat, exp}`, `exp - iat = 900` s.
+- Rate limiter: only login/register/verify/forgot/reset/change-password/google-start share the 30 per 15 min counter now. Refresh, logout, sessions are under the global limiter (they used to share the credentials counter, and a few tabs plus reloads exhausted it).
