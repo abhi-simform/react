@@ -7,7 +7,7 @@ import { Breadcrumbs } from "@/components/layout/Breadcrumbs"
 import { Footer } from "@/components/layout/Footer"
 import { Header } from "@/components/layout/Header"
 import { StoresSync } from "@/components/common/StoresSync"
-import { DevAuthPanel } from "@/features/auth"
+import { VerifyEmailBanner } from "@/features/auth"
 import { CompareTray } from "@/features/compare"
 import { useRouteFocus } from "@/hooks/useRouteFocus"
 
@@ -48,6 +48,7 @@ export default function ShellLayout() {
       </a>
       <OfflineBanner />
       <Header />
+      <VerifyEmailBanner />
       {/* tabIndex -1 lets the skip link and useRouteFocus move keyboard focus here. */}
       <main
         id="main"
@@ -59,7 +60,6 @@ export default function ShellLayout() {
         <Outlet />
       </main>
       <Footer />
-      <DevAuthPanel />
       <CompareTray />
       <StoresSync />
       {/* Written by useRouteFocus: tells screen readers the page changed. */}

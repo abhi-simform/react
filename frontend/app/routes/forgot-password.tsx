@@ -1,9 +1,9 @@
-import { PlaceholderPage } from "@/components/common/PlaceholderPage"
+import { ForgotPasswordForm } from "@/features/auth"
 import { pageTitle } from "@/lib/pageTitle"
 import type { RouteHandle } from "@/types/route-handle"
 
 export default function ForgotPasswordRoute() {
-  return <PlaceholderPage title="Forgot password" builtIn="10" />
+  return <ForgotPasswordForm />
 }
 
 export function meta() {

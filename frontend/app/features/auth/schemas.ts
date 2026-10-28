@@ -26,11 +26,22 @@ export const registerSchema = z
     error: "Passwords do not match",
   })
 
+export const forgotPasswordSchema = z.object({ email })
+
+export const resetPasswordSchema = z
+  .object({ password: passwordField, confirmPassword: z.string() })
+  .refine((v) => v.password === v.confirmPassword, {
+    path: ["confirmPassword"],
+    error: "Passwords do not match",
+  })
+
 /** Login does not re-check password strength: an old password may predate the rules. */
 export const loginSchema = z.object({
   email,
   password: z.string().min(1, { error: "Enter your password" }),
 })
 
+export type ResetPasswordValues = z.output<typeof resetPasswordSchema>
+export type ForgotPasswordValues = z.output<typeof forgotPasswordSchema>
 export type RegisterValues = z.output<typeof registerSchema>
 export type LoginValues = z.output<typeof loginSchema>

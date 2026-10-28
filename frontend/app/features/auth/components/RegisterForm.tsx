@@ -1,7 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod"
+import { useState } from "react"
 import { useForm } from "react-hook-form"
-import { Link, useLocation, useNavigate } from "react-router"
-import { toast } from "sonner"
+import { Link, useLocation } from "react-router"
 
 import { FormError } from "@/components/form/FormError"
 import { FormField } from "@/components/form/FormField"
@@ -12,6 +12,8 @@ import { applyApiError } from "@/lib/forms/applyApiError"
 import { paths } from "@/lib/paths"
 
 import { useAuth } from "../AuthProvider"
+import { CheckEmail } from "./CheckEmail"
+import { GoogleButton } from "./GoogleButton"
 import { getReturnTo } from "../returnTo"
 import { registerSchema, type RegisterValues } from "../schemas"
 
@@ -22,7 +24,7 @@ import { registerSchema, type RegisterValues } from "../schemas"
  */
 export function RegisterForm() {
   const { signUp } = useAuth()
-  const navigate = useNavigate()
+  const [registeredEmail, setRegisteredEmail] = useState<string | null>(null)
   const location = useLocation()
   const {
     register,
@@ -35,9 +37,8 @@ export function RegisterForm() {
     async ({ name, email, password }: RegisterValues) => {
       try {
         const user = await signUp({ name, email, password })
-        // Result handling stays minimal until Stage 10: show who we got back, then leave.
-        toast.success(`Account created for ${user.name} (${user.email})`)
-        navigate(getReturnTo(location.state), { replace: true })
+        // Signed in already; the next step is the mailbox (10.5).
+        setRegisteredEmail(user.email)
       } catch (err) {
         applyApiError(toApiError(err), setError, {
           fields: ["name", "email", "password"],
@@ -53,6 +54,11 @@ export function RegisterForm() {
     }
   )
   const submit = handleSubmit(onSubmit)
+
+  if (registeredEmail)
+    return (
+      <CheckEmail email={registeredEmail} continueTo={getReturnTo(location)} />
+    )
 
   return (
     <form
@@ -129,9 +135,11 @@ export function RegisterForm() {
       <Button type="submit" disabled={isSubmitting}>
         {isSubmitting ? "Creating..." : "Create account"}
       </Button>
+      <p className="text-center text-sm text-neutral-500">or</p>
+      <GoogleButton label="Sign up with Google" />
       <p className="text-sm">
         Already have an account?{" "}
-        <Link to={paths.login()} state={location.state} className="underline">
+        <Link to={paths.login(getReturnTo(location, ""))} className="underline">
           Log in
         </Link>
       </p>

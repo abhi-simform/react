@@ -1,13 +1,17 @@
-import { PlaceholderPage } from "@/components/common/PlaceholderPage"
+import { VerifyEmailPage } from "@/features/auth"
 import { pageTitle } from "@/lib/pageTitle"
 import type { RouteHandle } from "@/types/route-handle"
 
 export default function VerifyEmailRoute() {
-  return <PlaceholderPage title="Verify your email" builtIn="10" />
+  return <VerifyEmailPage />
 }
 
 export function meta() {
-  return [{ title: pageTitle("Verify your email") }]
+  return [
+    { title: pageTitle("Verify your email") },
+    // The URL may carry a one-time token: never leak it through the Referer header.
+    { name: "referrer", content: "no-referrer" },
+  ]
 }
 
 export const handle = { breadcrumb: "Verify email" } satisfies RouteHandle
