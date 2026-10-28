@@ -1,6 +1,7 @@
 import { Link, useSearchParams } from "react-router"
 
 import { ErrorState } from "@/components/common/ErrorState"
+import { NotFoundError } from "@/lib/notFound"
 import { paths } from "@/lib/paths"
 
 import { useProduct, useRelatedProducts } from "../hooks/useProduct"
@@ -54,20 +55,8 @@ export function ProductDetailPage({ slug }: { slug: string }) {
     )
   }
   if (state.status === "error") {
-    if (state.error.status === 404) {
-      return (
-        <div className="p-4">
-          <h1 className="text-xl font-medium">Product not found</h1>
-          <p className="my-2 text-sm">
-            We could not find a product called &ldquo;{slug}&rdquo;. It may have
-            been removed, or the link is mistyped.
-          </p>
-          <Link to={paths.home()} className="underline">
-            Back to the home page
-          </Link>
-        </div>
-      )
-    }
+    // 404 is a "route-level" outcome: hand it to the ErrorBoundary (branded 404).
+    if (state.error.status === 404) throw new NotFoundError("Product", slug)
     return (
       <div className="p-4">
         <h1 className="text-xl font-medium">Could not load product</h1>

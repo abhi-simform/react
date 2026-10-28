@@ -1,6 +1,6 @@
 import { SlidersHorizontal } from "lucide-react"
 import { useState } from "react"
-import { Link, useNavigate, useSearchParams } from "react-router"
+import { useNavigate, useSearchParams } from "react-router"
 
 import { EmptyState } from "@/components/common/EmptyState"
 import { ErrorState } from "@/components/common/ErrorState"
@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/sheet"
 import { useMediaQuery } from "@/hooks/useMediaQuery"
 import { assertNever } from "@/lib/assert"
+import { NotFoundError } from "@/lib/notFound"
 import { paths } from "@/lib/paths"
 
 import { PAGE_SIZE, toProductQuery } from "../filters"
@@ -79,19 +80,8 @@ export function ProductListingPage({
     categorySlug &&
     category.status === "error" &&
     category.error.status === 404
-  ) {
-    return (
-      <div className="p-4">
-        <h1 className="text-xl font-medium">Category not found</h1>
-        <p className="my-2 text-sm">
-          There is no category called &ldquo;{categorySlug}&rdquo;.
-        </p>
-        <Link to={paths.products()} className="underline">
-          Browse all products
-        </Link>
-      </div>
-    )
-  }
+  )
+    throw new NotFoundError("Category", categorySlug)
 
   function body() {
     switch (state.status) {

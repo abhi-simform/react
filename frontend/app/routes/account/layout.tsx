@@ -1,7 +1,10 @@
 import { useState } from "react"
 import { Outlet } from "react-router"
 
+import { RouteErrorView } from "@/components/common/RouteErrorView"
 import { AccountNav } from "@/components/layout/AccountNav"
+
+import type { Route } from "./+types/layout"
 
 /**
  * The sidebar lives in the PARENT route, so navigating between /account/* pages
@@ -26,6 +29,20 @@ export default function AccountLayout() {
       </aside>
       <section aria-label="Account content">
         <Outlet />
+      </section>
+    </div>
+  )
+}
+
+/** A crash on one account page keeps the sidebar: the error replaces only the page area. */
+export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
+  return (
+    <div className="grid gap-4 p-4 md:grid-cols-[12rem_1fr]">
+      <aside>
+        <AccountNav />
+      </aside>
+      <section aria-label="Account content">
+        <RouteErrorView error={error} />
       </section>
     </div>
   )
