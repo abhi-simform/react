@@ -1,9 +1,9 @@
-import { PlaceholderPage } from "@/components/common/PlaceholderPage"
+import { OrdersPage } from "@/features/orders"
 import { pageTitle } from "@/lib/pageTitle"
 import type { RouteHandle } from "@/types/route-handle"
 
 export default function OrdersRoute() {
-  return <PlaceholderPage title="Your orders" builtIn="9" />
+  return <OrdersPage />
 }
 
 export function meta() {

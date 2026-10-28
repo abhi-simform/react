@@ -92,3 +92,23 @@ export function canReturn(status: OrderStatus): boolean {
       return assertNever(status)
   }
 }
+
+/** No further status change is expected: polling stops here (9.10). */
+export function isTerminal(status: OrderStatus): boolean {
+  switch (status) {
+    case "delivered":
+    case "cancelled":
+    case "returned":
+    case "refunded":
+      return true
+    case "pending_payment":
+    case "placed":
+    case "packed":
+    case "shipped":
+    case "out_for_delivery":
+    case "return_requested":
+      return false
+    default:
+      return assertNever(status)
+  }
+}
