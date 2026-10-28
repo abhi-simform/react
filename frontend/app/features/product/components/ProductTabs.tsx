@@ -1,4 +1,5 @@
 import { lazy, Suspense, useState } from "react"
+import { useSearchParams } from "react-router"
 
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -9,10 +10,36 @@ const ReviewForm = lazy(() =>
   import("./ReviewForm").then((m) => ({ default: m.ReviewForm }))
 )
 
+const TABS = ["description", "specs", "reviews", "qa"] as const
+type TabName = (typeof TABS)[number]
+const isTab = (v: string | null): v is TabName => TABS.some((t) => t === v)
+
+/**
+ * The active tab lives in the URL (`?tab=reviews`, 8.4 migration): a link can point at the
+ * reviews, a reload keeps the tab, and Back works. No param = the default tab, so the
+ * canonical URL stays clean. `replace` keeps tab clicks out of the history stack.
+ */
 export function ProductTabs({ product }: { product: ProductDetailVM }) {
   const [writing, setWriting] = useState(false)
+  const [searchParams, setSearchParams] = useSearchParams()
+  const param = searchParams.get("tab")
+  const tab: TabName = isTab(param) ? param : "description"
+
+  function onTabChange(next: unknown) {
+    if (!isTab(typeof next === "string" ? next : null)) return
+    setSearchParams(
+      (current) => {
+        const params = new URLSearchParams(current)
+        if (next === "description") params.delete("tab")
+        else params.set("tab", String(next))
+        return params
+      },
+      { replace: true, preventScrollReset: true }
+    )
+  }
+
   return (
-    <Tabs defaultValue="description">
+    <Tabs value={tab} onValueChange={onTabChange}>
       <TabsList>
         <TabsTrigger value="description">Description</TabsTrigger>
         <TabsTrigger value="specs">Specifications</TabsTrigger>
