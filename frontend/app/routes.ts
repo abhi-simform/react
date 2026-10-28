@@ -73,6 +73,7 @@ export default [
       route("closures", "routes/dev/closures.tsx"),
       route("bugs", "routes/dev/bugs.tsx"),
       route("keys", "routes/dev/keys.tsx"),
+      route("forms", "routes/dev/forms.tsx"),
     ]),
 
     route("*", "routes/not-found.tsx"),

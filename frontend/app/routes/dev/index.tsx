@@ -11,6 +11,7 @@ const LABS = [
   ["closures", "4.9 stale closures"],
   ["bugs", "4.10 five broken effects"],
   ["keys", "3.5 index keys bug"],
+  ["forms", "7.1 form re-render counts"],
 ] as const
 
 export default function DevIndexRoute() {

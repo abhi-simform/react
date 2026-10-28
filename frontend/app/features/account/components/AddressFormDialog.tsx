@@ -1,5 +1,6 @@
 import { Loader2 } from "lucide-react"
-import { useRef, useState } from "react"
+import { useState } from "react"
+import { useForm } from "react-hook-form"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -12,9 +13,11 @@ import {
 } from "@/components/ui/dialog"
 import type { ApiError } from "@/lib/api/errors"
 
+import { PHONE_RE, PINCODE_RE } from "@/lib/fields"
+
 import { ADDRESS_TYPES, type Address, type AddressInput } from "../schemas"
 
-/** Deliberately PLAIN (6.3): one `useState` object, no form library. Stage 7 rebuilds it with RHF + Zod. */
+/** 7.1: the form values. Was one `useState` object in 6.3 (plain, controlled); now React Hook Form. */
 type Fields = {
   fullName: string
   phone: string
@@ -110,6 +113,18 @@ export function AddressFormDialog({
   )
 }
 
+const FIELD_NAMES = [
+  "fullName",
+  "phone",
+  "line1",
+  "line2",
+  "landmark",
+  "city",
+  "state",
+  "pincode",
+] as const
+type TextField = (typeof FIELD_NAMES)[number]
+
 function AddressForm({
   existing,
   pending,
@@ -121,71 +136,63 @@ function AddressForm({
   onSubmit: Props["onSubmit"]
   onClose: () => void
 }) {
-  const [fields, setFields] = useState<Fields>(
-    existing ? fromAddress(existing) : EMPTY
-  )
-  const [error, setError] = useState<ApiError | null>(null)
-  const submitting = useRef(false) // same-tick double submit guard (state would still be stale)
-  const fieldErrors = error?.fieldErrors ?? {}
-  // A 422 on a field is shown under it; anything else (network, 409 limit) at the top.
-  const generalError =
-    error && Object.keys(fieldErrors).length === 0 ? error.message : undefined
+  const {
+    register,
+    handleSubmit,
+    setError,
+    formState: { errors, isSubmitting },
+  } = useForm<Fields>({
+    defaultValues: existing ? fromAddress(existing) : EMPTY,
+  })
+  // A server 422 on a field goes under that field (setError); anything else is a form-level note.
+  const [generalError, setGeneralError] = useState<string>()
 
-  function set<K extends keyof Fields>(key: K, value: Fields[K]) {
-    setFields((f) => ({ ...f, [key]: value }))
-  }
-
-  async function submit(e: React.SubmitEvent<HTMLFormElement>) {
-    e.preventDefault()
-    if (submitting.current) return
-    submitting.current = true
-    try {
-      const result = await onSubmit(
-        toInput(fields, existing !== undefined),
-        existing
-      )
-      if (result) setError(result)
-      else onClose()
-    } finally {
-      submitting.current = false
-    }
+  async function submit(values: Fields) {
+    setGeneralError(undefined)
+    // RHF awaits this promise: `isSubmitting` is true until it settles, which also
+    // blocks a second submit while the first request is running.
+    const error = await onSubmit(
+      toInput(values, existing !== undefined),
+      existing
+    )
+    if (!error) return onClose()
+    const fieldErrors = Object.entries(error.fieldErrors).filter(([path]) =>
+      (FIELD_NAMES as readonly string[]).includes(path)
+    )
+    if (fieldErrors.length === 0) return setGeneralError(error.message)
+    for (const [path, message] of fieldErrors)
+      setError(path as TextField, { type: "server", message })
   }
 
   const text = (
-    key: keyof Fields &
-      (
-        | "fullName"
-        | "phone"
-        | "line1"
-        | "line2"
-        | "landmark"
-        | "city"
-        | "state"
-        | "pincode"
-      ),
+    key: TextField,
     label: string,
+    rules: Parameters<typeof register<TextField>>[1],
     extra: React.ComponentProps<"input"> = {}
   ) => (
     <label className="flex flex-col text-sm">
       {label}
       <input
         className="rounded border p-1"
-        value={fields[key]}
-        onChange={(e) => set(key, e.target.value)}
-        aria-invalid={fieldErrors[key] ? true : undefined}
-        aria-describedby={fieldErrors[key] ? `err-${key}` : undefined}
+        aria-invalid={errors[key] ? true : undefined}
+        aria-describedby={errors[key] ? `err-${key}` : undefined}
+        {...register(key, rules)}
         {...extra}
       />
-      {fieldErrors[key] && (
-        <span id={`err-${key}`} className="text-xs text-red-700">
-          {fieldErrors[key]}
+      {errors[key] && (
+        <span id={`err-${key}`} role="alert" className="text-xs text-red-700">
+          {errors[key].message}
         </span>
       )}
     </label>
   )
 
   return (
-    <form onSubmit={submit} className="flex flex-col gap-2" noValidate>
+    <form
+      onSubmit={handleSubmit(submit)}
+      className="flex flex-col gap-2"
+      noValidate
+    >
       <DialogHeader>
         <DialogTitle>{existing ? "Edit address" : "Add address"}</DialogTitle>
         <DialogDescription>Where should we deliver?</DialogDescription>
@@ -198,33 +205,67 @@ function AddressForm({
           {generalError}
         </p>
       )}
-      {text("fullName", "Full name", { autoComplete: "name", autoFocus: true })}
-      {text("phone", "Mobile number", {
-        inputMode: "numeric",
-        autoComplete: "tel-national",
-      })}
-      {text("line1", "House, street", { autoComplete: "address-line1" })}
-      {text("line2", "Area (optional)", { autoComplete: "address-line2" })}
-      {text("landmark", "Landmark (optional)")}
+      {text(
+        "fullName",
+        "Full name",
+        {
+          required: "Enter the recipient's name",
+          minLength: { value: 2, message: "At least 2 characters" },
+        },
+        { autoComplete: "name", autoFocus: true }
+      )}
+      {text(
+        "phone",
+        "Mobile number",
+        {
+          required: "Enter a mobile number",
+          pattern: {
+            value: PHONE_RE,
+            message: "Enter a valid 10-digit mobile number",
+          },
+        },
+        { inputMode: "numeric", autoComplete: "tel-national" }
+      )}
+      {text(
+        "line1",
+        "House, street",
+        {
+          required: "Enter the house / street",
+          minLength: { value: 3, message: "At least 3 characters" },
+        },
+        { autoComplete: "address-line1" }
+      )}
+      {text("line2", "Area (optional)", {}, { autoComplete: "address-line2" })}
+      {text("landmark", "Landmark (optional)", {})}
       <div className="grid grid-cols-2 gap-2">
-        {text("city", "City", { autoComplete: "address-level2" })}
-        {text("state", "State", { autoComplete: "address-level1" })}
+        {text(
+          "city",
+          "City",
+          { required: "Enter the city" },
+          { autoComplete: "address-level2" }
+        )}
+        {text(
+          "state",
+          "State",
+          { required: "Enter the state" },
+          { autoComplete: "address-level1" }
+        )}
       </div>
-      {text("pincode", "Pincode", {
-        inputMode: "numeric",
-        maxLength: 6,
-        autoComplete: "postal-code",
-      })}
+      {text(
+        "pincode",
+        "Pincode",
+        {
+          required: "Enter a pincode",
+          pattern: {
+            value: PINCODE_RE,
+            message: "Enter a valid 6-digit pincode",
+          },
+        },
+        { inputMode: "numeric", maxLength: 6, autoComplete: "postal-code" }
+      )}
       <label className="flex flex-col text-sm">
         Type
-        <select
-          className="rounded border p-1"
-          value={fields.type}
-          onChange={(e) => {
-            const v = ADDRESS_TYPES.find((t) => t === e.target.value)
-            if (v) set("type", v)
-          }}
-        >
+        <select className="rounded border p-1" {...register("type")}>
           {ADDRESS_TYPES.map((t) => (
             <option key={t} value={t}>
               {t}
@@ -234,11 +275,7 @@ function AddressForm({
       </label>
       {!existing && (
         <label className="flex items-center gap-2 text-sm">
-          <input
-            type="checkbox"
-            checked={fields.isDefault}
-            onChange={(e) => set("isDefault", e.target.checked)}
-          />
+          <input type="checkbox" {...register("isDefault")} />
           Make this my default address
         </label>
       )}
@@ -246,8 +283,10 @@ function AddressForm({
         <Button type="button" variant="outline" onClick={onClose}>
           Cancel
         </Button>
-        <Button type="submit" disabled={pending}>
-          {pending && <Loader2 aria-hidden className="animate-spin" />}
+        <Button type="submit" disabled={pending || isSubmitting}>
+          {(pending || isSubmitting) && (
+            <Loader2 aria-hidden className="animate-spin" />
+          )}
           {existing ? "Save changes" : "Add address"}
         </Button>
       </DialogFooter>
