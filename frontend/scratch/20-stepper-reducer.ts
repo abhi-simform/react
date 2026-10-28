@@ -45,5 +45,8 @@ stepperReducer(frozen, { type: "complete", step: 3 })
 assert.throws(() =>
   stepperReducer(initialStepperState, { type: "nope" } as never)
 )
-assert.deepEqual(run({ type: "go", step: 3 }, { type: "reset" }), initialStepperState)
+assert.deepEqual(
+  run({ type: "go", step: 3 }, { type: "reset" }),
+  initialStepperState
+)
 console.log("20-stepper-reducer: ok")

@@ -9,7 +9,7 @@ export type PersistApi = {
 
 /**
  * Persisted stores are created with `skipHydration: true`: the SERVER (and the first client
- * render) must see the empty initial state, or the markup would differ ("Cart 0" vs "Cart 3")
+ * render, once SSR is on) must see the empty initial state, or the markup would differ ("Cart 0" vs "Cart 3")
  * and React would report a hydration mismatch. This hook then:
  * 1. rehydrates from localStorage once, after mount;
  * 2. rehydrates again on a `storage` event for the store's key (another tab changed the cart).

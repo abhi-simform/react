@@ -20,7 +20,7 @@ export function CompareTray() {
   return (
     <section
       aria-label="Compare tray"
-      className="fixed bottom-4 left-4 z-40 flex max-w-sm flex-col gap-2 rounded border bg-white p-3 text-sm shadow-lg"
+      className="fixed bottom-4 left-4 z-40 flex max-w-sm flex-col gap-2 rounded border bg-background p-3 text-sm text-foreground shadow-lg"
     >
       <p className="font-medium">
         Compare ({items.length}/{COMPARE_MAX})

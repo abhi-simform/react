@@ -8,6 +8,7 @@ import { usePersistHydrated } from "@/lib/persistSync"
 import { paths } from "@/lib/paths"
 
 import { selectLines, useCartStore, useCartTotals } from "../cartStore"
+import { clearCart } from "../undo"
 import { CartLineRow } from "./CartLineRow"
 import { CouponBox } from "./CouponBox"
 import { FreeShippingBar } from "./FreeShippingBar"
@@ -48,11 +49,7 @@ export function CartPage() {
       <section aria-label="Cart items">
         <div className="mb-2 flex items-center justify-between">
           <h1 className="text-xl font-medium">Your cart ({lines.length})</h1>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => useCartStore.getState().clear()}
-          >
+          <Button variant="outline" size="sm" onClick={clearCart}>
             Clear cart
           </Button>
         </div>

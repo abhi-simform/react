@@ -2,6 +2,7 @@ import {
   createContext,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
   useRef,
   useState,
@@ -9,6 +10,7 @@ import {
 import { toast } from "sonner"
 
 import { useAuth } from "@/features/auth"
+import { undoableToast } from "@/features/toast"
 import { useFetch } from "@/hooks/useFetch"
 import { toApiError, type ApiError } from "@/lib/api/errors"
 
@@ -35,7 +37,7 @@ type WishlistValue = {
   count: number
   isWishlisted: (productId: string) => boolean
   isPending: (productId: string) => boolean
-  toggle: (productId: string) => Promise<void>
+  toggle: (productId: string, productName?: string) => Promise<void>
 }
 
 const WishlistContext = createContext<WishlistValue | null>(null)
@@ -65,32 +67,47 @@ export function WishlistProvider({ children }: { children: React.ReactNode }) {
         : "loading"
   const setIds = fetched.setData
 
-  const toggle = useCallback(
-    async (productId: string) => {
+  // Undo needs to call `setMembership` again, which it cannot reference while defining it:
+  // the latest version is kept in a ref (written in an effect, read in the toast's click).
+  const reAdd = useRef<(id: string, name?: string) => void>(() => {})
+
+  /**
+   * Set ONE product's membership (optimistic, with rollback). `toggle` and the Undo action
+   * both go through here, so Undo is just "set it back" with the same concurrency guard.
+   */
+  const setMembership = useCallback(
+    async (productId: string, member: boolean, productName?: string) => {
       if (!userId || !ids || busy.current.has(productId)) return
-      const wasWishlisted = ids.has(productId)
+      if (ids.has(productId) === member) return
       busy.current.add(productId)
       setPending((p) => new Set(p).add(productId))
 
-      const setMember = (member: boolean) =>
+      const apply = (value: boolean) =>
         setIds((current) => {
           const next = new Set(current)
-          if (member) next.add(productId)
+          if (value) next.add(productId)
           else next.delete(productId)
           return next
         })
 
-      setMember(!wasWishlisted) // optimistic
+      apply(member) // optimistic
       try {
-        await (wasWishlisted
-          ? removeFromWishlist(productId)
-          : addToWishlist(productId))
+        await (member
+          ? addToWishlist(productId)
+          : removeFromWishlist(productId))
+        if (!member) {
+          // Removed: no confirm dialog, an Undo toast instead (8.5). Undo re-adds it.
+          undoableToast(
+            `Removed ${productName ?? "the product"} from your wishlist`,
+            () => reAdd.current(productId, productName)
+          )
+        }
       } catch (err) {
-        setMember(wasWishlisted) // roll back exactly this id
+        apply(!member) // roll back exactly this id
         toast.error(
-          wasWishlisted
-            ? "Could not remove it from your wishlist"
-            : "Could not save it to your wishlist",
+          member
+            ? "Could not save it to your wishlist"
+            : "Could not remove it from your wishlist",
           { description: toApiError(err).message }
         )
       } finally {
@@ -103,6 +120,16 @@ export function WishlistProvider({ children }: { children: React.ReactNode }) {
       }
     },
     [userId, ids, setIds]
+  )
+
+  useEffect(() => {
+    reAdd.current = (id, name) => void setMembership(id, true, name)
+  })
+
+  const toggle = useCallback(
+    (productId: string, productName?: string) =>
+      setMembership(productId, !(ids?.has(productId) ?? false), productName),
+    [setMembership, ids]
   )
 
   const value = useMemo<WishlistValue>(

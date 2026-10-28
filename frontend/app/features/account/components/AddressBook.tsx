@@ -1,6 +1,8 @@
 import { useState } from "react"
 import { toast } from "sonner"
 
+import { toApiError } from "@/lib/api/errors"
+
 import { MapPin } from "lucide-react"
 
 import { AsyncView } from "@/components/common/AsyncView"
@@ -20,11 +22,24 @@ export function AddressBook() {
   const [target, setTarget] = useState<Address | "new">()
 
   async function save(input: AddressInput, existing: Address | undefined) {
-    const error = existing
-      ? await book.update(existing.id, input)
-      : await book.create(input)
-    if (!error) toast.success(existing ? "Address updated" : "Address added")
-    return error
+    // `book.update/create` RESOLVE with the error (the form maps field errors from it). For
+    // `toast.promise` the failure must be a rejection, so adapt: one toast that goes
+    // loading -> success/error by itself, and the dialog still gets the error object back.
+    const work = (
+      existing ? book.update(existing.id, input) : book.create(input)
+    ).then((error) => {
+      if (error) throw error
+    })
+    toast.promise(work, {
+      loading: "Saving address...",
+      success: existing ? "Address updated" : "Address added",
+      error: (e: unknown) =>
+        `Could not save the address: ${toApiError(e).message}`,
+    })
+    return work.then(
+      () => null,
+      (error: unknown) => toApiError(error)
+    )
   }
 
   async function removeRow(id: string) {

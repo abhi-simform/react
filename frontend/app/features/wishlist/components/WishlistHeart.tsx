@@ -33,7 +33,7 @@ export function WishlistHeart({ productId, productName, className }: Props) {
       })
       return
     }
-    if (!inert) void toggle(productId)
+    if (!inert) void toggle(productId, productName)
   }
 
   return (

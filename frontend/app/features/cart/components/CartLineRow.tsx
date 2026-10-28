@@ -6,6 +6,7 @@ import { formatCurrency } from "@/lib/format"
 import { paths } from "@/lib/paths"
 
 import { useCartStore } from "../cartStore"
+import { removeCartLine } from "../undo"
 import type { GuestCartLine } from "../types"
 
 /**
@@ -40,7 +41,7 @@ export function CartLineRow({ line }: { line: GuestCartLine }) {
           <Button
             variant="outline"
             size="sm"
-            onClick={() => useCartStore.getState().remove(line.sku)}
+            onClick={() => removeCartLine(line.sku)}
           >
             Remove
             <span className="sr-only"> {line.name}</span>
