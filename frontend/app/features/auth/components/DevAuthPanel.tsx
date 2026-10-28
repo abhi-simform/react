@@ -1,9 +1,23 @@
-import { useAuth } from "../AuthContext"
+import { toast } from "sonner"
 
-/** Dev-only: flip the fake session without going through a form. Not shipped in production builds. */
+import { useAuth } from "../AuthContext"
+import type { Role } from "../types"
+
+/** Dev-only: sign in as a seeded account (REAL token from the API) without a form. Not shipped in production builds. */
 export function DevAuthPanel() {
   const { status, user, login, logout } = useAuth()
   if (!import.meta.env.DEV) return null
+
+  async function signIn(role: Role) {
+    try {
+      await login(role)
+    } catch (error) {
+      toast.error(
+        error instanceof Error ? error.message : "Could not sign in as " + role
+      )
+    }
+  }
+
   return (
     <div
       aria-label="Dev auth panel"
@@ -19,12 +33,16 @@ export function DevAuthPanel() {
           key={role}
           type="button"
           className="rounded border px-1"
-          onClick={() => login(role)}
+          onClick={() => void signIn(role)}
         >
           Sign in as {role}
         </button>
       ))}
-      <button type="button" className="rounded border px-1" onClick={logout}>
+      <button
+        type="button"
+        className="rounded border px-1"
+        onClick={() => void logout()}
+      >
         Sign out
       </button>
     </div>

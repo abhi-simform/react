@@ -1,27 +1,41 @@
-import { createContext, useContext, useEffect, useMemo, useState } from "react"
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react"
 
+import { ApiError } from "@/lib/api/errors"
 import { useLocalStorage } from "@/hooks/useLocalStorage"
 
+import {
+  endSession,
+  loginAsDevRole,
+  onSessionLost,
+  refreshSession,
+} from "./session"
 import type { AuthStatus, AuthUser, Role } from "./types"
 
 /**
- * STUB (Stage 5.6): a fake user in localStorage, toggled by the dev panel or the
- * login page. Stage 8 moves this into a real context and Stage 10 swaps the
- * source for the API (access token in memory + refresh cookie). The shape
- * `{ status, user, login, logout }` is what the guards depend on, so they will
- * not change.
+ * STUB (Stage 5.6, real token since 6.3): the user shape and the guards are the
+ * final ones, but the source is still the dev accounts (see `session.ts`).
+ * localStorage only remembers "someone was signed in" so a refresh knows to ask
+ * the API for a new access token; the token itself is never persisted.
+ * Stage 8 moves this into a real context and Stage 10 swaps the login source.
  */
 type AuthValue = {
   status: AuthStatus
   user: AuthUser | null
-  login: (role?: Role) => void
-  logout: () => void
+  /** Rejects when the API is unreachable or refuses the dev account. */
+  login: (role?: Role) => Promise<void>
+  logout: () => Promise<void>
 }
 
 const AuthContext = createContext<AuthValue | null>(null)
 
 const STORAGE_KEY = "shopsphere.devUser"
-const RESTORE_DELAY_MS = 300
 
 function isAuthUser(value: unknown): value is AuthUser {
   return (
@@ -40,41 +54,82 @@ function isAuthUser(value: unknown): value is AuthUser {
   )
 }
 
-const fakeUser = (role: Role): AuthUser => ({
-  id: `dev-${role}`,
-  name: `Dev ${role}`,
-  email: `${role}@shopsphere.dev`,
-  role,
-})
+function hasRememberedUser(): boolean {
+  try {
+    const raw = window.localStorage.getItem(STORAGE_KEY)
+    return raw !== null && isAuthUser(JSON.parse(raw))
+  } catch {
+    return false
+  }
+}
+
+type Session = { status: AuthStatus; user: AuthUser | null }
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [stored, setStored, clear] = useLocalStorage<AuthUser | null>(
+  const [, setRemembered, forget] = useLocalStorage<AuthUser | null>(
     STORAGE_KEY,
     null,
     (v): v is AuthUser | null => v === null || isAuthUser(v)
   )
-  // The real app asks the API ("who am I?") on every page load, which takes time.
-  // The timer simulates that wait so the "loading" status is real and the guards must handle it.
-  const [restored, setRestored] = useState(false)
-  useEffect(() => {
-    const timer = setTimeout(() => setRestored(true), RESTORE_DELAY_MS)
-    return () => clearTimeout(timer)
-  }, [])
+  // "loading" until we know: the restore below asks the API, which takes time.
+  const [session, setSession] = useState<Session>({
+    status: "loading",
+    user: null,
+  })
 
-  const status: AuthStatus = !restored
-    ? "loading"
-    : stored
-      ? "authenticated"
-      : "anonymous"
+  useEffect(() => {
+    let cancelled = false
+    const restore = hasRememberedUser()
+      ? refreshSession()
+      : Promise.resolve(null)
+    restore
+      .then((user) => {
+        if (cancelled) return
+        setSession(
+          user
+            ? { status: "authenticated", user }
+            : { status: "anonymous", user: null }
+        )
+      })
+      .catch((error: unknown) => {
+        if (cancelled) return
+        // 401 = the cookie is gone or expired: forget. Network error: keep the hint,
+        // the next reload with the backend up restores the session.
+        if (error instanceof ApiError && error.status === 401) forget()
+        setSession({ status: "anonymous", user: null })
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [forget])
+
+  // A 401 that a refresh could not fix: the session is over everywhere in the app.
+  useEffect(
+    () =>
+      onSessionLost(() => {
+        forget()
+        setSession({ status: "anonymous", user: null })
+      }),
+    [forget]
+  )
+
+  const login = useCallback(
+    async (role: Role = "customer") => {
+      const user = await loginAsDevRole(role)
+      setRemembered(user)
+      setSession({ status: "authenticated", user })
+    },
+    [setRemembered]
+  )
+  const logout = useCallback(async () => {
+    forget()
+    setSession({ status: "anonymous", user: null })
+    await endSession()
+  }, [forget])
 
   const value = useMemo<AuthValue>(
-    () => ({
-      status,
-      user: status === "authenticated" ? stored : null,
-      login: (role = "customer") => setStored(fakeUser(role)),
-      logout: clear,
-    }),
-    [status, stored, setStored, clear]
+    () => ({ ...session, login, logout }),
+    [session, login, logout]
   )
   return <AuthContext value={value}>{children}</AuthContext>
 }

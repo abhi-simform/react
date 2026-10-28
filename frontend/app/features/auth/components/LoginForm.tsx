@@ -13,15 +13,24 @@ export function LoginForm() {
   const navigate = useNavigate()
   const location = useLocation()
   const [role, setRole] = useState<Role>("customer")
+  const [pending, setPending] = useState(false)
+  const [error, setError] = useState<string>()
 
   return (
     <form
       className="mx-auto flex max-w-sm flex-col gap-3 p-4"
-      onSubmit={(e) => {
+      onSubmit={async (e) => {
         e.preventDefault()
-        login(role)
-        // `replace`: Back must not return to the login form.
-        navigate(getReturnTo(location.state), { replace: true })
+        setPending(true)
+        setError(undefined)
+        try {
+          await login(role) // real API call: needs the backend and the seeded accounts
+          // `replace`: Back must not return to the login form.
+          navigate(getReturnTo(location.state), { replace: true })
+        } catch (err) {
+          setError(err instanceof Error ? err.message : "Could not sign in")
+          setPending(false)
+        }
       }}
     >
       <h1 className="text-xl font-medium">Log in</h1>
@@ -41,7 +50,14 @@ export function LoginForm() {
           <option value="admin">admin</option>
         </select>
       </label>
-      <Button type="submit">Log in</Button>
+      {error && (
+        <p role="alert" className="text-sm text-red-700">
+          {error}
+        </p>
+      )}
+      <Button type="submit" disabled={pending}>
+        {pending ? "Signing in..." : "Log in"}
+      </Button>
     </form>
   )
 }

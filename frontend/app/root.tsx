@@ -2,6 +2,7 @@ import { Links, Meta, Outlet, Scripts, ScrollRestoration } from "react-router"
 
 import type { Route } from "./+types/root"
 import { RouteErrorView } from "@/components/common/RouteErrorView"
+import { Toaster } from "@/components/ui/sonner"
 import { AuthProvider } from "@/features/auth"
 import { pageTitle } from "@/lib/pageTitle"
 
@@ -34,6 +35,8 @@ export default function App() {
   return (
     <AuthProvider>
       <Outlet />
+      {/* Toasts (sonner): role="status" live region, used for action feedback. */}
+      <Toaster position="bottom-right" />
     </AuthProvider>
   )
 }
