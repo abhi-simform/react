@@ -3,7 +3,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query"
 import { findProductInCache, productQueries } from "@/features/catalog"
 import { toAsyncState } from "@/lib/queryState"
 
-import { relatedQueries } from "../queries"
+import { relatedQueries, similarQueries } from "../queries"
 
 /**
  * `GET /products/:slug` as a query: shared by the PDP, prefetch and tests. While the full
@@ -23,3 +23,13 @@ export function useProduct(slug: string) {
 /** A few other products from the same category, for the "related" links. */
 export const useRelatedProducts = (categorySlug: string, excludeSlug: string) =>
   toAsyncState(useQuery(relatedQueries.list(categorySlug, excludeSlug)))
+
+/** Dependent on the product (9.9): `enabled` is false until the real detail arrived. */
+export const useSimilarProducts = (
+  productId: string,
+  categorySlug: string,
+  enabled: boolean
+) =>
+  toAsyncState(
+    useQuery({ ...similarQueries.list(productId, categorySlug), enabled })
+  )

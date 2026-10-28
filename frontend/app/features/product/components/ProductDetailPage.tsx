@@ -6,8 +6,18 @@ import { useDocumentTitle } from "@/hooks/useDocumentTitle"
 import { NotFoundError } from "@/lib/notFound"
 import { paths } from "@/lib/paths"
 
-import { toProductDetailVM } from "@/features/catalog"
-import { useProduct, useRelatedProducts } from "../hooks/useProduct"
+import {
+  ProductGrid,
+  toProductCardVM,
+  toProductDetailVM,
+} from "@/features/catalog"
+import { AsyncView } from "@/components/common/AsyncView"
+import { ProductGridSkeleton } from "@/components/common/Skeletons"
+import {
+  useProduct,
+  useRelatedProducts,
+  useSimilarProducts,
+} from "../hooks/useProduct"
 import { variantsFixture } from "@/test/fixtures/variants"
 
 import { ProductDetailView } from "./ProductDetailView"
@@ -39,6 +49,38 @@ function RelatedProducts({
         ))}
       </ul>
     </nav>
+  )
+}
+
+/**
+ * "Similar products" (9.9): DEPENDENT on the product (needs its id and category), so it is
+ * `enabled` only once the real detail is here, with its own skeleton and retry.
+ */
+function SimilarProducts({
+  productId,
+  categorySlug,
+  enabled,
+}: {
+  productId: string
+  categorySlug: string
+  enabled: boolean
+}) {
+  const similar = useSimilarProducts(productId, categorySlug, enabled)
+  return (
+    <section aria-labelledby="similar-title" className="mt-6">
+      <h2 id="similar-title" className="mb-2 font-medium">
+        Similar products
+      </h2>
+      <AsyncView
+        state={similar}
+        loading={<ProductGridSkeleton count={4} />}
+        empty={(items) =>
+          items.length === 0 && <p className="text-sm">Nothing similar yet.</p>
+        }
+      >
+        {(items) => <ProductGrid products={items.map(toProductCardVM)} />}
+      </AsyncView>
+    </section>
   )
 }
 
@@ -95,6 +137,11 @@ export function ProductDetailPage({ slug }: { slug: string }) {
           product={view}
           variants={variantsFixture(product)}
           detailsPending={state.isPlaceholder}
+        />
+        <SimilarProducts
+          productId={product._id}
+          categorySlug={product.category.slug}
+          enabled={!state.isPlaceholder}
         />
         <RelatedProducts
           categorySlug={product.category.slug}
