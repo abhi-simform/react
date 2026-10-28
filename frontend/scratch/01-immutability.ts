@@ -16,8 +16,14 @@ assert.equal(lines[0]?.qty, 1, "input untouched")
 assert.notEqual(bumped, lines)
 assert.equal(bumped[1], lines[1], "unchanged lines keep their reference")
 
-assert.deepEqual(removeLine(lines, "A").map((l) => l.sku), ["B"])
-assert.deepEqual(updateQty(lines, "B", 0).map((l) => l.sku), ["A"])
+assert.deepEqual(
+  removeLine(lines, "A").map((l) => l.sku),
+  ["B"]
+)
+assert.deepEqual(
+  updateQty(lines, "B", 0).map((l) => l.sku),
+  ["A"]
+)
 assert.equal(lines.length, 2)
 
 const selected = deepFreeze(new Set(["x"]))

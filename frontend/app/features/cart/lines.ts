@@ -10,6 +10,9 @@ export function updateQty(
   return lines.map((line) => (line.sku === sku ? { ...line, qty } : line))
 }
 
-export function removeLine(lines: readonly CartLine[], sku: string): CartLine[] {
+export function removeLine(
+  lines: readonly CartLine[],
+  sku: string
+): CartLine[] {
   return lines.filter((line) => line.sku !== sku)
 }

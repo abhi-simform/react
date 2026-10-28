@@ -51,3 +51,9 @@ Reality vs plan: prices in the API are integer **rupees** (not paise), products 
 ## 1.1 Destructuring, spread, rest, immutability
 
 `updateQty`/`removeLine` (`features/cart/lines.ts`) and `toggle`/`deepFreeze` (`lib/immutable.ts`) return new arrays/objects. `scratch/01-immutability.ts` runs them on deep-frozen input and nothing throws; pushing to the same frozen array does throw a `TypeError`. Note `Object.freeze` on a `Set` does not stop `.add()`, so the toggle proof relies on the result being a different Set. `arr.push(x); setArr(arr)` does not re-render because React compares by reference (`Object.is`): same array, so state is "unchanged".
+
+## 1.2 filter, map, find, some, every
+
+`filterProducts` (`features/catalog/utils.ts`) is a conjunction of predicates; empty/undefined filters do not restrict (an empty brand list means "no brand filter", otherwise selecting then un-selecting a brand would show nothing). Brands use a `Set` for O(1) lookup, search lowercases `name + brand`. `scratch/02-filters.ts` asserts 5 combinations plus each filter alone; the expected counts came from an independent throwaway Python script over the JSON (not from the code under test), and the same values were seen in the `/scratch/explorer` UI (e.g. search "shirt" = 10, rating >= 4.5 = 82, Apple + rating >= 4.5 = 2).
+Stretch done: `filterWithFacets` returns `{ items, facets.brands }` where brand counts ignore the brand filter itself (disjunctive facets). Selecting Apple still shows "OnePlus (4)" so users can widen the OR. The backend B1 facet counts must do the same, otherwise ticking one brand makes all the others read 0.
+Pitfall seen in the explorer's number inputs: `Number("")` is `0`, so an empty box must map to `undefined`, not 0 (same trap as `z.coerce.number()` later).
