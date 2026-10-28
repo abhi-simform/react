@@ -5,6 +5,7 @@ import { healthRoutes } from "./modules/health/health.routes.js"
 import { productRoutes } from "./modules/products/product.routes.js"
 import { addressRoutes } from "./modules/addresses/address.routes.js"
 import { pincodeRoutes } from "./modules/pincodes/pincode.routes.js"
+import { uploadRoutes } from "./modules/uploads/upload.routes.js"
 import { wishlistRoutes } from "./modules/wishlist/wishlist.routes.js"
 import { userRoutes } from "./modules/users/user.routes.js"
 
@@ -19,3 +20,4 @@ routes.use("/products", productRoutes)
 routes.use("/wishlist", wishlistRoutes)
 routes.use("/addresses", addressRoutes)
 routes.use("/pincodes", pincodeRoutes)
+routes.use("/uploads", uploadRoutes)

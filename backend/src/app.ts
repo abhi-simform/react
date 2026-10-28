@@ -13,6 +13,7 @@ import { errorHandler } from "./middleware/errorHandler.js"
 import { notFound } from "./middleware/notFound.js"
 import { apiLimiter } from "./middleware/rateLimit.js"
 import { openApiDocument } from "./openapi.js"
+import { mountUploadFiles } from "./modules/uploads/upload.routes.js"
 import { routes } from "./routes.js"
 
 // App factory: builds the Express app WITHOUT listening, so tests can import it.
@@ -38,6 +39,7 @@ export function createApp() {
   app.use(cookieParser())
   app.use(API_PREFIX, apiLimiter)
 
+  mountUploadFiles(app) // GET /uploads/<file> (local-disk adapter), outside the /api/v1 prefix
   app.use("/api/docs", swaggerUi.serve, swaggerUi.setup(openApiDocument))
   app.use(API_PREFIX, routes)
 

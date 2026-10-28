@@ -30,6 +30,15 @@ const schema = z.object({
   SMTP_PORT: z.coerce.number().int().default(1025),
   EMAIL_FROM: z.string().default("ShopSphere <no-reply@shopsphere.local>"),
 
+  // Image uploads (B7). Local disk for development; the ImageStorage interface in
+  // modules/uploads/storage.ts is where a Cloudinary/S3 adapter plugs in later.
+  UPLOAD_DIR: z.string().default("uploads"),
+  UPLOAD_MAX_BYTES: z.coerce
+    .number()
+    .int()
+    .positive()
+    .default(2 * 1024 * 1024),
+
   LOG_LEVEL: z
     .enum(["fatal", "error", "warn", "info", "debug", "trace", "silent"])
     .default("info"),
