@@ -7,6 +7,9 @@ import { QuantityStepper } from "@/components/common/QuantityStepper"
 import { Button } from "@/components/ui/button"
 import type { ProductDetailVM } from "@/features/catalog"
 import { toPriceVM } from "@/lib/format"
+import { toPaise } from "@/lib/money"
+import { addToCart } from "@/features/cart"
+import { CompareToggle } from "@/features/compare"
 import { DeliveryCheck } from "@/features/delivery"
 import { WishlistHeart } from "@/features/wishlist"
 import type { Variant } from "@/types/domain"
@@ -78,7 +81,24 @@ export function ProductDetailView({
         <QuantityStepper value={quantity} onValueChange={setQty} max={maxQty} />
         <Button
           disabled={!canBuy}
-          onClick={() => console.log("add to cart", variant?.sku, quantity)}
+          onClick={() => {
+            if (!variant) return
+            // Name carries the chosen options: two variants of one product are two cart lines.
+            const options = Object.values(variant.attributes).join(", ")
+            addToCart(
+              {
+                sku: variant.sku,
+                productId: product.id,
+                slug: product.slug,
+                name: options ? `${product.name} (${options})` : product.name,
+                imageUrl: product.image.url,
+                unitPrice: toPaise(variant.price),
+                mrp: toPaise(variant.mrp),
+                stock: variant.stock,
+              },
+              quantity
+            )
+          }}
         >
           Add to cart
         </Button>
@@ -91,6 +111,14 @@ export function ProductDetailView({
             className="border"
           />
           <span aria-hidden>Wishlist</span>
+          <CompareToggle
+            item={{
+              id: product.id,
+              slug: product.slug,
+              name: product.name,
+              imageUrl: product.image.url,
+            }}
+          />
         </div>
       </div>
       <div className="md:col-span-2">

@@ -3,7 +3,10 @@ import { Link } from "react-router"
 import { Price } from "@/components/common/Price"
 import { Rating } from "@/components/common/Rating"
 import { Button } from "@/components/ui/button"
+import { addToCart } from "@/features/cart"
+import { CompareToggle } from "@/features/compare"
 import { WishlistHeart } from "@/features/wishlist"
+import { toPaise } from "@/lib/money"
 import { paths } from "@/lib/paths"
 import { cn } from "@/lib/utils"
 
@@ -16,6 +19,7 @@ type ProductCardProps = {
   product: ProductCardProduct
   /** Slot content (badges) rendered over the image. Use `ProductCard.Badge`. */
   children?: React.ReactNode
+  /** Overrides the default (add to the guest cart): labs and tests pass their own. */
   onAddToCart?: (product: ProductCardProduct) => void
   onNotifyMe?: (product: ProductCardProduct) => void
   /** E.g. the flash sale ended: the button stays but cannot be used. */
@@ -86,6 +90,15 @@ export function ProductCard({
           <p className="text-xs text-neutral-500">No ratings yet</p>
         )}
         <Price price={product.price} />
+        <CompareToggle
+          item={{
+            id: product.id,
+            slug: product.slug,
+            name: product.name,
+            imageUrl: product.image.url,
+          }}
+          className="relative z-10 w-fit"
+        />
         {product.stockNote && (
           <p
             className={cn(
@@ -112,7 +125,20 @@ export function ProductCard({
           size="sm"
           className="relative z-10"
           disabled={addToCartDisabled}
-          onClick={() => onAddToCart?.(product)}
+          onClick={() =>
+            onAddToCart
+              ? onAddToCart(product)
+              : addToCart({
+                  sku: product.sku,
+                  productId: product.id,
+                  slug: product.slug,
+                  name: product.name,
+                  imageUrl: product.image.url,
+                  unitPrice: toPaise(product.amount),
+                  mrp: toPaise(product.mrpAmount),
+                  stock: product.stock,
+                })
+          }
         >
           Add to cart
         </Button>

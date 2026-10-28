@@ -64,3 +64,31 @@ function couponDiscount(
   // A coupon can never make the subtotal negative.
   return Math.min(capped, subtotal)
 }
+
+export type FreeShippingProgress = {
+  /** Paise still to add (whole rupees) before shipping is free; 0 when it already is. */
+  remaining: number
+  /** 0..1, for a progress bar. */
+  ratio: number
+  qualified: boolean
+}
+
+/**
+ * "Add Rs 120 more for free delivery". Derived from the subtotal, never stored. Free is
+ * strictly ABOVE the threshold (same rule as `computeTotals`), so a subtotal exactly on it
+ * still needs one more rupee; amounts are whole rupees in practice, so we round up to one.
+ */
+export function freeShippingProgress(
+  subtotal: number,
+  { freeAbove }: ShippingRules = DEFAULT_SHIPPING_RULES
+): FreeShippingProgress {
+  const qualified = subtotal > freeAbove
+  const remaining = qualified
+    ? 0
+    : (Math.floor((freeAbove - subtotal) / 100) + 1) * 100
+  return {
+    remaining,
+    ratio: freeAbove === 0 ? 1 : Math.min(1, subtotal / freeAbove),
+    qualified,
+  }
+}

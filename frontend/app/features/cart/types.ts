@@ -38,3 +38,27 @@ export type CartTotals = {
 
 /** What the UI sends when adding to the cart: the server decides the price snapshot. */
 export type CartItemInput = Omit<CartItem, "priceSnapshot">
+
+/**
+ * A line of the GUEST cart (8.3, client state). `CartLine` is what the totals need; the rest is
+ * a display snapshot taken when the product was added, because a guest cart has no server to
+ * ask. `stock` is the stock at that moment: the clamp uses it, and re-adding refreshes it.
+ * Stage 9's logged-in cart is server state and replaces these snapshots with the server's.
+ */
+export type GuestCartLine = CartLine & {
+  productId: string
+  slug: string
+  name: string
+  imageUrl: string
+  stock: number
+}
+
+/** What a caller hands to `add`: the line without a quantity. */
+export type CartLineInput = Omit<GuestCartLine, "qty">
+
+/** Captured by `remove` so an undo can put the line back where it was (8.5). */
+export type RemovedLine = {
+  line: GuestCartLine
+  /** Every sku in the cart, in order, at the moment of removal (includes the removed one). */
+  order: readonly string[]
+}

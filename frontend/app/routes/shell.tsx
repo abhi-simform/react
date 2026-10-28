@@ -6,7 +6,9 @@ import { RouteErrorView } from "@/components/common/RouteErrorView"
 import { Breadcrumbs } from "@/components/layout/Breadcrumbs"
 import { Footer } from "@/components/layout/Footer"
 import { Header } from "@/components/layout/Header"
+import { StoresSync } from "@/components/common/StoresSync"
 import { DevAuthPanel } from "@/features/auth"
+import { CompareTray } from "@/features/compare"
 import { useRouteFocus } from "@/hooks/useRouteFocus"
 
 import { getBreadcrumb } from "@/types/route-handle"
@@ -45,6 +47,8 @@ export default function ShellLayout() {
       </main>
       <Footer />
       <DevAuthPanel />
+      <CompareTray />
+      <StoresSync />
       {/* Written by useRouteFocus: tells screen readers the page changed. */}
       <div ref={liveRef} role="status" aria-live="polite" className="sr-only" />
     </div>

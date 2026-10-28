@@ -12,6 +12,7 @@ export const wishlistProductSchema = z.object({
   name: z.string(),
   slug: z.string(),
   brand: z.string(),
+  sku: z.string(),
   price: z.number().nonnegative(),
   mrp: z.number().nonnegative(),
   discountPercent: z.number().min(0).max(100),

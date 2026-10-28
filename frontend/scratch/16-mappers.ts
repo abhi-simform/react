@@ -21,6 +21,7 @@ const base = {
   ratingAvg: 4.3,
   ratingCount: 1234,
   stock: 3,
+  sku: "PH-1",
 }
 
 const card = toProductCardVM(base)

@@ -42,11 +42,16 @@ export type ProductCardVM = {
   slug: string
   name: string
   brand: string
+  sku: string
+  /** Units available now (the cart clamps to it). */
+  stock: number
   /** The first image, or the placeholder. */
   image: ImageVM
   price: PriceVM
   /** Selling price in whole rupees (for comparisons; never display this directly). */
   amount: number
+  /** List price (MRP) in whole rupees. */
+  mrpAmount: number
   /** `null` = nobody has rated it yet: render "No ratings yet", not "0.0 (0)". */
   rating: RatingVM | null
   inStock: boolean
@@ -67,6 +72,7 @@ export type ProductCardSource = Pick<
   | "ratingAvg"
   | "ratingCount"
   | "stock"
+  | "sku"
 >
 
 export function toRatingVM(average: number, count: number): RatingVM | null {
@@ -81,9 +87,12 @@ export function toProductCardVM(product: ProductCardSource): ProductCardVM {
     slug: product.slug,
     name: product.name,
     brand: product.brand,
+    sku: product.sku,
+    stock: product.stock,
     image: toImages(product.images, product.name)[0]!,
     price: toPriceVM(product.price, product.mrp),
     amount: product.price,
+    mrpAmount: product.mrp,
     rating: toRatingVM(product.ratingAvg, product.ratingCount),
     inStock,
     stockNote: !inStock
