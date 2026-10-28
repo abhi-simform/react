@@ -1,9 +1,16 @@
+import { lazy, Suspense, useState } from "react"
+
+import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import type { ProductDetail } from "@/features/catalog"
 
-import { ReviewForm } from "./ReviewForm"
+// The review editor is big and most visitors never write a review: load it on demand.
+const ReviewForm = lazy(() =>
+  import("./ReviewForm").then((m) => ({ default: m.ReviewForm }))
+)
 
 export function ProductTabs({ product }: { product: ProductDetail }) {
+  const [writing, setWriting] = useState(false)
   return (
     <Tabs defaultValue="description">
       <TabsList>
@@ -36,7 +43,17 @@ export function ProductTabs({ product }: { product: ProductDetail }) {
           {product.ratingAvg}. The review list arrives with the reviews backend
           phase.
         </p>
-        <ReviewForm />
+        {writing ? (
+          <Suspense
+            fallback={<p role="status">Loading the review editor...</p>}
+          >
+            <ReviewForm />
+          </Suspense>
+        ) : (
+          <Button variant="outline" onClick={() => setWriting(true)}>
+            Write a review
+          </Button>
+        )}
       </TabsContent>
       <TabsContent value="qa" className="text-sm">
         No questions yet.

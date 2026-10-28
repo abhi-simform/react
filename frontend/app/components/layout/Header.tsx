@@ -1,6 +1,7 @@
 import { Moon } from "lucide-react"
 import { Link, NavLink } from "react-router"
 
+import { CompareTrayButton } from "@/features/compare"
 import { CartDrawer } from "@/features/cart/components/CartDrawer"
 import { SearchBox } from "@/features/search/components/SearchBox"
 import { useMediaQuery } from "@/hooks/useMediaQuery"
@@ -57,6 +58,7 @@ export function Header() {
         >
           <Moon aria-hidden className="size-4" />
         </button>
+        <CompareTrayButton />
         <CartDrawer />
       </nav>
     </header>
