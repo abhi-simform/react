@@ -172,7 +172,7 @@ export function ProductForm() {
       <fieldset className="flex flex-col gap-2 rounded border p-2">
         <legend className="px-1 text-sm font-medium">Variants</legend>
         {variantsError && (
-          <p role="alert" className="text-xs text-red-700">
+          <p role="alert" className="text-xs text-destructive">
             {variantsError}
           </p>
         )}
@@ -342,7 +342,7 @@ export function ProductForm() {
           </h2>
           <pre
             data-testid="payload"
-            className="overflow-auto rounded bg-neutral-100 p-2 text-xs"
+            className="overflow-auto rounded bg-muted p-2 text-xs"
           >
             {/* A File serialises to {}: show what matters about each one. */}
             {JSON.stringify(

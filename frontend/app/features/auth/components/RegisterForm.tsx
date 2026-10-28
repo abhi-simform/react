@@ -135,7 +135,7 @@ export function RegisterForm() {
       <Button type="submit" disabled={isSubmitting}>
         {isSubmitting ? "Creating..." : "Create account"}
       </Button>
-      <p className="text-center text-sm text-neutral-500">or</p>
+      <p className="text-center text-sm text-muted-foreground">or</p>
       <GoogleButton label="Sign up with Google" />
       <p className="text-sm">
         Already have an account?{" "}

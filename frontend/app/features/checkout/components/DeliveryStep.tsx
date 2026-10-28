@@ -59,7 +59,7 @@ export function DeliveryStep() {
           Express (+ {formatCurrency(EXPRESS_FEE)}), from tomorrow
         </label>
         {errors.method && (
-          <p role="alert" className="text-xs text-red-700">
+          <p role="alert" className="text-xs text-destructive">
             {errors.method.message}
           </p>
         )}
@@ -100,7 +100,7 @@ export function DeliveryStep() {
           </tbody>
         </table>
         {errors.slot && (
-          <p id="slot-error" role="alert" className="text-xs text-red-700">
+          <p id="slot-error" role="alert" className="text-xs text-destructive">
             {errors.slot.message}
           </p>
         )}

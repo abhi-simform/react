@@ -118,7 +118,7 @@ export function CartPage() {
                 </dl>
                 {totals.savings > 0 && (
                   <p
-                    className="text-sm text-green-800"
+                    className="text-sm text-success"
                     data-testid="cart-savings"
                   >
                     You save {formatCurrency(totals.savings)} on this order
@@ -133,7 +133,7 @@ export function CartPage() {
                   Proceed to checkout
                 </Button>
                 {blocked && (
-                  <p className="text-xs text-red-700">
+                  <p className="text-xs text-destructive">
                     Resolve the items above to continue.
                   </p>
                 )}

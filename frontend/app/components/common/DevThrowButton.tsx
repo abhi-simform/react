@@ -12,7 +12,7 @@ export function DevThrowButton() {
   return (
     <button
       type="button"
-      className="rounded border border-red-400 px-2 py-1 text-sm"
+      className="rounded border border-destructive/50 px-2 py-1 text-sm"
       onClick={() => setBoom(true)}
     >
       Throw error (dev)

@@ -250,3 +250,11 @@ Notes:
 - `layout` animations use transforms (FLIP) and `mode="popLayout"` lets neighbours glide up while the removed line fades; I did not animate `height` (a layout property).
 - The CSS-only pieces (bump, fade) cost no JS. Motion is used where state has to be tracked (exit animations, layout), CSS where it does not.
 - Honest limit: frame timing is a requestAnimationFrame sample, not a DevTools Performance trace; "60 fps" here means no frame over 33 ms except the one state update.
+
+## 13.7 Dark mode, theming and design tokens
+
+Not a speed change, but it has a performance-shaped acceptance criterion (no flash) and a cost to account for:
+
+- **Flash of the wrong theme**: the SPA ships a blank HTML shell, so a dark-mode visitor saw a white canvas until the app's JavaScript ran and `ThemeProvider` added `.dark`. The inline `<head>` script (`features/theme/themeScript.ts`, ~300 bytes) now sets the class and `color-scheme` before the first paint. Proof (`e2e/theme.spec.ts`, Playwright, production build): with a stored dark choice, `<html class="dark">` is set when the browser records `first-paint` (**true with the script, false with the script stripped from the HTML** = the control). The measurement uses `first-paint`, not `first-contentful-paint`: the flash is the blank canvas before any content exists.
+- Cost of the script: one synchronous inline script, ~300 B, `localStorage.getItem` + `matchMedia`; no network. It adds a CSP hash requirement: `public/_headers` pins `sha256-...` and a unit test recomputes the hash from the script text (`node scripts/csp-hash.mjs` prints it).
+- Contrast is part of the e2e suite (`e2e/contrast.spec.ts` resolves each token to sRGB in both themes; new tokens added) and axe runs on login/home/listing/cart in dark.

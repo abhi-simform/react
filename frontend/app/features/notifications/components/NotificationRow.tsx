@@ -38,7 +38,7 @@ export function NotificationRow({
         aria-hidden
         className={cn(
           "mt-1.5 size-2 shrink-0 rounded-full",
-          n.read ? "bg-transparent" : "bg-teal-600"
+          n.read ? "bg-transparent" : "bg-brand"
         )}
       />
       <div className="min-w-0 flex-1">
@@ -56,8 +56,8 @@ export function NotificationRow({
             {title}
           </button>
         )}
-        {n.body && <p className="text-neutral-700">{n.body}</p>}
-        <time dateTime={n.createdAt} className="text-xs text-neutral-500">
+        {n.body && <p className="text-foreground">{n.body}</p>}
+        <time dateTime={n.createdAt} className="text-xs text-muted-foreground">
           {formatRelative(n.createdAt)}
         </time>
       </div>

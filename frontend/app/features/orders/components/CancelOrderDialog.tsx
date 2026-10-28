@@ -83,7 +83,7 @@ export function CancelOrderDialog({ order }: { order: Order }) {
               </div>
             )}
             {problem && (
-              <p role="alert" className="text-xs text-red-700">
+              <p role="alert" className="text-xs text-destructive">
                 {problem}
               </p>
             )}

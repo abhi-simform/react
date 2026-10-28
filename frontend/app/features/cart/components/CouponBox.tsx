@@ -78,7 +78,7 @@ export function CouponBox() {
       {ok && (
         <p
           role="status"
-          className="text-sm text-green-800"
+          className="text-sm text-success"
           data-testid="coupon-applied"
         >
           {ok.code} applied
@@ -95,7 +95,7 @@ export function CouponBox() {
         </p>
       )}
       {failed && (
-        <p role="alert" className="text-sm text-red-700">
+        <p role="alert" className="text-sm text-destructive">
           {describeCouponReason(
             failed.error.reason,
             failed.code,
@@ -148,7 +148,7 @@ export function CouponBox() {
       {message && (
         <p
           role="alert"
-          className="text-sm text-red-700"
+          className="text-sm text-destructive"
           data-testid="coupon-error"
         >
           {message.text}
@@ -168,12 +168,12 @@ export function CouponBox() {
                   <p className="font-medium">{c.code}</p>
                   <p className="text-xs">{c.description}</p>
                   {c.minOrder > 0 && (
-                    <p className="text-xs text-neutral-600">
+                    <p className="text-xs text-muted-foreground">
                       Min order {formatRupees(c.minOrder)}
                     </p>
                   )}
                   {!c.applicable && c.reason && (
-                    <p className="text-xs text-neutral-600">
+                    <p className="text-xs text-muted-foreground">
                       {describeCouponReason(c.reason, c.code, {
                         minOrder: c.minOrder,
                         shortBy: undefined,
@@ -181,7 +181,7 @@ export function CouponBox() {
                     </p>
                   )}
                   {c.applicable && (
-                    <p className="text-xs text-green-800">
+                    <p className="text-xs text-success">
                       Saves {formatRupees(c.discount)} on this cart
                     </p>
                   )}

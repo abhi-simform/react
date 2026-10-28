@@ -9,7 +9,7 @@ export function UploadStatusList({ items }: { items: readonly UploadItem[] }) {
       {relevant.map((i) => (
         <li
           key={`${i.file.name}-${i.file.size}-${i.file.lastModified}`}
-          className={i.status === "error" ? "text-red-700" : undefined}
+          className={i.status === "error" ? "text-destructive" : undefined}
         >
           {i.file.name}:{" "}
           {i.status === "uploading"

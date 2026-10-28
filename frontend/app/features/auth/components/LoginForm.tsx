@@ -88,7 +88,7 @@ export function LoginForm() {
       <Link to={paths.forgotPassword()} className="text-sm underline">
         Forgot your password?
       </Link>
-      <p className="text-center text-sm text-neutral-500">or</p>
+      <p className="text-center text-sm text-muted-foreground">or</p>
       <GoogleButton />
       <p className="text-sm">
         New here?{" "}

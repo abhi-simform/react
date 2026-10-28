@@ -18,7 +18,7 @@ export function WishlistLink() {
       to={paths.wishlist()}
       aria-label={label}
       className={({ isActive }) =>
-        cn("flex items-center gap-1 rounded px-1", isActive && "bg-neutral-200")
+        cn("flex items-center gap-1 rounded px-1", isActive && "bg-muted")
       }
     >
       <Heart aria-hidden className="size-4" />

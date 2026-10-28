@@ -138,7 +138,7 @@ export function OrdersPage() {
                   >
                     {o.orderNumber}
                   </Link>
-                  <p className="text-xs text-neutral-600">
+                  <p className="text-xs text-muted-foreground">
                     {formatDate(o.createdAt)}, {o.items.length}{" "}
                     {o.items.length === 1 ? "item" : "items"}
                   </p>
@@ -180,7 +180,7 @@ export function OrdersPage() {
                 />
               </>
             ) : (
-              <p role="status" className="text-xs text-neutral-600">
+              <p role="status" className="text-xs text-muted-foreground">
                 {orders.data.total}{" "}
                 {orders.data.total === 1 ? "order" : "orders"} in total.
               </p>

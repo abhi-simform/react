@@ -2,3 +2,4 @@
 export { ThemeProvider, useTheme } from "./ThemeProvider"
 export type { ResolvedTheme, Theme } from "./ThemeProvider"
 export { ThemeToggle } from "./ThemeToggle"
+export { themeInitScript, THEME_STORAGE_KEY } from "./themeScript"

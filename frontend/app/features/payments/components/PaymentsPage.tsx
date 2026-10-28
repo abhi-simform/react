@@ -57,7 +57,7 @@ export function PaymentsPage() {
                   </Link>
                   <span>{formatRupees(p.amount)}</span>
                 </div>
-                <p className="text-xs text-neutral-600">
+                <p className="text-xs text-muted-foreground">
                   {STATUS_TEXT[p.status]}
                   {p.method ? `, ${p.method}` : ""}
                   {p.paidAt ? `, paid ${formatDate(p.paidAt)}` : ""}
@@ -67,7 +67,7 @@ export function PaymentsPage() {
                   {p.provider === "mock" ? " (mock gateway)" : ""}
                 </p>
                 {p.failureReason && p.status === "failed" && (
-                  <p className="text-xs text-red-700">{p.failureReason}</p>
+                  <p className="text-xs text-destructive">{p.failureReason}</p>
                 )}
                 {p.refunds.length > 0 && (
                   <ul className="mt-1 text-xs" aria-label="Refunds">
@@ -96,7 +96,7 @@ export function PaymentsPage() {
                 {q.isFetchingNextPage ? "Loading..." : "Load more"}
               </Button>
             ) : (
-              <p role="status" className="text-xs text-neutral-600">
+              <p role="status" className="text-xs text-muted-foreground">
                 {q.data.total} payment{q.data.total === 1 ? "" : "s"} in total.
               </p>
             )}

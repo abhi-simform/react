@@ -85,21 +85,21 @@ export function ProductDetailView({
       {/* Not sticky: the box is taller than a desktop viewport and, being sticky within the whole
           grid, it slid down over the full-width tabs row (offers overlapped the description). */}
       <div className="flex flex-col gap-3 md:self-start">
-        <p className="text-sm text-neutral-500">{product.brand}</p>
+        <p className="text-sm text-muted-foreground">{product.brand}</p>
         <h1 className="text-xl font-medium">{product.name}</h1>
         {product.rating ? (
           <Rating value={product.rating.value} count={product.rating.count} />
         ) : (
-          <p className="text-sm text-neutral-500">No ratings yet</p>
+          <p className="text-sm text-muted-foreground">No ratings yet</p>
         )}
         <Price price={priceVM} className="text-lg" />
         {product.deal && <DealEndsNote endsAt={product.deal.endsAt} />}
         {previousPrice !== undefined && previousPrice !== price && (
-          <p className="text-sm text-neutral-600">
+          <p className="text-sm text-muted-foreground">
             Price changed from {toPriceVM(previousPrice, undefined).current}
           </p>
         )}
-        <p className="text-xs text-neutral-500">
+        <p className="text-xs text-muted-foreground">
           Listed {product.listedOn}, updated {product.updatedAgo}
         </p>
         <VariantPicker

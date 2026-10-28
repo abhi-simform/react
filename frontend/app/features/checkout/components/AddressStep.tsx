@@ -124,7 +124,7 @@ export function AddressStep() {
               <p
                 id="address-error"
                 role="alert"
-                className="text-xs text-red-700"
+                className="text-xs text-destructive"
               >
                 {errors.addressId.message}
               </p>

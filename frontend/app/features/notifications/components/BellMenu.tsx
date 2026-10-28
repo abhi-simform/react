@@ -55,7 +55,7 @@ export function BellMenu() {
         </Popover.Trigger>
         <Popover.Portal>
           <Popover.Positioner sideOffset={6} align="end" className="z-30">
-            <Popover.Popup className="w-80 max-w-[calc(100vw-1rem)] rounded border bg-white p-2 shadow-lg dark:bg-neutral-900">
+            <Popover.Popup className="w-80 max-w-[calc(100vw-1rem)] rounded border bg-background p-2 shadow-lg">
               <div className="flex items-center justify-between px-2 pb-1">
                 <Popover.Title className="font-medium">
                   Notifications
@@ -74,7 +74,7 @@ export function BellMenu() {
                   Loading...
                 </p>
               ) : latest.isError ? (
-                <p role="alert" className="px-2 py-4 text-sm text-red-700">
+                <p role="alert" className="px-2 py-4 text-sm text-destructive">
                   Could not load notifications.{" "}
                   <button
                     type="button"
@@ -85,7 +85,7 @@ export function BellMenu() {
                   </button>
                 </p>
               ) : latest.data.length === 0 ? (
-                <p className="px-2 py-4 text-sm text-neutral-600">
+                <p className="px-2 py-4 text-sm text-muted-foreground">
                   Nothing yet. Order updates will show up here.
                 </p>
               ) : (

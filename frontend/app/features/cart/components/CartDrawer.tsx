@@ -76,7 +76,7 @@ function CartButton() {
         data-testid="cart-badge"
         // `motion-safe:` = only when the user has NOT asked for reduced motion. Transform only (no layout).
         className={cn(
-          "inline-block rounded bg-neutral-200 px-1",
+          "inline-block rounded bg-muted px-1",
           bumps > 0 && "motion-safe:animate-bump"
         )}
       >

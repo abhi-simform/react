@@ -118,7 +118,7 @@ export function InfiniteResults({
             />
           </>
         ) : (
-          <p role="status" className="text-sm text-neutral-600">
+          <p role="status" className="text-sm text-muted-foreground">
             You&apos;ve seen it all ({list.total.toLocaleString("en-IN")}{" "}
             products)
           </p>

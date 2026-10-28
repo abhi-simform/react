@@ -112,7 +112,7 @@ function DetailsForm({
       <FormField label="Email" hint="Your email cannot be changed here.">
         {(c) => (
           <input
-            className="rounded border bg-neutral-100 p-1"
+            className="rounded border bg-muted p-1"
             value={profile.email}
             readOnly
             {...c}

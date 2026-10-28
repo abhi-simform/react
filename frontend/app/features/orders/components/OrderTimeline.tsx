@@ -85,12 +85,12 @@ export function OrderTimeline({
           aria-current={s.state === "current" ? "step" : undefined}
           className={cn(
             "flex gap-2 rounded px-2 py-1",
-            s.state === "upcoming" && "text-neutral-500",
+            s.state === "upcoming" && "text-muted-foreground",
             s.state === "current" &&
               "animate-in font-medium duration-500 fade-in-0 slide-in-from-left-2 motion-reduce:animate-none",
             s.state === "current" &&
               s.status === "out_for_delivery" &&
-              "bg-amber-100 text-amber-900"
+              "bg-warning-muted text-warning"
           )}
         >
           <span aria-hidden className="w-4 text-center">
@@ -111,7 +111,7 @@ export function OrderTimeline({
               : ""}
           </span>
           {s.at && (
-            <time dateTime={s.at} className="text-xs text-neutral-600">
+            <time dateTime={s.at} className="text-xs text-muted-foreground">
               {formatDate(s.at, { hour: "numeric", minute: "2-digit" })}
             </time>
           )}

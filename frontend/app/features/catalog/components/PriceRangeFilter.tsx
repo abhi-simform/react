@@ -76,7 +76,7 @@ export function PriceRangeFilter({
                 aria-pressed={min === b.from && max === b.to}
                 onClick={() => onChange(b.from, b.to)}
                 style={{ height: `${Math.max(8, (b.count / peak) * 100)}%` }}
-                className="w-full bg-neutral-300 aria-pressed:bg-neutral-700"
+                className="w-full bg-muted-foreground/40 aria-pressed:bg-foreground"
               />
             </li>
           ))}

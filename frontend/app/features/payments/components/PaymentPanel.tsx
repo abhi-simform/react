@@ -61,7 +61,7 @@ export function PaymentPanel({
       {(phase.name === "idle" || phase.name === "starting") &&
         (order.paymentStatus === "failed" ? (
           <>
-            <p role="alert" className="text-red-700">
+            <p role="alert" className="text-destructive">
               Your last payment attempt failed
               {lastFailure ? `: ${lastFailure}` : ""}. Nothing was charged for
               the failed attempt.
@@ -91,7 +91,7 @@ export function PaymentPanel({
       {phase.name === "confirming" && (
         <div role="status" className="flex flex-col gap-1">
           <p data-testid="confirming">Confirming your payment...</p>
-          <p className="text-xs text-neutral-600">
+          <p className="text-xs text-muted-foreground">
             {phase.verifyFailed
               ? "We could not reach the server to verify it, but your bank may have accepted the payment. We keep checking; this page updates by itself."
               : "This usually takes a few seconds. This page updates by itself; you can also close it, the order keeps its status."}
@@ -122,7 +122,11 @@ export function PaymentPanel({
 
       {phase.name === "failed" && (
         <>
-          <p role="alert" className="text-red-700" data-testid="payment-failed">
+          <p
+            role="alert"
+            className="text-destructive"
+            data-testid="payment-failed"
+          >
             Payment failed: {phase.reason}
           </p>
           {payButton(`Retry payment (${amount})`)}
@@ -130,7 +134,11 @@ export function PaymentPanel({
       )}
 
       {phase.name === "mismatch" && (
-        <p role="alert" className="text-red-700" data-testid="payment-mismatch">
+        <p
+          role="alert"
+          className="text-destructive"
+          data-testid="payment-mismatch"
+        >
           We could not verify this payment. If money left your account, do not
           pay again: contact support with order number{" "}
           <strong>{order.orderNumber}</strong> and we will sort it out.
@@ -139,7 +147,7 @@ export function PaymentPanel({
 
       {phase.name === "error" && (
         <>
-          <p role="alert" className="text-red-700">
+          <p role="alert" className="text-destructive">
             {phase.message}
           </p>
           {payButton("Try again")}

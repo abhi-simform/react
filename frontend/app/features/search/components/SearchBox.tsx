@@ -175,10 +175,10 @@ export function SearchBox() {
       <div
         hidden={!isOpen}
         aria-busy={waiting}
-        className="absolute top-full right-0 left-0 z-20 mt-1 max-h-96 min-w-72 overflow-y-auto rounded border bg-white p-1 text-sm shadow"
+        className="absolute top-full right-0 left-0 z-20 mt-1 max-h-96 min-w-72 overflow-y-auto rounded border bg-background p-1 text-sm shadow"
       >
         {isOpen && suggestions.isError && typed.length >= MIN_TERM && (
-          <p role="alert" className="px-2 py-1 text-red-700">
+          <p role="alert" className="px-2 py-1 text-destructive">
             {toApiError(suggestions.error).message}
           </p>
         )}

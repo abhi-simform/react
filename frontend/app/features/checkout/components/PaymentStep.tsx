@@ -62,7 +62,11 @@ export function PaymentStep() {
             ` (only for orders up to ${formatRupees(COD_MAX_TOTAL / 100)})`}
         </label>
         {errors.payment && (
-          <p id="payment-error" role="alert" className="text-xs text-red-700">
+          <p
+            id="payment-error"
+            role="alert"
+            className="text-xs text-destructive"
+          >
             {errors.payment.message}
           </p>
         )}

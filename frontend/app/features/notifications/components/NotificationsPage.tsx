@@ -128,7 +128,7 @@ export function NotificationsPage() {
             <p
               role="status"
               data-testid="notification-count"
-              className="mb-1 text-xs text-neutral-600"
+              className="mb-1 text-xs text-muted-foreground"
             >
               Loaded {items.length.toLocaleString("en-IN")} of{" "}
               {(q.data?.pages[0]?.meta.total ?? items.length).toLocaleString(

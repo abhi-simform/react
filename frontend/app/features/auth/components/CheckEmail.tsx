@@ -25,7 +25,7 @@ export function CheckEmail({
         24 hours and works once. You can keep shopping meanwhile; some features
         (like checkout) need a verified email.
       </p>
-      <p className="text-sm text-neutral-500">
+      <p className="text-sm text-muted-foreground">
         In development the mail lands in Mailpit: http://localhost:8025
       </p>
       <div className="flex items-center gap-3">

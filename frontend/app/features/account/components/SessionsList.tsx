@@ -66,12 +66,12 @@ export function SessionsList() {
                   <p className="font-medium">
                     {s.device}{" "}
                     {s.current && (
-                      <span className="rounded bg-green-100 px-1 text-xs text-green-800">
+                      <span className="rounded bg-success-muted px-1 text-xs text-success">
                         This device
                       </span>
                     )}
                   </p>
-                  <p className="text-neutral-500">
+                  <p className="text-muted-foreground">
                     IP {s.ip ?? "unknown"} · signed in {when(s.startedAt)} ·
                     last active {when(s.lastActiveAt)}
                   </p>

@@ -62,7 +62,7 @@ function ProductCardBase({
       <div
         data-fly-source
         className={cn(
-          "relative aspect-square overflow-hidden rounded bg-neutral-100"
+          "relative aspect-square overflow-hidden rounded bg-muted"
         )}
       >
         {/* Decorative: the title link right below names the product. */}
@@ -91,7 +91,7 @@ function ProductCardBase({
       </div>
 
       <div className="flex flex-1 flex-col gap-1">
-        <p className="text-xs text-neutral-500">{product.brand}</p>
+        <p className="text-xs text-muted-foreground">{product.brand}</p>
         <h3 className="line-clamp-2 text-sm font-medium">
           <Link
             to={paths.product(product.slug)}
@@ -108,7 +108,7 @@ function ProductCardBase({
             size="sm"
           />
         ) : (
-          <p className="text-xs text-neutral-500">No ratings yet</p>
+          <p className="text-xs text-muted-foreground">No ratings yet</p>
         )}
         <Price price={product.price} />
         <CompareToggle
@@ -124,7 +124,7 @@ function ProductCardBase({
           <p
             className={cn(
               "text-xs",
-              outOfStock ? "text-red-700" : "text-amber-700"
+              outOfStock ? "text-destructive" : "text-warning"
             )}
           >
             {product.stockNote}

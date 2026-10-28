@@ -53,7 +53,7 @@ export function ResponsiveImage({
         decoding={priority ? "sync" : "async"}
         fetchPriority={priority ? "high" : "auto"}
         style={ratio ? { aspectRatio: String(ratio) } : undefined}
-        className={cn("size-full object-cover", className)}
+        className={cn("size-full object-cover dark:brightness-90", className)}
       />
     </picture>
   )

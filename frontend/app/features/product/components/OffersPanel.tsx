@@ -48,7 +48,7 @@ export function OffersPanel() {
           Loading offers...
         </p>
       ) : q.isError ? (
-        <p role="alert" className="text-red-700">
+        <p role="alert" className="text-destructive">
           Could not load offers ({toApiError(q.error).message}).{" "}
           <button className="underline" onClick={() => void q.refetch()}>
             Retry
@@ -59,11 +59,11 @@ export function OffersPanel() {
           {q.data.map((o) => (
             <li key={o.code} className="flex items-start justify-between gap-2">
               <span>
-                <code className="rounded bg-neutral-100 px-1 font-mono">
+                <code className="rounded bg-muted px-1 font-mono">
                   {o.code}
                 </code>{" "}
                 {o.description}
-                <span className="block text-xs text-neutral-600">
+                <span className="block text-xs text-muted-foreground">
                   {describe(o)}
                 </span>
               </span>
@@ -79,7 +79,7 @@ export function OffersPanel() {
           ))}
         </ul>
       )}
-      <p className="mt-2 text-xs text-neutral-600">
+      <p className="mt-2 text-xs text-muted-foreground">
         Apply a code in your cart; it checks whether it fits.
       </p>
     </section>

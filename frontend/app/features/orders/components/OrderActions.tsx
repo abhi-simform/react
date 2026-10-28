@@ -44,7 +44,7 @@ export function OrderActions({ order }: { order: Order }) {
         {reorder.isPending ? "Adding..." : "Buy again"}
       </Button>
       {canReturn(order.status) && !order.returnableUntil && (
-        <p className="w-full text-xs text-neutral-600">
+        <p className="w-full text-xs text-muted-foreground">
           The 7 day return window for this order has closed.
         </p>
       )}

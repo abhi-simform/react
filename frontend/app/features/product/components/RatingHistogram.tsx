@@ -30,17 +30,17 @@ export function RatingHistogram({
               disabled={n === 0}
               onClick={() => onSelect(active === star ? undefined : star)}
               className={cn(
-                "grid w-full grid-cols-[3rem_1fr_3rem] items-center gap-2 rounded px-1 text-xs hover:bg-neutral-100 disabled:opacity-50",
-                active === star && "bg-neutral-100 font-medium"
+                "grid w-full grid-cols-[3rem_1fr_3rem] items-center gap-2 rounded px-1 text-xs hover:bg-muted disabled:opacity-50",
+                active === star && "bg-muted font-medium"
               )}
             >
               <span aria-hidden>{star} ★</span>
               <span
                 aria-hidden
-                className="h-2 overflow-hidden rounded bg-neutral-200"
+                className="h-2 overflow-hidden rounded bg-muted"
               >
                 <span
-                  className="block h-full bg-amber-500"
+                  className="block h-full bg-warning"
                   style={{ width: `${pct}%` }}
                 />
               </span>

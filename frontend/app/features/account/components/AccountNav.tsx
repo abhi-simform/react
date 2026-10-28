@@ -26,10 +26,7 @@ export function AccountNav() {
           to={link.to}
           end={"end" in link}
           className={({ isActive }) =>
-            cn(
-              "rounded px-2 py-1 text-sm",
-              isActive && "bg-neutral-200 font-medium"
-            )
+            cn("rounded px-2 py-1 text-sm", isActive && "bg-muted font-medium")
           }
         >
           {link.label}

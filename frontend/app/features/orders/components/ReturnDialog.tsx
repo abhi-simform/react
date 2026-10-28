@@ -153,7 +153,7 @@ function ReturnForm({ order, onDone }: { order: Order; onDone: () => void }) {
             />
             <label htmlFor={`ret-sel-${n}`} className="flex-1">
               {f.title}{" "}
-              <span className="text-neutral-500">(bought {f.bought})</span>
+              <span className="text-muted-foreground">(bought {f.bought})</span>
             </label>
             <label className="sr-only" htmlFor={`ret-qty-${n}`}>
               Quantity of {f.title}
@@ -171,19 +171,19 @@ function ReturnForm({ order, onDone }: { order: Order; onDone: () => void }) {
           </div>
         ))}
         {errors.items?.message && (
-          <p role="alert" className="text-xs text-red-700">
+          <p role="alert" className="text-xs text-destructive">
             {errors.items.message}
           </p>
         )}
         {errors.items?.root?.message && (
-          <p role="alert" className="text-xs text-red-700">
+          <p role="alert" className="text-xs text-destructive">
             {errors.items.root.message}
           </p>
         )}
         {fields.map(
           (_, n) =>
             errors.items?.[n]?.qty?.message && (
-              <p key={n} role="alert" className="text-xs text-red-700">
+              <p key={n} role="alert" className="text-xs text-destructive">
                 {errors.items[n]?.qty?.message}
               </p>
             )
@@ -260,7 +260,7 @@ function ReturnForm({ order, onDone }: { order: Order; onDone: () => void }) {
       </FormField>
 
       {errors.root?.message && (
-        <p role="alert" className="text-xs text-red-700">
+        <p role="alert" className="text-xs text-destructive">
           {errors.root.message}
         </p>
       )}

@@ -15,9 +15,9 @@ export function PlaceholderPage({
   return (
     <div className="p-4">
       <h1 className="text-xl font-medium">{title}</h1>
-      {detail && <p className="text-sm text-neutral-600">{detail}</p>}
+      {detail && <p className="text-sm text-muted-foreground">{detail}</p>}
       {builtIn && (
-        <p className="text-sm text-neutral-500">
+        <p className="text-sm text-muted-foreground">
           Placeholder (stage {builtIn}).
         </p>
       )}

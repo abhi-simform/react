@@ -196,7 +196,7 @@ export function ReviewStep() {
       {error && (
         <p
           role="alert"
-          className="text-sm text-red-700"
+          className="text-sm text-destructive"
           data-testid="place-error"
         >
           {error}

@@ -19,13 +19,10 @@ function AuthLoading() {
   return (
     <div className="p-4" aria-busy="true">
       <h1 className="text-xl font-medium">Loading...</h1>
-      <p role="status" className="text-sm text-neutral-500">
+      <p role="status" className="text-sm text-muted-foreground">
         Checking your session
       </p>
-      <div
-        aria-hidden
-        className="mt-3 h-24 animate-pulse rounded bg-neutral-100"
-      />
+      <div aria-hidden className="mt-3 h-24 animate-pulse rounded bg-muted" />
     </div>
   )
 }

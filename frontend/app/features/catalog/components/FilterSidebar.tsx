@@ -58,12 +58,12 @@ export function FilterSidebar({
                   }
                 />
                 <span className="flex-1">{b.name}</span>
-                <span className="text-neutral-500">{b.count}</span>
+                <span className="text-muted-foreground">{b.count}</span>
               </label>
             </li>
           ))}
           {brands.length === 0 && missing.length === 0 && (
-            <li className="text-neutral-500">No brands</li>
+            <li className="text-muted-foreground">No brands</li>
           )}
         </ul>
       </fieldset>
@@ -96,7 +96,7 @@ export function FilterSidebar({
               onChange={() => setFilter("minRating", step)}
             />
             <span className="flex-1">{step} stars &amp; up</span>
-            <span className="text-neutral-500">
+            <span className="text-muted-foreground">
               {facets?.rating.find((r) => r.value === step)?.count ?? ""}
             </span>
           </label>
@@ -110,7 +110,9 @@ export function FilterSidebar({
           onChange={(e) => setFilter("inStock", e.target.checked)}
         />
         <span className="flex-1">In stock only</span>
-        <span className="text-neutral-500">{facets?.inStock.count ?? ""}</span>
+        <span className="text-muted-foreground">
+          {facets?.inStock.count ?? ""}
+        </span>
       </label>
     </div>
   )

@@ -48,7 +48,7 @@ export function CartLineRow({
       className="flex gap-3 border-b py-3"
     >
       {line.imageUrl ? (
-        <div className="size-16 shrink-0 overflow-hidden rounded bg-neutral-100">
+        <div className="size-16 shrink-0 overflow-hidden rounded bg-muted">
           <ResponsiveImage
             src={line.imageUrl}
             alt=""
@@ -58,7 +58,7 @@ export function CartLineRow({
           />
         </div>
       ) : (
-        <div aria-hidden className="size-16 rounded bg-neutral-100" />
+        <div aria-hidden className="size-16 rounded bg-muted" />
       )}
       <div className="flex flex-1 flex-col gap-1 text-sm">
         <Link to={paths.product(line.slug)} className="font-medium underline">
@@ -67,13 +67,13 @@ export function CartLineRow({
         <p>
           {formatCurrency(line.unitPrice)} each
           {line.deal && (
-            <span className="ml-1 rounded bg-amber-100 px-1 text-xs text-amber-900">
+            <span className="ml-1 rounded bg-warning-muted px-1 text-xs text-warning">
               Deal price
             </span>
           )}
         </p>
         {line.priceChanged && (
-          <p role="status" className="text-xs text-amber-700">
+          <p role="status" className="text-xs text-warning">
             Price changed from {formatCurrency(line.previousPrice)} to{" "}
             {formatCurrency(line.unitPrice)}
           </p>
@@ -119,7 +119,7 @@ export function CartLineRow({
           </Button>
         </div>
         {line.outOfStock && (
-          <p role="alert" className="text-xs text-red-700">
+          <p role="alert" className="text-xs text-destructive">
             Out of stock:{" "}
             {saved
               ? "you can still keep it saved"
@@ -127,20 +127,20 @@ export function CartLineRow({
           </p>
         )}
         {!saved && line.qtyReduced && (
-          <p role="alert" className="text-xs text-red-700">
+          <p role="alert" className="text-xs text-destructive">
             Only {line.availableQty} left, you have {line.qty} in your cart.
             Lower the quantity to check out.
           </p>
         )}
         {atMax && !line.qtyReduced && (
-          <p role="status" className="text-xs text-amber-700">
+          <p role="status" className="text-xs text-warning">
             Maximum available: {max}
           </p>
         )}
         {message && (
           <p
             role="alert"
-            className="flex items-center gap-2 rounded bg-amber-100 p-1 text-xs text-amber-900"
+            className="flex items-center gap-2 rounded bg-warning-muted p-1 text-xs text-warning"
           >
             {message}
             <button

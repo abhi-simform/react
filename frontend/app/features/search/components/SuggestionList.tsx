@@ -35,7 +35,7 @@ export function SuggestionList({
             <li
               role="presentation"
               id={`${listId}-${g.id}`}
-              className="px-2 pt-2 text-xs font-medium text-neutral-500 uppercase"
+              className="px-2 pt-2 text-xs font-medium text-muted-foreground uppercase"
             >
               {g.label}
             </li>
@@ -53,8 +53,8 @@ export function SuggestionList({
                 onClick={() => onChoose(o.id)}
                 className={cn(
                   "flex cursor-pointer items-center gap-2 rounded px-2 py-1",
-                  o.id === activeId && "bg-neutral-200",
-                  o.kind === "clear-recent" && "text-neutral-600 underline"
+                  o.id === activeId && "bg-muted",
+                  o.kind === "clear-recent" && "text-muted-foreground underline"
                 )}
               >
                 {o.kind === "product" && (
@@ -65,7 +65,7 @@ export function SuggestionList({
                     width={32}
                     height={32}
                     loading="lazy"
-                    className="size-8 shrink-0 rounded bg-neutral-100 object-cover"
+                    className="size-8 shrink-0 rounded bg-muted object-cover"
                   />
                 )}
                 <span className="min-w-0 flex-1 truncate">
@@ -78,7 +78,7 @@ export function SuggestionList({
                   )}
                 </span>
                 {o.hint && (
-                  <span className="shrink-0 text-xs text-neutral-500">
+                  <span className="shrink-0 text-xs text-muted-foreground">
                     {o.hint}
                   </span>
                 )}

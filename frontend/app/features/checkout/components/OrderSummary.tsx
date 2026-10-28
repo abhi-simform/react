@@ -41,11 +41,11 @@ export function OrderSummary() {
         </dd>
       </dl>
       {totals.savings > 0 && (
-        <p className="mt-2 text-xs text-green-800">
+        <p className="mt-2 text-xs text-success">
           You save {formatCurrency(totals.savings)} on this order
         </p>
       )}
-      <p className="mt-2 text-xs text-neutral-500">
+      <p className="mt-2 text-xs text-muted-foreground">
         {lines.length} {lines.length === 1 ? "line" : "lines"} from your cart.
       </p>
     </>

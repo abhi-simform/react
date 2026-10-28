@@ -12,7 +12,7 @@ export function ConnectionIndicator() {
     <span
       data-testid="socket-status"
       title={`Realtime connection: ${label}`}
-      className="rounded border px-1 text-xs text-neutral-600"
+      className="rounded border px-1 text-xs text-muted-foreground"
     >
       <span aria-hidden>{status === "connected" && online ? "● " : "○ "}</span>
       {label}

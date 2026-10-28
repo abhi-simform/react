@@ -18,7 +18,7 @@ import { MobileMenu } from "./MobileMenu"
 
 /** NavLink sets `aria-current="page"` itself; the className function styles the active one. */
 const navClass = ({ isActive }: { isActive: boolean }) =>
-  cn("rounded px-1", isActive && "bg-neutral-200 font-medium")
+  cn("rounded px-1", isActive && "bg-muted font-medium")
 
 export function Header() {
   // Only ONE of the two menus is ever in the DOM (not hidden with CSS).

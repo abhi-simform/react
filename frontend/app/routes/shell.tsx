@@ -42,7 +42,7 @@ export default function ShellLayout() {
       {/* First tab stop: hidden until focused, jumps over the header/nav. */}
       <a
         href="#main"
-        className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50 focus:rounded focus:bg-white focus:p-2 focus:shadow"
+        className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50 focus:rounded focus:bg-background focus:p-2 focus:shadow"
       >
         Skip to content
       </a>

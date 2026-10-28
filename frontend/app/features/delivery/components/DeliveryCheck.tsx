@@ -45,7 +45,7 @@ export function DeliveryCheck() {
       />
       <div id={`${id}-status`}>
         {state.status === "format" && (
-          <p role="alert" className="text-xs text-red-700">
+          <p role="alert" className="text-xs text-destructive">
             {state.message}
           </p>
         )}

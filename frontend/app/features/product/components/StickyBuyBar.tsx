@@ -44,7 +44,7 @@ export function StickyBuyBar({
     <div
       hidden={typing}
       data-testid="sticky-buy-bar"
-      className="sticky bottom-0 z-10 col-span-full -mx-4 flex items-center gap-2 border-t bg-white p-3 md:hidden dark:bg-neutral-900"
+      className="sticky bottom-0 z-10 col-span-full -mx-4 flex items-center gap-2 border-t bg-background p-3 md:hidden"
     >
       <Price price={price} className="flex-1" />
       <Button

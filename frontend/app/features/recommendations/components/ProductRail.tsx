@@ -34,9 +34,9 @@ function RailSkeleton() {
           aria-hidden
           className={`${CARD_WIDTH} shrink-0 animate-pulse rounded-lg border p-2 motion-reduce:animate-none`}
         >
-          <div className="aspect-square rounded bg-neutral-200" />
-          <div className="mt-2 h-4 w-full rounded bg-neutral-200" />
-          <div className="mt-1 h-4 w-1/2 rounded bg-neutral-200" />
+          <div className="aspect-square rounded bg-muted" />
+          <div className="mt-2 h-4 w-full rounded bg-muted" />
+          <div className="mt-1 h-4 w-1/2 rounded bg-muted" />
         </div>
       ))}
     </div>
@@ -128,10 +128,10 @@ function RailInner({
         </div>
       </div>
       {query.data?.note && (
-        <p className="text-xs text-neutral-600">{query.data.note}</p>
+        <p className="text-xs text-muted-foreground">{query.data.note}</p>
       )}
       {query.isError ? (
-        <p role="alert" className="text-sm text-red-700">
+        <p role="alert" className="text-sm text-destructive">
           Could not load this section ({toApiError(query.error).message}).{" "}
           <button
             type="button"
@@ -143,7 +143,7 @@ function RailInner({
         </p>
       ) : query.isSuccess ? (
         items.length === 0 ? (
-          <p className="text-sm text-neutral-600">{emptyMessage}</p>
+          <p className="text-sm text-muted-foreground">{emptyMessage}</p>
         ) : (
           <ul
             ref={scroller}

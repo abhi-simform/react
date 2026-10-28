@@ -10,7 +10,7 @@ import { CartSessionSync } from "@/features/cart"
 import { RealtimeSync } from "@/features/realtime"
 import { RecentlyViewedSync } from "@/features/recommendations"
 import { WishlistSessionSync } from "@/features/wishlist"
-import { ThemeProvider } from "@/features/theme"
+import { ThemeProvider, themeInitScript } from "@/features/theme"
 import { ToastProvider } from "@/features/toast"
 import { env } from "@/lib/env"
 import { installGlobalErrorReporting } from "@/lib/globalErrors"
@@ -60,6 +60,10 @@ export function Layout({ children }: { children: React.ReactNode }) {
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
+        {/* Native controls and scrollbars may use either scheme (the theme script/provider picks one). */}
+        <meta name="color-scheme" content="light dark" />
+        {/* 13.7: sets the `dark` class before first paint (no flash). Must run before the CSS is applied. */}
+        <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
         <Meta />
         <Links />
       </head>

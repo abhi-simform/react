@@ -62,7 +62,7 @@ function DrawerBody() {
         ))}
       </CartLineList>
       {totals.discount > 0 && (
-        <p className="flex justify-between text-sm text-green-800">
+        <p className="flex justify-between text-sm text-success">
           <span>Coupon discount</span>
           <span>-{formatCurrency(totals.discount)}</span>
         </p>

@@ -16,6 +16,15 @@ const PAIRS: [fg: string, bg: string, min: number][] = [
   ["--muted-foreground", "--muted", 4.5],
   ["--destructive", "--background", 4.5],
   ["--ring", "--background", 3],
+  // 13.7 semantic tokens: text on the page and on their own soft background; the brand colour as a UI
+  // element (an unread dot, a progress bar) needs 3:1 (non-text, 1.4.11).
+  ["--success", "--background", 4.5],
+  ["--success", "--success-muted", 4.5],
+  ["--warning", "--background", 4.5],
+  ["--warning", "--warning-muted", 4.5],
+  ["--destructive", "--destructive-muted", 4.5],
+  ["--brand", "--background", 3],
+  ["--brand-foreground", "--brand", 4.5],
 ]
 
 for (const scheme of ["light", "dark"] as const) {

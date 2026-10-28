@@ -18,7 +18,7 @@ export function TopCategories() {
           Loading categories...
         </p>
       ) : q.isError ? (
-        <p role="alert" className="text-sm text-red-700">
+        <p role="alert" className="text-sm text-destructive">
           Could not load categories ({toApiError(q.error).message}).{" "}
           <button className="underline" onClick={() => void q.refetch()}>
             Retry
@@ -30,10 +30,10 @@ export function TopCategories() {
             <li key={c.id}>
               <Link
                 to={paths.category(c.slug)}
-                className="flex h-full flex-col rounded-lg border p-3 hover:bg-neutral-50"
+                className="flex h-full flex-col rounded-lg border p-3 hover:bg-muted"
               >
                 <span className="font-medium">{c.name}</span>
-                <span className="text-xs text-neutral-600">
+                <span className="text-xs text-muted-foreground">
                   {c.productCount} products
                 </span>
               </Link>

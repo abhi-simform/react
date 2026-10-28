@@ -38,7 +38,7 @@ export function SectionBoundary({ children, label, resetKeys }: Props) {
           fallbackRender={({ resetErrorBoundary }) => (
             <div
               role="alert"
-              className="rounded border border-red-300 p-3 text-sm"
+              className="rounded border border-destructive/50 p-3 text-sm"
             >
               <p>Could not load {label}.</p>
               <Button
@@ -71,7 +71,7 @@ function CrashSwitch({ label }: { label: string }) {
     <button
       type="button"
       onClick={() => setCrashed(true)}
-      className="mt-1 rounded border border-dashed border-red-400 px-1 text-xs text-red-700"
+      className="mt-1 rounded border border-dashed border-destructive/50 px-1 text-xs text-destructive"
     >
       Crash this widget ({label})
     </button>

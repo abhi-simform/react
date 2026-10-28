@@ -27,7 +27,7 @@ export function ReviewCard({
   return (
     <li className="border-b pb-3">
       <p className="font-medium">
-        <span aria-hidden className="text-amber-600">
+        <span aria-hidden className="text-warning">
           {"★".repeat(r.rating)}
           {"☆".repeat(5 - r.rating)}
         </span>
@@ -35,7 +35,7 @@ export function ReviewCard({
       </p>
       <p className="whitespace-pre-line">{r.body}</p>
       <PhotoLightbox photos={r.photos} label={`${r.author}'s review`} />
-      <p className="mt-1 text-xs text-neutral-600">
+      <p className="mt-1 text-xs text-muted-foreground">
         {r.author}
         {r.verifiedPurchase && (
           <span className="ml-1 rounded bg-emerald-100 px-1 py-0.5 text-emerald-900">
@@ -50,7 +50,7 @@ export function ReviewCard({
       <div className="mt-1 flex flex-wrap items-center gap-2">
         {r.isMine ? (
           <>
-            <span className="text-xs text-neutral-600">
+            <span className="text-xs text-muted-foreground">
               {r.helpfulCount} found this helpful
             </span>
             <Button variant="outline" size="xs" onClick={() => onEdit(r)}>

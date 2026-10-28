@@ -9,7 +9,7 @@ export function VerifyEmailBanner() {
   return (
     <div
       role="status"
-      className="flex flex-wrap items-center gap-3 border-b bg-amber-50 px-4 py-2 text-sm"
+      className="flex flex-wrap items-center gap-3 border-b bg-warning-muted px-4 py-2 text-sm"
     >
       <span>
         Please verify your email address. We sent a link to{" "}

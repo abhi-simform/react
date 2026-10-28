@@ -34,7 +34,7 @@ export function MegaMenu() {
         <div
           id="mega-menu-panel"
           data-testid="mega-menu"
-          className="absolute top-full left-0 z-20 mt-1 w-[32rem] rounded border bg-white p-3 text-sm shadow"
+          className="absolute top-full left-0 z-20 mt-1 w-[32rem] rounded border bg-background p-3 text-sm shadow"
         >
           {tree.status === "success" ? (
             <ul className="grid grid-cols-2 gap-4">
@@ -53,7 +53,7 @@ export function MegaMenu() {
                         <Link
                           to={paths.category(c.slug)}
                           onClick={() => setOpen(false)}
-                          className="block rounded p-1 hover:bg-neutral-100"
+                          className="block rounded p-1 hover:bg-muted"
                         >
                           {c.name}
                         </Link>

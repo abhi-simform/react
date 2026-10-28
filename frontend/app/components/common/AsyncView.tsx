@@ -52,7 +52,7 @@ export function AsyncView<T>({
           className="animate-in duration-300 fade-in motion-reduce:animate-none"
         >
           {state.isRefreshing && (
-            <p role="status" className="mb-1 text-xs text-neutral-500">
+            <p role="status" className="mb-1 text-xs text-muted-foreground">
               Updating...
             </p>
           )}

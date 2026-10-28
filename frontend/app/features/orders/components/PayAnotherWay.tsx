@@ -46,7 +46,7 @@ export function PayAnotherWay({ order }: { order: Order }) {
   }
 
   return (
-    <div className="border-t pt-2 text-xs text-neutral-700">
+    <div className="border-t pt-2 text-xs text-foreground">
       <p>
         Prefer another way to pay? You can cancel this order and check out again
         with cash on delivery (where available).

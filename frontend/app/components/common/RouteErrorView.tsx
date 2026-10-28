@@ -51,9 +51,11 @@ export function RouteErrorView({ error }: { error: unknown }) {
       <p className="my-2 text-sm">
         We hit an unexpected problem. Trying again usually helps.
       </p>
-      {detail && <p className="text-sm text-red-800">Dev detail: {detail}</p>}
+      {detail && (
+        <p className="text-sm text-destructive">Dev detail: {detail}</p>
+      )}
       {stack && (
-        <pre className="my-2 overflow-x-auto rounded bg-neutral-100 p-2 text-xs">
+        <pre className="my-2 overflow-x-auto rounded bg-muted p-2 text-xs">
           <code>{stack}</code>
         </pre>
       )}

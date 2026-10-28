@@ -44,12 +44,12 @@ export function FormField({ label, error, hint, className, children }: Props) {
         "aria-describedby": describedBy,
       })}
       {hint && (
-        <p id={hintId} className="text-xs text-neutral-500">
+        <p id={hintId} className="text-xs text-muted-foreground">
           {hint}
         </p>
       )}
       {error && (
-        <p id={errorId} role="alert" className="text-xs text-red-700">
+        <p id={errorId} role="alert" className="text-xs text-destructive">
           {error}
         </p>
       )}

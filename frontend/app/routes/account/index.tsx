@@ -49,7 +49,7 @@ export default function AccountIndexRoute() {
 
 function Retry({ error, onRetry }: { error: unknown; onRetry: () => void }) {
   return (
-    <p role="alert" className="text-sm text-red-700">
+    <p role="alert" className="text-sm text-destructive">
       {toApiError(error).message}{" "}
       <button className="underline" onClick={onRetry}>
         Retry
@@ -78,7 +78,7 @@ function RecentOrders() {
       ) : q.isError ? (
         <Retry error={q.error} onRetry={() => void q.refetch()} />
       ) : orders.length === 0 ? (
-        <p className="text-sm text-neutral-600">
+        <p className="text-sm text-muted-foreground">
           No orders yet.{" "}
           <Link className="underline" to={paths.products()}>
             Start shopping
@@ -94,7 +94,7 @@ function RecentOrders() {
               <Link className="underline" to={paths.order(o._id)}>
                 {o.orderNumber}
               </Link>
-              <span className="text-neutral-600">
+              <span className="text-muted-foreground">
                 {formatDate(o.createdAt)}
               </span>
               <OrderStatusBadge status={o.status} />
@@ -147,7 +147,7 @@ function DefaultAddress() {
       ) : q.isError ? (
         <Retry error={q.error} onRetry={() => void q.refetch()} />
       ) : !address ? (
-        <p className="text-sm text-neutral-600">
+        <p className="text-sm text-muted-foreground">
           No saved address.{" "}
           <Link className="underline" to={paths.accountPage("addresses")}>
             Add one

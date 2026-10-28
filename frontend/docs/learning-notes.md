@@ -998,3 +998,12 @@ Backend B1 was built first (separate `backend B1:` commits): `GET /categories` n
 - Make sure nothing awaits an animation: the toast appears ~170 ms after the click; the clone flies in parallel.
 - An e2e contrast check (axe) read half-transparent text during the 300 ms fade and failed: axe samples rendered pixels. The test now waits for finite animations to end (`document.getAnimations()`).
 - Barrel files bite (again): importing `motion/react` from a feature that the shell imports added 30 kB to every page. The JS budget script caught it within a minute.
+
+## 13.7 Dark mode and tokens
+
+- Tokens are the contract: `--success/--warning/--destructive` are TEXT colours that pass 4.5:1 on `--background` and on their own `-muted` tint, in both themes (measured by `e2e/contrast.spec.ts`: it resolves the `oklch()` custom property to sRGB through a canvas and applies the WCAG formula). Replacing 89 files' worth of hard-coded `text-neutral-500`, `bg-green-100`, `text-red-700` ... with `text-muted-foreground`, `bg-success-muted`, `text-destructive` made dark mode work without a single `dark:` variant per component.
+- The first version of my "no flash" test passed WITHOUT the fix: I was sampling `first-contentful-paint`, but with a client-rendered shell nothing contentful paints before the app has run (and the provider sets `.dark` in time). The flash is the blank canvas, i.e. `first-paint`. A control that strips the script is what proves a test can fail.
+- A corrupt `localStorage` value must not stop the OS preference from applying: parse and `matchMedia` live in separate `try` blocks in the head script.
+- `color-scheme: light dark` (meta + CSS per theme) makes native controls, scrollbars and autofill follow the theme. Photos get `dark:brightness-90` so a white product shot does not glare.
+- Third-party: Sonner takes the theme from `ThemeProvider` (already). Razorpay's modal only accepts an accent `theme.color` (hex): `cssVarToHex("--brand")` resolves the current brand token; the modal's own light/dark is out of our hands.
+- A histogram bar coloured `bg-border` vanished in dark (the dark border token is 10% white): borders are not fills; use `bg-muted-foreground/40`. A screenshot in each theme found it, no assertion would have.

@@ -33,7 +33,7 @@ export function HeroCarousel() {
       <div
         role="status"
         aria-busy="true"
-        className="aspect-[3/1] min-h-40 w-full animate-pulse rounded-lg bg-neutral-200 motion-reduce:animate-none"
+        className="aspect-[3/1] min-h-40 w-full animate-pulse rounded-lg bg-muted motion-reduce:animate-none"
       >
         <span className="sr-only">Loading featured offers</span>
       </div>
@@ -112,7 +112,7 @@ function Carousel({ banners }: { banners: Banner[] }) {
               aria-label={`${i + 1} of ${banners.length}`}
               // Off-screen slides are not focusable and not read as available content.
               inert={i !== active}
-              className="relative aspect-[3/1] min-h-40 w-full shrink-0 snap-center bg-neutral-200"
+              className="relative aspect-[3/1] min-h-40 w-full shrink-0 snap-center bg-muted"
             >
               {src && (
                 <ResponsiveImage
@@ -167,8 +167,8 @@ function Carousel({ banners }: { banners: Banner[] }) {
                   <span
                     aria-hidden
                     className={cn(
-                      "size-3 rounded-full border border-neutral-800",
-                      i === active ? "bg-neutral-800" : "bg-transparent"
+                      "size-3 rounded-full border border-foreground",
+                      i === active ? "bg-foreground" : "bg-transparent"
                     )}
                   />
                 </button>

@@ -106,10 +106,10 @@ export function ImageDropzone({
         }}
         className={cn(
           "flex flex-col items-start gap-2 rounded border border-dashed p-3",
-          dragging && "border-solid bg-neutral-100"
+          dragging && "border-solid bg-muted"
         )}
       >
-        <p id={`${id}-hint`} className="text-xs text-neutral-600">
+        <p id={`${id}-hint`} className="text-xs text-muted-foreground">
           Drop images here, paste one, or choose files. {hint}
         </p>
         <input
@@ -147,7 +147,11 @@ export function ImageDropzone({
         )}
       </div>
       {shownProblems.length > 0 && (
-        <ul id={`${id}-problems`} role="alert" className="text-xs text-red-700">
+        <ul
+          id={`${id}-problems`}
+          role="alert"
+          className="text-xs text-destructive"
+        >
           {shownProblems.map((p) => (
             <li key={p}>{p}</li>
           ))}
@@ -177,14 +181,14 @@ function Thumb({
           className="size-20 rounded border object-cover"
         />
       ) : (
-        <div aria-hidden className="size-20 rounded border bg-neutral-100" />
+        <div aria-hidden className="size-20 rounded border bg-muted" />
       )}
       <button
         type="button"
         disabled={disabled}
         onClick={onRemove}
         aria-label={`Remove ${file.name}`}
-        className="absolute -top-2 -right-2 rounded-full border bg-white p-0.5"
+        className="absolute -top-2 -right-2 rounded-full border bg-background p-0.5"
       >
         <X aria-hidden className="size-3" />
       </button>
@@ -196,7 +200,7 @@ function Thumb({
 function LiveUrlCounter() {
   const count = useLiveObjectUrlCount()
   return (
-    <p data-testid="object-url-count" className="text-xs text-neutral-500">
+    <p data-testid="object-url-count" className="text-xs text-muted-foreground">
       dev: object URLs alive: {count}
     </p>
   )

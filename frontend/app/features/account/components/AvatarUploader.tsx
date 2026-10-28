@@ -64,7 +64,7 @@ export function AvatarUploader({
         <div
           aria-label="No photo yet"
           role="img"
-          className="flex size-24 items-center justify-center rounded-full border bg-neutral-100 text-2xl"
+          className="flex size-24 items-center justify-center rounded-full border bg-muted text-2xl"
         >
           {name.slice(0, 1).toUpperCase()}
         </div>
@@ -109,7 +109,7 @@ export function AvatarUploader({
         </div>
       )}
       {state.status === "error" && (
-        <p role="alert" className="text-sm text-red-700">
+        <p role="alert" className="text-sm text-destructive">
           {state.message}
         </p>
       )}

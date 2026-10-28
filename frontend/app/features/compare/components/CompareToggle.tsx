@@ -29,7 +29,7 @@ export function CompareToggle({
       aria-label={`Compare: ${item.name}`}
       onClick={() => toggleCompare(item)}
       className={cn(
-        "flex items-center gap-1 rounded border px-1.5 py-0.5 text-xs aria-pressed:bg-neutral-900 aria-pressed:text-white",
+        "flex items-center gap-1 rounded border px-1.5 py-0.5 text-xs aria-pressed:bg-foreground aria-pressed:text-background",
         className
       )}
     >

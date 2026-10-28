@@ -19,16 +19,19 @@ export function EmptyState({
   return (
     <div className="rounded border border-dashed p-8 text-center">
       {icon && (
-        <div aria-hidden className="mb-2 flex justify-center text-neutral-400">
+        <div
+          aria-hidden
+          className="mb-2 flex justify-center text-muted-foreground"
+        >
           {icon}
         </div>
       )}
       <p className="font-medium">{title}</p>
       {description && (
-        <p className="mt-1 text-sm text-neutral-600">{description}</p>
+        <p className="mt-1 text-sm text-muted-foreground">{description}</p>
       )}
       {(action || children) && (
-        <div className="mt-2 text-sm text-neutral-600">
+        <div className="mt-2 text-sm text-muted-foreground">
           {action ?? children}
         </div>
       )}

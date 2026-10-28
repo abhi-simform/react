@@ -31,7 +31,7 @@ export function PreferencesForm() {
       {prefs.isPending ? (
         <p role="status">Loading preferences...</p>
       ) : prefs.isError ? (
-        <p role="alert" className="text-sm text-red-700">
+        <p role="alert" className="text-sm text-destructive">
           {toApiError(prefs.error).message}
         </p>
       ) : (
@@ -48,7 +48,7 @@ export function PreferencesForm() {
               <tr key={r.key}>
                 <td className="py-1 pr-6">
                   {r.label}
-                  <span className="block text-xs text-neutral-500">
+                  <span className="block text-xs text-muted-foreground">
                     {r.hint}
                   </span>
                 </td>
@@ -69,7 +69,7 @@ export function PreferencesForm() {
         </table>
       )}
       {update.isError && (
-        <p role="alert" className="mt-2 text-sm text-red-700">
+        <p role="alert" className="mt-2 text-sm text-destructive">
           We could not save that change. Your previous setting is back.
         </p>
       )}

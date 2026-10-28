@@ -104,7 +104,7 @@ export function ReviewsSection({
               {summary.data.count > 0 && (
                 <Rating value={summary.data.average} />
               )}
-              <p className="text-xs text-neutral-600" data-testid="count">
+              <p className="text-xs text-muted-foreground" data-testid="count">
                 {summary.data.count} review{summary.data.count === 1 ? "" : "s"}
               </p>
             </div>
@@ -182,14 +182,14 @@ export function ReviewsSection({
             onRetry={() => void q.refetch()}
           />
         ) : items.length === 0 ? (
-          <p role="status" className="py-4 text-neutral-600">
+          <p role="status" className="py-4 text-muted-foreground">
             {filtered
               ? "No reviews match these filters."
               : "No reviews yet. Be the first to write one."}
           </p>
         ) : (
           <>
-            <p className="mb-2 text-xs text-neutral-600">
+            <p className="mb-2 text-xs text-muted-foreground">
               {total} review{total === 1 ? "" : "s"}
               {filtered ? " match" : ""}
             </p>
@@ -239,7 +239,7 @@ export function ReviewsSection({
                   />
                 </>
               ) : (
-                <p role="status" className="text-xs text-neutral-600">
+                <p role="status" className="text-xs text-muted-foreground">
                   That is every review.
                 </p>
               )}
@@ -301,14 +301,14 @@ function WriteReview({
           Write a review
         </Button>
         {eligibility.verifiedPurchase && (
-          <span className="text-xs text-neutral-600">
+          <span className="text-xs text-muted-foreground">
             Your review will show "Verified purchase".
           </span>
         )}
       </div>
     )
   return (
-    <p className="mb-3 text-xs text-neutral-700" data-testid="no-review-reason">
+    <p className="mb-3 text-xs text-foreground" data-testid="no-review-reason">
       {eligibility.reason === "ALREADY_REVIEWED" ? (
         <>
           You have already reviewed this product.{" "}

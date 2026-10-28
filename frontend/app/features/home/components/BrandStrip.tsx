@@ -23,7 +23,7 @@ export function BrandStrip() {
           Loading brands...
         </p>
       ) : q.isError ? (
-        <p role="alert" className="text-sm text-red-700">
+        <p role="alert" className="text-sm text-destructive">
           Could not load brands ({toApiError(q.error).message}).{" "}
           <button className="underline" onClick={() => void q.refetch()}>
             Retry
@@ -35,10 +35,12 @@ export function BrandStrip() {
             <li key={b.name}>
               <Link
                 to={paths.products({ brand: b.name })}
-                className="rounded-full border px-3 py-1 text-sm hover:bg-neutral-50"
+                className="rounded-full border px-3 py-1 text-sm hover:bg-muted"
               >
                 {b.name}{" "}
-                <span className="text-xs text-neutral-500">({b.count})</span>
+                <span className="text-xs text-muted-foreground">
+                  ({b.count})
+                </span>
               </Link>
             </li>
           ))}

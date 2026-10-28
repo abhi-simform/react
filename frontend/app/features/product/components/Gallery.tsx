@@ -38,7 +38,7 @@ export function Gallery({
     strip.scrollTo({ left: Math.max(0, target), behavior: "smooth" })
   }, [index])
   const count = images.length
-  if (count === 0) return <div className="aspect-square bg-neutral-100" />
+  if (count === 0) return <div className="aspect-square bg-muted" />
 
   const current = images[index]!
   const nextIndex = (index + 1) % count
@@ -75,7 +75,7 @@ export function Gallery({
     >
       <div
         data-fly-source
-        className="relative aspect-square overflow-hidden rounded bg-neutral-100"
+        className="relative aspect-square overflow-hidden rounded bg-muted"
       >
         <ResponsiveImage
           src={current.url}
@@ -92,7 +92,7 @@ export function Gallery({
               type="button"
               aria-label="Previous image"
               onClick={() => go(-1)}
-              className="absolute top-1/2 left-1 -translate-y-1/2 rounded-full bg-white/90 p-1 shadow"
+              className="absolute top-1/2 left-1 -translate-y-1/2 rounded-full bg-background/90 p-1 shadow"
             >
               <ChevronLeft aria-hidden className="size-5" />
             </button>
@@ -100,7 +100,7 @@ export function Gallery({
               type="button"
               aria-label="Next image"
               onClick={() => go(1)}
-              className="absolute top-1/2 right-1 -translate-y-1/2 rounded-full bg-white/90 p-1 shadow"
+              className="absolute top-1/2 right-1 -translate-y-1/2 rounded-full bg-background/90 p-1 shadow"
             >
               <ChevronRight aria-hidden className="size-5" />
             </button>
@@ -126,7 +126,7 @@ export function Gallery({
               onClick={() => setIndex(i)}
               className={cn(
                 "size-16 shrink-0 overflow-hidden rounded border-2",
-                i === index ? "border-black" : "border-transparent"
+                i === index ? "border-foreground" : "border-transparent"
               )}
             >
               <ResponsiveImage

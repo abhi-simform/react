@@ -47,7 +47,7 @@ export function AddressCard({
     >
       <header className="flex items-center gap-2">
         <h3 className="font-medium">{a.fullName}</h3>
-        <span className="rounded bg-neutral-100 px-1 text-xs uppercase">
+        <span className="rounded bg-muted px-1 text-xs uppercase">
           {a.type}
         </span>
         {a.isDefault && (
@@ -66,7 +66,7 @@ export function AddressCard({
       </p>
       <p>Mobile: {a.phone}</p>
       {error && (
-        <p role="alert" className="text-red-700">
+        <p role="alert" className="text-destructive">
           {error}
         </p>
       )}

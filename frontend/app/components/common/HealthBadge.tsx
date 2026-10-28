@@ -25,7 +25,7 @@ export function HealthBadge() {
       )
     case "error":
       return (
-        <p role="alert" className="text-red-600">
+        <p role="alert" className="text-destructive">
           Could not reach the API: {state.error.message}
         </p>
       )

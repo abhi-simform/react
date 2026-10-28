@@ -12,13 +12,13 @@ export function Price({ price, className }: PriceProps) {
     <p className={cn("flex flex-wrap items-baseline gap-x-2", className)}>
       <span className="font-semibold">{price.current}</span>
       {price.mrp && (
-        <s className="text-sm text-neutral-500">
+        <s className="text-sm text-muted-foreground">
           <span className="sr-only">MRP </span>
           {price.mrp}
         </s>
       )}
       {price.discountLabel && (
-        <span className="rounded bg-green-100 px-1 text-xs text-green-800">
+        <span className="rounded bg-success-muted px-1 text-xs text-success">
           {price.discountLabel}
         </span>
       )}

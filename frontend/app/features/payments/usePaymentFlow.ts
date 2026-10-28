@@ -1,3 +1,4 @@
+import { cssVarToHex } from "@/lib/cssColor"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { useReducer } from "react"
 
@@ -134,7 +135,8 @@ export function usePaymentFlow(orderId: string) {
             email: options.prefill.email,
             contact: options.prefill.contact,
           },
-          theme: { color: "#111827" },
+          // The modal is third-party UI: it gets the brand colour of the CURRENT theme as hex (13.7).
+          theme: { color: cssVarToHex("--brand", "#111827") },
           handler: (r) => void onHandler(r),
           modal: { ondismiss: () => dispatch({ type: "dismiss" }) },
         },

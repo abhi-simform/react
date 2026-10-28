@@ -124,7 +124,7 @@ export function CompareTable({
                 <tr
                   key={row.label}
                   data-differs={different || undefined}
-                  className={cn("border-t", different && "bg-amber-100")}
+                  className={cn("border-t", different && "bg-warning-muted")}
                 >
                   <th scope="row" className="p-2 font-medium">
                     {row.label}

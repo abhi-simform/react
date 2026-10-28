@@ -6,7 +6,7 @@ export function OfflineBanner() {
   return (
     <div role="status" aria-live="polite">
       {!online && (
-        <p className="bg-amber-100 p-2 text-center text-sm text-amber-900">
+        <p className="bg-warning-muted p-2 text-center text-sm text-warning">
           You are offline. Showing what we already have; new requests will fail
           until you reconnect.
         </p>

@@ -39,7 +39,7 @@ export function CheckoutStepper() {
                 ? "font-medium underline"
                 : i <= reachable
                   ? ""
-                  : "text-neutral-500"
+                  : "text-muted-foreground"
             }
           >
             {i !== current && i <= reachable ? (

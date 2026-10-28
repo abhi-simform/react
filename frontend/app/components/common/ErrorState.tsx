@@ -79,11 +79,11 @@ export function ErrorState({
 }) {
   const { title, message, retryable } = describeError(error)
   return (
-    <div role="alert" className="rounded border border-red-300 p-4">
-      <p className="font-medium text-red-800">{title}</p>
+    <div role="alert" className="rounded border border-destructive/50 p-4">
+      <p className="font-medium text-destructive">{title}</p>
       <p className="text-sm">{message}</p>
       {/* The code is for support and bug reports. */}
-      <p className="mt-1 text-xs text-neutral-500">Code: {error.code}</p>
+      <p className="mt-1 text-xs text-muted-foreground">Code: {error.code}</p>
       {onRetry && retryable && (
         <Button className="mt-2" variant="outline" onClick={onRetry}>
           Retry

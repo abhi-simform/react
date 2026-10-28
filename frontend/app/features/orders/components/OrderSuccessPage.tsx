@@ -103,7 +103,7 @@ export function OrderSuccessPage({ orderId }: { orderId: string }) {
         </Button>
       </div>
       {import.meta.env.DEV && (
-        <p className="text-xs text-neutral-600">
+        <p className="text-xs text-muted-foreground">
           Dev: the confirmation email is in Mailpit at http://localhost:8025.
         </p>
       )}

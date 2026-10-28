@@ -36,7 +36,7 @@ export function ListingResults({
       {updating && (
         <div
           aria-hidden
-          className="mb-2 h-0.5 w-full animate-pulse rounded bg-blue-500"
+          className="mb-2 h-0.5 w-full animate-pulse rounded bg-brand"
         />
       )}
       <AsyncView

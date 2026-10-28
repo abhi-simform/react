@@ -167,7 +167,7 @@ function ReviewForm({
               <label
                 htmlFor={`${id}-star-${i + 1}`}
                 title={label}
-                className="cursor-pointer text-2xl text-neutral-400 peer-checked:text-amber-600 peer-focus-visible:ring-2"
+                className="cursor-pointer text-2xl text-muted-foreground peer-checked:text-warning peer-focus-visible:ring-2"
               >
                 <span className="sr-only">
                   {i + 1} star{i ? "s" : ""}: {label}
@@ -181,7 +181,7 @@ function ReviewForm({
           <p
             id={`${id}-rating-error`}
             role="alert"
-            className="text-xs text-red-700"
+            className="text-xs text-destructive"
           >
             {errors.rating.message}
           </p>
@@ -218,7 +218,7 @@ function ReviewForm({
               <button
                 type="button"
                 aria-label="Remove this photo"
-                className="absolute -top-2 -right-2 rounded-full border bg-white px-1 text-xs"
+                className="absolute -top-2 -right-2 rounded-full border bg-background px-1 text-xs"
                 onClick={() => setKept((k) => k.filter((x) => x !== u))}
               >
                 x
@@ -237,7 +237,7 @@ function ReviewForm({
       <UploadStatusList items={uploads.items} />
 
       {errors.root?.message && (
-        <p role="alert" className="text-xs text-red-700">
+        <p role="alert" className="text-xs text-destructive">
           {errors.root.message}
         </p>
       )}

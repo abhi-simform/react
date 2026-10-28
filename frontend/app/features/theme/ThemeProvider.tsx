@@ -3,6 +3,8 @@ import { createContext, useContext, useEffect, useMemo } from "react"
 import { useLocalStorage } from "@/hooks/useLocalStorage"
 import { useMediaQuery } from "@/hooks/useMediaQuery"
 
+import { THEME_STORAGE_KEY } from "./themeScript"
+
 export type Theme = "light" | "dark" | "system"
 export type ResolvedTheme = "light" | "dark"
 
@@ -14,7 +16,7 @@ type ThemeValue = {
   setTheme: (theme: Theme) => void
 }
 
-const STORAGE_KEY = "shopsphere.theme"
+const STORAGE_KEY = THEME_STORAGE_KEY
 const isTheme = (v: unknown): v is Theme =>
   v === "light" || v === "dark" || v === "system"
 
@@ -27,8 +29,8 @@ const ThemeContext = createContext<ThemeValue | null>(null)
  * `dark` class (what Tailwind's `dark:` variant and shadcn's `.dark` variables look for) and
  * `color-scheme` (native form controls, scrollbars) on `<html>`: that is syncing with an
  * external system (the DOM), a legitimate effect. The first render uses what `useLocalStorage` returns (the
- * server snapshot is "system", so SSR would match); a stored "dark" is applied by the effect
- * after paint (a brief light flash; Stage 13 adds the inline <head> script that removes it).
+ * server snapshot is "system", so SSR would match); a stored "dark" is applied BEFORE first paint by the inline <head> script
+ * (`themeInitScript`, 13.7), so there is no light flash; this effect keeps the class in step afterwards.
  */
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [theme, setTheme] = useLocalStorage<Theme>(

@@ -75,7 +75,7 @@ export function QaSection({ productId }: { productId: string }) {
           <p role="status">No questions yet. Ask the first one.</p>
         ) : (
           <>
-            <p className="mb-2 text-xs text-neutral-600">
+            <p className="mb-2 text-xs text-muted-foreground">
               {total} question{total === 1 ? "" : "s"}
             </p>
             <ul className="flex flex-col gap-4">
@@ -207,7 +207,7 @@ function QuestionItem({
   return (
     <li>
       <p className="font-medium">Q: {qn.text}</p>
-      <p className="text-xs text-neutral-600">
+      <p className="text-xs text-muted-foreground">
         {qn.author}, {formatRelative(qn.createdAt)}
       </p>
       <div className="my-1 flex flex-wrap gap-2">
@@ -245,13 +245,13 @@ function QuestionItem({
         )}
       </div>
       {answers.length === 0 ? (
-        <p className="text-xs text-neutral-600">Not answered yet.</p>
+        <p className="text-xs text-muted-foreground">Not answered yet.</p>
       ) : (
         <ul className="ml-3 flex flex-col gap-2 border-l pl-3">
           {answers.map((a) => (
             <li key={a.id}>
               <p>A: {a.text}</p>
-              <p className="text-xs text-neutral-600">
+              <p className="text-xs text-muted-foreground">
                 {a.author}
                 <Badge a={a} />, {formatRelative(a.createdAt)}
               </p>

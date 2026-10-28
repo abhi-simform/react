@@ -15,7 +15,7 @@ export function FormError({ error, onRetry, retrying }: Props) {
   return (
     <div
       role="alert"
-      className="flex flex-col gap-2 rounded border border-red-300 p-2 text-sm text-red-800"
+      className="flex flex-col gap-2 rounded border border-destructive/50 p-2 text-sm text-destructive"
     >
       <p>{error.message}</p>
       {retryable && onRetry && (

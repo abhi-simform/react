@@ -17,7 +17,7 @@ export function CartIssues() {
     <div
       role="alert"
       data-testid="cart-issues"
-      className="mb-2 rounded border border-red-200 bg-red-50 p-2 text-sm text-red-900"
+      className="mb-2 rounded border border-destructive/50 bg-destructive-muted p-2 text-sm text-destructive"
     >
       <p className="font-medium">Fix these before you check out</p>
       <ul className="list-disc pl-5">

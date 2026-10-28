@@ -24,7 +24,7 @@ export function PincodeStatus({
       return (
         <p
           role="status"
-          className="flex items-center gap-1 text-xs text-neutral-600"
+          className="flex items-center gap-1 text-xs text-muted-foreground"
         >
           <Loader2 aria-hidden className="size-3 animate-spin" />
           Checking delivery...
@@ -33,7 +33,7 @@ export function PincodeStatus({
     case "unserviceable":
       if (fieldShowsError) return null
       return (
-        <p role="status" className="text-xs text-red-700">
+        <p role="status" className="text-xs text-destructive">
           Sorry, we do not deliver to this pincode yet.
         </p>
       )
@@ -41,7 +41,7 @@ export function PincodeStatus({
       return (
         <p
           role="status"
-          className="flex items-center gap-2 text-xs text-red-700"
+          className="flex items-center gap-2 text-xs text-destructive"
         >
           Could not check delivery right now.
           <Button
@@ -56,7 +56,7 @@ export function PincodeStatus({
       )
     case "serviceable":
       return (
-        <p role="status" className="text-xs text-green-800">
+        <p role="status" className="text-xs text-success">
           {describeEta(state.result)}.{" "}
           {state.result.codAvailable
             ? "Cash on delivery available."

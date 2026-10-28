@@ -57,7 +57,9 @@ export function CompareTray() {
             Compare now
           </Button>
         ) : (
-          <p className="text-xs text-neutral-600">Add one more to compare.</p>
+          <p className="text-xs text-muted-foreground">
+            Add one more to compare.
+          </p>
         )}
         <Button size="sm" variant="outline" onClick={clearCompare}>
           Clear

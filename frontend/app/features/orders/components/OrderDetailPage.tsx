@@ -67,7 +67,7 @@ export function OrderDetailPage({ orderId }: { orderId: string }) {
       <p
         role="status"
         aria-live="polite"
-        className="mb-3 text-xs text-neutral-600"
+        className="mb-3 text-xs text-muted-foreground"
         data-testid="order-live"
       >
         {live
@@ -95,7 +95,7 @@ export function OrderDetailPage({ orderId }: { orderId: string }) {
         </h2>
         <OrderTimeline order={o} eta={o.delivery?.estimatedTo} />
         {o.delivery?.estimatedFrom && o.delivery.estimatedTo && live && (
-          <p className="mt-1 text-xs text-neutral-600">
+          <p className="mt-1 text-xs text-muted-foreground">
             Estimated delivery {formatDate(o.delivery.estimatedFrom)} to{" "}
             {formatDate(o.delivery.estimatedTo)}.
           </p>
@@ -188,7 +188,7 @@ function PaymentSummary({ order: o }: { order: Order }) {
                   : "Paid online."}
       </p>
       {payment && payment.refunds.length > 0 && (
-        <ul aria-label="Refunds" className="text-xs text-neutral-700">
+        <ul aria-label="Refunds" className="text-xs text-foreground">
           {payment.refunds.map((r) => (
             <li key={r.createdAt}>
               {formatRupees(r.amount)}:{" "}

@@ -6,7 +6,7 @@ import { useDealExpiry } from "../hooks/useDealExpiry"
 export function DealEndsNote({ endsAt }: { endsAt: string }) {
   const countdown = useDealExpiry(endsAt)
   return (
-    <p className="text-sm text-amber-800" data-testid="deal-note">
+    <p className="text-sm text-warning" data-testid="deal-note">
       {countdown.isExpired ? (
         "This deal has ended."
       ) : (

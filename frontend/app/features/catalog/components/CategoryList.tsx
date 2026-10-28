@@ -36,11 +36,11 @@ export function CategoryList({ activeSlug }: { activeSlug?: string }) {
       className={cn(
         "flex justify-between rounded px-1 py-0.5",
         nested && "pl-4",
-        node.slug === activeSlug && "bg-neutral-200 font-medium"
+        node.slug === activeSlug && "bg-muted font-medium"
       )}
     >
       <span>{node.name}</span>
-      <span className="text-neutral-500">{node.productCount}</span>
+      <span className="text-muted-foreground">{node.productCount}</span>
     </Link>
   )
 

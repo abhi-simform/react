@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils"
 import { useAuth } from "../AuthProvider"
 
 const navClass = ({ isActive }: { isActive: boolean }) =>
-  cn("rounded px-1", isActive && "bg-neutral-200 font-medium")
+  cn("rounded px-1", isActive && "bg-muted font-medium")
 
 /**
  * Header account area. Role-specific links are UX only (10.4): the API enforces roles itself
@@ -18,7 +18,7 @@ export function AccountMenu() {
 
   if (status === "loading")
     return (
-      <span aria-busy="true" className="text-neutral-400">
+      <span aria-busy="true" className="text-muted-foreground">
         ...
       </span>
     )
@@ -39,10 +39,12 @@ export function AccountMenu() {
       <summary className="cursor-pointer rounded px-1 select-none">
         {user.name}
         {user.role !== "customer" && (
-          <span className="ml-1 text-xs text-neutral-500">({user.role})</span>
+          <span className="ml-1 text-xs text-muted-foreground">
+            ({user.role})
+          </span>
         )}
       </summary>
-      <ul className="absolute right-0 z-20 mt-1 flex min-w-44 flex-col gap-1 rounded border bg-white p-2 shadow dark:bg-neutral-900">
+      <ul className="absolute right-0 z-20 mt-1 flex min-w-44 flex-col gap-1 rounded border bg-background p-2 shadow">
         <li>
           <Link to={paths.account()}>Account</Link>
         </li>
