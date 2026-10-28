@@ -1,6 +1,7 @@
 import { isValidObjectId } from "mongoose"
 import { ApiError } from "../../utils/ApiError.js"
 import { Category } from "../categories/category.model.js"
+import { attachDeals, liveDeals } from "../deals/deal.service.js"
 import { Product } from "./product.model.js"
 import type { z } from "zod"
 import type { listProductsSchema } from "./product.schema.js"
@@ -119,7 +120,11 @@ export async function listProducts(q: ListQuery) {
       .lean(),
     Product.countDocuments(filter),
   ])
-  return { items, total, facets: q.facets ? await computeFacets(q) : undefined }
+  return {
+    items: await attachDeals(items),
+    total,
+    facets: q.facets ? await computeFacets(q) : undefined,
+  }
 }
 
 export async function getProduct(idOrSlug: string) {
@@ -131,5 +136,6 @@ export async function getProduct(idOrSlug: string) {
     .populate("categoryPath", "name slug")
     .lean()
   if (!product) throw ApiError.notFound("Product not found")
-  return product
+  const deal = (await liveDeals([product._id])).get(String(product._id)) ?? null
+  return { ...product, deal }
 }

@@ -10,6 +10,10 @@ import { RefreshToken } from "../modules/auth/refreshToken.model.js"
 import { Address } from "../modules/addresses/address.model.js"
 import { WishlistItem } from "../modules/wishlist/wishlist.model.js"
 import { Cart } from "../modules/cart/cart.model.js"
+import { Coupon } from "../modules/coupons/coupon.model.js"
+import { Deal } from "../modules/deals/deal.model.js"
+import { Banner } from "../modules/banners/banner.model.js"
+import { Order } from "../modules/orders/order.model.js"
 import { slugify } from "../utils/slugify.js"
 import { CATALOG } from "./catalog.js"
 
@@ -37,6 +41,10 @@ async function main() {
     Address.syncIndexes(),
     WishlistItem.syncIndexes(),
     Cart.syncIndexes(),
+    Coupon.syncIndexes(),
+    Deal.syncIndexes(),
+    Banner.syncIndexes(),
+    Order.syncIndexes(),
   ])
 
   // Users
@@ -201,6 +209,112 @@ async function main() {
       })
     }
   }
+
+  // B4: coupons, deals/flash sales and home banners (times are relative to seed time).
+  const electronics = await Category.findOne({ slug: "electronics" })
+  const H = 3_600_000
+  const now = Date.now()
+  await Coupon.insertMany([
+    {
+      code: "SAVE10",
+      description: "10% off, up to Rs 200 (orders from Rs 500)",
+      type: "percent",
+      value: 10,
+      maxDiscount: 200,
+      minOrder: 500,
+      perUserLimit: 5,
+    },
+    {
+      code: "FLAT100",
+      description: "Rs 100 off (orders from Rs 2,000)",
+      type: "flat",
+      value: 100,
+      minOrder: 2000,
+      perUserLimit: 5,
+    },
+    {
+      code: "WELCOME50",
+      description: "Rs 50 off your first order (from Rs 299)",
+      type: "flat",
+      value: 50,
+      minOrder: 299,
+      firstOrderOnly: true,
+    },
+    {
+      code: "TECH15",
+      description: "15% off Electronics, up to Rs 1,500",
+      type: "percent",
+      value: 15,
+      maxDiscount: 1500,
+      minOrder: 1000,
+      categories: electronics ? [electronics._id] : [],
+      perUserLimit: 3,
+    },
+    {
+      code: "OLD50",
+      description: "50% off (expired)",
+      type: "percent",
+      value: 50,
+      startsAt: new Date(now - 90 * 24 * H),
+      expiresAt: new Date(now - 24 * H),
+    },
+    {
+      code: "LASTONE",
+      description: "Rs 75 off, only one left in the world",
+      type: "flat",
+      value: 75,
+      usageLimit: 1,
+    },
+  ])
+  const dealPicks = await Product.find({ status: "active", stock: { $gte: 20 } })
+    .sort({ soldCount: -1 })
+    .limit(10)
+  await Deal.insertMany(
+    dealPicks.map((p, n) => ({
+      product: p._id,
+      dealPrice: Math.max(1, Math.round(p.price * (n % 3 === 0 ? 0.7 : 0.82))),
+      startsAt: new Date(now - H),
+      endsAt: new Date(now + (n < 4 ? 6 : n < 8 ? 36 : 72) * H),
+      stockLimit: 10 + n * 3,
+      claimed: n === 0 ? 8 : Math.floor((10 + n * 3) / 3),
+      badge: n < 4 ? "Flash sale" : "Deal of the day",
+    }))
+  )
+  const upcoming = await Product.findOne({ status: "active", stock: { $gte: 20 } })
+    .sort({ soldCount: 1 })
+    .skip(5)
+  if (upcoming)
+    await Deal.create({
+      product: upcoming._id,
+      dealPrice: Math.max(1, Math.round(upcoming.price * 0.6)),
+      startsAt: new Date(now + 24 * H),
+      endsAt: new Date(now + 48 * H),
+      stockLimit: 20,
+      badge: "Coming soon",
+    })
+  await Banner.insertMany([
+    {
+      title: "Flash sale is live",
+      subtitle: "Up to 30% off, while stock lasts",
+      imageUrl: "https://picsum.photos/seed/banner-flash/1200/400",
+      linkUrl: "/deals",
+      sortOrder: 1,
+    },
+    {
+      title: "New in Electronics",
+      subtitle: "Phones, laptops and audio",
+      imageUrl: "https://picsum.photos/seed/banner-tech/1200/400",
+      linkUrl: "/c/electronics",
+      sortOrder: 2,
+    },
+    {
+      title: "Free delivery above Rs 499",
+      imageUrl: "https://picsum.photos/seed/banner-ship/1200/400",
+      linkUrl: "/products",
+      sortOrder: 3,
+    },
+  ])
+
   logger.info(
     `Seeded ${total} products, ${await Category.countDocuments()} categories, 3 users`
   )

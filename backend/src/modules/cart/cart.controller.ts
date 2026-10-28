@@ -3,6 +3,7 @@ import { valid } from "../../middleware/validate.js"
 import { ApiError } from "../../utils/ApiError.js"
 import { ok } from "../../utils/response.js"
 import * as service from "./cart.service.js"
+import type { applyCouponSchema } from "../coupons/coupon.schema.js"
 import type {
   addItemSchema,
   mergeSchema,
@@ -47,4 +48,13 @@ export const merge: RequestHandler = async (req, res) => {
     body.guestToken
   )
   ok(res, { ...cart, merge: report })
+}
+
+export const applyCoupon: RequestHandler = async (req, res) => {
+  const { body } = valid<typeof applyCouponSchema>(req)
+  ok(res, await service.applyCoupon(req.user!.id, body.code))
+}
+
+export const removeCoupon: RequestHandler = async (req, res) => {
+  ok(res, await service.removeCoupon(req.user!.id))
 }

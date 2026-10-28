@@ -16,6 +16,9 @@ import {
   mergeSchema,
   updateItemSchema,
 } from "./modules/cart/cart.schema.js"
+import { applyCouponSchema, createCouponSchema } from "./modules/coupons/coupon.schema.js"
+import { createDealSchema, listDealsSchema } from "./modules/deals/deal.schema.js"
+import { createBannerSchema } from "./modules/banners/banner.routes.js"
 import { addWishlistSchema } from "./modules/wishlist/wishlist.schema.js"
 import { listBrandsSchema } from "./modules/categories/category.schema.js"
 import { listProductsSchema } from "./modules/products/product.schema.js"
@@ -338,6 +341,182 @@ export const openApiDocument = {
         responses: { 200: { description: "Cart view" } },
       },
     },
+    "/cart/coupon": {
+      post: {
+        tags: ["Coupons"],
+        summary:
+          "Apply a coupon to the signed-in user's cart (replaces any earlier one). Cart view gains coupon { code, description, discount } and totals.discount/shipping/tax/total",
+        security: bearer,
+        requestBody: body(applyCouponSchema.body),
+        responses: {
+          200: { description: "Cart view" },
+          401: { description: "UNAUTHORIZED (guests must sign in)" },
+          422: {
+            description:
+              "COUPON_INVALID, details.reason: UNKNOWN | NOT_STARTED | EXPIRED | MIN_ORDER (+minOrder, shortBy) | ALREADY_USED | NOT_APPLICABLE | EXHAUSTED | FIRST_ORDER_ONLY | EMPTY_CART",
+          },
+        },
+      },
+      delete: {
+        tags: ["Coupons"],
+        summary: "Remove the applied coupon (idempotent)",
+        security: bearer,
+        responses: { 200: { description: "Cart view" } },
+      },
+    },
+    "/coupons/available": {
+      get: {
+        tags: ["Coupons"],
+        summary:
+          "Live coupons, each checked against this cart: { code, description, type, value, maxDiscount, minOrder, expiresAt, applicable, discount, reason, message }",
+        security: [...bearer, {}],
+        parameters: [cartToken],
+        responses: { 200: { description: "Coupon[]" } },
+      },
+    },
+    "/deals": {
+      get: {
+        tags: ["Deals"],
+        summary:
+          "Flash sales / deals. status=active (default) or upcoming; category slug filter. meta.now is the server clock. Each deal: { id, dealPrice, startsAt, endsAt, stockLimit, claimed, remaining, badge, discountPercent, product }",
+        parameters: queryParams(listDealsSchema.query as z.ZodObject),
+        responses: { 200: { description: "Deal[] + meta { now, count }" } },
+      },
+    },
+    "/time": {
+      get: {
+        tags: ["Deals"],
+        summary:
+          "Server clock { now, epochMs } (no-store). Clients keep the offset for countdowns",
+        responses: { 200: { description: "{ now, epochMs }" } },
+      },
+    },
+    "/banners": {
+      get: {
+        tags: ["Banners"],
+        summary: "Active home banners (placement=hero|strip), ordered",
+        parameters: [
+          {
+            name: "placement",
+            in: "query",
+            required: false,
+            schema: { type: "string", enum: ["hero", "strip"] },
+          },
+        ],
+        responses: {
+          200: { description: "{ id, title, subtitle, imageUrl, linkUrl, placement }[]" },
+        },
+      },
+    },
+    "/admin/coupons": {
+      get: {
+        tags: ["Admin"],
+        summary: "All coupons",
+        security: bearer,
+        responses: { 200: { description: "Coupon[]" } },
+      },
+      post: {
+        tags: ["Admin"],
+        summary: "Create a coupon",
+        security: bearer,
+        requestBody: body(createCouponSchema.body),
+        responses: {
+          201: { description: "Coupon" },
+          403: { description: "FORBIDDEN" },
+          409: { description: "COUPON_CODE_TAKEN" },
+          422: { description: "VALIDATION_ERROR" },
+        },
+      },
+    },
+    "/admin/coupons/{id}": {
+      patch: {
+        tags: ["Admin"],
+        summary: "Edit / deactivate a coupon",
+        security: bearer,
+        parameters: [
+          { name: "id", in: "path", required: true, schema: { type: "string" } },
+        ],
+        responses: { 200: { description: "Coupon" }, 404: { description: "NOT_FOUND" } },
+      },
+    },
+    "/admin/deals": {
+      get: {
+        tags: ["Admin"],
+        summary: "All deals",
+        security: bearer,
+        responses: { 200: { description: "Deal[]" } },
+      },
+      post: {
+        tags: ["Admin"],
+        summary: "Create a deal (price must be below the regular price)",
+        security: bearer,
+        requestBody: body(createDealSchema.body),
+        responses: {
+          201: { description: "Deal" },
+          400: { description: "BAD_REQUEST" },
+          403: { description: "FORBIDDEN" },
+          422: { description: "VALIDATION_ERROR" },
+        },
+      },
+    },
+    "/admin/deals/{id}": {
+      patch: {
+        tags: ["Admin"],
+        summary: "Edit a deal",
+        security: bearer,
+        parameters: [
+          { name: "id", in: "path", required: true, schema: { type: "string" } },
+        ],
+        responses: { 200: { description: "Deal" } },
+      },
+      delete: {
+        tags: ["Admin"],
+        summary: "Delete a deal",
+        security: bearer,
+        parameters: [
+          { name: "id", in: "path", required: true, schema: { type: "string" } },
+        ],
+        responses: { 204: { description: "Deleted" } },
+      },
+    },
+    "/admin/banners": {
+      get: {
+        tags: ["Admin"],
+        summary: "All banners",
+        security: bearer,
+        responses: { 200: { description: "Banner[]" } },
+      },
+      post: {
+        tags: ["Admin"],
+        summary: "Create a banner (linkUrl must be a same-site path)",
+        security: bearer,
+        requestBody: body(createBannerSchema.body),
+        responses: {
+          201: { description: "Banner" },
+          422: { description: "VALIDATION_ERROR" },
+        },
+      },
+    },
+    "/admin/banners/{id}": {
+      patch: {
+        tags: ["Admin"],
+        summary: "Edit a banner",
+        security: bearer,
+        parameters: [
+          { name: "id", in: "path", required: true, schema: { type: "string" } },
+        ],
+        responses: { 200: { description: "Banner" } },
+      },
+      delete: {
+        tags: ["Admin"],
+        summary: "Delete a banner",
+        security: bearer,
+        parameters: [
+          { name: "id", in: "path", required: true, schema: { type: "string" } },
+        ],
+        responses: { 204: { description: "Deleted" } },
+      },
+    },
     "/cart/merge": {
       post: {
         tags: ["Cart"],
@@ -566,7 +745,7 @@ export const openApiDocument = {
     "/products/{idOrSlug}": {
       get: {
         tags: ["Catalog"],
-        summary: "Product detail",
+        summary: "Product detail (includes `deal`: the live deal or null)",
         parameters: [
           { name: "idOrSlug", in: "path", required: true, schema: { type: "string" } },
         ],

@@ -25,6 +25,8 @@ const cartSchema = new Schema(
     user: { type: Types.ObjectId, ref: "User" },
     guestToken: { type: String },
     items: { type: [lineSchema], default: [] },
+    // B4: the applied coupon CODE only. Rules are re-evaluated on every read (it may expire).
+    couponCode: { type: String },
     // Guest carts only: abandoned ones are deleted by Mongo's TTL monitor. Refreshed on write.
     expiresAt: { type: Date },
   },

@@ -98,7 +98,7 @@ describe("cart: add / update / delete with stock validation", () => {
       priceChanged: false,
     })
     const r3 = await add(guest(), ids[1]!, 2)
-    expect(r3.body.data.totals).toEqual({
+    expect(r3.body.data.totals).toMatchObject({
       lineCount: 2,
       unitCount: 5,
       subtotal: 3 * 100 + 2 * 150,

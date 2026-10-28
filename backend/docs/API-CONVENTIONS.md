@@ -223,4 +223,25 @@ A revoked session cannot refresh, but the access token it already holds stays va
 4. Put the client ID and secret in `backend/.env` as `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET`; restart the backend. The mock switches itself off. In production over HTTPS also set `COOKIE_SECURE=true` and, if the SPA is on another site, `COOKIE_SAMESITE=none` (the state cookie stays Lax, which is enough for a top-level redirect).
    Scopes requested: `openid email profile`. Nothing was tested against real Google (no credentials in this environment).
 
+### Coupons, deals, server time, banners (B4)
+
+Money stays whole rupees. The cart view (every cart response) gained: `totals.{discount, shipping, tax, total}` (free shipping strictly above Rs 499 on the discounted subtotal, otherwise Rs 40; tax 18% exclusive, rounded once), `coupon` and per-line `deal`.
+
+| Method | Path | Notes |
+| --- | --- | --- |
+| POST | `/cart/coupon` `{code}` | **Bearer required** (usage limits are per person). Codes are case-insensitive. `200` = cart view with `coupon: { code, description, discount }`. `422 COUPON_INVALID` with `details.reason`: `UNKNOWN`, `NOT_STARTED`, `EXPIRED`, `MIN_ORDER` (+ `minOrder`, `shortBy`), `ALREADY_USED`, `NOT_APPLICABLE` (category coupon, no eligible lines), `EXHAUSTED`, `FIRST_ORDER_ONLY`, `EMPTY_CART`. Applying replaces an earlier coupon. |
+| DELETE | `/cart/coupon` | Bearer. Idempotent. |
+| GET | `/coupons/available` | Bearer or `x-cart-token`. Live coupons each checked against the cart: `applicable`, `discount`, `reason`, `message`. |
+| GET | `/deals?status=active\|upcoming&category=<slug>&limit` | Public. `data[]` = `{ id, dealPrice, startsAt, endsAt, stockLimit, claimed, remaining, badge, discountPercent, status, product: {id,name,slug,brand,imageUrl,price,mrp,stock,category} }`, `meta.now` = server clock. Poll it for the "claimed" bar. |
+| GET | `/time` | `{ now, epochMs }`, `Cache-Control: no-store`. |
+| GET | `/banners?placement=hero\|strip` | Public; only active banners inside their optional window, by `sortOrder`. |
+| * | `/admin/coupons`, `/admin/deals`, `/admin/banners` | Admin only (`403` otherwise): list, create, `PATCH /:id`, deals/banners `DELETE /:id`. Deal price must be below the regular price (`400`); a banner `linkUrl` must be a same-site path (`//evil.com` is `422`). |
+
+Rules worth knowing:
+
+- **The cart stores only the coupon CODE.** Rules are re-evaluated on every cart read; if the coupon stops applying (expired, minimum no longer met, used up) the cart returns `coupon: { code, error: { reason, message } }` and `totals.discount = 0` instead of failing. Percent discounts round down; a coupon never discounts more than its eligible lines; `maxDiscount` caps percent coupons.
+- **Per-user and first-order rules** read the user's orders (cancelled ones do not count); the global `usageLimit` is claimed atomically when an order is placed (B5) and released on cancel.
+- **Deals.** A deal is live when `startsAt <= now < endsAt`, `isActive` and units are left (`claimed < stockLimit`), judged by the server clock. While live: `GET /products` rows and `GET /products/:id` carry `deal: { id, dealPrice, endsAt, remaining, ... }` (else `null`; `price` stays the regular price), and the cart prices a line at the deal price when `remaining >= qty`. When it ends the next read returns the regular price (and `priceChanged: true` if the shopper added it at the deal price). Overlapping deals: cheapest wins.
+- Seed: coupons `SAVE10`, `FLAT100`, `WELCOME50` (first order), `TECH15` (Electronics only), `OLD50` (expired), `LASTONE` (1 use total); 10 live deals (one nearly sold out), 1 upcoming, 3 hero banners.
+
 New endpoints are appended here as each backend phase lands (see `BACKEND-ROADMAP.md`).

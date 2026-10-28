@@ -1,5 +1,8 @@
-import mongoose, { Types } from "mongoose"
+import mongoose, { Types, type ClientSession } from "mongoose"
 import { ApiError } from "../../utils/ApiError.js"
+import { couponError, couponMessage, evaluateCoupon } from "../coupons/coupon.service.js"
+import { liveDeals } from "../deals/deal.service.js"
+import { priceOrder } from "../pricing/pricing.js"
 import { Product } from "../products/product.model.js"
 import type { CartOwner } from "./cart.identity.js"
 import {
@@ -19,18 +22,35 @@ const limitFor = (stock: number) => Math.min(stock, MAX_QTY_PER_LINE)
 
 // ---- view ----------------------------------------------------------------------------------
 
-export type CartLineView = Awaited<ReturnType<typeof buildView>>["items"][number]
+export type CartLineView = Awaited<ReturnType<typeof priceCart>>["view"]["items"][number]
+
+type ItemDoc = {
+  product: Types.ObjectId
+  qty: number
+  priceAtAdd: number
+  savedForLater: boolean
+  addedAt: Date
+}
+type CartDocLike = {
+  _id: unknown
+  items: ItemDoc[]
+  couponCode?: string | null
+  updatedAt?: Date
+}
 
 /**
- * The cart as the client sees it: lines joined with the CURRENT product data, plus flags.
- * Flags are computed on every read, so the first GET after a stock or price change reveals it:
+ * Price a cart against the CURRENT catalog, live deals and the applied coupon. Used for the cart
+ * view AND by order placement (with a transaction session), so the cart total and the order
+ * total can never disagree. Flags are computed on every read:
  * - `outOfStock`  nothing available (stock 0, or product archived/removed)
  * - `qtyReduced`  you asked for more than what is left (`availableQty < qty`, but > 0)
  * - `priceChanged` current price differs from what you saw (`previousPrice` -> `unitPrice`)
- * Money is whole rupees. Totals count only the PAYABLE quantity of purchasable lines.
+ * A live deal (B4) replaces the unit price while the deal has units left for the whole line;
+ * `deal` tells the client why. Money is whole rupees. Totals count only the PAYABLE quantity.
  */
-async function buildView(
-  cart: { _id: unknown; items: ItemDoc[]; updatedAt?: Date } | null
+export async function priceCart(
+  cart: CartDocLike | null,
+  ctx: { userId?: string; session?: ClientSession } = {}
 ) {
   const items = cart?.items ?? []
   const products = await Product.find(
@@ -45,15 +65,25 @@ async function buildView(
       mrp: 1,
       stock: 1,
       status: 1,
+      categoryPath: 1,
     }
-  ).lean()
+  )
+    .session(ctx.session ?? null)
+    .lean()
   const byId = new Map(products.map((p) => [String(p._id), p]))
+  const deals = await liveDeals(
+    items.map((i) => i.product),
+    new Date(),
+    ctx.session
+  )
 
   const lines = items.map((i) => {
     const p = byId.get(String(i.product))
     const active = p?.status === "active"
     const availableQty = active ? (p?.stock ?? 0) : 0
-    const unitPrice = p?.price ?? i.priceAtAdd
+    const d = deals.get(String(i.product))
+    const deal = active && d && d.remaining >= i.qty ? d : null
+    const unitPrice = deal?.dealPrice ?? p?.price ?? i.priceAtAdd
     return {
       productId: String(i.product),
       sku: p?.sku ?? "",
@@ -70,39 +100,82 @@ async function buildView(
       qtyReduced: availableQty > 0 && availableQty < i.qty,
       priceChanged: !!p && unitPrice !== i.priceAtAdd,
       previousPrice: i.priceAtAdd,
+      deal: deal ? { id: deal.id, dealPrice: deal.dealPrice, endsAt: deal.endsAt } : null,
       savedForLater: i.savedForLater,
       addedAt: i.addedAt,
+      categoryPath: p?.categoryPath ?? [],
     }
   })
 
   const active = lines.filter((l) => !l.savedForLater)
   const subtotal = active.reduce((s, l) => s + l.unitPrice * l.payableQty, 0)
   const mrpTotal = active.reduce((s, l) => s + l.mrp * l.payableQty, 0)
-  return {
-    items: active,
-    saved: lines.filter((l) => l.savedForLater),
+
+  // The applied coupon is re-evaluated on every read: it can expire or stop applying at any time.
+  let coupon:
+    | { code: string; description: string; discount: number }
+    | { code: string; error: { reason: string; message: string; [k: string]: unknown } }
+    | null = null
+  let discount = 0
+  if (cart?.couponCode) {
+    const r = await evaluateCoupon(cart.couponCode, {
+      userId: ctx.userId,
+      subtotal,
+      lines: active.map((l) => ({
+        categoryPath: l.categoryPath,
+        lineTotal: l.unitPrice * l.payableQty,
+      })),
+      session: ctx.session,
+    })
+    if (r.ok) {
+      discount = r.discount
+      coupon = { code: r.code, description: r.description, discount }
+    } else {
+      coupon = {
+        code: cart.couponCode,
+        error: { reason: r.reason, message: couponMessage(r.reason), ...r.details },
+      }
+    }
+  }
+  const pricing = priceOrder(subtotal, discount)
+  const view = {
+    items: active.map(stripInternal),
+    saved: lines.filter((l) => l.savedForLater).map(stripInternal),
     totals: {
       lineCount: active.length,
       unitCount: active.reduce((s, l) => s + l.payableQty, 0),
       subtotal,
       mrpTotal,
       savings: mrpTotal - subtotal,
+      discount,
+      shipping: pricing.shipping,
+      tax: pricing.tax,
+      total: pricing.total,
     },
+    coupon,
     hasIssues: active.some((l) => l.outOfStock || l.qtyReduced || l.priceChanged),
     updatedAt: cart?.updatedAt ?? null,
   }
+  return {
+    view,
+    lines: active,
+    couponApplied: coupon && "discount" in coupon ? coupon.code : null,
+    discount,
+    subtotal,
+  }
 }
 
-type ItemDoc = {
-  product: Types.ObjectId
-  qty: number
-  priceAtAdd: number
-  savedForLater: boolean
-  addedAt: Date
+function stripInternal<T extends { categoryPath: unknown }>({
+  categoryPath: _categoryPath,
+  ...rest
+}: T) {
+  return rest
 }
 
 export async function getCart(owner: CartOwner) {
-  return buildView(await Cart.findOne(ownerFilter(owner)).lean())
+  const cart = await Cart.findOne(ownerFilter(owner)).lean()
+  return (await priceCart(cart, { userId: "userId" in owner ? owner.userId : undefined }))
+    .view
 }
 
 // ---- helpers -------------------------------------------------------------------------------
@@ -155,6 +228,9 @@ function stockError(name: string, availableQty: number, requested: number, inCar
 export async function addItem(owner: CartOwner, productId: string, qty: number) {
   const product = await activeProduct(productId)
   const limit = limitFor(product.stock)
+  // The price the shopper is shown right now (a live deal beats the regular price).
+  const deal = (await liveDeals([productId])).get(productId)
+  const seenPrice = deal && deal.remaining >= qty ? deal.dealPrice : product.price
   const cart = await ensureCart(owner)
   if (!cart) throw ApiError.notFound("Cart not found")
   const pid = new Types.ObjectId(productId)
@@ -186,7 +262,7 @@ export async function addItem(owner: CartOwner, productId: string, qty: number) 
             items: {
               product: pid,
               qty,
-              priceAtAdd: product.price,
+              priceAtAdd: seenPrice,
               savedForLater: false,
               addedAt: new Date(),
             },
@@ -367,4 +443,38 @@ export async function mergeGuestCart(userId: string, guestToken: string) {
     await Cart.deleteOne({ _id: guest._id }, { session })
   })
   return { cart: await getCart({ userId }), merge: report }
+}
+
+// ---- coupon (B4) ---------------------------------------------------------------------------
+
+/**
+ * Apply a coupon code to the signed-in user's cart. Validation is server-side:
+ * `422 COUPON_INVALID` with `details.reason` (UNKNOWN, EXPIRED, MIN_ORDER, ALREADY_USED,
+ * NOT_APPLICABLE, EXHAUSTED, FIRST_ORDER_ONLY, EMPTY_CART). Applying replaces any earlier coupon.
+ */
+export async function applyCoupon(userId: string, code: string) {
+  const owner = { userId }
+  const cart = await Cart.findOne(ownerFilter(owner)).lean()
+  const { lines, subtotal } = await priceCart(
+    cart ? { ...cart, couponCode: null } : null,
+    {
+      userId,
+    }
+  )
+  const r = await evaluateCoupon(code, {
+    userId,
+    subtotal,
+    lines: lines.map((l) => ({
+      categoryPath: l.categoryPath,
+      lineTotal: l.unitPrice * l.payableQty,
+    })),
+  })
+  if (!r.ok) throw couponError(r)
+  await Cart.updateOne(ownerFilter(owner), { $set: { couponCode: r.code } })
+  return getCart(owner)
+}
+
+export async function removeCoupon(userId: string) {
+  await Cart.updateOne(ownerFilter({ userId }), { $unset: { couponCode: 1 } })
+  return getCart({ userId })
 }
