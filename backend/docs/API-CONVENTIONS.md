@@ -45,10 +45,10 @@ export type PageMeta = {
 | 401    | `NO_REFRESH_TOKEN` `INVALID_REFRESH_TOKEN` `SESSION_EXPIRED` `REFRESH_REUSE` | Session is over → clear auth state, go to login.                                                                                 |
 | 403    | `FORBIDDEN`                                                                  | Logged in but not allowed (wrong role).                                                                                          |
 | 404    | `NOT_FOUND`                                                                  | Missing resource or unknown route.                                                                                               |
-| 409    | `EMAIL_TAKEN` `DUPLICATE_KEY` `CONFLICT`                                     | Uniqueness/state conflict. Show a field error.                                                                                   |
+| 409    | `EMAIL_TAKEN` `DUPLICATE_KEY` `CONFLICT` `ALREADY_VERIFIED` `NO_PASSWORD`    | Uniqueness/state conflict. Show a field error.                                                                                   |
 | 413    | `PAYLOAD_TOO_LARGE`                                                          | Body > 1 MB.                                                                                                                     |
 | 422    | `VALIDATION_ERROR`                                                           | Field errors in `error.details`: `[{ in: "body", path: "email", message: "Invalid email address" }]`. Map `path` to form fields. |
-| 429    | `RATE_LIMITED` `AUTH_RATE_LIMITED`                                           | Back off; show "try again later".                                                                                                |
+| 429    | `RATE_LIMITED` `AUTH_RATE_LIMITED` `RESEND_COOLDOWN`                         | Back off; show "try again later".                                                                                                |
 | 5xx    | `INTERNAL_ERROR`                                                             | Our bug. Show generic error + retry.                                                                                             |
 
 ## 3. Authentication
@@ -181,5 +181,45 @@ Dev customer's seeded cart: 2 live lines (one whose price has dropped since it w
 - Storage sits behind the `ImageStorage` interface (`modules/uploads/storage.ts`, one method `save`). Cloudinary/S3 = a second class returning the provider's URL; no route or test changes. Needs from the owner at that point: `CLOUDINARY_URL` (or key/secret) and the adapter class (not built: out of scope without credentials).
 - One file per request on purpose: the client uploads images one at a time, gets per-file progress/cancel/retry, and puts the returned URLs in the form payload.
 - Reviews, Q&A and moderation (the rest of B7) are NOT built yet; they arrive in Stage 11.
+
+### Auth hardening, Google sign-in and sessions (B10)
+
+B0 already had register/login/refresh(rotation + reuse detection)/logout/verify/forgot/reset/change-password. B10 adds the rest and tightens the email flows. 2FA (optional in the roadmap) is not built.
+
+**User shape** gained `providers: ("password"|"google")[]`.
+
+| Method | Path                                       | Notes                                                                                                                                                                                                    |
+| ------ | ------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| POST   | `/auth/verify-email` `{token}`             | `200 { message, alreadyVerified }`. The same link twice is `alreadyVerified: true` (not an error). `400 INVALID_TOKEN` (unknown) or `400 TOKEN_EXPIRED` (24 h; offer a resend).                          |
+| POST   | `/auth/resend-verification`                | Bearer. `409 ALREADY_VERIFIED`; `429 RESEND_COOLDOWN` with `details.retryAfterSeconds` (60 s between mails).                                                                                             |
+| POST   | `/auth/forgot-password` `{email}`          | Identical `200` for known/unknown emails; mail only goes to real accounts (Mailpit http://localhost:8025).                                                                                               |
+| POST   | `/auth/reset-password` `{token, password}` | `400 INVALID_TOKEN` (also: already used) / `400 TOKEN_EXPIRED` (1 h) / `422`. Revokes **every** session, marks the email verified, clears the cookie.                                                    |
+| POST   | `/auth/change-password`                    | Bearer + the refresh cookie. Revokes the **other** sessions; this one stays signed in. `401 INVALID_CREDENTIALS`, `409 NO_PASSWORD` for Google-only accounts (they use "Forgot password" to set one).    |
+| GET    | `/auth/sessions`                           | Bearer (+ cookie). `[{ id, device, userAgent, ip, startedAt, lastActiveAt, current }]`. `id` is the refresh-token family; it survives rotation. `current` is true for the session whose cookie was sent. |
+| DELETE | `/auth/sessions/:id`                       | Bearer. `204`; the session's next refresh is `401`. `404` for unknown or someone else's id, `422` for a non-uuid. Revoking the current one also clears the cookie.                                       |
+| POST   | `/auth/logout-all`                         | Bearer. `204`, every session revoked, cookie cleared.                                                                                                                                                    |
+| GET    | `/auth/google?redirect=/path`              | **Browser navigation.** 302 to Google.                                                                                                                                                                   |
+| GET    | `/auth/google/callback`                    | Google's redirect target. 302 to `CLIENT_URL/auth/google/callback?...` (below).                                                                                                                          |
+
+A revoked session cannot refresh, but the access token it already holds stays valid until it expires (15 min): that is the cost of stateless JWTs.
+
+**Google flow** (server-side authorization code; the browser never sees Google's tokens or the client secret):
+`GET /auth/google` -> sets httpOnly `oauthState` cookie (path `/api/v1/auth/google`, 10 min: nonce + safe redirect) -> 302 Google with `state=<nonce>` -> Google -> `GET /auth/google/callback?code&state` -> state must match the cookie, code is exchanged server-side, user is found/linked/created, the **refresh cookie is set**, 302 to the SPA:
+
+- success: `/auth/google/callback?redirect=/orders/123` plus `created=1` (new account) and/or `linked=1` (linked to an existing account). The SPA then calls `POST /auth/refresh` like on any reload to get the access token.
+- failure: `/auth/google/callback?error=<code>[&redirect=...]`, `code` one of `access_denied` (user cancelled), `invalid_state`, `email_not_verified` (Google says the email is unverified), `account_disabled`, `google_failed`, `google_not_configured`.
+- `redirect` is only ever a same-site relative path (`/x`; `//evil.com`, `https://...`, backslashes collapse to `/`).
+
+**Account linking:** a known Google id signs in. Otherwise an existing account with the same email is linked (only because Google verified the email) and becomes verified. If that local account had never verified its email, its password and sessions are **removed** at linking time (defence against someone who pre-registered the victim's address); otherwise the password keeps working. No account: one is created (verified, no password).
+
+**Mock Google (no credentials needed).** With `GOOGLE_CLIENT_ID`/`SECRET` empty and `NODE_ENV != production`, `/auth/google` redirects to `GET /auth/google/mock`, a plain form where you type an email/name, tick "verified", and Continue or Cancel; it feeds the same callback code path (state check, linking, cookies, redirects). `GOOGLE_MOCK=false` turns it off, `true` forces it (never in production). With neither mock nor credentials the callback page gets `error=google_not_configured`.
+
+**What the owner supplies for real Google:**
+
+1. Google Cloud console -> APIs & Services -> OAuth consent screen (External, add yourself as a test user while in "Testing").
+2. Credentials -> Create credentials -> OAuth client ID -> type **Web application**.
+3. Authorized redirect URI: `http://localhost:4000/api/v1/auth/google/callback` (in production: `https://<api-host>/api/v1/auth/google/callback`, and set `GOOGLE_REDIRECT_URI` to the same value). No JavaScript origins needed (the browser never calls Google's APIs).
+4. Put the client ID and secret in `backend/.env` as `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET`; restart the backend. The mock switches itself off. In production over HTTPS also set `COOKIE_SECURE=true` and, if the SPA is on another site, `COOKIE_SAMESITE=none` (the state cookie stays Lax, which is enough for a top-level redirect).
+   Scopes requested: `openid email profile`. Nothing was tested against real Google (no credentials in this environment).
 
 New endpoints are appended here as each backend phase lands (see `BACKEND-ROADMAP.md`).

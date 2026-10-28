@@ -1,5 +1,12 @@
 import { z } from "zod"
-import { registerSchema, loginSchema } from "./modules/auth/auth.schema.js"
+import {
+  registerSchema,
+  loginSchema,
+  verifyEmailSchema,
+  forgotPasswordSchema,
+  resetPasswordSchema,
+  changePasswordSchema,
+} from "./modules/auth/auth.schema.js"
 import {
   createAddressSchema,
   updateAddressSchema,
@@ -106,22 +113,123 @@ export const openApiDocument = {
     "/auth/verify-email": {
       post: {
         tags: ["Auth"],
-        summary: "Verify email with emailed token",
-        responses: { 200: { description: "ok" } },
+        summary:
+          "Verify email with the emailed token (idempotent: a repeat says alreadyVerified)",
+        requestBody: body(verifyEmailSchema.body),
+        responses: {
+          200: { description: "{ message, alreadyVerified }" },
+          400: { description: "INVALID_TOKEN | TOKEN_EXPIRED" },
+        },
+      },
+    },
+    "/auth/resend-verification": {
+      post: {
+        tags: ["Auth"],
+        summary: "Email a new verification link (60 s cooldown)",
+        security: bearer,
+        responses: {
+          200: { description: "ok" },
+          409: { description: "ALREADY_VERIFIED" },
+          429: { description: "RESEND_COOLDOWN, details.retryAfterSeconds" },
+        },
       },
     },
     "/auth/forgot-password": {
       post: {
         tags: ["Auth"],
-        summary: "Email a reset link (always 200)",
+        summary:
+          "Email a reset link (always the same 200, whether or not the email exists)",
+        requestBody: body(forgotPasswordSchema.body),
         responses: { 200: { description: "ok" } },
       },
     },
     "/auth/reset-password": {
       post: {
         tags: ["Auth"],
-        summary: "Set a new password using the emailed token",
-        responses: { 200: { description: "ok" } },
+        summary: "Set a new password with the emailed token; revokes every session",
+        requestBody: body(resetPasswordSchema.body),
+        responses: {
+          200: { description: "ok" },
+          400: { description: "INVALID_TOKEN | TOKEN_EXPIRED" },
+          422: { description: "VALIDATION_ERROR (password rules)" },
+        },
+      },
+    },
+    "/auth/change-password": {
+      post: {
+        tags: ["Auth"],
+        summary: "Change password; other sessions are revoked, this one stays",
+        security: bearer,
+        requestBody: body(changePasswordSchema.body),
+        responses: {
+          200: { description: "ok" },
+          401: { description: "INVALID_CREDENTIALS (wrong current password)" },
+          409: { description: "NO_PASSWORD (Google-only account)" },
+        },
+      },
+    },
+    "/auth/sessions": {
+      get: {
+        tags: ["Auth"],
+        summary:
+          "Active sessions of the caller; `current` marks the one whose cookie was sent",
+        security: bearer,
+        responses: {
+          200: {
+            description:
+              "[{ id, device, userAgent, ip, startedAt, lastActiveAt, current }]",
+          },
+        },
+      },
+    },
+    "/auth/sessions/{id}": {
+      delete: {
+        tags: ["Auth"],
+        summary:
+          "Revoke one session (its next refresh fails). Revoking the current one clears the cookie",
+        security: bearer,
+        parameters: [
+          {
+            name: "id",
+            in: "path",
+            required: true,
+            schema: { type: "string", format: "uuid" },
+          },
+        ],
+        responses: {
+          204: { description: "revoked" },
+          404: { description: "Not your session" },
+        },
+      },
+    },
+    "/auth/logout-all": {
+      post: {
+        tags: ["Auth"],
+        summary: "Revoke every session including this one",
+        security: bearer,
+        responses: { 204: { description: "No content" } },
+      },
+    },
+    "/auth/google": {
+      get: {
+        tags: ["Auth"],
+        summary: "Start Google sign-in (browser navigation). ?redirect=/relative/path",
+        description:
+          "302 to Google (or to the built-in mock consent page when no credentials are set outside production). Sets a short-lived httpOnly state cookie.",
+        parameters: [
+          { name: "redirect", in: "query", required: false, schema: { type: "string" } },
+        ],
+        responses: { 302: { description: "Redirect" } },
+      },
+    },
+    "/auth/google/callback": {
+      get: {
+        tags: ["Auth"],
+        summary:
+          "Google redirects here. Sets the refresh cookie, then 302 to CLIENT_URL/auth/google/callback",
+        description:
+          "Success: ?redirect=/path[&created=1][&linked=1]. Failure: ?error=access_denied|invalid_state|email_not_verified|account_disabled|google_failed|google_not_configured.",
+        responses: { 302: { description: "Redirect to the SPA" } },
       },
     },
     "/users/me": {
