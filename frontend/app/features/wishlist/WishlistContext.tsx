@@ -2,7 +2,6 @@ import {
   createContext,
   useCallback,
   useContext,
-  useEffect,
   useMemo,
   useRef,
   useState,
@@ -10,8 +9,8 @@ import {
 import { toast } from "sonner"
 
 import { useAuth } from "@/features/auth"
+import { useFetch } from "@/hooks/useFetch"
 import { toApiError, type ApiError } from "@/lib/api/errors"
-import { isAbortError } from "@/lib/async"
 
 import { addToWishlist, getWishlistIds, removeFromWishlist } from "./api"
 
@@ -41,42 +40,30 @@ type WishlistValue = {
 
 const WishlistContext = createContext<WishlistValue | null>(null)
 
-type Loaded = { userId: string; ids: ReadonlySet<string> }
-
 export function WishlistProvider({ children }: { children: React.ReactNode }) {
   const { status: authStatus, user } = useAuth()
   const userId = authStatus === "authenticated" ? (user?.id ?? null) : null
 
-  const [loaded, setLoaded] = useState<Loaded | null>(null)
-  const [failed, setFailed] = useState<{
-    userId: string
-    error: ApiError
-  } | null>(null)
+  // The READ part is the generic `useFetch` (6.8). Its dependency is the user id: a
+  // different user is a different request, so the previous user's hearts are never shown.
+  const fetched = useFetch(
+    async (signal) => new Set(await getWishlistIds(signal)),
+    [userId],
+    { enabled: userId !== null }
+  )
   const [pending, setPending] = useState<ReadonlySet<string>>(new Set())
   const busy = useRef(new Set<string>()) // synchronous guard (see useAddresses)
 
-  useEffect(() => {
-    if (!userId) return
-    const controller = new AbortController()
-    getWishlistIds(controller.signal)
-      .then((ids) => setLoaded({ userId, ids: new Set(ids) }))
-      .catch((err: unknown) => {
-        if (isAbortError(err)) return
-        setFailed({ userId, error: toApiError(err) })
-      })
-    return () => controller.abort()
-  }, [userId])
-
-  // Derived, not stored: a different (or no) user means "nothing loaded for you yet".
-  const ids = loaded?.userId === userId ? loaded.ids : undefined
-  const error = failed?.userId === userId ? failed.error : null
+  const ids = fetched.status === "success" ? fetched.data : undefined
+  const error = fetched.status === "error" ? fetched.error : null
   const status: WishlistStatus = !userId
     ? "anonymous"
-    : ids
+    : fetched.status === "success"
       ? "ready"
-      : error
+      : fetched.status === "error"
         ? "error"
         : "loading"
+  const setIds = fetched.setData
 
   const toggle = useCallback(
     async (productId: string) => {
@@ -86,12 +73,11 @@ export function WishlistProvider({ children }: { children: React.ReactNode }) {
       setPending((p) => new Set(p).add(productId))
 
       const setMember = (member: boolean) =>
-        setLoaded((current) => {
-          if (!current || current.userId !== userId) return current
-          const next = new Set(current.ids)
+        setIds((current) => {
+          const next = new Set(current)
           if (member) next.add(productId)
           else next.delete(productId)
-          return { userId, ids: next }
+          return next
         })
 
       setMember(!wasWishlisted) // optimistic
@@ -116,7 +102,7 @@ export function WishlistProvider({ children }: { children: React.ReactNode }) {
         })
       }
     },
-    [userId, ids]
+    [userId, ids, setIds]
   )
 
   const value = useMemo<WishlistValue>(

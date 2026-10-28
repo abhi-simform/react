@@ -1,4 +1,4 @@
-import { useAsyncResource } from "@/hooks/useAsyncResource"
+import { useFetch } from "@/hooks/useFetch"
 
 import { getWishlist } from "../api"
 
@@ -8,4 +8,4 @@ import { getWishlist } from "../api"
  * and a failed remove reappear.
  */
 export const useWishlistProducts = () =>
-  useAsyncResource("wishlist:page1", (signal) => getWishlist(1, 60, signal))
+  useFetch((signal) => getWishlist(1, 60, signal), [1])

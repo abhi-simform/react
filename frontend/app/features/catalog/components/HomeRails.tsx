@@ -3,7 +3,7 @@ import { Link } from "react-router"
 import { AsyncView } from "@/components/common/AsyncView"
 import { EmptyState } from "@/components/common/EmptyState"
 import { ProductGridSkeleton } from "@/components/common/Skeletons"
-import { useAsyncResource } from "@/hooks/useAsyncResource"
+import { useFetch } from "@/hooks/useFetch"
 import { ApiError } from "@/lib/api/errors"
 import { paths } from "@/lib/paths"
 
@@ -30,8 +30,7 @@ const RAILS: readonly Rail[] = [
  * Dev only: `/?failRail=top` makes that rail fail with a fake 500 after 400 ms.
  */
 function ProductRail({ rail, forceFail }: { rail: Rail; forceFail: boolean }) {
-  const state = useAsyncResource(
-    `rail:${rail.id}:${forceFail}`,
+  const state = useFetch(
     async (signal) => {
       if (forceFail) {
         // A believable 500 (retryable), not a 404.
@@ -44,7 +43,8 @@ function ProductRail({ rail, forceFail }: { rail: Rail; forceFail: boolean }) {
       }
       const page = await getProducts({ limit: 5, sort: rail.sort }, signal)
       return page.items
-    }
+    },
+    [rail.id, rail.sort, forceFail]
   )
   return (
     <section

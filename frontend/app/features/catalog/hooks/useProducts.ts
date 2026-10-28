@@ -1,24 +1,24 @@
 import type { Paginated } from "@/lib/api/envelope"
 import { toQueryString } from "@/lib/api/query"
-import type { AsyncState } from "@/lib/asyncState"
-import { useAsyncResource } from "@/hooks/useAsyncResource"
+import { useFetch, type FetchResult } from "@/hooks/useFetch"
 
 import { getProductsByQuery } from "../api"
 import type { Product, ProductListMeta, ProductQuery } from "../types"
 
 /**
- * Hand-rolled fetch (deleted in Stage 9 when TanStack Query replaces it).
- * The key is the query STRING, a primitive: depending on the `params` object
- * would re-run the effect on every render (new object each time).
+ * One of the hooks on the generic `useFetch` (6.8; deleted in Stage 9 when TanStack
+ * Query replaces it). The dependency is the query STRING, a primitive.
  */
 export function useProducts(
   params: ProductQuery,
   enabled = true
-): AsyncState<Paginated<Product, ProductListMeta>> & { reload: () => void } {
+): FetchResult<Paginated<Product, ProductListMeta>> {
   const queryString = toQueryString(params)
-  return useAsyncResource(
-    queryString,
+  return useFetch(
     (signal) => getProductsByQuery(queryString, signal),
-    enabled
+    [queryString],
+    {
+      enabled,
+    }
   )
 }

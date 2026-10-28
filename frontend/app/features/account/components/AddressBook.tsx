@@ -39,7 +39,7 @@ export function AddressBook() {
         <Button onClick={() => setTarget("new")}>Add address</Button>
       </div>
       <AsyncView
-        state={{ ...book.state, reload: book.reload }}
+        state={book.state}
         loading={<ListSkeleton rows={2} label="Loading addresses" />}
         empty={(addresses) =>
           addresses.length === 0 && (
