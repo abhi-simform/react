@@ -34,3 +34,10 @@ I registered `route("hello", "routes/helo.tsx")` (typo) and Vite returned HTTP 5
 - `app/lib/env.ts` throws at import time if `VITE_API_URL` is missing. I removed `.env.local` and restarted the dev server: the root error boundary showed "VITE_API_URL is missing..." instead of requests to `undefined/health`. Vite only reads `.env*` at startup, so a restart is needed after editing.
 - The "Ping API" button (`HealthBadge`) fetches `/health` from an event handler. It works from `:5173` because the backend allows that origin in CORS. With the backend stopped, `fetch` rejects with `TypeError: Failed to fetch` (no status, no body) and the UI shows it in a `role="alert"` paragraph.
 - Deviation: `frontend/.gitignore` had `.env*`, which also ignored `.env.example`; added `!.env.example` so the example is tracked.
+
+## 0.4 Full-stack smoke test
+
+- `GET /products?limit=2` returns `{ success: true, data: [...], meta }`. `limit` max is 60 (limit=61 returns a 422 VALIDATION_ERROR on `query.limit`).
+- `POST /auth/register` with `{"email":"nope"}` returns 422 `{ success: false, error: { code: "VALIDATION_ERROR", message, details: [{ in, path, message }] } }`. `code` is for program logic, `message` for humans, `details[].path` maps to form fields, and the `x-request-id` response header is what you quote when debugging backend logs. A valid body returns `{ user, accessToken }` and sets the refresh cookie.
+- Swagger (`:4000/api/docs`), Mongo Express (`:8081`) and Mailpit (`:8025`, started with `docker compose up -d`) are all reachable. Mailpit stays empty until an email flow (verify/reset) runs.
+- Not done in this automated build: installing the React DevTools extension and DevTools Network throttling (Slow 4G, disable cache, Timing tab). Those are manual browser steps for the owner.
