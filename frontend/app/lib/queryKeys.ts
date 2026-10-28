@@ -84,17 +84,25 @@ export const paymentKeys = {
 
 export const reviewKeys = {
   all: ["reviews"] as const,
-  list: (productId: string, options: Filters = {}) =>
-    [...reviewKeys.all, "list", productId, options] as const,
-  /** Everything about one product's reviews (the prefix `addReview` invalidates). */
-  forProduct: (productId: string) =>
-    [...reviewKeys.all, "list", productId] as const,
+  /** Everything about one product's reviews: lists (all filters), summary, my eligibility. */
+  forProduct: (productId: string) => [...reviewKeys.all, productId] as const,
+  lists: (productId: string) =>
+    [...reviewKeys.forProduct(productId), "list"] as const,
+  list: (productId: string, filter: Filters = {}) =>
+    [...reviewKeys.lists(productId), filter] as const,
+  summary: (productId: string) =>
+    [...reviewKeys.forProduct(productId), "summary"] as const,
+  eligibility: (productId: string) =>
+    [...reviewKeys.forProduct(productId), "eligibility"] as const,
 }
 
 export const questionKeys = {
   all: ["questions"] as const,
-  list: (productId: string, options: Filters = {}) =>
-    [...questionKeys.all, "list", productId, options] as const,
+  forProduct: (productId: string) => [...questionKeys.all, productId] as const,
+  list: (productId: string, filter: Filters = {}) =>
+    [...questionKeys.forProduct(productId), "list", filter] as const,
+  answers: (questionId: string) =>
+    [...questionKeys.all, "answers", questionId] as const,
 }
 
 export const relatedKeys = {

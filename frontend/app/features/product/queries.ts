@@ -9,7 +9,14 @@ import {
   similarKeys,
 } from "@/lib/queryKeys"
 
-import { getQuestions, getReviews } from "./reviews.api"
+import {
+  getAnswers,
+  getEligibility,
+  getQuestions,
+  getReviews,
+  getReviewSummary,
+  type ReviewFilter,
+} from "./reviews.api"
 
 /** Related products: same category, best rated, minus the product itself. */
 export const relatedQueries = {
@@ -27,28 +34,57 @@ export const relatedQueries = {
     }),
 }
 
-/** Reviews, "load more" style (9.8). `failPage` is the dev demo for an error on page N. */
+/**
+ * Reviews (B7): "load more" lists keyed by product AND filter (so each star/sort/photo combination
+ * has its own cache entry and Back to a filter is instant), a summary (histogram) and the
+ * shopper's eligibility to write one.
+ */
 export const reviewQueries = {
-  infinite: (productId: string, failPage?: number) =>
+  infinite: (productId: string, filter: ReviewFilter) =>
     infiniteQueryOptions({
-      queryKey: reviewKeys.list(productId, { failPage }),
+      queryKey: reviewKeys.list(productId, filter),
       initialPageParam: 1,
       queryFn: ({ pageParam, signal }) =>
-        getReviews(productId, { page: pageParam, failPage, signal }),
+        getReviews(productId, filter, pageParam, signal),
       getNextPageParam: (last) =>
         last.meta.hasNext ? last.meta.page + 1 : undefined,
       staleTime: STALE.catalog,
-      retry: failPage ? false : undefined, // the demo failure should show at once
+    }),
+  summary: (productId: string) =>
+    queryOptions({
+      queryKey: reviewKeys.summary(productId),
+      queryFn: ({ signal }) => getReviewSummary(productId, signal),
+      staleTime: STALE.catalog,
+    }),
+  eligibility: (productId: string) =>
+    queryOptions({
+      queryKey: reviewKeys.eligibility(productId),
+      queryFn: ({ signal }) => getEligibility(productId, signal),
+      staleTime: STALE.personal,
     }),
 }
 
 export const questionQueries = {
-  list: (productId: string, fail = false) =>
-    queryOptions({
-      queryKey: questionKeys.list(productId, { fail }),
-      queryFn: ({ signal }) => getQuestions(productId, signal, fail),
+  infinite: (productId: string, sort: "helpful" | "newest") =>
+    infiniteQueryOptions({
+      queryKey: questionKeys.list(productId, { sort }),
+      initialPageParam: 1,
+      queryFn: ({ pageParam, signal }) =>
+        getQuestions(productId, sort, pageParam, signal),
+      getNextPageParam: (last) =>
+        last.meta.hasNext ? last.meta.page + 1 : undefined,
       staleTime: STALE.catalog,
-      retry: fail ? false : undefined,
+    }),
+  /** The answers beyond the 3 that come with a question. */
+  answers: (questionId: string) =>
+    infiniteQueryOptions({
+      queryKey: questionKeys.answers(questionId),
+      initialPageParam: 1,
+      queryFn: ({ pageParam, signal }) =>
+        getAnswers(questionId, pageParam, signal),
+      getNextPageParam: (last) =>
+        last.meta.hasNext ? last.meta.page + 1 : undefined,
+      staleTime: STALE.catalog,
     }),
 }
 
