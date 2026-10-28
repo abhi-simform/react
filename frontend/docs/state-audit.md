@@ -75,9 +75,9 @@ S9 = moves to TanStack Query in Stage 9, NOTE = right today, caveat explained.
 | 51 | Orders list / order detail | fixtures (no query yet) | server cache | Server data (Stage 11 backend + S9 Query). | S9 |
 | 52 | Compare table rows | `buildRows(products)` in render | derived | Function of the fetched products. | OK |
 
-Counts: 52 items. Right today: 37. Migrated in Stage 8: 3 (5, 13, 34). Waiting for Stage 9
-(server data in hooks/Context): 12 (12, 14-17, 22, 25, 26, 29, 51, and 15/16 as part of the
-wishlist move). Notes: 2 (41, 43).
+Counts: 52 items. Already right: 37. Migrated in Stage 8: 3 (5, 13, 34). Waiting for Stage 9
+(server data held in hooks/Context): 10 (12, 14, 15, 16, 17, 22, 25, 26, 29, 51). Right today
+with a caveat: 2 (41, 43). Items 7 and 43 have a Stage 9 part (logged-in cart, applied coupon).
 
 ## The three migrations done in Stage 8
 
