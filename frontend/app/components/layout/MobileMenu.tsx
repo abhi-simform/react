@@ -2,6 +2,7 @@ import { Menu } from "lucide-react"
 import { Link } from "react-router"
 
 import { Button } from "@/components/ui/button"
+import { useCategoryTree } from "@/features/catalog/hooks/useCategories"
 import { paths } from "@/lib/paths"
 import {
   Sheet,
@@ -12,10 +13,9 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet"
 
-import { NAV_CATEGORIES } from "./categories"
-
 /** Below 1024px: the same links in a left drawer (focus trap + Esc come from the sheet). */
 export function MobileMenu() {
+  const tree = useCategoryTree()
   return (
     <Sheet>
       <SheetTrigger
@@ -28,19 +28,32 @@ export function MobileMenu() {
         <SheetHeader>
           <SheetTitle>Categories</SheetTitle>
         </SheetHeader>
-        <ul className="flex flex-col p-4">
-          {NAV_CATEGORIES.map((c) => (
-            <li key={c.slug}>
-              <SheetClose
-                render={
-                  <Link to={paths.category(c.slug)} className="block py-2" />
-                }
-              >
-                {c.name}
-              </SheetClose>
-            </li>
-          ))}
-        </ul>
+        {tree.status === "success" ? (
+          <ul className="flex flex-col overflow-y-auto p-4">
+            {tree.data
+              .flatMap((root) => [root, ...root.children])
+              .map((c) => (
+                <li key={c.id}>
+                  <SheetClose
+                    render={
+                      <Link
+                        to={paths.category(c.slug)}
+                        className="block py-2"
+                      />
+                    }
+                  >
+                    {c.name}
+                  </SheetClose>
+                </li>
+              ))}
+          </ul>
+        ) : (
+          <p role="status" className="p-4">
+            {tree.status === "error"
+              ? "Could not load categories."
+              : "Loading..."}
+          </p>
+        )}
       </SheetContent>
     </Sheet>
   )

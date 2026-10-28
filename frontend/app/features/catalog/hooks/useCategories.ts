@@ -6,6 +6,11 @@ import { getCategory, getCategoryTree } from "../api"
 export const useCategoryTree = () =>
   useAsyncResource("category-tree", () => getCategoryTree())
 
-/** One category with its breadcrumb `ancestors` and `children`; 404 -> error state. */
-export const useCategory = (slug: string) =>
-  useAsyncResource(`category:${slug}`, (signal) => getCategory(slug, signal))
+/**
+ * One category with its breadcrumb `ancestors` and `children`; 404 -> error state.
+ * Without a slug (the plain /products page) nothing is requested and the data is `null`.
+ */
+export const useCategory = (slug: string | undefined) =>
+  useAsyncResource(`category:${slug ?? "none"}`, async (signal) =>
+    slug === undefined ? null : getCategory(slug, signal)
+  )
