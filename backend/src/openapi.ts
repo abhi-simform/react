@@ -232,6 +232,18 @@ export const openApiDocument = {
         responses: { 302: { description: "Redirect to the SPA" } },
       },
     },
+    "/seller/me": {
+      get: {
+        tags: ["Seller"],
+        summary: "Role-gated placeholder (seller/admin only); the real seller API is B11",
+        security: bearer,
+        responses: {
+          200: { description: "{ sellerId, role, productCount }" },
+          401: { description: "Unauthorized" },
+          403: { description: "FORBIDDEN (customer)" },
+        },
+      },
+    },
     "/users/me": {
       get: {
         tags: ["Users"],
