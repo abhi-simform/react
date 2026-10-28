@@ -40,7 +40,8 @@ import {
 import * as RS from "./modules/reviews/review.schema.js"
 import { addWishlistSchema } from "./modules/wishlist/wishlist.schema.js"
 import { listBrandsSchema } from "./modules/categories/category.schema.js"
-import { listProductsSchema } from "./modules/products/product.schema.js"
+import { listAuditSchema } from "./modules/audit/audit.schema.js"
+import { listProductsSchema, setPriceSchema } from "./modules/products/product.schema.js"
 import {
   broadcastSchema,
   listNotificationsSchema,
@@ -90,7 +91,7 @@ export const openApiDocument = {
     title: "ShopSphere API",
     version: "0.1.0",
     description:
-      "Responses use { success, data, meta? } or { success:false, error:{code,message,details?} }.",
+      "Responses use { success, data, meta? } or { success:false, error:{code,message,details?} }. Caching: catalog GETs send `Cache-Control: public, max-age, stale-while-revalidate` and every GET carries a weak ETag (send If-None-Match -> 304); everything else is `private, no-cache` or `no-store`.",
   },
   servers: [{ url: "/api/v1" }],
   components: {
@@ -1514,6 +1515,86 @@ export const openApiDocument = {
         responses: {
           201: { description: "{ sent }" },
           403: { description: "FORBIDDEN" },
+        },
+      },
+    },
+    "/config/public": {
+      get: {
+        tags: ["Config"],
+        summary:
+          "Display-only currency rates and supported locales (prices are stored and CHARGED in INR). Cache-Control: public, max-age=3600",
+        responses: {
+          200: { description: "{ baseCurrency, currencies, asOf, locales }" },
+        },
+      },
+    },
+    "/metrics/vitals": {
+      post: {
+        tags: ["Config"],
+        summary:
+          "Real-user Web Vitals beacon (public, rate limited): name LCP|INP|CLS|FCP|TTFB, value, path (no query), connection, ua",
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                required: ["name", "value", "path"],
+                properties: {
+                  name: { type: "string", enum: ["LCP", "INP", "CLS", "FCP", "TTFB"] },
+                  value: { type: "number" },
+                  rating: { type: "string", enum: ["good", "needs-improvement", "poor"] },
+                  path: { type: "string", example: "/products" },
+                  connection: { type: "string", example: "4g" },
+                  nav: { type: "string" },
+                  ua: { type: "string", enum: ["mobile", "desktop"] },
+                },
+              },
+            },
+          },
+        },
+        responses: {
+          204: { description: "Stored" },
+          422: { description: "VALIDATION_ERROR" },
+        },
+      },
+    },
+    "/admin/metrics/vitals": {
+      get: {
+        tags: ["Admin"],
+        summary: "p75 of each Web Vital per path over the last `days` (default 7)",
+        security: bearer,
+        responses: { 200: { description: "{ name, path, samples, p75 }[]" } },
+      },
+    },
+    "/admin/audit-logs": {
+      get: {
+        tags: ["Admin"],
+        summary:
+          "Audit trail of staff writes, newest first. Filters: actor, target (an id in the path), action (prefix), from, to",
+        security: bearer,
+        parameters: queryParams(listAuditSchema.query as z.ZodObject),
+        responses: {
+          200: { description: "AuditEntry[] + meta" },
+          403: { description: "FORBIDDEN" },
+        },
+      },
+    },
+    "/admin/products/{id}/price": {
+      patch: {
+        tags: ["Admin"],
+        summary:
+          "Change a product price (whole rupees, <= mrp). A drop queues a background job that notifies wishlisters. Audited",
+        security: bearer,
+        parameters: [
+          { name: "id", in: "path", required: true, schema: { type: "string" } },
+        ],
+        requestBody: body(setPriceSchema.body),
+        responses: {
+          200: { description: "{ id, name, from, to, wishlistAlertQueued }" },
+          400: { description: "BAD_REQUEST (price above mrp)" },
+          403: { description: "FORBIDDEN" },
+          404: { description: "NOT_FOUND" },
         },
       },
     },

@@ -32,6 +32,7 @@ export const errorHandler: ErrorRequestHandler = (err, req, res, _next) => {
     logger.error({ err, reqId: req.id }, "Unhandled error")
   }
 
+  res.setHeader("Cache-Control", "no-store") // never let a cache keep an error (publicCache set a max-age earlier)
   res.status(apiError.statusCode).json({
     success: false,
     error: {

@@ -2,7 +2,7 @@ import { Router } from "express"
 import { authRoutes } from "./modules/auth/auth.routes.js"
 import { brandRoutes, categoryRoutes } from "./modules/categories/category.routes.js"
 import { healthRoutes } from "./modules/health/health.routes.js"
-import { productRoutes } from "./modules/products/product.routes.js"
+import { adminProductRoutes, productRoutes } from "./modules/products/product.routes.js"
 import { addressRoutes } from "./modules/addresses/address.routes.js"
 import { pincodeRoutes } from "./modules/pincodes/pincode.routes.js"
 import { uploadRoutes } from "./modules/uploads/upload.routes.js"
@@ -36,11 +36,25 @@ import {
   adminNotificationRoutes,
   notificationRoutes,
 } from "./modules/notifications/notification.routes.js"
+import { adminAuditRoutes } from "./modules/audit/audit.routes.js"
+import { auditStaffWrites } from "./modules/audit/audit.service.js"
+import { configRoutes } from "./modules/config/config.routes.js"
+import { adminMetricsRoutes, metricsRoutes } from "./modules/metrics/metrics.routes.js"
+import { optionalAuth } from "./middleware/auth.js"
+import { staffWriteLimiter } from "./middleware/rateLimit.js"
 import { userRoutes } from "./modules/users/user.routes.js"
 
 // Every feature module mounts here. New module = new line.
 export const routes = Router()
+// Staff areas: a tighter per-account write budget and an audit row for every successful change.
+// (Mounted first so they run before the individual /admin/* and /seller routers.)
+routes.use(["/admin", "/seller"], optionalAuth, auditStaffWrites, staffWriteLimiter)
 routes.use("/health", healthRoutes)
+routes.use("/config", configRoutes)
+routes.use("/metrics", metricsRoutes)
+routes.use("/admin/metrics", adminMetricsRoutes)
+routes.use("/admin/audit-logs", adminAuditRoutes)
+routes.use("/admin/products", adminProductRoutes)
 routes.use("/auth", authRoutes)
 routes.use("/users", userRoutes)
 routes.use("/categories", categoryRoutes)

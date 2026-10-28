@@ -43,3 +43,8 @@ export const listProductsSchema = {
 }
 
 export const getProductSchema = { params: z.object({ idOrSlug: z.string().min(1) }) }
+
+export const setPriceSchema = {
+  params: z.object({ id: z.string().regex(/^[0-9a-fA-F]{24}$/, "Invalid id") }),
+  body: z.object({ price: z.number().int().min(1).max(10_000_000) }),
+}

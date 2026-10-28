@@ -1,6 +1,7 @@
 import { Router } from "express"
 import { z } from "zod"
 import { authenticate, authorize } from "../../middleware/auth.js"
+import { publicCache } from "../../middleware/httpCache.js"
 import { valid, validate } from "../../middleware/validate.js"
 import { ApiError } from "../../utils/ApiError.js"
 import { ok } from "../../utils/response.js"
@@ -33,31 +34,36 @@ export const updateBannerSchema = {
 }
 
 export const bannerRoutes = Router()
-bannerRoutes.get("/", validate(listBannersSchema), async (req, res) => {
-  const { query } = valid<typeof listBannersSchema>(req)
-  const now = new Date()
-  const items = await Banner.find({
-    placement: query.placement,
-    isActive: true,
-    $and: [
-      { $or: [{ startsAt: null }, { startsAt: { $lte: now } }] },
-      { $or: [{ endsAt: null }, { endsAt: { $gt: now } }] },
-    ],
-  })
-    .sort({ sortOrder: 1, _id: 1 })
-    .lean()
-  ok(
-    res,
-    items.map(({ _id, title, subtitle, imageUrl, linkUrl, placement }) => ({
-      id: String(_id),
-      title,
-      subtitle: subtitle ?? null,
-      imageUrl,
-      linkUrl,
-      placement,
-    }))
-  )
-})
+bannerRoutes.get(
+  "/",
+  publicCache(60, 300),
+  validate(listBannersSchema),
+  async (req, res) => {
+    const { query } = valid<typeof listBannersSchema>(req)
+    const now = new Date()
+    const items = await Banner.find({
+      placement: query.placement,
+      isActive: true,
+      $and: [
+        { $or: [{ startsAt: null }, { startsAt: { $lte: now } }] },
+        { $or: [{ endsAt: null }, { endsAt: { $gt: now } }] },
+      ],
+    })
+      .sort({ sortOrder: 1, _id: 1 })
+      .lean()
+    ok(
+      res,
+      items.map(({ _id, title, subtitle, imageUrl, linkUrl, placement }) => ({
+        id: String(_id),
+        title,
+        subtitle: subtitle ?? null,
+        imageUrl,
+        linkUrl,
+        placement,
+      }))
+    )
+  }
+)
 
 export const adminBannerRoutes = Router()
 adminBannerRoutes.use(authenticate, authorize("admin"))

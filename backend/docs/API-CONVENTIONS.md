@@ -271,7 +271,7 @@ Money is whole rupees. `Order` = `{ id, orderNumber ("SS-YYYYMMDD-XXXXXX"), user
 - Cancel / staff-cancel give back stock, the deal claim and the coupon use; `returned` restocks the goods. `return_requested -> returned -> refunded` is driven by `/admin/orders/:id/status` or the returns queue below; online refunds move money through the B6 gateway.
 - Order email: COD orders send a confirmation to Mailpit (http://localhost:8025) after commit; online orders will after payment (B6).
 - Seed: the dev customer has 4 historical orders (2 delivered, 1 shipped, 1 cancelled) numbered `SS-SEED-00000N`.
-- Not built here: tracking events and notifications (B9), expiry of unpaid `pending_payment` orders (B12 job), seller view of orders (B11).
+- Not built here: tracking events and notifications (B9), expiry of unpaid `pending_payment` orders (done in B12), seller view of orders (B11).
 
 ### Payments (B6)
 
@@ -305,7 +305,7 @@ Browser                    Backend                         Razorpay (or mock)
 
 Rules worth knowing:
 
-- **Order states.** Online orders are `pending_payment` until paid; failures and closed modals leave them `pending_payment` (with `paymentStatus: "failed"` after a failed attempt) and retryable, so the UI shows "Retry payment" using the same order. Unpaid orders are not auto-expired yet (B12 job).
+- **Order states.** Online orders are `pending_payment` until paid; failures and closed modals leave them `pending_payment` (with `paymentStatus: "failed"` after a failed attempt) and retryable, so the UI shows "Retry payment" using the same order. Unpaid orders are auto-cancelled after `ORDER_EXPIRY_MINUTES` (default 30) by the B12 job `orders.expire-unpaid`: stock, deal claim and coupon use are released and the shopper is told the order was cancelled.
 - **Two roads to "paid", one winner.** `verify` and the webhook call the same guarded update, so in any order and any number of times the order is placed once, one confirmation email goes out, and `statusHistory` gets one `placed` entry. A failure event can never un-pay a paid payment.
 - **Late payment on a cancelled order** (shopper cancelled, but still paid in the open modal) is refunded automatically.
 - **Refunds** run through the gateway: cancelling a paid order refunds it in full; the `returned -> refunded` step refunds the returned items' share (see Returns). The mock settles instantly; real Razorpay answers `pending` and the `refund.processed` webhook finishes it. `paymentStatus` walks `paid -> refund_pending -> partially_refunded|refunded`. COD has no gateway refund.
@@ -420,3 +420,46 @@ Notifications expire after 90 days (TTL index). Templates live in code (`notific
 
 Events are NOT replayed. After a reconnect the client must refetch what it shows (`/notifications/unread-count`, the open order); that is how a missed event stays harmless.
 Seed: the dev customer has notifications generated from their seeded orders with the live templates (the newest 4 are unread) plus an offers notification.
+
+### Hardening and ops (B12)
+
+Everything here runs with NO Redis; `REDIS_URL` only changes where state lives.
+
+| Concern                  | Without `REDIS_URL`                                                                              | With `REDIS_URL` (`docker compose --profile cache up -d`)                          |
+| ------------------------ | ------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------- |
+| Cache (`utils/cache.ts`) | in-process Map with TTL (max 500 entries)                                                        | Redis keys with `EX`                                                               |
+| Rate-limit counters      | express-rate-limit memory store (per process, reset on restart)                                  | `RedisRateLimitStore` (atomic INCR+PEXPIRE, shared by all instances)               |
+| Jobs (`jobs/queue.ts`)   | in-process runner: same handlers, 3 attempts, exponential backoff; **jobs die with the process** | BullMQ queue `shopsphere`: durable, retried, repeating jobs as upserted schedulers |
+
+Env: `REDIS_URL`, `CACHE_ENABLED` (true), `CACHE_TTL_SECONDS` (30), `JOBS_ENABLED` (true; false = no workers/schedulers on this instance, producing still works), `ORDER_EXPIRY_MINUTES` (30), `ORDER_EXPIRY_SWEEP_SECONDS` (60). All in `.env.example`.
+
+**HTTP caching.** Every `GET` carries a weak `ETag` (Express computes it from the body): send `If-None-Match` and get `304` with no body. `Cache-Control` policy:
+
+- default for `/api/v1`: GET `private, no-cache` (store, but revalidate first: safe for cart/orders/me); everything else `no-store`; every error response is forced to `no-store`.
+- public catalog: `GET /categories`, `/categories/:slug`, `/brands`: `public, max-age=300, stale-while-revalidate=3600`; `GET /products`, `/products/:idOrSlug`: `public, max-age=10, stale-while-revalidate=60`; `GET /banners`: `max-age=60`; `GET /config/public`: `max-age=3600, swr=86400`.
+- `GET /time` stays `no-store`. Never add `publicCache` to a route that reads `Authorization` or `x-cart-token`.
+
+**Server cache.** Category tree, brand list (5 min) and product facet counts (`CACHE_TTL_SECONDS`) are cached. Invalidation is by version: any write to a `Product` (model hooks) bumps the `catalog` version, so entries become unreachable at once. The hook runs inside order transactions before commit, so a reader can very briefly cache pre-commit data; the TTL bounds that. The seed script runs out of process and does not bump the version (restart the API or wait out the TTL after reseeding).
+
+**Security headers.** API responses: `Content-Security-Policy: default-src 'none'; frame-ancestors 'none'; base-uri 'none'; form-action 'none'`, `X-Content-Type-Options: nosniff`, `Referrer-Policy: no-referrer`, `Permissions-Policy` (camera/microphone/geolocation/payment off), HSTS in production, `Cross-Origin-Resource-Policy: cross-origin` (the SPA shows API-hosted images). `/api/docs` keeps helmet's default CSP so Swagger UI works.
+
+**Rate limits.** `apiLimiter` 300/min/IP on all of `/api/v1`; `authLimiter` 30 per 15 min on credential endpoints; `uploadLimiter` 30/min **per account**; `metricsLimiter` 120/min on the vitals beacon; `staffWriteLimiter` 120 writes/min **per account** on `/admin/*` and `/seller/*` (reads are exempt). 429 body: `{ error: { code: "RATE_LIMITED" | "AUTH_RATE_LIMITED" | "UPLOAD_RATE_LIMITED" } }` plus draft-8 `RateLimit` headers.
+
+**Audit log** (`AuditLog`, 1 year TTL). Every successful (status < 400) non-GET request under `/admin` or `/seller` writes one row: actor, role, action (`PATCH /admin/products/:id/price`), concrete path, the ids found in the path, status, ip, request id. Bodies are never stored. `GET /admin/audit-logs?page&limit&actor&target&action&from&to` (admin; `action` is a prefix match) returns `{ id, at, actor{id,name,email}|null, role, action, path, targets, status, ip, requestId }[]` newest first.
+
+**Jobs.**
+
+| Job                    | Triggered by                                               | Does                                                                                                |
+| ---------------------- | ---------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
+| `email.send`           | `sendEmail()` (auth mails, order/notification mails)       | sends through SMTP; throws on failure so the queue retries (3 attempts, exponential backoff)        |
+| `price-drop.alert`     | `PATCH /admin/products/:id/price` when the price goes DOWN | notifies every wishlister (in-app; email only if they enabled offers emails) with type `price.drop` |
+| `orders.expire-unpaid` | repeating, every `ORDER_EXPIRY_SWEEP_SECONDS`              | cancels `pending_payment` orders older than `ORDER_EXPIRY_MINUTES` that are not paid (200 per run)  |
+
+**New endpoints.**
+
+- `PATCH /admin/products/:id/price` `{ price }` (admin, whole rupees, must be <= mrp): `{ id, name, from, to, wishlistAlertQueued }`. 400 above the list price, 404, 403, 422.
+- `GET /config/public`: `{ baseCurrency: "INR", chargedCurrency: "INR", currencies: { INR: { rate, symbol }, USD, EUR, GBP, AED }, asOf, locales }`. Rates are for DISPLAY only; the backend, the order and the payment are always INR.
+- `POST /metrics/vitals` (public, `204`): `{ name: LCP|INP|CLS|FCP|TTFB, value, rating?, path (no query string), connection?, nav?, ua?: mobile|desktop }`. Stored 30 days. `GET /admin/metrics/vitals?days=7` returns `{ name, path, samples, p75 }[]`.
+- Seed: the dev customer now also has 2,000 older read notifications (one per hour, every 7th with a long body) for the virtualised list; the unread badge is still 4.
+
+Not built (out of B12 scope here): idempotency keys beyond orders, soft-delete, cursor pagination, Sentry, load test, deploy config (Stage 14).

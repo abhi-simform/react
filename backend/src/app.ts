@@ -7,9 +7,10 @@ import { pinoHttp } from "pino-http"
 import crypto from "node:crypto"
 import swaggerUi from "swagger-ui-express"
 import { API_PREFIX } from "./config/constants.js"
-import { env, isTest } from "./config/env.js"
+import { env, isProd, isTest } from "./config/env.js"
 import { logger } from "./config/logger.js"
 import { errorHandler } from "./middleware/errorHandler.js"
+import { defaultCachePolicy } from "./middleware/httpCache.js"
 import { notFound } from "./middleware/notFound.js"
 import { apiLimiter } from "./middleware/rateLimit.js"
 import { openApiDocument } from "./openapi.js"
@@ -21,7 +22,36 @@ export function createApp() {
   const app = express()
   app.set("trust proxy", 1) // correct client IPs behind a reverse proxy / load balancer
 
-  app.use(helmet({ crossOriginResourcePolicy: { policy: "cross-origin" } })) // allow the SPA to show API-hosted images
+  // Security headers. This server returns JSON and images, never pages, so its CSP can be the
+  // strictest possible: nothing may load or run from an API response, and it cannot be framed.
+  // Only the Swagger UI page (which needs inline scripts/styles) gets the relaxed default policy.
+  const apiCsp = helmet({
+    crossOriginResourcePolicy: { policy: "cross-origin" }, // allow the SPA to show API-hosted images
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'none'"],
+        frameAncestors: ["'none'"],
+        baseUri: ["'none'"],
+        formAction: ["'none'"],
+      },
+    },
+    referrerPolicy: { policy: "no-referrer" },
+    strictTransportSecurity: isProd
+      ? { maxAge: 15_552_000, includeSubDomains: true }
+      : false,
+  })
+  const docsCsp = helmet({ crossOriginResourcePolicy: { policy: "cross-origin" } })
+  app.use((req, res, next) =>
+    (req.path.startsWith("/api/docs") ? docsCsp : apiCsp)(req, res, next)
+  )
+  app.use((_req, res, next) => {
+    // Helmet has no Permissions-Policy: switch off browser features an API never needs.
+    res.setHeader(
+      "Permissions-Policy",
+      "camera=(), microphone=(), geolocation=(), payment=()"
+    )
+    next()
+  })
   app.use(
     cors({
       origin: env.CORS_ORIGINS,
@@ -52,7 +82,7 @@ export function createApp() {
     })
   )
   app.use(cookieParser())
-  app.use(API_PREFIX, apiLimiter)
+  app.use(API_PREFIX, apiLimiter, defaultCachePolicy)
 
   mountUploadFiles(app) // GET /uploads/<file> (local-disk adapter), outside the /api/v1 prefix
   app.use("/api/docs", swaggerUi.serve, swaggerUi.setup(openApiDocument))

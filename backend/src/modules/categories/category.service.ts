@@ -1,4 +1,5 @@
 import { ApiError } from "../../utils/ApiError.js"
+import { cached } from "../../utils/cache.js"
 import { Product } from "../products/product.model.js"
 import { Category } from "./category.model.js"
 
@@ -22,7 +23,13 @@ async function subtreeCounts(): Promise<Map<string, number>> {
   return new Map(rows.map((r) => [String(r._id), r.count]))
 }
 
-export async function getCategoryTree(): Promise<CategoryNode[]> {
+// Both the tree (with subtree counts: an aggregation over every product) and the brand list are
+// read on nearly every page view and change rarely: cached for 5 minutes, and dropped at once when
+// a Product changes (model hooks bump the "catalog" version).
+export const getCategoryTree = () =>
+  cached("catalog", "category-tree", buildCategoryTree, 300)
+
+async function buildCategoryTree(): Promise<CategoryNode[]> {
   const [all, counts] = await Promise.all([
     Category.find({ isActive: true }).sort({ sortOrder: 1, name: 1 }).lean(),
     subtreeCounts(),
@@ -88,7 +95,15 @@ export async function getCategoryBySlug(slug: string) {
 }
 
 // Distinct brands with active-product counts, optionally scoped to a category subtree.
-export async function listBrands(categorySlug?: string) {
+export const listBrands = (categorySlug?: string) =>
+  cached(
+    "catalog",
+    `brands:${categorySlug ?? ""}`,
+    () => listBrandsUncached(categorySlug),
+    300
+  )
+
+async function listBrandsUncached(categorySlug?: string) {
   const match: Record<string, unknown> = { status: "active" }
   if (categorySlug) {
     const cat = await Category.findOne({ slug: categorySlug }).select("_id").lean()

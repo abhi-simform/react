@@ -731,6 +731,33 @@ async function main() {
       createdAt: new Date(now - 2 * 3_600_000),
     })
     await Notification.insertMany(rows, { timestamps: false })
+
+    // Stage 13 (virtualised notifications page): a 2,000-row history of OLDER, already-read
+    // messages. Spread over 85 days so the 90-day TTL does not eat them; the unread badge stays 4.
+    const filler = Array.from({ length: 2000 }, (_, i) => {
+      const at = new Date(now - 4 * 86_400_000 - i * 3_600_000) // one per hour, back ~83 days
+      const long = i % 7 === 0 // every 7th has a long body: rows are NOT a fixed height
+      return {
+        user: customer._id,
+        category: (["orders", "offers", "account"] as const)[i % 3],
+        type:
+          i % 3 === 0
+            ? "order.shipped"
+            : i % 3 === 1
+              ? "offer.broadcast"
+              : "account.notice",
+        title: `Notification #${2000 - i}`,
+        body: long
+          ? "This one has a longer message on purpose, so that rows have different heights and a virtualised list has to measure them. "
+              .repeat(2)
+              .trim()
+          : "A short, already-read message from the seeded history.",
+        link: i % 3 === 0 ? "/orders" : "/deals",
+        createdAt: at,
+        readAt: new Date(at.getTime() + 60_000),
+      }
+    })
+    await Notification.insertMany(filler, { timestamps: false })
   }
 
   logger.info(

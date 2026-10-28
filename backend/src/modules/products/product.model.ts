@@ -1,4 +1,5 @@
 import { Schema, model, Types, type InferSchemaType } from "mongoose"
+import { invalidate } from "../../utils/cache.js"
 import { slugify } from "../../utils/slugify.js"
 
 const productSchema = new Schema(
@@ -51,6 +52,13 @@ productSchema.index(
 productSchema.index({ status: 1, categoryPath: 1, price: 1 })
 productSchema.index({ status: 1, createdAt: -1 })
 productSchema.index({ status: 1, ratingAvg: -1 })
+
+// Any write to a product (price, stock after an order, rating after a review, ...) makes the cached
+// catalog aggregates (facet counts, category counts, brands) wrong: bump their version.
+const bust = () => void invalidate("catalog")
+productSchema.post("save", bust)
+productSchema.post(["updateOne", "updateMany", "findOneAndUpdate", "deleteOne"], bust)
+productSchema.post("insertMany", bust)
 
 export type ProductAttrs = InferSchemaType<typeof productSchema>
 export const Product = model("Product", productSchema)

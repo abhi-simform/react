@@ -3,6 +3,8 @@ import { createApp } from "./app.js"
 import { connectDb, disconnectDb } from "./config/db.js"
 import { env } from "./config/env.js"
 import { logger } from "./config/logger.js"
+import { closeRedis } from "./config/redis.js"
+import { startJobs, stopJobs } from "./jobs/index.js"
 import { closeRealtime, initRealtime } from "./realtime/socket.js"
 
 async function main() {
@@ -10,6 +12,7 @@ async function main() {
   // Express and Socket.io share ONE http server (and port): /api/v1 and /socket.io.
   const server = createServer(createApp())
   initRealtime(server)
+  await startJobs() // BullMQ workers (REDIS_URL) or the in-process runner; repeating jobs included
   server.listen(env.PORT, () => {
     logger.info(
       `API ready at http://localhost:${env.PORT}/api/v1  (docs: /api/docs, realtime: /socket.io)`
@@ -21,6 +24,8 @@ async function main() {
     logger.info(`${signal} received, shutting down`)
     void closeRealtime() // also closes the http server (ends open sockets)
     server.close(async () => {
+      await stopJobs()
+      await closeRedis()
       await disconnectDb()
       process.exit(0)
     })

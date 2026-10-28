@@ -58,6 +58,24 @@ const schema = z.object({
     .positive()
     .default(2 * 1024 * 1024),
 
+  // Hardening & ops (B12). REDIS_URL is OPTIONAL: set it and the cache, the rate-limit counters and the
+  // job queue (BullMQ) live in Redis (shared across server instances, survive restarts); leave it
+  // empty and the SAME interfaces run in-process (memory cache/counters, in-process job runner).
+  REDIS_URL: z.string().optional(),
+  CACHE_ENABLED: z
+    .enum(["true", "false"])
+    .default("true")
+    .transform((v) => v === "true"),
+  CACHE_TTL_SECONDS: z.coerce.number().int().min(1).default(30),
+  // Background jobs: set false to run nothing in the background (tests drive jobs by hand).
+  JOBS_ENABLED: z
+    .enum(["true", "false"])
+    .default("true")
+    .transform((v) => v === "true"),
+  // Unpaid online orders are cancelled (stock released) after this long; the sweep runs this often.
+  ORDER_EXPIRY_MINUTES: z.coerce.number().int().min(1).default(30),
+  ORDER_EXPIRY_SWEEP_SECONDS: z.coerce.number().int().min(5).default(60),
+
   LOG_LEVEL: z
     .enum(["fatal", "error", "warn", "info", "debug", "trace", "silent"])
     .default("info"),
@@ -87,3 +105,6 @@ export const razorpayConfigured = Boolean(env.RAZORPAY_KEY_ID && env.RAZORPAY_KE
 export const paymentMock =
   !isProd &&
   (env.PAYMENT_MOCK === "true" || (env.PAYMENT_MOCK === "auto" && !razorpayConfigured))
+
+/** Redis is used only when a URL is configured; everything else falls back to in-process. */
+export const redisEnabled = Boolean(env.REDIS_URL)

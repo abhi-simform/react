@@ -1,5 +1,6 @@
 import { isValidObjectId } from "mongoose"
 import { ApiError } from "../../utils/ApiError.js"
+import { cached } from "../../utils/cache.js"
 import { Category } from "../categories/category.model.js"
 import { attachDeals, liveDeals } from "../deals/deal.service.js"
 import { Product } from "./product.model.js"
@@ -41,7 +42,20 @@ async function buildFilter(q: ListQuery, omit?: FilterKey) {
 
 const RATING_STEPS = [4, 3, 2, 1]
 
-async function computeFacets(q: ListQuery) {
+// Facet counts are 4 aggregations per listing request and the same few filter combinations repeat
+// all day: cache them (memory or Redis). The Product model hooks bump the "catalog" version on any
+// write, so a price or stock change never serves stale counts for longer than one request.
+const computeFacets = (q: ListQuery) => {
+  const filters: Partial<ListQuery> = { ...q }
+  delete filters.page // facets do not depend on the page, the page size or the sort
+  delete filters.limit
+  delete filters.sort
+  return cached("catalog", `facets:${JSON.stringify(filters)}`, () =>
+    computeFacetsUncached(q)
+  )
+}
+
+async function computeFacetsUncached(q: ListQuery) {
   const [brandF, priceF, ratingF, stockF] = await Promise.all([
     buildFilter(q, "brand"),
     buildFilter(q, "price"),

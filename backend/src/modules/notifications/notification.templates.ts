@@ -138,3 +138,16 @@ export function emailHtml(
 ) {
   return `<p>Hi ${escapeHtml(name)},</p><p><b>${escapeHtml(t.title)}</b></p><p>${escapeHtml(t.body)}</p><p><a href="${clientUrl}${path}">Open in ShopSphere</a></p>`
 }
+
+export const priceDropTemplate = (
+  p: { id: string; name: string; slug: string },
+  from: number,
+  to: number
+): Template => ({
+  category: "offers",
+  type: "price.drop",
+  title: `Price drop: ${p.name}`,
+  body: `Now Rs ${to}, down from Rs ${from}. It is on your wishlist.`,
+  link: `/products/${p.slug}`,
+  email: true, // still gated by the shopper's "offers" email preference (off by default)
+})
