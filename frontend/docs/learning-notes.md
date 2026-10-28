@@ -71,3 +71,11 @@ Pitfall seen in the explorer's number inputs: `Number("")` is `0`, so an empty b
 ## 1.5 Optional chaining, nullish coalescing
 
 `displayDiscount` and `safeBrandName` (in `features/catalog/utils.ts`) are checked in `scratch/05-defensive.ts` with `console.assert` (silent when green). `a || b` replaces every falsy value (`0`, `""`, `NaN`), `a ?? b` only `null`/`undefined`. ShopSphere example: a free-sample product with `price: 0` shown as `price || 99` becomes ₹99, which is a wrong price on screen; `price ?? 99` keeps `0`. Likewise a `discountPercent` of `0` must render as "No discount" deliberately, not because `0` was falsy.
+
+## 1.6 Promises and async/await against the real API
+
+Code: `lib/api/getJson.ts` (`getJson<T>` + `HttpError` with `status`), `lib/async.ts` (`sleep`, `withTimeout`, `isAbortError`), `features/catalog/homeData.ts` (`loadHomeData`), plus an "Async lab" panel on `/scratch/explorer` (buttons call the functions from event handlers, no effects). Verified two ways: `node --import ./scratch/register-alias.mjs scratch/06-async.ts` (the hook file teaches Node the `@/` alias) and in the browser panel.
+- `fetch("/nope")` resolves with `ok: false, status: 404` (asserted); only `getJson`'s `if (!response.ok) throw` turns it into an error with the envelope message, e.g. `HTTP 404: Route not found: GET /api/v1/this-route-does-not-exist`.
+- `loadHomeData` uses `Promise.allSettled`: the deliberately broken third URL ends up in `errors` while `newest` and `topRated` still hold 8 products each.
+- `withTimeout(run, ms)` aborts via `AbortController` and races the abort signal, so even an operation that ignores the signal rejects. A 1ms timeout gives `error.name === "AbortError"`, which `isAbortError` tells apart from a real `HttpError`.
+- Timings: `await a(); await b();` runs back to back (3 x `/products?limit=60` took ~47ms in the browser, ~20ms in Node), `await Promise.all([...])` overlaps them (~23ms / ~12ms); with `sleep(100)` twice it is 200ms vs 100ms. Local API latency is tiny so the difference is small in absolute terms. Not done: DevTools "Slow 3G"/"Offline" throttling and reading the Network panel waterfall (no manual DevTools in this automated run), the in-code timings stand in for it.
