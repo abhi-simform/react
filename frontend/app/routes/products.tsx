@@ -1,6 +1,6 @@
 import { Navigate, useSearchParams } from "react-router"
 
-import { ProductListingPage } from "@/features/catalog/components/ProductListingPage"
+import { ProductListingPage } from "@/features/catalog"
 import { paths } from "@/lib/paths"
 import { pageTitle } from "@/lib/pageTitle"
 import type { RouteHandle } from "@/types/route-handle"

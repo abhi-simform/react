@@ -2,9 +2,11 @@ import { useState } from "react"
 
 import { EmptyState } from "@/components/common/EmptyState"
 import { ErrorState } from "@/components/common/ErrorState"
-import { ProductCard } from "@/features/catalog/components/ProductCard"
-import { ProductCardSkeleton } from "@/features/catalog/components/ProductCardSkeleton"
-import { useProducts } from "@/features/catalog/hooks/useProducts"
+import {
+  ProductCard,
+  ProductCardSkeleton,
+  useProducts,
+} from "@/features/catalog"
 import type { Product } from "@/features/catalog"
 import { useCountdown } from "@/hooks/useCountdown"
 import { formatCountdown } from "@/lib/duration"

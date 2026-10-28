@@ -1,7 +1,7 @@
 // Throwaway (4.6): countdown experiments.
 import { useState } from "react"
 
-import { FlashSaleStrip } from "@/features/deals/components/FlashSaleStrip"
+import { FlashSaleStrip } from "@/features/deals"
 import { CountdownLab } from "@/scratch/countdown/CountdownLab"
 
 export default function ScratchCountdown() {

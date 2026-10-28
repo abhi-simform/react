@@ -1,4 +1,4 @@
-import { ProductGrid } from "@/features/catalog/components/ProductGrid"
+import { ProductGrid } from "@/features/catalog"
 
 import { useProductsByIds } from "../hooks/useProductsByIds"
 import { useRecentlyViewed } from "../hooks/useRecentlyViewed"

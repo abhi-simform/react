@@ -1,7 +1,7 @@
 import { useRef, useState } from "react"
 import { Link } from "react-router"
 
-import { useCategoryTree } from "@/features/catalog/hooks/useCategories"
+import { useCategoryTree } from "@/features/catalog"
 import { useOnClickOutside } from "@/hooks/useOnClickOutside"
 import { paths } from "@/lib/paths"
 

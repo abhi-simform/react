@@ -1,26 +1,14 @@
-import { SlidersHorizontal } from "lucide-react"
 import { useState } from "react"
 import { useNavigate, useSearchParams } from "react-router"
 
-import { EmptyState } from "@/components/common/EmptyState"
-import { ErrorState } from "@/components/common/ErrorState"
 import { Button } from "@/components/ui/button"
-import {
-  Sheet,
-  SheetClose,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet"
 import { Breadcrumbs } from "@/components/layout/Breadcrumbs"
 import { useDocumentTitle } from "@/hooks/useDocumentTitle"
 import { useMediaQuery } from "@/hooks/useMediaQuery"
-import { assertNever } from "@/lib/assert"
 import { NotFoundError } from "@/lib/notFound"
 import { paths } from "@/lib/paths"
 
-import { PAGE_SIZE, toProductQuery } from "../filters"
+import { toProductQuery } from "../filters"
 import { useCategory } from "../hooks/useCategories"
 import { useProductFilters } from "../hooks/useProductFilters"
 import { useProducts } from "../hooks/useProducts"
@@ -28,11 +16,9 @@ import type { Facets } from "../types"
 import { ActiveFilterChips } from "./ActiveFilterChips"
 import { FilterSidebar } from "./FilterSidebar"
 import { Pagination } from "./Pagination"
-import { ProductCardSkeleton } from "./ProductCardSkeleton"
-import { ProductGrid } from "./ProductGrid"
+import { FiltersSheet } from "./FiltersSheet"
+import { ListingResults } from "./ListingResults"
 import { SortSelect } from "./SortSelect"
-
-const gridClass = "grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-4"
 
 /**
  * /products and /c/:categorySlug are the same page: the category is a preset,
@@ -92,48 +78,6 @@ export function ProductListingPage({
   )
     throw new NotFoundError("Category", categorySlug)
 
-  function body() {
-    switch (state.status) {
-      case "idle":
-      case "loading":
-        return (
-          <ul
-            className={gridClass}
-            aria-busy="true"
-            aria-label="Loading products"
-          >
-            {Array.from({ length: PAGE_SIZE }, (_, i) => (
-              <li key={i}>
-                <ProductCardSkeleton />
-              </li>
-            ))}
-          </ul>
-        )
-      case "error":
-        return <ErrorState error={state.error} onRetry={state.reload} />
-      case "success":
-        if (state.data.items.length > 0)
-          return <ProductGrid products={state.data.items} view={filters.view} />
-        return filters.page > 1 ? (
-          <EmptyState title={`Page ${filters.page} does not exist`}>
-            <Button variant="outline" onClick={() => setFilter("page", 1)}>
-              Go to page 1
-            </Button>
-          </EmptyState>
-        ) : (
-          <EmptyState title="No products match these filters">
-            {activeCount > 0 && (
-              <Button variant="outline" onClick={api.clearAll}>
-                Clear all filters
-              </Button>
-            )}
-          </EmptyState>
-        )
-      default:
-        return assertNever(state)
-    }
-  }
-
   const sidebar = (
     <FilterSidebar categorySlug={categorySlug} facets={facets} api={api} />
   )
@@ -163,25 +107,9 @@ export function ProductListingPage({
             <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
               <div className="flex items-center gap-3">
                 {!isDesktop && (
-                  <Sheet>
-                    <SheetTrigger
-                      render={<Button variant="outline" size="sm" />}
-                    >
-                      <SlidersHorizontal aria-hidden className="size-4" />
-                      Filters{activeCount > 0 ? ` (${activeCount})` : ""}
-                    </SheetTrigger>
-                    <SheetContent side="left" className="overflow-y-auto">
-                      <SheetHeader>
-                        <SheetTitle>Filters</SheetTitle>
-                      </SheetHeader>
-                      <div className="p-4">{sidebar}</div>
-                      <div className="p-4">
-                        <SheetClose render={<Button className="w-full" />}>
-                          Show {meta ? meta.total : ""} results
-                        </SheetClose>
-                      </div>
-                    </SheetContent>
-                  </Sheet>
+                  <FiltersSheet activeCount={activeCount} total={meta?.total}>
+                    {sidebar}
+                  </FiltersSheet>
                 )}
                 <p role="status" aria-live="polite" className="text-sm">
                   {meta
@@ -215,7 +143,13 @@ export function ProductListingPage({
               onSetFilter={setFilter}
               onClearAll={api.clearAll}
             />
-            {body()}
+            <ListingResults
+              state={state}
+              filters={filters}
+              activeCount={activeCount}
+              onGoToPage={(page) => setFilter("page", page)}
+              onClearAll={api.clearAll}
+            />
             {meta && (
               <Pagination
                 page={meta.page}

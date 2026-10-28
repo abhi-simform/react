@@ -2,8 +2,7 @@
 // and a switch between the buggy index keys and the correct id keys.
 import { useState } from "react"
 
-import { ProductGrid } from "@/features/catalog/components/ProductGrid"
-import { sortProducts, type SortKey } from "@/features/catalog"
+import { ProductGrid, sortProducts, type SortKey } from "@/features/catalog"
 import { IndexKeyGrid } from "@/scratch/key-bug/IndexKeyGrid"
 import { productsFixture } from "@/test/fixtures/products"
 

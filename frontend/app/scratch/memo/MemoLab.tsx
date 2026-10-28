@@ -13,8 +13,6 @@ import {
 import {
   ProductCard,
   type ProductCardProduct,
-} from "@/features/catalog/components/ProductCard"
-import {
   filterProducts,
   priceHistogram,
   type Product,

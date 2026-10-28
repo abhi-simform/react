@@ -1,4 +1,4 @@
-import { ProductListingPage } from "@/features/catalog/components/ProductListingPage"
+import { ProductListingPage } from "@/features/catalog"
 
 import { RouteErrorView } from "@/components/common/RouteErrorView"
 

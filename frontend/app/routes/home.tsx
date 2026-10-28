@@ -1,6 +1,6 @@
 import { HealthBadge } from "@/components/common/HealthBadge"
-import { RecentlyViewedRail } from "@/features/product/components/RecentlyViewedRail"
-import { FlashSaleStrip } from "@/features/deals/components/FlashSaleStrip"
+import { RecentlyViewedRail } from "@/features/product"
+import { FlashSaleStrip } from "@/features/deals"
 import { pageTitle } from "@/lib/pageTitle"
 
 export default function Home() {

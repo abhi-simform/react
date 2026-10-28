@@ -1,5 +1,5 @@
 // Throwaway (4.5): ref experiments.
-import { AddressDialog } from "@/features/account/components/AddressDialog"
+import { AddressDialog } from "@/features/account"
 import { SlashShortcutDemo } from "@/scratch/refs/SlashShortcutDemo"
 
 export default function ScratchRefs() {

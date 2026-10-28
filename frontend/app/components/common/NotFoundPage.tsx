@@ -1,6 +1,6 @@
 import { Form, Link } from "react-router"
 
-import { useCategoryTree } from "@/features/catalog/hooks/useCategories"
+import { useCategoryTree } from "@/features/catalog"
 import { paths } from "@/lib/paths"
 
 /** A 404 with a way forward: search, popular categories, home. */

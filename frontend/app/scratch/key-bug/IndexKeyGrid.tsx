@@ -1,10 +1,7 @@
 // BROKEN ON PURPOSE (3.2): identical to ProductGrid except `key={index}`.
 // Like the 3rd card, then change the sort: the heart stays at position 3
 // because React matched the state by position, not by product.
-import {
-  ProductCard,
-  type ProductCardProduct,
-} from "@/features/catalog/components/ProductCard"
+import { ProductCard, type ProductCardProduct } from "@/features/catalog"
 
 export function IndexKeyGrid({
   products,

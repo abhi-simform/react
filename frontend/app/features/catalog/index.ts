@@ -28,3 +28,28 @@ export type {
 } from "./types"
 export { loadHomeData } from "./homeData"
 export type { HomeData } from "./homeData"
+
+// UI and hooks other features / routes may use.
+export { ProductCard } from "./components/ProductCard"
+export type { ProductCardProduct } from "./components/ProductCard"
+export { ProductCardSkeleton } from "./components/ProductCardSkeleton"
+export { ProductGrid } from "./components/ProductGrid"
+export { ProductListingPage } from "./components/ProductListingPage"
+export { useProducts } from "./hooks/useProducts"
+export { useCategory, useCategoryTree } from "./hooks/useCategories"
+export { useProductFilters } from "./hooks/useProductFilters"
+export { getBrands, getCategory, getCategoryTree } from "./api"
+export {
+  parseFilters,
+  toProductQuery,
+  toSearchParams,
+  PAGE_SIZE,
+} from "./filters"
+export type { ListingFilters } from "./filters"
+export type {
+  Brand,
+  CategoryDetail,
+  CategoryNode,
+  Facets,
+  ProductListMeta,
+} from "./types"

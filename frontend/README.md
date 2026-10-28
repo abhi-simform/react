@@ -19,3 +19,13 @@ To use the components in your app, import them as follows:
 ```tsx
 import { Button } from "@/components/ui/button";
 ```
+
+## How the frontend is organized
+
+- `app/routes.ts` is the route tree; `app/routes/*` are THIN modules (param in, feature component out, plus `meta`/`handle`/`ErrorBoundary`). No business logic there.
+- `app/features/<name>/` is one product capability (`catalog`, `product`, `cart`, `checkout`, `auth`, `search`, `deals`, `account`, `compare`, `orders`). Inside: `components/`, `hooks/`, `api.ts`, `schemas.ts`, pure logic (`filters.ts`, `utils.ts`).
+- Each feature has ONE public entry, `index.ts`. Other code imports `@/features/catalog`, never `@/features/catalog/components/...` (ESLint `no-restricted-imports` fails the build).
+- Shared code is promoted only when a second feature needs it: `components/{ui,layout,common}` (UI), `hooks/` (generic hooks), `lib/` (API client in `lib/api/`, `format.ts` for prices and dates, `money.ts`, `paths.ts` for every URL).
+- Where is price formatting? `lib/format.ts` (`formatRupees`, `formatCurrency`); the `Price` component is `components/common/Price.tsx`.
+- `app/scratch/` and `/dev/*` are throwaway labs from earlier stages (dev builds only); `scratch/*.ts` are node-run checks (`npm run check:scratch`).
+- Checks: `npm run typecheck`, `npm run lint`, `npm run check:scratch`, `npm run build`.

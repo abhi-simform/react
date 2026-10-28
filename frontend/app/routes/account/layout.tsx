@@ -2,7 +2,7 @@ import { useState } from "react"
 import { Outlet } from "react-router"
 
 import { RouteErrorView } from "@/components/common/RouteErrorView"
-import { AccountNav } from "@/components/layout/AccountNav"
+import { AccountNav } from "@/features/account"
 
 import type { Route } from "./+types/layout"
 

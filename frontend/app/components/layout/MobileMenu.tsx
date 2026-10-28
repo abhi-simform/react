@@ -2,7 +2,7 @@ import { Menu } from "lucide-react"
 import { Link } from "react-router"
 
 import { Button } from "@/components/ui/button"
-import { useCategoryTree } from "@/features/catalog/hooks/useCategories"
+import { useCategoryTree } from "@/features/catalog"
 import { paths } from "@/lib/paths"
 import {
   Sheet,

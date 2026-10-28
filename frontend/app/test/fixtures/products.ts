@@ -1,5 +1,5 @@
 import { paginatedSchema } from "@/lib/api/schemas"
-import { productSchema } from "@/features/catalog/schemas"
+import { productSchema } from "@/features/catalog"
 
 import raw from "./products.json"
 
