@@ -137,12 +137,18 @@ function AddressForm({
 
   async function submit(e: React.SubmitEvent<HTMLFormElement>) {
     e.preventDefault()
-    const result = await onSubmit(
-      toInput(fields, existing !== undefined),
-      existing
-    )
-    if (result) setError(result)
-    else onClose()
+    if (submitting.current) return
+    submitting.current = true
+    try {
+      const result = await onSubmit(
+        toInput(fields, existing !== undefined),
+        existing
+      )
+      if (result) setError(result)
+      else onClose()
+    } finally {
+      submitting.current = false
+    }
   }
 
   const text = (

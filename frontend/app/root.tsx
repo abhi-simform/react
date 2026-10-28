@@ -4,6 +4,7 @@ import type { Route } from "./+types/root"
 import { RouteErrorView } from "@/components/common/RouteErrorView"
 import { Toaster } from "@/components/ui/sonner"
 import { AuthProvider } from "@/features/auth"
+import { WishlistProvider } from "@/features/wishlist"
 import { pageTitle } from "@/lib/pageTitle"
 
 import "./app.css"
@@ -34,7 +35,9 @@ export function Layout({ children }: { children: React.ReactNode }) {
 export default function App() {
   return (
     <AuthProvider>
-      <Outlet />
+      <WishlistProvider>
+        <Outlet />
+      </WishlistProvider>
       {/* Toasts (sonner): role="status" live region, used for action feedback. */}
       <Toaster position="bottom-right" />
     </AuthProvider>

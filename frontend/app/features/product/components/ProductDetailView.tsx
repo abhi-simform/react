@@ -7,6 +7,7 @@ import { QuantityStepper } from "@/components/common/QuantityStepper"
 import { Button } from "@/components/ui/button"
 import { formatRupees } from "@/lib/format"
 import type { ProductDetail } from "@/features/catalog"
+import { WishlistHeart } from "@/features/wishlist"
 import type { Variant } from "@/types/domain"
 
 import { useRecentlyViewed } from "../hooks/useRecentlyViewed"
@@ -70,6 +71,15 @@ export function ProductDetailView({
         >
           Add to cart
         </Button>
+        {/* Same shared Set as the cards and the header count (no request of its own). */}
+        <div className="flex items-center gap-2 text-sm">
+          <WishlistHeart
+            productId={product._id}
+            productName={product.name}
+            className="border"
+          />
+          <span aria-hidden>Wishlist</span>
+        </div>
       </div>
       <div className="md:col-span-2">
         <ProductTabs product={product} />

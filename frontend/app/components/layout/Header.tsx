@@ -4,6 +4,7 @@ import { Link, NavLink } from "react-router"
 import { CompareTrayButton } from "@/features/compare"
 import { CartDrawer } from "@/features/cart"
 import { SearchBox } from "@/features/search"
+import { WishlistLink } from "@/features/wishlist"
 import { useMediaQuery } from "@/hooks/useMediaQuery"
 import { paths } from "@/lib/paths"
 import { cn } from "@/lib/utils"
@@ -58,6 +59,7 @@ export function Header() {
         >
           <Moon aria-hidden className="size-4" />
         </button>
+        <WishlistLink />
         <CompareTrayButton />
         <CartDrawer />
       </nav>

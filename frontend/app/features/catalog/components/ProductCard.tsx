@@ -1,10 +1,9 @@
-import { Heart } from "lucide-react"
-import { useState } from "react"
 import { Link } from "react-router"
 
 import { Price } from "@/components/common/Price"
 import { Rating } from "@/components/common/Rating"
 import { Button } from "@/components/ui/button"
+import { WishlistHeart } from "@/features/wishlist"
 import { paths } from "@/lib/paths"
 import { cn } from "@/lib/utils"
 
@@ -38,7 +37,6 @@ export function ProductCard({
   onNotifyMe,
   addToCartDisabled = false,
 }: ProductCardProps) {
-  const [liked, setLiked] = useState(false)
   const outOfStock = product.stock <= 0
   const image = product.images[0]
 
@@ -63,18 +61,11 @@ export function ProductCard({
         <div className="absolute top-1 left-1 flex flex-col items-start gap-1">
           {children}
         </div>
-        <button
-          type="button"
-          aria-pressed={liked}
-          aria-label={liked ? "Remove from wishlist" : "Add to wishlist"}
-          onClick={() => setLiked((v) => !v)}
-          className="absolute top-1 right-1 z-10 flex size-8 items-center justify-center rounded-full bg-white/90 shadow"
-        >
-          <Heart
-            aria-hidden
-            className={cn("size-4", liked && "fill-red-500 text-red-500")}
-          />
-        </button>
+        <WishlistHeart
+          productId={product._id}
+          productName={product.name}
+          className="absolute top-1 right-1 z-10"
+        />
       </div>
 
       <div
