@@ -156,4 +156,12 @@ export const searchKeys = {
     [...searchKeys.all, "suggestions", term] as const,
 }
 
+export const homeKeys = {
+  all: ["home"] as const,
+  banners: (placement: string) =>
+    [...homeKeys.all, "banners", placement] as const,
+}
+
+export const offerKeys = { all: ["offers"] as const }
+
 export const healthKeys = { all: ["health"] as const }

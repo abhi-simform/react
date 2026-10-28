@@ -2,8 +2,14 @@ import { infiniteQueryOptions, queryOptions } from "@tanstack/react-query"
 
 import { getProducts } from "@/features/catalog"
 import { STALE } from "@/lib/query-client"
-import { questionKeys, relatedKeys, reviewKeys } from "@/lib/queryKeys"
+import {
+  offerKeys,
+  questionKeys,
+  relatedKeys,
+  reviewKeys,
+} from "@/lib/queryKeys"
 
+import { getOffers } from "./offers.api"
 import {
   getAnswers,
   getEligibility,
@@ -80,5 +86,15 @@ export const questionQueries = {
       getNextPageParam: (last) =>
         last.meta.hasNext ? last.meta.page + 1 : undefined,
       staleTime: STALE.catalog,
+    }),
+}
+
+/** The Offers panel: the live coupons (not checked against a cart). Rarely changes. */
+export const offerQueries = {
+  list: () =>
+    queryOptions({
+      queryKey: [...offerKeys.all, "list"] as const,
+      queryFn: ({ signal }) => getOffers(signal),
+      staleTime: STALE.static,
     }),
 }

@@ -2,6 +2,7 @@ import { useQuery, useSuspenseQuery } from "@tanstack/react-query"
 import { Suspense } from "react"
 import { Link } from "react-router"
 
+import { LazySection } from "@/components/common/LazySection"
 import { AsyncView } from "@/components/common/AsyncView"
 import { EmptyState } from "@/components/common/EmptyState"
 import { RailErrorBoundary } from "@/components/common/RailErrorBoundary"
@@ -140,10 +141,15 @@ export function HomeRails({ failRail }: { failRail?: string | null }) {
     <div className="flex flex-col gap-6">
       {RAILS.map((rail) => {
         const forceFail = import.meta.env.DEV && failRail === rail.id
-        return rail.suspense ? (
-          <SuspenseRail key={rail.id} rail={rail} forceFail={forceFail} />
-        ) : (
-          <ProductRail key={rail.id} rail={rail} forceFail={forceFail} />
+        // On demand (11.10): a rail is mounted, and so fetched, only when scrolled near.
+        return (
+          <LazySection key={rail.id}>
+            {rail.suspense ? (
+              <SuspenseRail rail={rail} forceFail={forceFail} />
+            ) : (
+              <ProductRail rail={rail} forceFail={forceFail} />
+            )}
+          </LazySection>
         )
       })}
     </div>
