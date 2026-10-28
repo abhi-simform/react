@@ -112,6 +112,11 @@ async function loadCards(n) {
 }
 
 let shown = 0
+if (scenario === "page") {
+  // `page <path>`: load a page and report layout shifts (CLS) with the elements that moved.
+  await page.goto(base + (args[1] ?? "/"), { waitUntil: "networkidle" })
+  await page.waitForTimeout(1500)
+}
 if (scenario === "notifications" || scenario === "feed") {
   // Signed in the way the e2e suite does it: log in through the API in this context, then hint the app.
   const login = await context.request.post(
@@ -168,12 +173,12 @@ const domNodesBefore = await page.evaluate(
 )
 await page.waitForTimeout(500)
 await throttle(cpu)
-await page.evaluate(() => {
+await page.evaluate((keepShifts) => {
   window.__m.events.length = 0
   window.__m.longtasks.length = 0
-  window.__m.shifts = 0
+  if (!keepShifts) ((window.__m.shifts = 0), (window.__m.culprits.length = 0))
   if (window.__perf) window.__perf.reset?.()
-})
+}, scenario === "page")
 
 let productRequests = 0
 page.on("request", (r) => {

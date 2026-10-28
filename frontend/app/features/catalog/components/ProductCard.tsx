@@ -2,6 +2,7 @@ import { memo } from "react"
 import { Link } from "react-router"
 
 import { Price } from "@/components/common/Price"
+import { ResponsiveImage } from "@/components/common/ResponsiveImage"
 import { Rating } from "@/components/common/Rating"
 import { Button } from "@/components/ui/button"
 import { useAddToCart } from "@/features/cart"
@@ -25,7 +26,14 @@ type ProductCardProps = {
   onNotifyMe?: (product: ProductCardProduct) => void
   /** E.g. the flash sale ended: the button stays but cannot be used. */
   addToCartDisabled?: boolean
+  /** The first row of a listing is above the fold and is the LCP: load its images eagerly (13.5). */
+  imagePriority?: boolean
 }
+
+// The card is ~46% of the viewport on a phone and 18-30% on larger screens (sidebar included).
+const CARD_WIDTHS = [200, 300, 400, 600] as const
+const CARD_SIZES =
+  "(min-width: 1280px) 18vw, (min-width: 1024px) 20vw, (min-width: 768px) 30vw, 46vw"
 
 /**
  * One link target per card: the title link is stretched over the whole card
@@ -40,6 +48,7 @@ function ProductCardBase({
   onAddToCart,
   onNotifyMe,
   addToCartDisabled = false,
+  imagePriority = false,
 }: ProductCardProps) {
   const outOfStock = !product.inStock
   const addToCart = useAddToCart()
@@ -56,13 +65,14 @@ function ProductCardBase({
         )}
       >
         {/* Decorative: the title link right below names the product. */}
-        <img
+        <ResponsiveImage
           src={product.image.url}
           alt=""
-          width={400}
-          height={400}
-          loading="lazy"
-          className={cn("size-full object-cover", outOfStock && "opacity-40")}
+          widths={CARD_WIDTHS}
+          sizes={CARD_SIZES}
+          ratio={1}
+          priority={imagePriority}
+          className={cn(outOfStock && "opacity-40")}
         />
         <div className="absolute top-1 left-1 flex flex-col items-start gap-1">
           {children ??

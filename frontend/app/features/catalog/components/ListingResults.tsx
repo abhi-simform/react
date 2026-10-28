@@ -74,6 +74,7 @@ export function ListingResults({
       >
         {(data) => (
           <ProductGrid
+            priorityCount={4}
             products={data.items.map(toProductCardVM)}
             view={filters.view}
           />

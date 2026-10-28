@@ -2,7 +2,13 @@ import { ChevronLeft, ChevronRight } from "lucide-react"
 import { useEffect, useRef, useState } from "react"
 import { preload } from "react-dom"
 
+import { ResponsiveImage } from "@/components/common/ResponsiveImage"
+import { imageSources } from "@/lib/images"
 import { cn } from "@/lib/utils"
+
+const MAIN_WIDTHS = [400, 600, 800] as const
+// Two columns from md up (half the viewport, capped by the page width), full width below.
+const MAIN_SIZES = "(min-width: 1024px) 480px, (min-width: 768px) 46vw, 92vw"
 
 type GalleryImage = { url: string; alt?: string }
 
@@ -37,7 +43,15 @@ export function Gallery({
   const current = images[index]!
   const nextIndex = (index + 1) % count
   // React 19 resource hint, legal during render: the next image is ready on "next".
-  if (count > 1) preload(images[nextIndex]!.url, { as: "image" })
+  if (count > 1) {
+    // Must describe the SAME candidates the <img> will pick, or the browser downloads two files.
+    const next = imageSources(images[nextIndex]!.url, MAIN_WIDTHS)
+    preload(next.src, {
+      as: "image",
+      imageSrcSet: next.srcSet,
+      imageSizes: next.srcSet ? MAIN_SIZES : undefined,
+    })
+  }
 
   const go = (delta: number) => setIndex((i) => (i + delta + count) % count)
 
@@ -60,12 +74,14 @@ export function Gallery({
       className="flex flex-col gap-2"
     >
       <div className="relative aspect-square overflow-hidden rounded bg-neutral-100">
-        <img
+        <ResponsiveImage
           src={current.url}
           alt={current.alt ?? `${productName}, image ${index + 1}`}
-          width={800}
-          height={800}
-          className="size-full object-cover"
+          widths={MAIN_WIDTHS}
+          sizes={MAIN_SIZES}
+          ratio={1}
+          // The first image is the PDP's LCP element: eager + high priority. Later ones are user-triggered.
+          priority={index === 0}
         />
         {count > 1 && (
           <>
@@ -110,13 +126,12 @@ export function Gallery({
                 i === index ? "border-black" : "border-transparent"
               )}
             >
-              <img
+              <ResponsiveImage
                 src={image.url}
                 alt=""
-                width={64}
-                height={64}
-                loading="lazy"
-                className="size-full object-cover"
+                widths={[64, 128]}
+                sizes="64px"
+                ratio={1}
               />
             </button>
           </li>

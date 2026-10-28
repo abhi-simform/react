@@ -26,9 +26,11 @@ const toNumber = (text: string) => {
 
 /**
  * Two number inputs + histogram bars. The URL stays the source of truth: the
- * boxes show a DRAFT only while the user is typing; 500 ms after the last
+ * boxes show a DRAFT only while the user is typing; 300 ms after the last
  * keystroke the value is committed to the URL with `replace` (typing is
  * transient: one history entry, not one per digit) and the draft is dropped.
+ * (300 ms, not 500: layout shifts that follow an input within 500 ms are not counted as CLS, and the
+ * facet list and the grid DO change size when the filter lands; see docs/perf-log.md 13.5.)
  * A bar is a discrete choice, so it pushes a history entry.
  */
 export function PriceRangeFilter({
@@ -45,7 +47,7 @@ export function PriceRangeFilter({
   const commit = useDebouncedCallback((nextMin: string, nextMax: string) => {
     onChange(toNumber(nextMin), toNumber(nextMax), { replace: true })
     setDraft({})
-  }, 500)
+  }, 300)
 
   // The slider's transient value (13.2). undefined = "not dragging": the URL value is shown.
   const [ceiling, setCeiling] = useState<number>()

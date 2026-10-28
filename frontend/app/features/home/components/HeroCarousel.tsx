@@ -4,6 +4,7 @@ import { Link } from "react-router"
 
 import { Button } from "@/components/ui/button"
 import { useMediaQuery } from "@/hooks/useMediaQuery"
+import { ResponsiveImage } from "@/components/common/ResponsiveImage"
 import { safeImageSrc } from "@/lib/safeUrl"
 import { cn } from "@/lib/utils"
 
@@ -114,13 +115,15 @@ function Carousel({ banners }: { banners: Banner[] }) {
               className="relative aspect-[3/1] min-h-40 w-full shrink-0 snap-center bg-neutral-200"
             >
               {src && (
-                <img
+                <ResponsiveImage
                   src={src}
                   alt=""
+                  widths={[600, 900, 1200]}
+                  sizes="100vw"
+                  ratio={3}
                   // The first slide is the LCP candidate: fetch it first, defer the rest.
-                  fetchPriority={i === 0 ? "high" : "low"}
-                  loading={i === 0 ? "eager" : "lazy"}
-                  className="absolute inset-0 size-full object-cover"
+                  priority={i === 0}
+                  className="absolute inset-0"
                 />
               )}
               <div className="absolute inset-0 flex flex-col justify-end gap-1 bg-gradient-to-t from-black/60 to-transparent p-4 text-white">

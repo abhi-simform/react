@@ -1,3 +1,4 @@
+import { ResponsiveImage } from "@/components/common/ResponsiveImage"
 import { Link } from "react-router"
 
 import { QuantityStepper } from "@/components/common/QuantityStepper"
@@ -38,13 +39,15 @@ export function CartLineRow({
   return (
     <li className="flex gap-3 border-b py-3">
       {line.imageUrl ? (
-        <img
-          src={line.imageUrl}
-          alt=""
-          width={64}
-          height={64}
-          className="size-16 rounded object-cover"
-        />
+        <div className="size-16 shrink-0 overflow-hidden rounded bg-neutral-100">
+          <ResponsiveImage
+            src={line.imageUrl}
+            alt=""
+            widths={[64, 128]}
+            sizes="64px"
+            ratio={1}
+          />
+        </div>
       ) : (
         <div aria-hidden className="size-16 rounded bg-neutral-100" />
       )}

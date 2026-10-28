@@ -70,7 +70,10 @@ export function VirtualProductGrid({
                 aria-setsize={products.length}
                 aria-posinset={start + i + 1}
               >
-                <ProductCard product={product} />
+                <ProductCard
+                  product={product}
+                  imagePriority={row.index === 0}
+                />
               </div>
             ))}
           </div>

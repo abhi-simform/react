@@ -9,6 +9,8 @@ type ProductGridProps = {
   onAddToCart?: (product: ProductCardProduct) => void
   /** "list" is a single column. */
   view?: "grid" | "list"
+  /** How many of the first cards load their image eagerly (13.5): the first row, which is the LCP. */
+  priorityCount?: number
 }
 
 /** 2 / 3 / 4 / 5 columns at base / md / lg / xl. Keys are product ids, never indexes. */
@@ -17,6 +19,7 @@ export function ProductGrid({
   badgeFor,
   onAddToCart,
   view = "grid",
+  priorityCount = 0,
 }: ProductGridProps) {
   return (
     <ul
@@ -27,11 +30,15 @@ export function ProductGrid({
           : "grid-cols-1"
       )}
     >
-      {products.map((product) => {
+      {products.map((product, index) => {
         const badge = badgeFor?.(product)
         return (
           <li key={product.id}>
-            <ProductCard product={product} onAddToCart={onAddToCart}>
+            <ProductCard
+              product={product}
+              onAddToCart={onAddToCart}
+              imagePriority={index < priorityCount}
+            >
               {badge && <ProductCard.Badge>{badge}</ProductCard.Badge>}
             </ProductCard>
           </li>

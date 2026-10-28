@@ -980,3 +980,12 @@ Backend B1 was built first (separate `backend B1:` commits): `GET /categories` n
 - `aria-setsize` / `aria-posinset` keep the list's real size known to a screen reader. Costs: Ctrl+F only finds rendered rows, Tab only reaches rendered rows, unrendered anchors do not work. Do not virtualize short lists.
 - TanStack Virtual reads `offsetHeight` (not `getBoundingClientRect`) in `measureElement`; jsdom returns 0 for it, which makes every row "fit" (159 of 300 rows rendered) until a test provides a height.
 - Found by the e2e suite on a production build (memory drill): opening the cart and pressing Escape immediately did nothing, because the lazy `CartSheet` chunk had not loaded yet (nothing to receive the key), and the drawer then opened by itself and hid the page behind its modal. Fix: `CartDrawer` listens for Escape while the store says "open", independent of the chunk. Lesson: lazy loading turns "instant" UI into "eventually" UI; every close/cancel path must work during the download.
+
+## 13.5 Images, fonts, CLS
+
+- Measured the shift culprit with `PerformanceObserver({type:"layout-shift"})` and its `sources` (element, previousRect, currentRect): the PDP's 0.52 CLS was the FOOTER moving, not the content: the loading state was too short. A skeleton must reserve the final height (or be a screen tall) so the footer does not jump.
+- Shifts within 500 ms of a user input are excluded from CLS (`hadRecentInput`): a debounce of 500 ms + a response time falls outside the window, 300 ms inside it. Do not change the UI to hide a real shift, but do not make the user wait longer than needed either.
+- `srcset` + `sizes`: the browser chooses by the LAYOUT width (`sizes`) times the screen density, not the viewport. Wrong `sizes` = wrong file. `fetchPriority=high` + `loading=eager` is for the LCP image only; the first row of a listing counts.
+- A font file named only inside CSS is discovered after the CSS is parsed (a chain): `<link rel=preload as=font crossorigin>` starts it early. `size-adjust` / `ascent-override` / `descent-override` on a local fallback face make the swap shift-free.
+- A Unicode-range split can bite: "₹" lives in Inter's latin-ext file (85 kB), so every price page downloaded it. Declare only what you need and let the rare glyph fall back.
+- Images were not the mobile LCP bottleneck: the element appears only after JS + API in a client-rendered app. Fix is architecture (SSR/prerender), not image tuning.

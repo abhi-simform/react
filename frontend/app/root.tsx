@@ -12,12 +12,42 @@ import { RecentlyViewedSync } from "@/features/recommendations"
 import { WishlistSessionSync } from "@/features/wishlist"
 import { ThemeProvider } from "@/features/theme"
 import { ToastProvider } from "@/features/toast"
+import { env } from "@/lib/env"
 import { installGlobalErrorReporting } from "@/lib/globalErrors"
 import { pageTitle } from "@/lib/pageTitle"
 import { queryClient } from "@/lib/query-client"
 import { reportWebVitals } from "@/lib/vitals"
 
+import interLatin from "../node_modules/@fontsource-variable/inter/files/inter-latin-wght-normal.woff2?url"
 import "./app.css"
+
+/**
+ * Resource hints (13.5/13.11), rendered into <head> at build time (SPA mode prerenders the shell):
+ * - preload the one font file every page needs: its URL is in the CSS, which the browser would only
+ *   discover after downloading and parsing it (a request chain); a preload starts it at once.
+ *   `crossOrigin` is required for fonts even on the same origin.
+ * - preconnect to the API origin (the first API request would otherwise pay DNS + TCP + TLS) and to
+ *   the image host the seeded catalog uses.
+ */
+export function links() {
+  return [
+    {
+      rel: "preload",
+      href: interLatin,
+      as: "font",
+      type: "font/woff2",
+      crossOrigin: "anonymous" as const,
+    },
+    {
+      rel: "preconnect",
+      href: new URL(env.VITE_API_URL).origin,
+      // The SPA calls the API with `credentials: "include"`: that uses the credentialed connection pool.
+      crossOrigin: "use-credentials" as const,
+    },
+    { rel: "preconnect", href: "https://picsum.photos" },
+    { rel: "preconnect", href: "https://fastly.picsum.photos" },
+  ]
+}
 
 /** Fallback title for any route that exports no `meta` of its own (the leaf route's meta wins). */
 export function meta() {
