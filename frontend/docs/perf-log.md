@@ -143,7 +143,19 @@ What was split off the first load:
 
 ### Biggest dependencies in the client bundle (`npm run analyze`; numbers are an ESTIMATE: per-module gzip scaled to the real total)
 
-```
+```All client JS: 584 kB gzip over 123 chunks (scale factor 0.62)
+package                              raw kB  ~gzip kB
+(app code)                             1395       240 
+react-dom                               970       114   > 50 (justified: the renderer (measured on the wire: ~60 kB gzip in entry.client); no lighter option for React 19)
+@base-ui/react                          335        69   > 50 (justified: headless dialog/popover/select/tabs/... used by ~10 components; tree-shaken per component and spread over route chunks, no page downloads 50 kB of it)
+react-router                            260        42 
+zod                                     171        25 
+react-hook-form                         105        14 
+@tanstack/query-core                     71        13 
+cn                                       43         8 
+@base-ui/utils                           28         8 
+sonner                                   52         7 
+engine.io-client                         29         7 
 ```
 
 - **No dependency over 50 kB gzip without a justification**: `react-dom` (~60 kB measured on the wire in `entry.client`; the estimator over-counts) and `@base-ui/react` (74 kB estimated across the whole app, but it is spread over ~10 components and per-route chunks; no page downloads it all) are recorded in `scripts/perf/deps.mjs` with the reason, and `npm run analyze` fails for any new package over 50 kB that is not listed.
