@@ -41,3 +41,13 @@ I registered `route("hello", "routes/helo.tsx")` (typo) and Vite returned HTTP 5
 - `POST /auth/register` with `{"email":"nope"}` returns 422 `{ success: false, error: { code: "VALIDATION_ERROR", message, details: [{ in, path, message }] } }`. `code` is for program logic, `message` for humans, `details[].path` maps to form fields, and the `x-request-id` response header is what you quote when debugging backend logs. A valid body returns `{ user, accessToken }` and sets the refresh cookie.
 - Swagger (`:4000/api/docs`), Mongo Express (`:8081`) and Mailpit (`:8025`, started with `docker compose up -d`) are all reachable. Mailpit stays empty until an email flow (verify/reset) runs.
 - Not done in this automated build: installing the React DevTools extension and DevTools Network throttling (Slow 4G, disable cache, Timing tab). Those are manual browser steps for the owner.
+
+# Stage 1: JavaScript essentials
+
+Setup: `node scripts/snapshot-products.mjs` pages through `GET /products` (the API caps `limit` at 60, so one `limit=100` curl returns 422) and merges all 308 products into `app/test/fixtures/products.json` (the full envelope; `data` is the array). Pure logic lives in `features/catalog/utils.ts` and `features/cart/totals.ts`; scratch checks run with `node scratch/<file>.ts` (Node 24 type stripping; added `allowImportingTsExtensions` to `tsconfig.json` so `.ts` specifiers typecheck).
+
+Reality vs plan: prices in the API are integer **rupees** (not paise), products use `name` (not `title`) and `price` (not `basePrice`), `brand` is a plain string, and there are no variants on products yet. The cart layer works in integer paise (`toPaise(rupees)`), the catalog layer filters on the API's rupee `price`.
+
+## 1.1 Destructuring, spread, rest, immutability
+
+`updateQty`/`removeLine` (`features/cart/lines.ts`) and `toggle`/`deepFreeze` (`lib/immutable.ts`) return new arrays/objects. `scratch/01-immutability.ts` runs them on deep-frozen input and nothing throws; pushing to the same frozen array does throw a `TypeError`. Note `Object.freeze` on a `Set` does not stop `.add()`, so the toggle proof relies on the result being a different Set. `arr.push(x); setArr(arr)` does not re-render because React compares by reference (`Object.is`): same array, so state is "unchanged".
