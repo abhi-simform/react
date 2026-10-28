@@ -27,3 +27,10 @@ I registered `route("hello", "routes/helo.tsx")` (typo) and Vite returned HTTP 5
 - The scaffold's `button.tsx` imported `cn` from the `"cn"` npm package directly. Changed to `@/lib/utils` so there is one place to import `cn` from. `npx shadcn@latest add card` generated `card.tsx` importing from the `cn` package again (the registry template), so I fixed that import by hand and removed the card since nothing uses it yet. Any new shadcn component needs that same one-line fix.
 - `npm run format` sorts Tailwind classes (checked: `p-4 flex text-sm m-2` became `m-2 flex p-4 text-sm`).
 - A deliberate `const n: number = "x"` fails `npm run typecheck` with TS2322; removed.
+
+## 0.2 Environment variables
+
+- Only `VITE_`-prefixed variables are exposed through `import.meta.env`, and they are inlined into the bundle at build time, so anyone can read them. Secrets stay on the server.
+- `app/lib/env.ts` throws at import time if `VITE_API_URL` is missing. I removed `.env.local` and restarted the dev server: the root error boundary showed "VITE_API_URL is missing..." instead of requests to `undefined/health`. Vite only reads `.env*` at startup, so a restart is needed after editing.
+- The "Ping API" button (`HealthBadge`) fetches `/health` from an event handler. It works from `:5173` because the backend allows that origin in CORS. With the backend stopped, `fetch` rejects with `TypeError: Failed to fetch` (no status, no body) and the UI shows it in a `role="alert"` paragraph.
+- Deviation: `frontend/.gitignore` had `.env*`, which also ignored `.env.example`; added `!.env.example` so the example is tracked.
