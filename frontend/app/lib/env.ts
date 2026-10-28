@@ -9,4 +9,6 @@ if (!apiUrl) {
 
 export const env = {
   VITE_API_URL: apiUrl.replace(/\/$/, ""),
+  /** true under `vite dev`, false in a production build */
+  DEV: import.meta.env.DEV,
 } as const

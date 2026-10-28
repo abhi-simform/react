@@ -23,7 +23,7 @@ await assert.rejects(getJson(`${base}/nope`), (e: unknown) => {
 })
 
 // allSettled: the broken request does not block the other two
-const home = await loadHomeData(base)
+const home = await loadHomeData()
 assert.equal(home.newest?.length, 8)
 assert.equal(home.topRated?.length, 8)
 assert.equal(home.errors.length, 1)

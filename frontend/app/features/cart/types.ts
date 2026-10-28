@@ -1,3 +1,5 @@
+import type { CartItem } from "@/types/domain"
+
 // All money in the cart layer is integer paise (1 rupee = 100 paise).
 export type CartLine = {
   sku: string
@@ -33,3 +35,6 @@ export type CartTotals = {
   total: number
   savings: number
 }
+
+/** What the UI sends when adding to the cart: the server decides the price snapshot. */
+export type CartItemInput = Omit<CartItem, "priceSnapshot">

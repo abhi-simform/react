@@ -36,7 +36,7 @@ function AsyncLab() {
   const addLog = (line: string) => setLog((prev) => [...prev, line])
 
   async function load() {
-    setHome(await loadHomeData(env.VITE_API_URL))
+    setHome(await loadHomeData())
   }
 
   async function timeoutDemo() {

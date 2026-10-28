@@ -13,6 +13,9 @@ function withExtension(url) {
 }
 
 export async function resolve(specifier, context, next) {
+  if (specifier === "@/lib/env") {
+    return next(new URL("./env-node.ts", import.meta.url).href, context)
+  }
   if (specifier.startsWith("@/")) {
     const target = withExtension(new URL(specifier.slice(2), appDir))
     return next(pathToFileURL(fileURLToPath(target)).href, context)

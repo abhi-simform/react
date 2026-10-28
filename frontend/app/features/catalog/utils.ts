@@ -1,4 +1,6 @@
 // Pure functions: no React, no globals, no mutation of inputs.
+import { groupBy } from "@/lib/groupBy"
+
 import type { Product, ProductFilters } from "./types.ts"
 
 type FilterKey = keyof ProductFilters
@@ -106,12 +108,12 @@ export function priceHistogram(
   return buckets
 }
 
-/** Brand -> count, sorted by count desc then name. Uses Map.groupBy. */
+/** Brand -> count, sorted by count desc then name. Uses the generic groupBy. */
 export function brandCounts(
   products: readonly Product[]
 ): { brand: string; count: number }[] {
-  const groups = Map.groupBy(products, (p) => p.brand)
-  return [...groups]
+  const groups = groupBy(products, (p) => p.brand)
+  return Object.entries(groups)
     .map(([brand, items]) => ({ brand, count: items.length }))
     .sort((a, b) => b.count - a.count || a.brand.localeCompare(b.brand))
 }
