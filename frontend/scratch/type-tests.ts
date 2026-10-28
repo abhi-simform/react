@@ -1,6 +1,6 @@
 // Compile-time checks only (never executed). `tsc` fails if a directive becomes unused.
 import { getProduct, getProducts } from "../app/features/catalog/api.ts"
-import { request } from "../app/lib/api/client.ts"
+import { api } from "../app/lib/api/client.ts"
 import type { Paginated } from "../app/lib/api/envelope.ts"
 import {
   productQuerySchema,
@@ -11,10 +11,10 @@ import { groupBy } from "../app/lib/groupBy.ts"
 import type { Product, ProductDetail } from "../app/features/catalog/schemas.ts"
 import type { CartItem, Order } from "../app/types/domain.ts"
 
-// request<T> returns exactly T
-export const a: Promise<Product[]> = request<Product[]>("/products")
+// api<T> returns exactly T
+export const a: Promise<Product[]> = api<Product[]>("/products")
 // @ts-expect-error a Promise<Product[]> is not a Promise<string>
-export const b: Promise<string> = request<Product[]>("/products")
+export const b: Promise<string> = api<Product[]>("/products")
 
 // a wrong generic fails where the result is used
 export const c: Promise<Paginated<Product>> = getProducts()
@@ -52,9 +52,9 @@ export const input2: Omit<CartItem, "priceSnapshot"> = {
 
 // With a schema, T is INFERRED from it: no generic argument, no lie.
 const opts = { schema: productSchema }
-export const inferred: Promise<Product> = request("/products/x", opts)
+export const inferred: Promise<Product> = api("/products/x", opts)
 // @ts-expect-error the schema says Product, not string
-export const wrong: Promise<string> = request("/products/x", opts)
+export const wrong: Promise<string> = api("/products/x", opts)
 
 // z.input (what you feed the schema) vs z.infer / z.output (what you get back)
 type QueryIn = z.input<typeof productQuerySchema>

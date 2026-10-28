@@ -4,7 +4,7 @@ import assert from "node:assert/strict"
 
 import { loadHomeData } from "@/features/catalog/homeData"
 import { sleep, isAbortError, withTimeout } from "@/lib/async"
-import { getJson } from "@/lib/api/getJson"
+import { api } from "@/lib/api/client"
 import { ApiError } from "@/lib/api/errors"
 
 const base = "http://localhost:4000/api/v1"
@@ -13,8 +13,8 @@ const base = "http://localhost:4000/api/v1"
 const raw = await fetch(`${base}/nope`)
 assert.equal(raw.ok, false)
 assert.equal(raw.status, 404)
-// ...getJson does
-await assert.rejects(getJson(`${base}/nope`), (e: unknown) => {
+// ...the api client does
+await assert.rejects(api("/nope"), (e: unknown) => {
   assert.ok(e instanceof ApiError)
   assert.equal(e.status, 404)
   assert.equal(e.code, "NOT_FOUND")
@@ -31,7 +31,7 @@ assert.match(home.errors[0]!, /404/)
 
 // abort: distinguishable from real failures
 await assert.rejects(
-  withTimeout((signal) => getJson(`${base}/products?limit=60`, { signal }), 1),
+  withTimeout((signal) => api("/products?limit=60", { signal }), 1),
   (e: unknown) => {
     assert.ok(isAbortError(e), String(e))
     assert.equal((e as Error).name, "AbortError")
@@ -39,16 +39,16 @@ await assert.rejects(
   }
 )
 // a real failure is NOT an AbortError
-await assert.rejects(getJson(`${base}/nope`), (e: unknown) => !isAbortError(e))
+await assert.rejects(api("/nope"), (e: unknown) => !isAbortError(e))
 // a fast request inside a generous timeout succeeds
 assert.equal(
   (
     (await withTimeout(
-      (s) => getJson(`${base}/health`, { signal: s }),
+      (s) => api("/health", { signal: s }),
       3000
-    )) as { success: boolean }
-  ).success,
-  true
+    )) as { status: string }
+  ).status,
+  "ok"
 )
 // ignoring the signal still rejects (race)
 await assert.rejects(
@@ -57,7 +57,7 @@ await assert.rejects(
 )
 
 // sequential vs parallel timing (each call ~simulated by a real request)
-const call = () => getJson(`${base}/products?limit=60`)
+const call = () => api("/products?limit=60")
 let t = performance.now()
 await call()
 await call()

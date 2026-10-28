@@ -1,6 +1,6 @@
 import { z } from "zod"
 
-import { request, requestPaginatedWithMeta } from "@/lib/api/client"
+import { api, apiPaginatedWithMeta } from "@/lib/api/client"
 import type { Paginated } from "@/lib/api/envelope"
 import { toQueryString } from "@/lib/api/query"
 
@@ -27,7 +27,7 @@ export const getProductsByQuery = (
   queryString: string,
   signal?: AbortSignal
 ): Promise<Paginated<Product, ProductListMeta>> =>
-  requestPaginatedWithMeta(`/products${queryString}`, {
+  apiPaginatedWithMeta(`/products${queryString}`, {
     schema: productSchema,
     metaSchema: productListMetaSchema,
     signal,
@@ -43,7 +43,7 @@ export const getProduct = (
   idOrSlug: string,
   signal?: AbortSignal
 ): Promise<ProductDetail> =>
-  request(`/products/${encodeURIComponent(idOrSlug)}`, {
+  api(`/products/${encodeURIComponent(idOrSlug)}`, {
     schema: productDetailSchema,
     signal,
   })
@@ -52,7 +52,7 @@ export const getCategory = (
   slug: string,
   signal?: AbortSignal
 ): Promise<CategoryDetail> =>
-  request(`/categories/${encodeURIComponent(slug)}`, {
+  api(`/categories/${encodeURIComponent(slug)}`, {
     schema: categoryDetailSchema,
     signal,
   })
@@ -61,7 +61,7 @@ export const getBrands = (
   categorySlug?: string,
   signal?: AbortSignal
 ): Promise<Brand[]> =>
-  request(`/brands${toQueryString({ category: categorySlug })}`, {
+  api(`/brands${toQueryString({ category: categorySlug })}`, {
     schema: z.array(brandSchema),
     signal,
   })
@@ -70,7 +70,7 @@ export const getBrands = (
 // page, so share ONE request. (Stage 9's TanStack Query replaces this hand-made cache.)
 let treePromise: Promise<CategoryNode[]> | undefined
 export function getCategoryTree(): Promise<CategoryNode[]> {
-  treePromise ??= request("/categories", {
+  treePromise ??= api("/categories", {
     schema: z.array(categoryNodeSchema),
   }).catch((error: unknown) => {
     treePromise = undefined // do not cache failures

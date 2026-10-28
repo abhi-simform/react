@@ -2,7 +2,7 @@
 import assert from "node:assert/strict"
 
 import { getProduct, getProducts } from "@/features/catalog/api"
-import { request } from "@/lib/api/client"
+import { api } from "@/lib/api/client"
 import { ApiError } from "@/lib/api/errors"
 import { groupBy } from "@/lib/groupBy"
 import { toQueryString } from "@/lib/api/query"
@@ -21,11 +21,11 @@ const detail = await getProduct(page.items[0]!.slug)
 assert.equal(detail._id, page.items[0]!._id)
 assert.ok(Array.isArray(detail.specs))
 
-const raw = await request<Product[]>("/products?limit=2")
+const raw = await api<Product[]>("/products?limit=2")
 assert.equal(raw.length, 2)
 
 await assert.rejects(
-  request("/nope"),
+  api("/nope"),
   (e: unknown) => e instanceof ApiError && e.status === 404
 )
 await assert.rejects(

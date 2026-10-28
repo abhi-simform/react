@@ -1,9 +1,8 @@
 import { useState } from "react"
 
 import { loadHomeData, type HomeData } from "@/features/catalog"
-import { getJson } from "@/lib/api/getJson"
+import { api } from "@/lib/api/client"
 import { isAbortError, withTimeout } from "@/lib/async"
-import { env } from "@/lib/env"
 
 // 1.6 playground: promises against the real API, triggered from event handlers (no effects yet).
 export function AsyncLab() {
@@ -17,11 +16,7 @@ export function AsyncLab() {
 
   async function timeoutDemo() {
     try {
-      await withTimeout(
-        (signal) =>
-          getJson(`${env.VITE_API_URL}/products?limit=60`, { signal }),
-        1
-      )
+      await withTimeout((signal) => api("/products?limit=60", { signal }), 1)
       addLog("finished before 1ms timeout")
     } catch (error) {
       addLog(
@@ -33,7 +28,7 @@ export function AsyncLab() {
   }
 
   async function timings() {
-    const call = () => getJson(`${env.VITE_API_URL}/products?limit=60`)
+    const call = () => api("/products?limit=60")
     let t = performance.now()
     await call()
     await call()

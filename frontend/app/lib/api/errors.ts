@@ -1,3 +1,7 @@
+export const NETWORK_MESSAGE =
+  "Cannot reach the server. Check your connection and try again."
+export const TIMEOUT_MESSAGE = "The server took too long to answer. Try again."
+
 export class ApiError extends Error {
   readonly status: number
   readonly code: string
@@ -14,6 +18,40 @@ export class ApiError extends Error {
     this.status = init.status
     this.code = init.code
     this.details = init.details
+  }
+
+  /** The request never got an answer (server down, offline, DNS, CORS failure). */
+  get isNetwork(): boolean {
+    return this.code === "NETWORK_ERROR"
+  }
+  /** Our own 10 second deadline fired. Retrying may help. */
+  get isTimeout(): boolean {
+    return this.code === "TIMEOUT"
+  }
+  /** 422: `fieldErrors` says which input to blame (form mapping, Stage 7). */
+  get isValidation(): boolean {
+    return this.status === 422
+  }
+  /**
+   * Backend 422 `details` is `[{ in, path, message }]`; this flattens it to
+   * `{ "pincode": "We do not deliver..." }` (first message per path wins).
+   */
+  get fieldErrors(): Record<string, string> {
+    const out: Record<string, string> = {}
+    if (!Array.isArray(this.details)) return out
+    for (const item of this.details as unknown[]) {
+      if (
+        typeof item === "object" &&
+        item !== null &&
+        "path" in item &&
+        typeof item.path === "string" &&
+        "message" in item &&
+        typeof item.message === "string"
+      ) {
+        out[item.path] ??= item.message
+      }
+    }
+    return out
   }
 }
 
@@ -59,6 +97,6 @@ export function toApiError(err: unknown): ApiError {
   return new ApiError({
     status: 0,
     code: "NETWORK_ERROR",
-    message: err instanceof Error ? err.message : "Unknown error",
+    message: NETWORK_MESSAGE,
   })
 }

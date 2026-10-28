@@ -8,7 +8,7 @@ import {
   productQuerySchema,
   productSchema,
 } from "@/features/catalog/schemas"
-import { request } from "@/lib/api/client"
+import { api } from "@/lib/api/client"
 import { ContractError } from "@/lib/api/errors"
 import { apiEnvelopeSchema, paginatedSchema } from "@/lib/api/schemas"
 
@@ -35,7 +35,7 @@ if (!bad.success) {
 
 // 4. break the contract deliberately: the schema expects `title`, the API sends `name`
 const renamed = productSchema.omit({ name: true }).extend({ title: z.string() })
-const err = await request("/products?limit=2", {
+const err = await api("/products?limit=2", {
   // list endpoints return an array in `data`
   schema: z.array(renamed),
 }).catch((e: unknown) => e)
@@ -45,7 +45,7 @@ console.log("ContractError:", err.message)
 
 // a wrong field TYPE (price as string) also pinpoints the path
 const priceAsString = productSchema.extend({ price: z.string() })
-const err2 = await request("/products?limit=1", {
+const err2 = await api("/products?limit=1", {
   schema: z.array(priceAsString),
 }).catch((e: unknown) => e)
 assert.ok(err2 instanceof ContractError)

@@ -389,3 +389,21 @@ Backend B1 was built first (separate `backend B1:` commits): `GET /categories` n
 - ESLint: `no-restricted-imports` with the pattern group `["@/features/*/**", "!@/features/<own>/**"]`, generated per feature from the folder list in `eslint.config.js` (a feature may deep-import ITSELF; everything outside `features/` is restricted entirely). Proof: a temporary `features/deals/x.ts` importing `@/features/catalog/components/ProductCard` and a `routes/x.ts` importing `@/features/catalog/components/ProductGrid` both failed `npm run lint` with "import is restricted ... Import from the feature's public API", while a deep import of its OWN feature inside `features/catalog` passed; the temporary files were removed. Limit: relative imports (`../../features/catalog/x`) are not covered; the `@/` alias is the project convention.
 - No business logic in `routes/*.tsx`: what remains there is composition (`shell.tsx` wires `useRouteFocus`, `account/layout.tsx` a layout and a dev counter), `meta`/`handle`, and `products.tsx`'s legacy-URL redirect.
 - Stretch done: `docs/adr/0001-feature-folders.md`. README section "How the frontend is organized" added to `frontend/README.md` (price formatting: `lib/format.ts`).
+
+## 6.1 HTTP in depth
+
+- `docs/api-notes.md` is the table of every B0 and B2 endpoint, verified with `curl -i` (status, error envelope, rate-limit headers). Things I only learned by calling the API: unknown ROUTES and unknown RESOURCES share `NOT_FOUND`; bad JSON is 400 `BAD_REQUEST` while a bad field is 422; `forgot-password` answers 200 for unknown emails on purpose; the 429 comes from a per-IP counter that ALL `/auth/*` calls share (my probing used it up), and it resets when the backend restarts (in-memory store).
+- 403 could not be reproduced: there is no admin-only route yet.
+- Idempotency: `DELETE /wishlist/:id` twice gives 204, 204 (the state is the same however often it is sent), so a retry, a double click or a replay is harmless. `POST /wishlist` is idempotent via a unique index + upsert (201 then 200). `POST /addresses` is not (two clicks, two addresses), so the UI has to guard it.
+- Stretch (conditional requests): the server sends a weak `ETag` and no `Cache-Control`; `If-None-Match` gives a 304 with an empty body. It saves bytes, not server work: Express builds the whole response before comparing the hash.
+
+## 6.2 The API client layer
+
+- `lib/api/client.ts` exports `api<T>(path, { method, query, body, signal, schema, auth, timeoutMs })` (the old `request` was renamed; the paginated variants are `apiPaginated` / `apiPaginatedWithMeta`) plus `configureApi({ getAccessToken, onUnauthorized })`. `lib/api/getJson.ts` is now the only file that calls `fetch`; `grep -rn "fetch(" app` proves it.
+- Error model: a 4xx/5xx with the envelope, a non-JSON body (HTML 502), a dead server (`NETWORK_ERROR`, friendly message), our own 10 s deadline (`TIMEOUT`) all become `ApiError` (`isNetwork`, `isTimeout`, `isValidation`, `fieldErrors`). The CALLER'S abort is re-thrown untouched as an `AbortError`, so `useAsyncResource` and friends can ignore it instead of toasting.
+- The deadline is `AbortSignal.timeout(10_000)` combined with the caller's signal through `AbortSignal.any`. To tell "I aborted" from "the deadline fired" the code checks `signal?.aborted` on the CALLER's signal first.
+- `query` skips `undefined`/`null` and repeats array keys (`?tag=a&tag=b`), as the plan asks. NOTE the backend expects comma lists (`brand=Apple,Samsung`), so catalog keeps building its own string with `toQueryString` (csv) and passes it in the path; `api` appends with `&` when the path already has a `?`.
+- `onUnauthorized(error)` may return `true` to say "I have a new token, retry": the client retries ONCE, never in a loop (a refresh that does not help surfaces the 401). Stage 10 only has to fill the two hooks.
+- `204` (logout, wishlist delete) resolves to `undefined`; `api<void>` is the default generic.
+- `scratch/15-api-client.ts` (in `npm run check:scratch`) starts a `node:http` server and asserts: success, repeated query keys, JSON vs `FormData` bodies, 204, 404 envelope, 422 `fieldErrors`, HTML 502, timeout, abort, token + one retry, and a dead server. It does not need the backend.
+- Stretch (axios/ky) skipped: fetch is what the plan recommends and Query only needs a promise-returning function.

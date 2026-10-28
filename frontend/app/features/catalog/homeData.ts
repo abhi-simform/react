@@ -1,4 +1,4 @@
-import { request } from "@/lib/api/client"
+import { api } from "@/lib/api/client"
 
 import { getProducts } from "./api"
 import type { Product } from "./types"
@@ -18,7 +18,7 @@ export async function loadHomeData(): Promise<HomeData> {
   const [newest, topRated, broken] = await Promise.allSettled([
     getProducts({ limit: 8, sort: "newest" }),
     getProducts({ limit: 8, sort: "rating" }),
-    request<unknown>("/this-route-does-not-exist"),
+    api<unknown>("/this-route-does-not-exist"),
   ])
 
   const errors: string[] = []
