@@ -39,7 +39,7 @@ Every time the hand-written data layer made me repeat myself, duplicate a reques
 ## F. Auth and plumbing
 
 - [ ] **Refresh-token rotation race.** `refreshSession()` needed a hand-written single-flight promise; React StrictMode (and a reload while a refresh was in flight, seen once with a Vite full reload) can trip the backend's reuse detection and log you out. Every client has to rediscover this.
-- [ ] **401 handling lives in the fetch wrapper, not in the data layer.** `onUnauthorized` retries once, but any request that is NOT `auth: true` silently skips it, and two parallel 401s would each start a refresh (the single-flight only protects `refreshSession`, not the retry logic itself).
+- [ ] **401 handling lives in the fetch wrapper, not in the data layer.** `onUnauthorized` refreshes and retries once, but only for requests that opted in with `auth: true`; every call site has to remember the flag, and there is no queue/priority: after a refresh, all failed requests simply retry at once.
 
 ## G. Observability
 
