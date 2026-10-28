@@ -14,6 +14,23 @@ import { createCouponSchema, updateCouponSchema } from "./coupon.schema.js"
 // GET /coupons/available: every coupon that is live right now, each checked against THIS cart,
 // so the UI can show "Apply" or the reason it cannot be used. Bearer or x-cart-token.
 export const couponRoutes = Router()
+
+// GET /coupons/offers: the live coupons, NOT checked against any cart (public). The product page's
+// "Offers" panel: it shows what exists, the cart says whether it applies.
+couponRoutes.get("/offers", async (_req, res) => {
+  ok(
+    res,
+    (await listAvailable()).map((c) => ({
+      code: c.code,
+      description: c.description,
+      type: c.type,
+      value: c.value,
+      maxDiscount: c.maxDiscount ?? null,
+      minOrder: c.minOrder,
+      expiresAt: c.expiresAt ?? null,
+    }))
+  )
+})
 couponRoutes.get("/available", cartOwner, async (req, res) => {
   const owner = req.cartOwner!
   const userId = "userId" in owner ? owner.userId : undefined

@@ -340,3 +340,29 @@ describe("banners", () => {
     expect(bad.status).toBe(422)
   })
 })
+
+describe("GET /coupons/offers (public)", () => {
+  it("lists live coupons without auth and without a cart, and hides expired ones", async () => {
+    await Coupon.create([
+      {
+        code: "LIVE10",
+        description: "10% off",
+        type: "percent",
+        value: 10,
+        minOrder: 100,
+      },
+      {
+        code: "OLD10",
+        description: "Expired",
+        type: "percent",
+        value: 10,
+        minOrder: 0,
+        expiresAt: new Date(Date.now() - 1000),
+      },
+    ])
+    const res = await request(app).get(`${A}/coupons/offers`)
+    expect(res.status).toBe(200)
+    expect(res.body.data.map((c: { code: string }) => c.code)).toEqual(["LIVE10"])
+    expect(res.body.data[0]).toMatchObject({ type: "percent", value: 10, minOrder: 100 })
+  })
+})

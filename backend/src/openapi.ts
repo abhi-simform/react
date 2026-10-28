@@ -397,6 +397,14 @@ export const openApiDocument = {
         responses: { 200: { description: "Cart view" } },
       },
     },
+    "/coupons/offers": {
+      get: {
+        tags: ["Coupons"],
+        summary:
+          "Public: the live coupons as offers { code, description, type, value, maxDiscount, minOrder, expiresAt }, not checked against a cart (product page Offers panel)",
+        responses: { 200: { description: "Offer[]" } },
+      },
+    },
     "/coupons/available": {
       get: {
         tags: ["Coupons"],
