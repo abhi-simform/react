@@ -2,6 +2,7 @@ import { useQueryClient } from "@tanstack/react-query"
 import { useState } from "react"
 import { useNavigate, useSearchParams } from "react-router"
 
+import { PerfProfiler } from "@/components/common/PerfProfiler"
 import { Button } from "@/components/ui/button"
 import { Breadcrumbs } from "@/components/layout/Breadcrumbs"
 import { useDocumentTitle } from "@/hooks/useDocumentTitle"
@@ -100,113 +101,120 @@ export function ProductListingPage({
   )
 
   return (
-    <div>
-      {category.status === "success" && category.data && (
-        <Breadcrumbs
-          trail={[
-            ...category.data.ancestors.map((a) => ({
-              label: a.name,
-              to: paths.category(a.slug),
-            })),
-            { label: category.data.name },
-          ]}
-        />
-      )}
-      <div className="p-4">
-        <h1 className="mb-3 text-xl font-medium">{title}</h1>
-        <div className="flex gap-6">
-          {isDesktop && (
-            <aside aria-label="Filters" className="w-60 shrink-0">
-              {sidebar}
-            </aside>
-          )}
-          <div className="min-w-0 flex-1">
-            <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
-              <div className="flex items-center gap-3">
-                {!isDesktop && (
-                  <FiltersSheet activeCount={activeCount} total={total}>
-                    {sidebar}
-                  </FiltersSheet>
-                )}
-                <p role="status" aria-live="polite" className="text-sm">
-                  {total !== undefined
-                    ? `${total.toLocaleString("en-IN")} products`
-                    : "Loading..."}
-                </p>
+    <PerfProfiler id="listing-page">
+      <div>
+        {category.status === "success" && category.data && (
+          <Breadcrumbs
+            trail={[
+              ...category.data.ancestors.map((a) => ({
+                label: a.name,
+                to: paths.category(a.slug),
+              })),
+              { label: category.data.name },
+            ]}
+          />
+        )}
+        <div className="p-4">
+          <h1 className="mb-3 text-xl font-medium">{title}</h1>
+          <div className="flex gap-6">
+            {isDesktop && (
+              <aside aria-label="Filters" className="w-60 shrink-0">
+                {sidebar}
+              </aside>
+            )}
+            <div className="min-w-0 flex-1">
+              <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
+                <div className="flex items-center gap-3">
+                  {!isDesktop && (
+                    <FiltersSheet activeCount={activeCount} total={total}>
+                      {sidebar}
+                    </FiltersSheet>
+                  )}
+                  <p role="status" aria-live="polite" className="text-sm">
+                    {total !== undefined
+                      ? `${total.toLocaleString("en-IN")} products`
+                      : "Loading..."}
+                  </p>
+                </div>
+                <div className="flex flex-wrap items-center gap-3">
+                  <SortSelect
+                    value={filters.sort}
+                    onChange={(s) => setFilter("sort", s)}
+                  />
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    aria-pressed={filters.view === "list"}
+                    onClick={() =>
+                      setFilter(
+                        "view",
+                        filters.view === "grid" ? "list" : "grid"
+                      )
+                    }
+                  >
+                    {filters.view === "grid" ? "List view" : "Grid view"}
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    aria-pressed={moreMode}
+                    onClick={() =>
+                      setFilter("mode", moreMode ? "pages" : "more")
+                    }
+                  >
+                    {moreMode ? "Use pages" : "Load more mode"}
+                  </Button>
+                </div>
               </div>
-              <div className="flex flex-wrap items-center gap-3">
-                <SortSelect
-                  value={filters.sort}
-                  onChange={(s) => setFilter("sort", s)}
+              <ActiveFilterChips
+                filters={filters}
+                categoryName={categoryName}
+                onRemoveCategory={categorySlug ? removeCategory : undefined}
+                onToggleBrand={api.toggleBrand}
+                onSetPriceRange={(min, max) => api.setPriceRange(min, max)}
+                onSetFilter={setFilter}
+                onClearAll={api.clearAll}
+              />
+              {moreMode ? (
+                <InfiniteResults
+                  list={infinite}
+                  filters={filters}
+                  activeCount={activeCount}
+                  onClearAll={api.clearAll}
                 />
-                <Button
-                  variant="outline"
-                  size="sm"
-                  aria-pressed={filters.view === "list"}
-                  onClick={() =>
-                    setFilter("view", filters.view === "grid" ? "list" : "grid")
+              ) : (
+                <ListingResults
+                  state={state}
+                  filters={filters}
+                  activeCount={activeCount}
+                  onGoToPage={(page) => setFilter("page", page)}
+                  onClearAll={api.clearAll}
+                />
+              )}
+              {!moreMode && meta?.hasNext && (
+                // Prefetch the NEXT page when the bottom of the grid nears the viewport (9.7):
+                // the click on "next" then finds it in the cache.
+                <LoadMoreSentinel
+                  enabled
+                  itemCount={meta.page}
+                  onVisible={() =>
+                    void queryClient.prefetchQuery(
+                      productQueries.list({ ...query, page: meta.page + 1 })
+                    )
                   }
-                >
-                  {filters.view === "grid" ? "List view" : "Grid view"}
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  aria-pressed={moreMode}
-                  onClick={() => setFilter("mode", moreMode ? "pages" : "more")}
-                >
-                  {moreMode ? "Use pages" : "Load more mode"}
-                </Button>
-              </div>
+                />
+              )}
+              {!moreMode && meta && (
+                <Pagination
+                  page={meta.page}
+                  totalPages={meta.totalPages}
+                  onPageChange={(p) => setFilter("page", p)}
+                />
+              )}
             </div>
-            <ActiveFilterChips
-              filters={filters}
-              categoryName={categoryName}
-              onRemoveCategory={categorySlug ? removeCategory : undefined}
-              onToggleBrand={api.toggleBrand}
-              onSetPriceRange={(min, max) => api.setPriceRange(min, max)}
-              onSetFilter={setFilter}
-              onClearAll={api.clearAll}
-            />
-            {moreMode ? (
-              <InfiniteResults
-                list={infinite}
-                filters={filters}
-                activeCount={activeCount}
-                onClearAll={api.clearAll}
-              />
-            ) : (
-              <ListingResults
-                state={state}
-                filters={filters}
-                activeCount={activeCount}
-                onGoToPage={(page) => setFilter("page", page)}
-                onClearAll={api.clearAll}
-              />
-            )}
-            {!moreMode && meta?.hasNext && (
-              // Prefetch the NEXT page when the bottom of the grid nears the viewport (9.7):
-              // the click on "next" then finds it in the cache.
-              <LoadMoreSentinel
-                enabled
-                itemCount={meta.page}
-                onVisible={() =>
-                  void queryClient.prefetchQuery(
-                    productQueries.list({ ...query, page: meta.page + 1 })
-                  )
-                }
-              />
-            )}
-            {!moreMode && meta && (
-              <Pagination
-                page={meta.page}
-                totalPages={meta.totalPages}
-                onPageChange={(p) => setFilter("page", p)}
-              />
-            )}
           </div>
         </div>
       </div>
-    </div>
+    </PerfProfiler>
   )
 }

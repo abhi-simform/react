@@ -1,3 +1,4 @@
+import { memo } from "react"
 import { Link } from "react-router"
 
 import { Price } from "@/components/common/Price"
@@ -33,7 +34,7 @@ type ProductCardProps = {
  * (interactive content inside interactive content) and confuses keyboards and
  * screen readers.
  */
-export function ProductCard({
+function ProductCardBase({
   product,
   children,
   onAddToCart,
@@ -154,5 +155,17 @@ function ProductCardBadge({ children }: { children: React.ReactNode }) {
   )
 }
 
+/**
+ * `memo` stays even with the React Compiler on (13.2). The Compiler caches work INSIDE a component
+ * and the elements it returns, but it cannot stop React from calling a child that a parent's `.map`
+ * builds again: when the grid's array changes (a filter removed 40 cards) there are 300 fresh
+ * <ProductCard> elements and each would run its hooks again. `memo` compares props and skips the
+ * call, but only if the view model objects keep their identity (InfiniteResults keeps a `useMemo`
+ * for exactly that). Measured while typing in the quick filter with 300 cards: grid render time
+ * 47 ms without either, 9 ms with both (docs/perf-log.md).
+ */
+export const ProductCard = Object.assign(memo(ProductCardBase), {
+  Badge: ProductCardBadge,
+})
+
 // Compound slot: <ProductCard><ProductCard.Badge>Lightning deal</ProductCard.Badge></ProductCard>
-ProductCard.Badge = ProductCardBadge

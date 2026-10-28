@@ -47,6 +47,14 @@ export function PriceRangeFilter({
     setDraft({})
   }, 500)
 
+  // The slider's transient value (13.2). undefined = "not dragging": the URL value is shown.
+  const [ceiling, setCeiling] = useState<number>()
+  function commitCeiling() {
+    if (ceiling === undefined) return
+    setCeiling(undefined)
+    if (ceiling !== (max ?? bounds?.max)) onChange(min, ceiling)
+  }
+
   const peak = Math.max(1, ...histogram.map((b) => b.count))
 
   return (
@@ -71,6 +79,28 @@ export function PriceRangeFilter({
             </li>
           ))}
         </ul>
+      )}
+      {bounds && bounds.max > bounds.min && (
+        <label className="my-2 block">
+          <span className="flex justify-between text-xs">
+            <span>Price ceiling</span>
+            <output>{formatRupees(ceiling ?? max ?? bounds.max)}</output>
+          </span>
+          {/* While dragging, only `ceiling` (local state) changes: this component and nothing else
+              re-renders. The URL, the request and the grid are touched once, on release. */}
+          <input
+            type="range"
+            min={bounds.min}
+            max={bounds.max}
+            step={Math.max(1, Math.round((bounds.max - bounds.min) / 100))}
+            value={ceiling ?? max ?? bounds.max}
+            onChange={(e) => setCeiling(Number(e.target.value))}
+            onPointerUp={commitCeiling}
+            onKeyUp={commitCeiling}
+            onBlur={commitCeiling}
+            className="w-full"
+          />
+        </label>
       )}
       <div className="flex items-center gap-2">
         <label className="flex-1">

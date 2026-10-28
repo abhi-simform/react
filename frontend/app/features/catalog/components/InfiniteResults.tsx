@@ -1,4 +1,5 @@
 import { Loader2 } from "lucide-react"
+import { useMemo, useState, useTransition } from "react"
 
 import { EmptyState } from "@/components/common/EmptyState"
 import { ErrorState } from "@/components/common/ErrorState"
@@ -9,6 +10,8 @@ import { PAGE_SIZE, type ListingFilters } from "../filters"
 import type { useInfiniteProducts } from "../hooks/useInfiniteProducts"
 import { LoadMoreSentinel } from "@/components/common/LoadMoreSentinel"
 import { toProductCardVM } from "../mappers"
+import { filterLoaded } from "../utils"
+import { PerfProfiler } from "@/components/common/PerfProfiler"
 import { ProductGrid } from "./ProductGrid"
 
 type Props = {
@@ -25,6 +28,15 @@ export function InfiniteResults({
   activeCount,
   onClearAll,
 }: Props) {
+  // Two copies of the text, on purpose (13.2): `quick` is what the input shows and must update at once;
+  // `applied` is what the 300+ cards are filtered by and may lag behind (a transition: interruptible, low priority).
+  const [quick, setQuick] = useState("")
+  const [applied, setApplied] = useState("")
+  const [pending, startTransition] = useTransition()
+  // Kept by hand: the cards are `memo`-ised on the IDENTITY of these view models, so they must be the same
+  // objects render after render (see ProductCard). Measured in docs/perf-log.md.
+  const cards = useMemo(() => list.items.map(toProductCardVM), [list.items])
+  const shown = filterLoaded(cards, applied)
   if (list.status === "loading-first")
     return <ProductGridSkeleton count={PAGE_SIZE} view={filters.view} />
   if (list.status === "error-first" && list.error)
@@ -46,10 +58,27 @@ export function InfiniteResults({
   const loadingMore = list.status === "loading-more"
   return (
     <div>
-      <ProductGrid
-        products={list.items.map(toProductCardVM)}
-        view={filters.view}
-      />
+      <label className="mb-2 flex items-center gap-2 text-sm">
+        <span>Filter loaded products</span>
+        <input
+          type="search"
+          value={quick}
+          onChange={(e) => {
+            setQuick(e.target.value)
+            startTransition(() => setApplied(e.target.value))
+          }}
+          placeholder={`Among the ${list.items.length} loaded`}
+          className="w-64 rounded border p-1"
+        />
+      </label>
+      <div
+        aria-busy={pending}
+        className={pending ? "opacity-60 transition-opacity" : undefined}
+      >
+        <PerfProfiler id="grid">
+          <ProductGrid products={shown} view={filters.view} />
+        </PerfProfiler>
+      </div>
       <div
         className="mt-4 flex flex-col items-center gap-2"
         aria-busy={loadingMore}

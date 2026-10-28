@@ -5,6 +5,7 @@ import { productsFixture } from "@/test/fixtures/products"
 import {
   brandCounts,
   displayDiscount,
+  filterLoaded,
   filterProducts,
   filterWithFacets,
   priceHistogram,
@@ -157,4 +158,27 @@ describe("brandCounts / display helpers", () => {
     [{ brand: null }, "Unbranded"],
     [{}, "Unbranded"],
   ])("safeBrandName %j", (input, out) => expect(safeBrandName(input)).toBe(out))
+})
+
+describe("filterLoaded (13.2 quick filter)", () => {
+  const items = [
+    { name: "Slim Fit Shirt", brand: "H&M" },
+    { name: "Running Shoes", brand: "Nike" },
+    { name: "Polo Shirt", brand: "U.S. Polo" },
+  ]
+  it("returns the same array for blank input (no new identity, no work)", () => {
+    expect(filterLoaded(items, "")).toBe(items)
+    expect(filterLoaded(items, "   ")).toBe(items)
+  })
+  it("matches every word, in the name or the brand, ignoring case", () => {
+    expect(filterLoaded(items, "SHIRT").map((i) => i.name)).toEqual([
+      "Slim Fit Shirt",
+      "Polo Shirt",
+    ])
+    expect(filterLoaded(items, "shirt polo").map((i) => i.name)).toEqual([
+      "Polo Shirt",
+    ])
+    expect(filterLoaded(items, "nike shoes")).toHaveLength(1)
+    expect(filterLoaded(items, "nothing")).toEqual([])
+  })
 })

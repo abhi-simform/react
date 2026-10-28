@@ -211,3 +211,19 @@ export function safeBrandName(product: { brand?: string | null }): string {
   // `||` would also replace "" (fine here), but `??` is the right default habit.
   return product.brand?.trim() || "Unbranded"
 }
+
+/**
+ * Quick filter over the items already on screen (13.2): a case-insensitive "all words appear in the
+ * name or brand" match. Pure, so the interaction cost it creates is in RENDERING the result, not here.
+ */
+export function filterLoaded<T extends { name: string; brand: string }>(
+  items: readonly T[],
+  text: string
+): readonly T[] {
+  const words = text.toLowerCase().split(/\s+/).filter(Boolean)
+  if (words.length === 0) return items
+  return items.filter((item) => {
+    const hay = `${item.name} ${item.brand}`.toLowerCase()
+    return words.every((w) => hay.includes(w))
+  })
+}
