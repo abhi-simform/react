@@ -2,7 +2,11 @@
 import { HealthBadge } from "@/components/common/HealthBadge"
 import { DerivedFilter, EffectFilter } from "@/scratch/effects/DerivedStateDemo"
 import { DebounceDemo } from "@/scratch/effects/DebounceDemo"
-import { AbortSearch, NaiveSearch } from "@/scratch/effects/SearchRaceDemo"
+import {
+  AbortSearch,
+  IgnoreSearch,
+  NaiveSearch,
+} from "@/scratch/effects/SearchRaceDemo"
 
 export default function ScratchEffects() {
   return (
@@ -15,6 +19,7 @@ export default function ScratchEffects() {
       <DerivedFilter />
       <NaiveSearch />
       <AbortSearch />
+      <IgnoreSearch />
       <DebounceDemo />
     </div>
   )

@@ -1,5 +1,6 @@
 import { Link } from "react-router"
 
+import { SearchBox } from "@/features/search/components/SearchBox"
 import { CartDrawer } from "@/features/cart/components/CartDrawer"
 
 export function Header() {
@@ -11,6 +12,7 @@ export function Header() {
       <nav aria-label="Primary" className="flex items-center gap-4 text-sm">
         <Link to="/products">Products</Link>
         <Link to="/scratch/explorer">Explorer</Link>
+        <SearchBox />
         <CartDrawer />
       </nav>
     </header>

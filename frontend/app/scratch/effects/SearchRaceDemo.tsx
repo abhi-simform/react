@@ -85,3 +85,40 @@ export function AbortSearch() {
     </section>
   )
 }
+
+/**
+ * Stretch: the `ignore` flag instead of AbortController. The stale request
+ * still completes on the network (wasted bandwidth and server work) but its
+ * result is dropped. It also works for async work that cannot be aborted.
+ */
+export function IgnoreSearch() {
+  const [term, setTerm] = useState("")
+  const [shown, setShown] = useState<Shown>(null)
+
+  useEffect(() => {
+    if (!term) return
+    let ignore = false
+    searchWithLatency(term).then((result) => {
+      if (!ignore) setShown(result)
+    })
+    return () => {
+      ignore = true
+    }
+  }, [term])
+
+  return (
+    <section className="border p-3">
+      <h3 className="font-medium">With an ignore flag</h3>
+      <input
+        aria-label="Search (ignore)"
+        className="border p-1"
+        value={term}
+        onChange={(e) => setTerm(e.target.value)}
+      />
+      <p data-testid="ignore-out">
+        Input: {term || "-"} / showing:{" "}
+        {shown ? `${shown.term} (${shown.total})` : "-"}
+      </p>
+    </section>
+  )
+}
