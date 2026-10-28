@@ -2,6 +2,7 @@ import { useId } from "react"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm, useWatch, type Control } from "react-hook-form"
 
+import { FormField } from "@/components/form/FormField"
 import { Button } from "@/components/ui/button"
 
 import { reviewSchema, type ReviewInput, type ReviewOutput } from "../schemas"
@@ -91,29 +92,20 @@ export function ReviewForm({
         )}
       </fieldset>
 
-      <div>
-        <label htmlFor={`${id}-text`} className="text-sm font-medium">
-          Your review
-        </label>
-        <textarea
-          id={`${id}-text`}
-          rows={4}
-          aria-invalid={errors.text ? true : undefined}
-          aria-describedby={`${id}-count${errors.text ? ` ${id}-text-error` : ""}`}
-          {...register("text")}
-          className="block w-full rounded border p-2 text-sm"
-        />
-        <CharCount id={`${id}-count`} control={control} />
-        {errors.text && (
-          <p
-            id={`${id}-text-error`}
-            role="alert"
-            className="text-sm text-red-700"
-          >
-            {errors.text.message}
-          </p>
+      <FormField
+        label="Your review"
+        error={errors.text?.message}
+        hint={<CharCount control={control} />}
+      >
+        {(field) => (
+          <textarea
+            rows={4}
+            className="block w-full rounded border p-2 text-sm"
+            {...field}
+            {...register("text")}
+          />
         )}
-      </div>
+      </FormField>
       <Button type="submit" className="self-start" disabled={isSubmitting}>
         {isSubmitting ? "Submitting..." : "Submit review"}
       </Button>
@@ -126,16 +118,14 @@ export function ReviewForm({
  * parent would re-render the whole form on every keystroke (see /dev/forms).
  */
 function CharCount({
-  id,
   control,
 }: {
-  id: string
   control: Control<ReviewInput, unknown, ReviewOutput>
 }) {
   const text = useWatch({ control, name: "text" })
   return (
-    <p id={id} className="text-xs text-neutral-500">
+    <>
       {text.length} / {MAX_CHARS}
-    </p>
+    </>
   )
 }

@@ -3,8 +3,12 @@ import { useForm } from "react-hook-form"
 import { Link, useLocation, useNavigate } from "react-router"
 import { toast } from "sonner"
 
+import { FormError } from "@/components/form/FormError"
+import { FormField } from "@/components/form/FormField"
 import { Button } from "@/components/ui/button"
+import { useSingleFlight } from "@/hooks/useSingleFlight"
 import { toApiError } from "@/lib/api/errors"
+import { applyApiError } from "@/lib/forms/applyApiError"
 import { paths } from "@/lib/paths"
 
 import { useAuth } from "../AuthContext"
@@ -12,8 +16,9 @@ import { getReturnTo } from "../returnTo"
 import { registerSchema, type RegisterValues } from "../schemas"
 
 /**
- * 7.2: the schema is the one in the plan (name, email, password, confirmPassword, acceptTerms).
- * `confirmPassword` and `acceptTerms` are form-only: they are stripped before the API call.
+ * 7.2 + 7.3. `confirmPassword` and `acceptTerms` are form-only: they are not sent.
+ * The server is authoritative: EMAIL_TAKEN (409) lands under the email field and focuses it,
+ * and a 422 with several `details` shows ALL of them (e.g. if the client and server rules drift).
  */
 export function RegisterForm() {
   const { signUp } = useAuth()
@@ -26,78 +31,101 @@ export function RegisterForm() {
     formState: { errors, isSubmitting },
   } = useForm({ resolver: zodResolver(registerSchema) }) // checkbox starts unchecked: `false` fails `z.literal(true)`
 
-  async function onSubmit({ name, email, password }: RegisterValues) {
-    try {
-      const user = await signUp({ name, email, password })
-      // Result handling stays minimal until Stage 10: show who we got back, then leave.
-      toast.success(`Account created for ${user.name} (${user.email})`)
-      navigate(getReturnTo(location.state), { replace: true })
-    } catch (err) {
-      setError("root.server", { message: toApiError(err).message })
+  const onSubmit = useSingleFlight(
+    async ({ name, email, password }: RegisterValues) => {
+      try {
+        const user = await signUp({ name, email, password })
+        // Result handling stays minimal until Stage 10: show who we got back, then leave.
+        toast.success(`Account created for ${user.name} (${user.email})`)
+        navigate(getReturnTo(location.state), { replace: true })
+      } catch (err) {
+        applyApiError(toApiError(err), setError, {
+          fields: ["name", "email", "password"],
+          codes: {
+            EMAIL_TAKEN: {
+              field: "email",
+              message:
+                "An account with this email already exists. Log in instead?",
+            },
+          },
+        })
+      }
     }
-  }
+  )
+  const submit = handleSubmit(onSubmit)
 
   return (
     <form
       className="mx-auto flex max-w-sm flex-col gap-3 p-4"
-      onSubmit={handleSubmit(onSubmit)}
+      onSubmit={submit}
       noValidate
     >
       <h1 className="text-xl font-medium">Create account</h1>
-      <label className="flex flex-col gap-1 text-sm">
-        Full name
-        <input
-          autoComplete="name"
-          className="rounded border p-1"
-          {...register("name")}
-        />
-        {errors.name && <span role="alert">{errors.name.message}</span>}
-      </label>
-      <label className="flex flex-col gap-1 text-sm">
-        Email
-        <input
-          type="email"
-          autoComplete="email"
-          className="rounded border p-1"
-          {...register("email")}
-        />
-        {errors.email && <span role="alert">{errors.email.message}</span>}
-      </label>
-      <label className="flex flex-col gap-1 text-sm">
-        Password
-        <input
-          type="password"
-          autoComplete="new-password"
-          className="rounded border p-1"
-          {...register("password")}
-        />
-        {errors.password && <span role="alert">{errors.password.message}</span>}
-      </label>
-      <label className="flex flex-col gap-1 text-sm">
-        Confirm password
-        <input
-          type="password"
-          autoComplete="new-password"
-          className="rounded border p-1"
-          {...register("confirmPassword")}
-        />
-        {errors.confirmPassword && (
-          <span role="alert">{errors.confirmPassword.message}</span>
+      <FormError
+        error={errors.root?.server}
+        onRetry={() => void submit()}
+        retrying={isSubmitting}
+      />
+      <FormField label="Full name" error={errors.name?.message}>
+        {(control) => (
+          <input
+            autoComplete="name"
+            className="rounded border p-1"
+            {...control}
+            {...register("name")}
+          />
         )}
-      </label>
-      <label className="flex items-center gap-2 text-sm">
-        <input type="checkbox" {...register("acceptTerms")} />I accept the terms
-      </label>
-      {errors.acceptTerms && (
-        <span role="alert" className="text-sm">
-          {errors.acceptTerms.message}
-        </span>
-      )}
-      {errors.root?.server && (
-        <p role="alert" className="text-sm text-red-700">
-          {errors.root.server.message}
-        </p>
-      )}
+      </FormField>
+      <FormField label="Email" error={errors.email?.message}>
+        {(control) => (
+          <input
+            type="email"
+            autoComplete="email"
+            className="rounded border p-1"
+            {...control}
+            {...register("email")}
+          />
+        )}
+      </FormField>
+      <FormField
+        label="Password"
+        hint="At least 8 characters, with upper and lower case letters and a number."
+        error={errors.password?.message}
+      >
+        {(control) => (
+          <input
+            type="password"
+            autoComplete="new-password"
+            className="rounded border p-1"
+            {...control}
+            {...register("password")}
+          />
+        )}
+      </FormField>
+      <FormField
+        label="Confirm password"
+        error={errors.confirmPassword?.message}
+      >
+        {(control) => (
+          <input
+            type="password"
+            autoComplete="new-password"
+            className="rounded border p-1"
+            {...control}
+            {...register("confirmPassword")}
+          />
+        )}
+      </FormField>
+      <FormField label="I accept the terms" error={errors.acceptTerms?.message}>
+        {(control) => (
+          <input
+            type="checkbox"
+            className="self-start"
+            {...control}
+            {...register("acceptTerms")}
+          />
+        )}
+      </FormField>
       <Button type="submit" disabled={isSubmitting}>
         {isSubmitting ? "Creating..." : "Create account"}
       </Button>

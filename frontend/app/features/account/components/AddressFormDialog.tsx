@@ -1,5 +1,4 @@
 import { Loader2 } from "lucide-react"
-import { useState } from "react"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm, type DefaultValues } from "react-hook-form"
 
@@ -14,6 +13,10 @@ import {
 } from "@/components/ui/dialog"
 import type { ApiError } from "@/lib/api/errors"
 
+import { FormError } from "@/components/form/FormError"
+import { FormField } from "@/components/form/FormField"
+import { useSingleFlight } from "@/hooks/useSingleFlight"
+import { applyApiError } from "@/lib/forms/applyApiError"
 import { INDIA_STATES, isIndiaState } from "@/lib/indiaStates"
 
 import {
@@ -93,7 +96,7 @@ export function AddressFormDialog({
   )
 }
 
-const FIELD_NAMES = [
+const FIELDS = [
   "fullName",
   "phone",
   "line1",
@@ -103,7 +106,6 @@ const FIELD_NAMES = [
   "state",
   "pincode",
 ] as const
-type TextField = Exclude<(typeof FIELD_NAMES)[number], "state">
 
 function AddressForm({
   existing,
@@ -125,69 +127,48 @@ function AddressForm({
     resolver: zodResolver(addressFormSchema),
     defaultValues: existing ? fromAddress(existing) : EMPTY,
   })
-  // A server 422 on a field goes under that field (setError); anything else is a form-level note.
-  const [generalError, setGeneralError] = useState<string>()
 
-  async function submit(values: AddressFormOutput) {
-    setGeneralError(undefined)
+  // Single flight: a same-tick second submit (Enter + click) never reaches the API.
+  const save = useSingleFlight(async (values: AddressFormOutput) => {
     // PATCH cannot change the default flag (it has its own endpoint).
     const { isDefault, ...rest } = values
     const input: AddressInput = existing ? rest : { ...rest, isDefault }
-    // RHF awaits this promise: `isSubmitting` is true until it settles, which also
-    // blocks a second submit while the first request is running.
+    // RHF awaits this promise: `isSubmitting` is true until it settles.
     const error = await onSubmit(input, existing)
     if (!error) return onClose()
-    const fieldErrors = Object.entries(error.fieldErrors).filter(([path]) =>
-      (FIELD_NAMES as readonly string[]).includes(path)
-    )
-    if (fieldErrors.length === 0) return setGeneralError(error.message)
-    for (const [path, message] of fieldErrors)
-      setError(path as (typeof FIELD_NAMES)[number], {
-        type: "server",
-        message,
-      })
-  }
+    // 422 details -> under each field (the first is focused); 409/limit/network -> form level.
+    applyApiError(error, setError, { fields: FIELDS })
+  })
+  const submit = handleSubmit(save)
 
   const text = (
-    key: TextField,
+    key: Exclude<(typeof FIELDS)[number], "state">,
     label: string,
     extra: React.ComponentProps<"input"> = {}
   ) => (
-    <label className="flex flex-col text-sm">
-      {label}
-      <input
-        className="rounded border p-1"
-        aria-invalid={errors[key] ? true : undefined}
-        aria-describedby={errors[key] ? `err-${key}` : undefined}
-        {...register(key)}
-        {...extra}
-      />
-      {errors[key] && (
-        <span id={`err-${key}`} role="alert" className="text-xs text-red-700">
-          {errors[key].message}
-        </span>
+    <FormField label={label} error={errors[key]?.message}>
+      {(control) => (
+        <input
+          className="rounded border p-1"
+          {...control}
+          {...register(key)}
+          {...extra}
+        />
       )}
-    </label>
+    </FormField>
   )
 
   return (
-    <form
-      onSubmit={handleSubmit(submit)}
-      className="flex flex-col gap-2"
-      noValidate
-    >
+    <form onSubmit={submit} className="flex flex-col gap-2" noValidate>
       <DialogHeader>
         <DialogTitle>{existing ? "Edit address" : "Add address"}</DialogTitle>
         <DialogDescription>Where should we deliver?</DialogDescription>
       </DialogHeader>
-      {generalError && (
-        <p
-          role="alert"
-          className="rounded border border-red-300 p-2 text-sm text-red-800"
-        >
-          {generalError}
-        </p>
-      )}
+      <FormError
+        error={errors.root?.server}
+        onRetry={() => void submit()}
+        retrying={isSubmitting}
+      />
       {text("fullName", "Full name", { autoComplete: "name", autoFocus: true })}
       {text("phone", "Mobile number", {
         inputMode: "numeric",
@@ -198,43 +179,43 @@ function AddressForm({
       {text("landmark", "Landmark (optional)")}
       <div className="grid grid-cols-2 gap-2">
         {text("city", "City", { autoComplete: "address-level2" })}
-        <label className="flex flex-col text-sm">
-          State
-          <select
-            className="rounded border p-1"
-            aria-invalid={errors.state ? true : undefined}
-            aria-describedby={errors.state ? "err-state" : undefined}
-            {...register("state")}
-          >
-            <option value="">Select...</option>
-            {INDIA_STATES.map((st) => (
-              <option key={st} value={st}>
-                {st}
-              </option>
-            ))}
-          </select>
-          {errors.state && (
-            <span id="err-state" role="alert" className="text-xs text-red-700">
-              {errors.state.message}
-            </span>
+        <FormField label="State" error={errors.state?.message}>
+          {(control) => (
+            <select
+              className="rounded border p-1"
+              {...control}
+              {...register("state")}
+            >
+              <option value="">Select...</option>
+              {INDIA_STATES.map((st) => (
+                <option key={st} value={st}>
+                  {st}
+                </option>
+              ))}
+            </select>
           )}
-        </label>
+        </FormField>
       </div>
       {text("pincode", "Pincode", {
         inputMode: "numeric",
         maxLength: 6,
         autoComplete: "postal-code",
       })}
-      <label className="flex flex-col text-sm">
-        Type
-        <select className="rounded border p-1" {...register("type")}>
-          {ADDRESS_TYPES.map((t) => (
-            <option key={t} value={t}>
-              {t}
-            </option>
-          ))}
-        </select>
-      </label>
+      <FormField label="Type">
+        {(control) => (
+          <select
+            className="rounded border p-1"
+            {...control}
+            {...register("type")}
+          >
+            {ADDRESS_TYPES.map((t) => (
+              <option key={t} value={t}>
+                {t}
+              </option>
+            ))}
+          </select>
+        )}
+      </FormField>
       {!existing && (
         <label className="flex items-center gap-2 text-sm">
           <input type="checkbox" {...register("isDefault")} />
