@@ -15,6 +15,7 @@ export default [
     route("scratch/refs", "routes/scratch-refs.tsx"),
     route("scratch/countdown", "routes/scratch-countdown.tsx"),
     route("scratch/memo", "routes/scratch-memo.tsx"),
+    route("scratch/closures", "routes/scratch-closures.tsx"),
     route("scratch/grid", "routes/scratch-grid.tsx"),
     route("p/:productSlug", "routes/product-detail.tsx"),
   ]),
