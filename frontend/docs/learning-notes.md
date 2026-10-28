@@ -293,3 +293,6 @@ Symptom: every time the component is shown again the number of window `resize` l
 
 ### Bug 3: race on a slow category switch
 Symptom: click "mobiles" (made slow: 1.5 s) and then "laptops" (0.1 s): the UI says `selected laptops / showing mobiles: Google F14 Smartphone 5G`. Cause: no cleanup; the older response arrives last and overwrites the newer. Fix: `AbortController` in the effect cleanup, `AbortError` ignored: `selected laptops / showing laptops: Apple K21 Laptop`. (The artificial `sleep` is not abortable; the aborted request still starts after the delay but dies immediately with an already-aborted signal.)
+
+### Bug 4: stale closure in an interval
+Symptom: a timer incrementing every 200 ms shows `1` and stays there (broken) while the fixed one kept counting (56 after ~11 s of the page being open). Cause: the effect runs once (`[]`), and `setSeconds(seconds + 1)` closes over the first render's `seconds = 0`, so it always sets 1. Fix: `setSeconds(s => s + 1)`: the new value depends only on the previous one, so the effect needs no dependency and the interval is created once.
