@@ -552,7 +552,7 @@ export async function mockPay(
                 amount: toPaise(payment.amount),
                 method,
                 error_code: "BAD_REQUEST_ERROR",
-                error_description: "Payment failed: the card was declined (mock gateway)",
+                error_description: "Your card was declined (mock gateway)",
               },
             },
           },
