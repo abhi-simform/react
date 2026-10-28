@@ -6,6 +6,7 @@ import { paths } from "@/lib/paths"
 
 import type { CheckoutInput } from "../schemas"
 import { STEP_FIELDS } from "../schemas"
+import { useStepperDispatch } from "../stepperContext"
 import { CHECKOUT_STEPS, stepIndexFromPath } from "../steps"
 
 /**
@@ -17,6 +18,7 @@ import { CHECKOUT_STEPS, stepIndexFromPath } from "../steps"
 export function StepNav() {
   const navigate = useNavigate()
   const { trigger } = useFormContext<CheckoutInput>()
+  const dispatch = useStepperDispatch()
   const index = stepIndexFromPath(useLocation().pathname)
   const previous = CHECKOUT_STEPS[index - 1]
   const next = CHECKOUT_STEPS[index + 1]
@@ -27,7 +29,10 @@ export function StepNav() {
     const valid = await trigger([...STEP_FIELDS[current.slug]], {
       shouldFocus: true,
     })
-    if (valid) void navigate(paths.checkoutStep(next.slug))
+    if (valid) {
+      dispatch({ type: "complete", step: index })
+      void navigate(paths.checkoutStep(next.slug))
+    }
   }
 
   return (

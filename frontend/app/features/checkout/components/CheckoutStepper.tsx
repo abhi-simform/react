@@ -4,6 +4,7 @@ import { Link, useLocation } from "react-router"
 import { paths } from "@/lib/paths"
 
 import type { CheckoutInput } from "../schemas"
+import { useStepper } from "../stepperContext"
 import {
   CHECKOUT_STEPS,
   firstIncompleteStep,
@@ -19,6 +20,7 @@ export function CheckoutStepper() {
   const { getValues } = useFormContext<CheckoutInput>()
   const current = stepIndexFromPath(pathname)
   const reachable = firstIncompleteStep(getValues())
+  const { completed } = useStepper()
 
   return (
     <ol
@@ -27,6 +29,7 @@ export function CheckoutStepper() {
     >
       {CHECKOUT_STEPS.map((step, i) => {
         const label = `${i + 1}. ${step.label}`
+        const done = completed.includes(i)
         return (
           <li
             key={step.slug}
@@ -45,6 +48,14 @@ export function CheckoutStepper() {
               </Link>
             ) : (
               label
+            )}
+            {done && i !== current && (
+              <span className="sr-only"> (completed)</span>
+            )}
+            {done && (
+              <span aria-hidden className="ml-1">
+                ✓
+              </span>
             )}
           </li>
         )

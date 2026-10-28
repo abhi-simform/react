@@ -12,6 +12,7 @@ const LABS = [
   ["bugs", "4.10 five broken effects"],
   ["keys", "3.5 index keys bug"],
   ["forms", "7.1 form re-render counts"],
+  ["state", "8.1-8.3 state ownership, context and store labs"],
 ] as const
 
 export default function DevIndexRoute() {

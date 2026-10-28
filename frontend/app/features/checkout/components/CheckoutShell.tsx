@@ -10,9 +10,11 @@ import { paths } from "@/lib/paths"
 import { DEFAULT_VALUES, loadDraft, saveDraft } from "../draft"
 import {
   checkoutSchema,
+  STEP_FIELDS,
   type CheckoutInput,
   type CheckoutValues,
 } from "../schemas"
+import { StepperProvider, useStepperDispatch } from "../stepperContext"
 import {
   CHECKOUT_STEPS,
   firstIncompleteStep,
@@ -50,22 +52,57 @@ export function CheckoutShell({ lines }: { lines: readonly CartLine[] }) {
 
   return (
     <FormProvider {...form}>
-      <div className="mx-auto grid max-w-5xl gap-6 p-4 md:grid-cols-[1fr_18rem]">
-        <div>
-          <CheckoutStepper />
-          <StepGuard>
-            <Outlet />
-          </StepGuard>
+      <StepperProvider>
+        <StepperSync />
+        <div className="mx-auto grid max-w-5xl gap-6 p-4 md:grid-cols-[1fr_18rem]">
+          <div>
+            <CheckoutStepper />
+            <StepGuard>
+              <Outlet />
+            </StepGuard>
+          </div>
+          <aside
+            aria-label="Order summary"
+            className="h-fit rounded border p-3 md:sticky md:top-4"
+          >
+            <OrderSummary lines={lines} />
+          </aside>
         </div>
-        <aside
-          aria-label="Order summary"
-          className="h-fit rounded border p-3 md:sticky md:top-4"
-        >
-          <OrderSummary lines={lines} />
-        </aside>
-      </div>
+      </StepperProvider>
     </FormProvider>
   )
+}
+
+/**
+ * Feeds the stepper reducer (8.1) from the two things it cannot see itself: the URL (which
+ * step is open) and the form (an edited answer un-completes its step and the later ones).
+ * Renders nothing. The URL stays the source of truth for the CURRENT step: this only records
+ * history (`visited`), which is why the stepper still reads `aria-current` from the path.
+ */
+function StepperSync() {
+  const dispatch = useStepperDispatch()
+  const { pathname } = useLocation()
+  const { subscribe } = useFormContext<CheckoutInput>()
+  const index = stepIndexFromPath(pathname)
+
+  useEffect(() => {
+    if (index >= 0) dispatch({ type: "go", step: index })
+  }, [dispatch, index])
+
+  useEffect(
+    () =>
+      subscribe({
+        formState: { values: true },
+        callback: ({ name }) => {
+          const step = CHECKOUT_STEPS.findIndex((s) =>
+            (STEP_FIELDS[s.slug] as readonly string[]).includes(name ?? "")
+          )
+          if (step >= 0) dispatch({ type: "invalidate", step })
+        },
+      }),
+    [subscribe, dispatch]
+  )
+  return null
 }
 
 /**
