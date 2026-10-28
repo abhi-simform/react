@@ -41,6 +41,15 @@ import * as RS from "./modules/reviews/review.schema.js"
 import { addWishlistSchema } from "./modules/wishlist/wishlist.schema.js"
 import { listBrandsSchema } from "./modules/categories/category.schema.js"
 import { listProductsSchema } from "./modules/products/product.schema.js"
+import { suggestSchema } from "./modules/search/search.schema.js"
+import {
+  compareSchema,
+  forYouSchema,
+  listViewedSchema,
+  productRailSchema,
+  recordViewsSchema,
+  trendingSchema,
+} from "./modules/recommendations/recommendations.schema.js"
 
 // OpenAPI doc served at /api/docs. Request schemas are derived from the SAME Zod schemas used
 // for validation, so docs can't drift from behaviour. Extend as modules are added.
@@ -1310,6 +1319,106 @@ export const openApiDocument = {
               "Product[] + meta(page,limit,total,totalPages,hasNext,hasPrev). With facets=true, meta.facets = { brands:[{value,count}], price:{min,max}, rating:[{value,count}], inStock:{count} }; each facet ignores its own filter (disjunctive).",
           },
         },
+      },
+    },
+    "/search/suggest": {
+      get: {
+        tags: ["Search"],
+        summary:
+          "Autocomplete: { query, products[{id,slug,name,brand,price,image,category}], categories[{id,name,slug}], brands[{name,count}], correction }. Prefix match on word starts, most popular first. `correction` (did you mean) is only set when nothing matched and the corrected term has results",
+        parameters: queryParams(suggestSchema.query as z.ZodObject),
+        responses: {
+          200: { description: "Suggestions" },
+          422: { description: "q must be 2-60 chars" },
+        },
+      },
+    },
+    "/products/compare": {
+      get: {
+        tags: ["Discovery"],
+        summary:
+          "Compare 2-4 products: { products[...], specs[{key, values[] (aligned with products, null = missing), differs}] }",
+        parameters: queryParams(compareSchema.query as z.ZodObject),
+        responses: {
+          200: { description: "Compare data" },
+          404: { description: "A product is missing or inactive" },
+        },
+      },
+    },
+    "/products/{idOrSlug}/similar": {
+      get: {
+        tags: ["Discovery"],
+        summary:
+          "Similar products (same category neighbourhood, ranked by brand, price closeness, rating)",
+        parameters: [
+          { name: "idOrSlug", in: "path", required: true, schema: { type: "string" } },
+          ...queryParams(productRailSchema.query as z.ZodObject),
+        ],
+        responses: {
+          200: { description: "Product[] (list-card shape + deal)" },
+          404: { description: "NOT_FOUND" },
+        },
+      },
+    },
+    "/products/{idOrSlug}/also-bought": {
+      get: {
+        tags: ["Discovery"],
+        summary:
+          "Customers also bought: products from the same non-cancelled orders, most frequent first. meta.source = orders | mixed | similar (topped up with similar products when co-purchases are sparse)",
+        parameters: [
+          { name: "idOrSlug", in: "path", required: true, schema: { type: "string" } },
+          ...queryParams(productRailSchema.query as z.ZodObject),
+        ],
+        responses: {
+          200: { description: "Product[]" },
+          404: { description: "NOT_FOUND" },
+        },
+      },
+    },
+    "/recommendations/trending": {
+      get: {
+        tags: ["Discovery"],
+        summary: "Trending (best sellers in stock), optionally within a category slug",
+        parameters: queryParams(trendingSchema.query as z.ZodObject),
+        responses: { 200: { description: "Product[]" } },
+      },
+    },
+    "/recommendations/for-you": {
+      get: {
+        tags: ["Discovery"],
+        summary:
+          "Personalised row from purchases, wishlist and recently viewed (send Bearer), or from `seed` ids (a guest's local list). meta = { personalised, basedOn[] }; no signal = trending with personalised:false",
+        parameters: queryParams(forYouSchema.query as z.ZodObject),
+        responses: { 200: { description: "Product[]" } },
+      },
+    },
+    "/me/recently-viewed": {
+      get: {
+        tags: ["Discovery"],
+        summary: "My recently viewed products, newest first (max 30 kept)",
+        security: bearer,
+        parameters: queryParams(listViewedSchema.query as z.ZodObject),
+        responses: {
+          200: { description: "Product[]" },
+          401: { description: "UNAUTHORIZED" },
+        },
+      },
+      post: {
+        tags: ["Discovery"],
+        summary:
+          "Record views (one, or the guest list after login). Upserts, viewedAt only moves forward, inactive products are ignored. 202",
+        security: bearer,
+        requestBody: body(recordViewsSchema.body),
+        responses: {
+          202: { description: "{ recorded }" },
+          422: { description: "VALIDATION_ERROR" },
+        },
+      },
+      delete: {
+        tags: ["Discovery"],
+        summary: "Clear my recently viewed list",
+        security: bearer,
+        responses: { 204: { description: "Cleared" } },
       },
     },
     "/products/{idOrSlug}": {

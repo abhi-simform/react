@@ -127,6 +127,16 @@ export async function listProducts(q: ListQuery) {
   }
 }
 
+/** An ACTIVE product by id or slug (lean, unpopulated), or 404. */
+export async function findActiveProduct(idOrSlug: string) {
+  const query = isValidObjectId(idOrSlug)
+    ? { $or: [{ _id: idOrSlug }, { slug: idOrSlug }] }
+    : { slug: idOrSlug }
+  const product = await Product.findOne({ ...query, status: "active" }).lean()
+  if (!product) throw ApiError.notFound("Product not found")
+  return product
+}
+
 export async function getProduct(idOrSlug: string) {
   const query = isValidObjectId(idOrSlug)
     ? { $or: [{ _id: idOrSlug }, { slug: idOrSlug }] }

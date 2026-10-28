@@ -26,6 +26,12 @@ import {
   questionRoutes,
   reviewRoutes,
 } from "./modules/reviews/review.routes.js"
+import { searchRoutes } from "./modules/search/search.routes.js"
+import {
+  productDiscoveryRoutes,
+  recentlyViewedRoutes,
+  recommendationRoutes,
+} from "./modules/recommendations/recommendations.routes.js"
 import { userRoutes } from "./modules/users/user.routes.js"
 
 // Every feature module mounts here. New module = new line.
@@ -36,7 +42,11 @@ routes.use("/users", userRoutes)
 routes.use("/categories", categoryRoutes)
 routes.use("/brands", brandRoutes)
 routes.use("/products/:productId", productReviewRoutes)
+routes.use("/products", productDiscoveryRoutes)
 routes.use("/products", productRoutes)
+routes.use("/search", searchRoutes)
+routes.use("/me/recently-viewed", recentlyViewedRoutes)
+routes.use("/recommendations", recommendationRoutes)
 routes.use("/wishlist", wishlistRoutes)
 routes.use("/addresses", addressRoutes)
 routes.use("/pincodes", pincodeRoutes)

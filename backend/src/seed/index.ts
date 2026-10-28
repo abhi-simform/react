@@ -17,6 +17,7 @@ import { Payment, WebhookEvent } from "../modules/payments/payment.model.js"
 import { Order, type OrderStatus } from "../modules/orders/order.model.js"
 import { Review, Vote, maskName } from "../modules/reviews/review.model.js"
 import { Answer, Question } from "../modules/reviews/qa.model.js"
+import { RecentlyViewed } from "../modules/recommendations/recentlyViewed.model.js"
 import { slugify } from "../utils/slugify.js"
 import { CATALOG } from "./catalog.js"
 
@@ -54,6 +55,7 @@ async function main() {
     Question.syncIndexes(),
     Answer.syncIndexes(),
     WebhookEvent.syncIndexes(),
+    RecentlyViewed.syncIndexes(),
   ])
 
   // Users
@@ -610,6 +612,76 @@ async function main() {
         }
         if (n) await Question.updateOne({ _id: q._id }, { answerCount: n })
       }
+    }
+  }
+
+  // B8: co-purchase history so "customers also bought" has real data: popular products are bought
+  // together with a companion from their own category (and sometimes an accessory-like cheap item),
+  // by the reviewer accounts. Historical snapshots again: stock/soldCount are not touched.
+  // The dev customer also has a recently viewed list (their delivered products stay out of it).
+  {
+    const buyers = await User.find({ email: /^reviewer\d+@/ }).lean()
+    const anchors = await Product.find({ status: "active" })
+      .sort({ soldCount: -1 })
+      .limit(40)
+      .lean()
+    const orders: object[] = []
+    let n = 0
+    for (const a of anchors) {
+      const siblings = await Product.find({
+        status: "active",
+        category: a.category,
+        _id: { $ne: a._id },
+      })
+        .sort({ soldCount: -1 })
+        .limit(6)
+        .lean()
+      if (!siblings.length) continue
+      for (let k = 0; k < 3; k++) {
+        const basket = [a, ...faker.helpers.arrayElements(siblings, k === 0 ? 2 : 1)]
+        const buyer = faker.helpers.arrayElement(buyers)
+        const createdAt = new Date(
+          now - faker.number.int({ min: 10, max: 120 }) * 86_400_000
+        )
+        const subtotal = basket.reduce((t, p) => t + p.price, 0)
+        orders.push({
+          orderNumber: `SS-SEED-B8-${String(++n).padStart(5, "0")}`,
+          user: buyer._id,
+          items: basket.map((p) => ({
+            product: p._id,
+            sku: p.sku,
+            title: p.name,
+            image: p.images[0]?.url,
+            unitPrice: p.price,
+            mrp: p.mrp,
+            qty: 1,
+            lineTotal: p.price,
+          })),
+          status: "delivered",
+          statusHistory: [{ status: "delivered", at: createdAt }],
+          pricing: { subtotal, discount: 0, shipping: 0, tax: 0, total: subtotal },
+          payment: { method: "cod", status: "paid" },
+          deliveredAt: createdAt,
+          createdAt,
+        })
+      }
+    }
+    await Order.insertMany(orders, { timestamps: false })
+    if (customer) {
+      const mine = await Order.find({ user: customer._id }).select("items.product").lean()
+      const bought = new Set(mine.flatMap((o) => o.items.map((i) => String(i.product))))
+      const viewed = (
+        await Product.find({ status: "active" }).sort({ soldCount: -1 }).limit(14).lean()
+      )
+        .filter((p) => !bought.has(String(p._id)))
+        .slice(0, 6)
+      await RecentlyViewed.insertMany(
+        viewed.map((p, i) => ({
+          user: customer._id,
+          product: p._id,
+          viewedAt: new Date(now - (i + 1) * 3_600_000),
+        }))
+      )
     }
   }
 
