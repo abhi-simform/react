@@ -12,7 +12,7 @@ const base = opt("base", "http://localhost:5173")
 const slug = opt("slug", "the-ordinary-j63-night-cream-ski-00200")
 // Budgets (kB gzip of JS requested while loading the page): the measured size after 13.3 plus ~4% headroom.
 // A regression guard, not a goal: see docs/perf-log.md for where the bytes are and what was tried.
-const BUDGET = { "/": 335, "/products": 330, [`/p/${slug}`]: 360, "/cart": 330 }
+const BUDGET = { "/": 335, "/products": 330, [`/p/${slug}`]: 360, "/cart": 345 }
 
 const browser = await chromium.launch()
 let failed = false

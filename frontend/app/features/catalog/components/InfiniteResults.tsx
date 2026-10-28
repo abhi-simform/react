@@ -1,5 +1,5 @@
 import { Loader2 } from "lucide-react"
-import { useMemo, useState, useTransition } from "react"
+import { Suspense, useMemo, useState, useTransition } from "react"
 
 import { EmptyState } from "@/components/common/EmptyState"
 import { ErrorState } from "@/components/common/ErrorState"
@@ -12,7 +12,15 @@ import { LoadMoreSentinel } from "@/components/common/LoadMoreSentinel"
 import { toProductCardVM } from "../mappers"
 import { filterLoaded } from "../utils"
 import { PerfProfiler } from "@/components/common/PerfProfiler"
-import { VirtualProductGrid } from "./VirtualProductGrid"
+import { lazyNamed } from "@/lib/lazyNamed"
+import { ProductGrid } from "./ProductGrid"
+
+// 13.3: @tanstack/react-virtual (~10 kB gzip) only matters in "load more" mode; until it arrives the plain
+// grid shows the same cards, so the page is never empty.
+const VirtualProductGrid = lazyNamed(
+  () => import("./VirtualProductGrid"),
+  "VirtualProductGrid"
+)
 
 type Props = {
   list: ReturnType<typeof useInfiniteProducts>
@@ -76,7 +84,13 @@ export function InfiniteResults({
         className={pending ? "opacity-60 transition-opacity" : undefined}
       >
         <PerfProfiler id="grid">
-          <VirtualProductGrid products={shown} view={filters.view} />
+          <Suspense
+            fallback={
+              <ProductGrid products={shown.slice(0, 24)} view={filters.view} />
+            }
+          >
+            <VirtualProductGrid products={shown} view={filters.view} />
+          </Suspense>
         </PerfProfiler>
       </div>
       <div

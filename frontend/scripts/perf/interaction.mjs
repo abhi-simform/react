@@ -112,6 +112,15 @@ async function loadCards(n) {
 }
 
 let shown = 0
+if (scenario === "motion") {
+  // `motion [--reduced]`: add a product to the cart (fly-to-cart + badge bump + toast), then remove a line on the
+  // cart page (AnimatePresence + layout). Frames sampled with requestAnimationFrame at the throttled CPU.
+  if (args.includes("--reduced"))
+    await page.emulateMedia({ reducedMotion: "reduce" })
+  await page.goto(`${base}/products`)
+  await page.locator("main article").first().waitFor()
+  await page.addInitScript(() => {})
+}
 if (scenario === "page") {
   // `page <path>`: load a page and report layout shifts (CLS) with the elements that moved.
   await page.goto(base + (args[1] ?? "/"), { waitUntil: "networkidle" })
@@ -237,6 +246,83 @@ if (scenario === "typing") {
   await page.waitForTimeout(300)
   await page.getByRole("button", { name: "Mark read" }).first().click()
   await page.waitForTimeout(600)
+} else if (scenario === "motion") {
+  const sample = () =>
+    page.evaluate(() => {
+      window.__frames = []
+      window.__flies = 0
+      new MutationObserver((muts) => {
+        for (const m of muts)
+          for (const n of m.addedNodes) if (n.dataset?.fly) window.__flies++
+      }).observe(document.body, { childList: true })
+      let last = performance.now()
+      const tick = (now) => {
+        window.__frames.push(now - last)
+        last = now
+        window.__raf = requestAnimationFrame(tick)
+      }
+      window.__raf = requestAnimationFrame(tick)
+    })
+  await sample()
+  const t1 = Date.now()
+  await page.getByRole("button", { name: "Add to cart" }).first().click()
+  await page.getByText("Added to cart").first().waitFor()
+  const toastMs = Date.now() - t1
+  await page.waitForTimeout(1000)
+  const flies = await page.evaluate(() => window.__flies)
+  const flyFrames = await page.evaluate(() => {
+    const f = window.__frames
+    return {
+      count: f.length,
+      avgMs: +(f.reduce((a, b) => a + b, 0) / f.length).toFixed(1),
+      p95Ms: Math.round(
+        [...f].sort((a, b) => a - b)[Math.floor(f.length * 0.95)]
+      ),
+      over33ms: f.filter((x) => x > 33).length,
+    }
+  })
+  const bumped = await page.evaluate(
+    () =>
+      getComputedStyle(document.querySelector("[data-testid=cart-badge]"))
+        .animationName
+  )
+  // The cart page: add a second product so that removing one makes the other glide up.
+  await page.getByRole("button", { name: "Add to cart" }).nth(1).click()
+  await page.waitForTimeout(1200)
+  await page
+    .getByRole("link", { name: /cart/i })
+    .first()
+    .click()
+    .catch(() => undefined)
+  await page.goto(`${base}/cart`)
+  await page
+    .getByRole("button", { name: /remove/i })
+    .first()
+    .waitFor()
+  await page.evaluate(() => {
+    window.__frames = []
+    let last = performance.now()
+    const tick = (now) => {
+      window.__frames.push(now - last)
+      last = now
+      window.__raf = requestAnimationFrame(tick)
+    }
+    window.__raf = requestAnimationFrame(tick)
+  })
+  await page
+    .getByRole("button", { name: /remove/i })
+    .first()
+    .click()
+  await page.waitForTimeout(900)
+  await page.evaluate(() => cancelAnimationFrame(window.__raf))
+  console.log(
+    JSON.stringify({
+      toastVisibleAfterMs: toastMs,
+      flyClonesCreated: flies,
+      badgeAnimationName: bumped,
+      flyFrames,
+    })
+  )
 } else if (scenario === "filter") {
   // The client-side quick filter over the loaded cards: every keystroke re-filters and re-renders them.
   const box = page.getByLabel("Filter loaded products")

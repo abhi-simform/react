@@ -71,7 +71,8 @@ export function ProductDetailView({
     return addToCart(
       product.id,
       options ? `${product.name} (${options})` : product.name,
-      quantity
+      quantity,
+      document.querySelector("[data-fly-source]")
     )
   }
   async function buyNow() {

@@ -1,4 +1,5 @@
 import { useInfiniteQuery } from "@tanstack/react-query"
+import { Suspense } from "react"
 import { useSearchParams } from "react-router"
 
 import { EmptyState } from "@/components/common/EmptyState"
@@ -17,7 +18,13 @@ import {
   type NotificationCategory,
   type NotificationFilter,
 } from "../schemas"
-import { VirtualNotificationList } from "./VirtualNotificationList"
+import { lazyNamed } from "@/lib/lazyNamed"
+
+// 13.3: the virtualiser (~10 kB gzip) loads with this list, not with every page.
+const VirtualNotificationList = lazyNamed(
+  () => import("./VirtualNotificationList"),
+  "VirtualNotificationList"
+)
 import { PreferencesForm } from "./PreferencesForm"
 
 const isCategory = (v: string | null): v is NotificationCategory =>
@@ -128,37 +135,45 @@ export function NotificationsPage() {
                 "en-IN"
               )}
             </p>
-            <VirtualNotificationList
-              items={items}
-              total={q.data?.pages[0]?.meta.total ?? items.length}
-              hasNextPage={q.hasNextPage}
-              isFetchingNextPage={q.isFetchingNextPage}
-              fetchNextPage={() => void q.fetchNextPage()}
-              onOpen={(x) => {
-                if (!x.read) markRead.mutate(x.id)
-              }}
-              renderActions={(n) => (
-                <div className="flex shrink-0 flex-col items-end gap-1 text-xs">
-                  {!n.read && (
+            <Suspense
+              fallback={
+                <p role="status" className="min-h-40">
+                  Loading list...
+                </p>
+              }
+            >
+              <VirtualNotificationList
+                items={items}
+                total={q.data?.pages[0]?.meta.total ?? items.length}
+                hasNextPage={q.hasNextPage}
+                isFetchingNextPage={q.isFetchingNextPage}
+                fetchNextPage={() => void q.fetchNextPage()}
+                onOpen={(x) => {
+                  if (!x.read) markRead.mutate(x.id)
+                }}
+                renderActions={(n) => (
+                  <div className="flex shrink-0 flex-col items-end gap-1 text-xs">
+                    {!n.read && (
+                      <button
+                        type="button"
+                        className="underline"
+                        onClick={() => markRead.mutate(n.id)}
+                      >
+                        Mark read
+                      </button>
+                    )}
                     <button
                       type="button"
                       className="underline"
-                      onClick={() => markRead.mutate(n.id)}
+                      aria-label={`Delete: ${n.title}`}
+                      onClick={() => remove.mutate(n.id)}
                     >
-                      Mark read
+                      Delete
                     </button>
-                  )}
-                  <button
-                    type="button"
-                    className="underline"
-                    aria-label={`Delete: ${n.title}`}
-                    onClick={() => remove.mutate(n.id)}
-                  >
-                    Delete
-                  </button>
-                </div>
-              )}
-            />
+                  </div>
+                )}
+              />
+            </Suspense>
             {q.hasNextPage && (
               <Button
                 className="mt-3"

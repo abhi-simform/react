@@ -1,3 +1,4 @@
+import { flyToCart } from "./flyToCart"
 import { useQuery, useQueryClient } from "@tanstack/react-query"
 import { toast } from "sonner"
 
@@ -281,13 +282,20 @@ export function useAddToCart() {
     mutationFn: (o, v) => addCartItem(o, v.productId, v.qty),
     productId: (v) => v.productId,
   })
-  return async function addToCart(productId: string, name: string, qty = 1) {
+  return async function addToCart(
+    productId: string,
+    name: string,
+    qty = 1,
+    /** The element the product image is in: it flies to the cart button on success (13.6). */
+    flyFrom?: Element | null
+  ) {
     if (!ready) {
       toast.info("Loading your session, try again in a moment")
       return false
     }
     try {
       await mutation.mutateAsync({ productId, qty })
+      void flyToCart(flyFrom) // not awaited: the feedback below never waits for an animation
       toast.success("Added to cart", {
         description: name,
         action: {

@@ -3,6 +3,7 @@ import { Suspense, useEffect, useState } from "react"
 
 import { Button } from "@/components/ui/button"
 import { lazyNamed } from "@/lib/lazyNamed"
+import { cn } from "@/lib/utils"
 
 import { useCartUi } from "../cartUiStore"
 import { useCartCount } from "../useCart"
@@ -50,8 +51,17 @@ export function CartDrawer() {
 
 function CartButton() {
   const count = useCartCount()
+  // The badge "bumps" when the count CHANGES (not on first paint): a counter that only ever goes up while
+  // the same count is shown, and a key that changes with it so the CSS animation restarts (13.6).
+  const [seen, setSeen] = useState(count)
+  const [bumps, setBumps] = useState(0)
+  if (count !== seen) {
+    setSeen(count)
+    setBumps((b) => b + 1)
+  }
   return (
     <Button
+      data-cart-target
       variant="outline"
       size="sm"
       aria-label={`Open cart, ${count} ${count === 1 ? "item" : "items"}`}
@@ -61,7 +71,15 @@ function CartButton() {
     >
       <ShoppingCart aria-hidden className="size-4" />
       Cart{" "}
-      <span data-testid="cart-badge" className="rounded bg-neutral-200 px-1">
+      <span
+        key={bumps}
+        data-testid="cart-badge"
+        // `motion-safe:` = only when the user has NOT asked for reduced motion. Transform only (no layout).
+        className={cn(
+          "inline-block rounded bg-neutral-200 px-1",
+          bumps > 0 && "motion-safe:animate-bump"
+        )}
+      >
         {count}
       </span>
     </Button>

@@ -12,6 +12,7 @@ import { paths } from "@/lib/paths"
 
 import { useCart } from "../useCart"
 import { CartIssues } from "./CartIssues"
+import { CartLineList } from "./CartLineList"
 import { CartLineRow } from "./CartLineRow"
 import { CouponBox } from "./CouponBox"
 import { FreeShippingBar } from "./FreeShippingBar"
@@ -64,7 +65,7 @@ export function CartPage() {
                     Nothing in your cart right now.
                   </p>
                 ) : (
-                  <ul>
+                  <CartLineList>
                     {lines.map((line) => (
                       <CartLineRow
                         key={line.productId}
@@ -72,7 +73,7 @@ export function CartPage() {
                         actions={cart}
                       />
                     ))}
-                  </ul>
+                  </CartLineList>
                 )}
                 {saved.length > 0 && (
                   <section aria-labelledby="saved-title" className="mt-6">

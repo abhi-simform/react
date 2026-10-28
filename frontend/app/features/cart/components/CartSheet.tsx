@@ -13,6 +13,7 @@ import { paths } from "@/lib/paths"
 
 import { useCartUi } from "../cartUiStore"
 import { useCart } from "../useCart"
+import { CartLineList } from "./CartLineList"
 import { CartLineRow } from "./CartLineRow"
 import { FreeShippingBar } from "./FreeShippingBar"
 
@@ -55,11 +56,11 @@ function DrawerBody() {
   return (
     <div className="flex flex-1 flex-col gap-3 overflow-y-auto p-4">
       <FreeShippingBar subtotal={totals.subtotal - totals.discount} />
-      <ul>
+      <CartLineList>
         {lines.map((line) => (
           <CartLineRow key={line.productId} line={line} actions={cart} />
         ))}
-      </ul>
+      </CartLineList>
       {totals.discount > 0 && (
         <p className="flex justify-between text-sm text-green-800">
           <span>Coupon discount</span>

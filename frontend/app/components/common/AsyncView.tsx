@@ -45,7 +45,12 @@ export function AsyncView<T>({
       const emptyView = empty?.(state.data)
       if (emptyView) return emptyView
       return (
-        <div aria-busy={state.isRefreshing || undefined}>
+        // Skeleton -> content: a short opacity fade (tw-animate-css); none for reduced motion, and none
+        // when this is only a refresh (the content was already there).
+        <div
+          aria-busy={state.isRefreshing || undefined}
+          className="animate-in duration-300 fade-in motion-reduce:animate-none"
+        >
           {state.isRefreshing && (
             <p role="status" className="mb-1 text-xs text-neutral-500">
               Updating...

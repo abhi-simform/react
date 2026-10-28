@@ -1,4 +1,5 @@
 import { ResponsiveImage } from "@/components/common/ResponsiveImage"
+import * as m from "motion/react-m"
 import { Link } from "react-router"
 
 import { QuantityStepper } from "@/components/common/QuantityStepper"
@@ -37,7 +38,15 @@ export function CartLineRow({
   const max = Math.max(1, Math.min(line.availableQty, MAX_PER_LINE))
   const atMax = !saved && line.qty >= max && line.availableQty > 0
   return (
-    <li className="flex gap-3 border-b py-3">
+    <m.li
+      // Animated by AnimatedLines (LazyMotion + popLayout); a plain <li> until Motion has loaded.
+      layout
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.2 }}
+      className="flex gap-3 border-b py-3"
+    >
       {line.imageUrl ? (
         <div className="size-16 shrink-0 overflow-hidden rounded bg-neutral-100">
           <ResponsiveImage
@@ -150,6 +159,6 @@ export function CartLineRow({
             (saved ? line.qty : Math.min(line.qty, line.availableQty))
         )}
       </p>
-    </li>
+    </m.li>
   )
 }

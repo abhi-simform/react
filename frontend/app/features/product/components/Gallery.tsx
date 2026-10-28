@@ -73,7 +73,10 @@ export function Gallery({
       onKeyDown={onKeyDown}
       className="flex flex-col gap-2"
     >
-      <div className="relative aspect-square overflow-hidden rounded bg-neutral-100">
+      <div
+        data-fly-source
+        className="relative aspect-square overflow-hidden rounded bg-neutral-100"
+      >
         <ResponsiveImage
           src={current.url}
           alt={current.alt ?? `${productName}, image ${index + 1}`}

@@ -60,6 +60,7 @@ function ProductCardBase({
       className="relative flex h-full flex-col gap-2 rounded-lg border p-2 focus-within:ring-2"
     >
       <div
+        data-fly-source
         className={cn(
           "relative aspect-square overflow-hidden rounded bg-neutral-100"
         )}
@@ -145,10 +146,17 @@ function ProductCardBase({
           size="sm"
           className="relative z-10"
           disabled={addToCartDisabled}
-          onClick={() =>
+          onClick={(e) =>
             onAddToCart
               ? onAddToCart(product)
-              : void addToCart(product.id, product.name)
+              : void addToCart(
+                  product.id,
+                  product.name,
+                  1,
+                  e.currentTarget
+                    .closest("article")
+                    ?.querySelector("[data-fly-source]")
+                )
           }
         >
           Add to cart

@@ -12,6 +12,18 @@ import { ShopPage } from "./pages/ShopPage"
 const TAGS = ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"]
 
 async function scan(page: import("@playwright/test").Page, name: string) {
+  // 13.6: content fades in (a 300 ms opacity animation). axe reads colours from the rendered pixels, so
+  // it would measure text that is half transparent and report contrast failures that are not there.
+  // Wait for the finite animations to end (looping skeleton pulses are ignored).
+  await page.waitForFunction(() =>
+    document
+      .getAnimations()
+      .every(
+        (a) =>
+          a.playState !== "running" ||
+          a.effect?.getComputedTiming().iterations === Infinity
+      )
+  )
   const { violations } = await new AxeBuilder({ page }).withTags(TAGS).analyze()
   const blocking = violations.filter(
     (v) => v.impact === "serious" || v.impact === "critical"

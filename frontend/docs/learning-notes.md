@@ -989,3 +989,12 @@ Backend B1 was built first (separate `backend B1:` commits): `GET /categories` n
 - A font file named only inside CSS is discovered after the CSS is parsed (a chain): `<link rel=preload as=font crossorigin>` starts it early. `size-adjust` / `ascent-override` / `descent-override` on a local fallback face make the swap shift-free.
 - A Unicode-range split can bite: "₹" lives in Inter's latin-ext file (85 kB), so every price page downloaded it. Declare only what you need and let the rare glyph fall back.
 - Images were not the mobile LCP bottleneck: the element appears only after JS + API in a client-rendered app. Fix is architecture (SSR/prerender), not image tuning.
+
+## 13.6 Motion
+
+- Animate `transform` and `opacity` only: the compositor runs them, so a CPU-throttled page still holds 60 fps (avg frame 16.7 ms at 4x). Do not animate `height`/`top`: use `layout` (FLIP: Motion measures, applies the inverse transform, animates it away) and `AnimatePresence mode="popLayout"` for removals.
+- `m` + `LazyMotion` instead of `motion.*`: the feature code is a separate chunk. `layout` needs `domMax` (31 kB gzip); `domAnimation` does not include it. `strict` throws if a full `motion` component sneaks in.
+- Reduced motion has three layers here: CSS `motion-safe:` / `motion-reduce:`, `MotionConfig reducedMotion="user"` for Motion components, and a `matchMedia` check in imperative code (fly to cart). "Reduced" does not mean "none at all": a short opacity fade is allowed, transforms and layout moves are not.
+- Make sure nothing awaits an animation: the toast appears ~170 ms after the click; the clone flies in parallel.
+- An e2e contrast check (axe) read half-transparent text during the 300 ms fade and failed: axe samples rendered pixels. The test now waits for finite animations to end (`document.getAnimations()`).
+- Barrel files bite (again): importing `motion/react` from a feature that the shell imports added 30 kB to every page. The JS budget script caught it within a minute.

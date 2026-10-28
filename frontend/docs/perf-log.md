@@ -226,3 +226,27 @@ Other measurements (`scripts/perf/interaction.mjs page <path>`, `typing`):
 - **Why mobile LCP barely moved** although the hero/card/gallery images are 60-80% smaller: the LCP breakdown shows the image itself needing ~1.1 s on the simulated slow 4G, but the element only appears after ~3.5 s: the page is client-rendered, so the image URL is unknown until the entry JS (~330 kB) has downloaded and run and the banner / product API call has returned. Images were never the bottleneck on mobile; the critical chain is HTML -> JS -> API -> image. The levers for that are server-side rendering or prerendering with data (Stage 14 deep dive) and shipping less JS (13.3). Desktop (fast network) did improve 9-25%.
 - **Cart mobile LCP 4.07 -> 0.76 s**: the LCP was a text node. The font used to arrive late (CSS -> font chain) and Chrome re-reports a text LCP when the web font swaps in; the preload plus a metrics-matched fallback removed the late re-paint.
 - Decorative card images keep `alt=""` (the title link names the product); gallery and review photos have meaningful alt text; thumbnails `alt=""` inside labelled buttons.
+
+## 13.6 Motion and micro-interactions
+
+What exists: (1) **fly to cart**: a clone of the product image travels to the cart button (`features/cart/flyToCart.ts`, `motion/mini` = Web Animations API, loaded by dynamic `import()` at the first add, `transform` + `opacity` only, fixed-position clone removed afterwards); (2) **cart count bump**: a CSS keyframe (`animate-bump`, transform only, `motion-safe:`) restarted by a `key` that changes with the count (not on first paint); (3) **cart list**: `AnimatePresence mode="popLayout"` + `m.li layout` inside `LazyMotion` (features = `domMax`, loaded on demand, in its own chunk) + `MotionConfig reducedMotion="user"`; (4) **skeleton -> content**: `AsyncView` fades the content in (`animate-in fade-in`, tw-animate-css, `motion-reduce:animate-none`); (5) **reduced motion** for all of them (below).
+
+Measured with `scripts/perf/interaction.mjs motion` (production build, CPU 4x, Chromium; `--reduced` emulates `prefers-reduced-motion: reduce`):
+
+| | Normal | Reduced motion |
+| --- | --- | --- |
+| Frames during add-to-cart + fly (4x CPU): count / avg / p95 / over 33 ms | 70 / 16.7 / 17 ms / 1 | 70 / 16.6 / 17 ms / 1 |
+| Frames during removing a cart line (popLayout + layout glide) | 58 / 16.4 / 17 ms / 0 over 50 ms | 58 / 16.1 / 17 ms / 0 |
+| "Added to cart" toast visible after the click | 168-182 ms | 159-167 ms |
+| Fly clones created | 1 | **0** |
+| Badge animation name | `bump` | **none** |
+| INP of the click | 48 ms | (same path) |
+
+So: 60 fps at 4x throttle (16.7 ms average, the single frame over 33 ms is the add-to-cart state update itself and also occurs with reduced motion), nothing plays when the OS asks for reduced motion (clone count 0, no keyframe animation), and the feedback arrives in ~170 ms, well under the 300 ms limit because nothing awaits an animation (`void flyToCart(...)` runs after the server accepted the item; the toast is not delayed by it).
+
+Bundle cost (and what I did about it): initial JS is unchanged (`/` 318 kB vs 320 kB after 13.3). `motion/mini` is ~3 kB gzip, loaded at the first add. `motion/react` (`AnimatePresence`, `LazyMotion`) + the `domMax` features chunk (`layout` animations need `domMax`, the bigger set: **31 kB gzip**) load only when a cart list renders, so `/cart` costs about +21 kB over the previous 313 kB (new budget 345). My first version imported `motion/react` from the cart feature's barrel and added ~30 kB to EVERY page; the budget script caught it (319 -> 349) and the animated list moved behind `lazyNamed` (`CartLineList`), as did `CartPage`, `CouponBox` (react-hook-form), the virtual grid and the virtual notification list (@tanstack/react-virtual, ~10 kB), each with a fallback that renders the same content plain. **Lesson: a feature barrel that is imported by the shell makes every export part of the first load; make the heavy leaves lazy at the barrel.**
+
+Notes:
+- `layout` animations use transforms (FLIP) and `mode="popLayout"` lets neighbours glide up while the removed line fades; I did not animate `height` (a layout property).
+- The CSS-only pieces (bump, fade) cost no JS. Motion is used where state has to be tracked (exit animations, layout), CSS where it does not.
+- Honest limit: frame timing is a requestAnimationFrame sample, not a DevTools Performance trace; "60 fps" here means no frame over 33 ms except the one state update.
