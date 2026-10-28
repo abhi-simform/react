@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useSearchParams } from "react-router"
 
 import { Switch } from "@/components/ui/switch"
 import { formatCurrency } from "@/lib/format"
@@ -63,7 +63,20 @@ export function CompareTable({
 }: {
   products: readonly ComparableProduct[]
 }) {
-  const [onlyDifferences, setOnlyDifferences] = useState(false)
+  // The view lives in the URL (`?diff=1`, 8.4 migration): shareable, survives reload and Back.
+  const [searchParams, setSearchParams] = useSearchParams()
+  const onlyDifferences = searchParams.get("diff") === "1"
+  function setOnlyDifferences(on: boolean) {
+    setSearchParams(
+      (current) => {
+        const params = new URLSearchParams(current)
+        if (on) params.set("diff", "1")
+        else params.delete("diff")
+        return params
+      },
+      { replace: true }
+    )
+  }
   const rows = buildRows(products)
   const shown = onlyDifferences ? rows.filter(differs) : rows
   return (
