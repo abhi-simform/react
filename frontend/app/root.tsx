@@ -7,7 +7,6 @@ import { RouteErrorView } from "@/components/common/RouteErrorView"
 import { AuthProvider, SessionCacheSync } from "@/features/auth"
 import { ThemeProvider } from "@/features/theme"
 import { ToastProvider } from "@/features/toast"
-import { WishlistProvider } from "@/features/wishlist"
 import { pageTitle } from "@/lib/pageTitle"
 import { queryClient } from "@/lib/query-client"
 
@@ -45,9 +44,7 @@ export default function App() {
         <AuthProvider>
           <SessionCacheSync />
           <ToastProvider>
-            <WishlistProvider>
-              <Outlet />
-            </WishlistProvider>
+            <Outlet />
           </ToastProvider>
         </AuthProvider>
       </ThemeProvider>

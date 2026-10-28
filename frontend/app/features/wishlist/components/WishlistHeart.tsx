@@ -5,7 +5,7 @@ import { useAuth } from "@/features/auth"
 import { paths } from "@/lib/paths"
 import { cn } from "@/lib/utils"
 
-import { useWishlist } from "../WishlistContext"
+import { useWishlist } from "../useWishlist"
 
 type Props = {
   productId: string
@@ -33,7 +33,7 @@ export function WishlistHeart({ productId, productName, className }: Props) {
       })
       return
     }
-    if (!inert) void toggle(productId, productName)
+    if (!inert) toggle(productId, productName)
   }
 
   return (

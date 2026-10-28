@@ -4,7 +4,7 @@ import { NavLink } from "react-router"
 import { paths } from "@/lib/paths"
 import { cn } from "@/lib/utils"
 
-import { useWishlist } from "../WishlistContext"
+import { useWishlist } from "../useWishlist"
 
 /** Header entry: heart + count. The count comes from the shared Set, so it never needs its own request. */
 export function WishlistLink() {
