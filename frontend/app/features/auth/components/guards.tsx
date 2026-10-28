@@ -30,13 +30,14 @@ function AuthLoading() {
   )
 }
 
-function ForbiddenPage({ role }: { role: Role }) {
+export function ForbiddenPage({ roles }: { roles: readonly Role[] }) {
   return (
     <div className="p-4">
       <h1 className="text-xl font-medium">403: Not allowed</h1>
       <p className="my-2 text-sm">
-        This area is only for {role} accounts. You are signed in with a
-        different role.
+        This area is only for {roles.join(" or ")} accounts. You are signed in
+        with a different role. (Hiding this page is only courtesy: the API
+        refuses these requests on its own.)
       </p>
       <a href={paths.home()} className="underline">
         Back to the home page
@@ -45,14 +46,20 @@ function ForbiddenPage({ role }: { role: Role }) {
   )
 }
 
-/** Where we send anonymous users, remembering the whole URL (query and hash too). */
+/**
+ * Where we send anonymous users, remembering the whole URL (query and hash too) in `?from=`:
+ * unlike navigation state it survives a reload and the Google round trip. `getReturnTo`
+ * validates it again on the way back.
+ */
 function RedirectToLogin() {
   const location = useLocation()
+  const { signedOutByUser } = useAuth()
+  // The user just chose to log out of this very page: home, not "log in to continue".
+  if (signedOutByUser) return <Navigate to={paths.home()} replace />
   return (
     <Navigate
-      to={paths.login()}
+      to={paths.login(location.pathname + location.search + location.hash)}
       replace
-      state={{ from: location.pathname + location.search + location.hash }}
     />
   )
 }
@@ -66,18 +73,18 @@ export function RequireAuth() {
 
 /** Login/register: signed-in users have nothing to do there. */
 export function PublicOnly() {
-  const { status } = useAuth()
+  const { status, registering } = useAuth()
   const location = useLocation()
   if (status === "loading") return <AuthLoading />
-  if (status === "authenticated")
-    return <Navigate to={getReturnTo(location.state)} replace />
+  if (status === "authenticated" && !registering)
+    return <Navigate to={getReturnTo(location)} replace />
   return <Outlet />
 }
 
-export function RequireRole({ role }: { role: Role }) {
+export function RequireRole({ roles }: { roles: readonly Role[] }) {
   const { status, user } = useAuth()
   if (status === "loading") return <AuthLoading />
   if (status === "anonymous" || !user) return <RedirectToLogin />
-  if (user.role !== role) return <ForbiddenPage role={role} />
+  if (!roles.includes(user.role)) return <ForbiddenPage roles={roles} />
   return <Outlet />
 }

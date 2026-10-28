@@ -35,9 +35,13 @@ export const paths = {
   help: () => "/help",
   policy: (slug: string) => generatePath("/policies/:slug", { slug }),
 
-  login: () => "/login",
-  register: () => "/register",
+  /** `from` = where to return after login (validated again by `getReturnTo` on the way back). */
+  login: (from?: string) => withQuery("/login", { from }),
+  register: (from?: string) => withQuery("/register", { from }),
   forgotPassword: () => "/forgot-password",
+  verifyEmail: () => "/verify-email",
+  resetPassword: () => "/reset-password",
+  googleCallback: () => "/auth/google/callback",
 
   orders: () => "/orders",
   order: (id: string) => generatePath("/orders/:orderId", { orderId: id }),

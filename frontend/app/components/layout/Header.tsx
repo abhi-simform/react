@@ -1,5 +1,6 @@
 import { Link, NavLink } from "react-router"
 
+import { AccountMenu } from "@/features/auth"
 import { CompareTrayButton } from "@/features/compare"
 import { CartDrawer } from "@/features/cart"
 import { SearchBox } from "@/features/search"
@@ -47,10 +48,7 @@ export function Header() {
           </NavLink>
         )}
         <SearchBox />
-        {/* Account menu placeholder: real menu arrives with auth (Stage 8/10). */}
-        <NavLink to={paths.account()} className={navClass}>
-          Account
-        </NavLink>
+        <AccountMenu />
         <ThemeToggle />
         <WishlistLink />
         <CompareTrayButton />
