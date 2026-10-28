@@ -2,5 +2,6 @@
 export { AccountNav } from "./components/AccountNav"
 export { AddressBook } from "./components/AddressBook"
 export { AddressDialog } from "./components/AddressDialog"
-export { getAddresses } from "./addresses.api"
-export type { Address } from "./schemas"
+export { AddressFormDialog } from "./components/AddressFormDialog"
+export { createAddress, getAddresses } from "./addresses.api"
+export type { Address, AddressInput } from "./schemas"

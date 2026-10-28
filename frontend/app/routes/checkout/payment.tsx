@@ -1,9 +1,14 @@
-import { PlaceholderPage } from "@/components/common/PlaceholderPage"
+import { PaymentStep, StepNav } from "@/features/checkout"
 import { pageTitle } from "@/lib/pageTitle"
 import type { RouteHandle } from "@/types/route-handle"
 
 export default function CheckoutPaymentRoute() {
-  return <PlaceholderPage title="Payment" builtIn="11" />
+  return (
+    <>
+      <PaymentStep />
+      <StepNav />
+    </>
+  )
 }
 
 export function meta() {

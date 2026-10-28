@@ -1,9 +1,14 @@
-import { PlaceholderPage } from "@/components/common/PlaceholderPage"
+import { DeliveryStep, StepNav } from "@/features/checkout"
 import { pageTitle } from "@/lib/pageTitle"
 import type { RouteHandle } from "@/types/route-handle"
 
 export default function CheckoutDeliveryRoute() {
-  return <PlaceholderPage title="Delivery options" builtIn="11" />
+  return (
+    <>
+      <DeliveryStep />
+      <StepNav />
+    </>
+  )
 }
 
 export function meta() {

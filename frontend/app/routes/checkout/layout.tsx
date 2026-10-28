@@ -1,17 +1,11 @@
-import { Outlet } from "react-router"
-
-import { CheckoutNav, CheckoutStepper } from "@/features/checkout"
+import { CheckoutShell } from "@/features/checkout"
 import { pageTitle } from "@/lib/pageTitle"
+import { cartLinesFixture } from "@/test/fixtures/cartLines"
 import type { RouteHandle } from "@/types/route-handle"
 
 export default function CheckoutLayout() {
-  return (
-    <div className="mx-auto max-w-3xl p-4">
-      <CheckoutStepper />
-      <Outlet />
-      <CheckoutNav />
-    </div>
-  )
+  // Fixture lines until the cart API (Stage 9): passed in, so the feature never imports fixtures.
+  return <CheckoutShell lines={cartLinesFixture} />
 }
 
 export function meta() {
