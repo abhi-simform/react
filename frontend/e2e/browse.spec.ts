@@ -25,15 +25,23 @@ test.describe("guest browsing", () => {
 
     await page.getByLabel("Sort by").selectOption("price_asc")
     await expect(page).toHaveURL(/sort=price_asc/)
-    const prices = await page
-      .getByRole("article")
-      .evaluateAll((els) =>
-        els.map((el) =>
-          Number(el.textContent?.match(/₹([\d,]+)/)?.[1]?.replace(/,/g, ""))
+    // the URL changes first and the old list stays on screen until the new one arrives:
+    // poll the VISIBLE prices until they are in ascending order (and there are some)
+    await expect
+      .poll(async () => {
+        const prices = await page
+          .getByRole("article")
+          .evaluateAll((els) =>
+            els.map((el) =>
+              Number(el.textContent?.match(/₹([\d,]+)/)?.[1]?.replace(/,/g, ""))
+            )
+          )
+        return (
+          prices.length > 0 &&
+          prices.every((p, i) => i === 0 || p >= prices[i - 1]!)
         )
-      )
-    expect(prices.length).toBeGreaterThan(0)
-    expect(prices).toEqual([...prices].sort((a, b) => a - b))
+      })
+      .toBe(true)
   })
 
   test("open a product from the listing", async ({ page }) => {
