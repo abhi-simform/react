@@ -8,6 +8,12 @@
  */
 type Filters = Record<string, unknown>
 
+export const authKeys = {
+  all: ["auth"] as const,
+  me: ["auth", "me"] as const,
+  sessions: ["auth", "sessions"] as const,
+}
+
 export const productKeys = {
   all: ["products"] as const,
   lists: () => [...productKeys.all, "list"] as const,

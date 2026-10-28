@@ -5,6 +5,10 @@ export type AuthUser = {
   name: string
   email: string
   role: Role
+  emailVerified: boolean
+  /** How this account can sign in: a password, Google, or both (account linking). */
+  providers: ("password" | "google")[]
+  avatarUrl: string | null
 }
 
 /** "loading" = we do not know yet (restoring a session): guards must not redirect on it. */
