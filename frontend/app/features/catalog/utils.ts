@@ -67,3 +67,51 @@ export function filterWithFacets(
   }
   return { items, facets: { brands } }
 }
+
+export type PriceBucket = { from: number; to: number; count: number }
+
+/**
+ * Equal-width buckets across min..max (integer rupee ranges, `to` inclusive).
+ * Empty list -> []. All prices equal -> one bucket (no divide by zero).
+ * Fewer than `bucketCount` buckets come back when the price range is narrower
+ * than the bucket count.
+ */
+export function priceHistogram(
+  products: readonly Product[],
+  bucketCount: number
+): PriceBucket[] {
+  if (products.length === 0 || bucketCount < 1) return []
+
+  let min = Infinity
+  let max = -Infinity
+  for (const { price } of products) {
+    if (price < min) min = price
+    if (price > max) max = price
+  }
+
+  const span = max - min + 1
+  const width = Math.ceil(span / bucketCount)
+  const buckets: PriceBucket[] = Array.from(
+    { length: Math.ceil(span / width) },
+    (_, i) => ({
+      from: min + i * width,
+      to: min + (i + 1) * width - 1,
+      count: 0,
+    })
+  )
+  for (const { price } of products) {
+    const bucket = buckets[Math.floor((price - min) / width)]
+    if (bucket) bucket.count++
+  }
+  return buckets
+}
+
+/** Brand -> count, sorted by count desc then name. Uses Map.groupBy. */
+export function brandCounts(
+  products: readonly Product[]
+): { brand: string; count: number }[] {
+  const groups = Map.groupBy(products, (p) => p.brand)
+  return [...groups]
+    .map(([brand, items]) => ({ brand, count: items.length }))
+    .sort((a, b) => b.count - a.count || a.brand.localeCompare(b.brand))
+}

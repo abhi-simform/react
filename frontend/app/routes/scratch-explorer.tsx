@@ -1,11 +1,17 @@
 // Throwaway Stage 1 route: a client-side product explorer over the static fixture.
 import { useState } from "react"
 
-import { filterWithFacets } from "@/features/catalog/utils"
+import {
+  brandCounts,
+  filterProducts,
+  filterWithFacets,
+  priceHistogram,
+} from "@/features/catalog/utils"
 import type { Product, ProductFilters } from "@/features/catalog/types"
 import snapshot from "@/test/fixtures/products.json"
 
 const products = snapshot.data as Product[]
+const topBrands = brandCounts(products).slice(0, 5)
 
 function toNumber(value: string): number | undefined {
   // "" must mean "no limit", not 0 (Number("") === 0).
@@ -21,6 +27,17 @@ export default function ScratchExplorer() {
   const brandOptions = Object.entries(facets.brands).sort(
     (a, b) => b[1] - a[1] || a[0].localeCompare(b[0])
   )
+
+  // Histogram ignores the price filter itself, otherwise it would collapse to the selected range.
+  const histogram = priceHistogram(
+    filterProducts(products, {
+      ...filters,
+      minPrice: undefined,
+      maxPrice: undefined,
+    }),
+    10
+  )
+  const maxCount = Math.max(1, ...histogram.map((b) => b.count))
 
   function patch(next: Partial<ProductFilters>) {
     setFilters((prev) => ({ ...prev, ...next }))
@@ -44,6 +61,24 @@ export default function ScratchExplorer() {
             onChange={(e) => patch({ search: e.target.value })}
           />
         </label>
+        <div
+          aria-label="Price histogram"
+          className="flex h-24 items-end gap-0.5"
+        >
+          {histogram.map((bucket) => (
+            <button
+              key={bucket.from}
+              type="button"
+              title={`₹${bucket.from} - ₹${bucket.to}: ${bucket.count}`}
+              aria-label={`₹${bucket.from} to ₹${bucket.to}: ${bucket.count} products`}
+              className="flex-1 bg-gray-400 hover:bg-gray-600"
+              style={{ height: `${(bucket.count / maxCount) * 100}%` }}
+              onClick={() =>
+                patch({ minPrice: bucket.from, maxPrice: bucket.to })
+              }
+            />
+          ))}
+        </div>
         <label className="flex flex-col">
           Min price
           <input
@@ -108,6 +143,10 @@ export default function ScratchExplorer() {
       <section>
         <p role="status" className="mb-2 font-medium">
           {items.length} of {products.length} products
+        </p>
+        <p className="mb-2 text-sm">
+          Top brands overall:{" "}
+          {topBrands.map((b) => `${b.brand} (${b.count})`).join(", ")}
         </p>
         <ul className="grid gap-1 text-sm">
           {items.map((p) => (
