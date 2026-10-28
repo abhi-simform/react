@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react"
 
-import { ApiError } from "@/lib/api/errors"
+import { toApiError } from "@/lib/api/errors"
 import { getHealth, type Health } from "@/lib/api/health"
 import type { AsyncState } from "@/lib/asyncState"
 
@@ -21,15 +21,7 @@ export function HealthBadge() {
       })
       .catch((err: unknown) => {
         if (ignore) return
-        const error =
-          err instanceof ApiError
-            ? err
-            : new ApiError({
-                status: 0,
-                code: "NETWORK_ERROR",
-                message: err instanceof Error ? err.message : "Unknown error",
-              })
-        setState({ status: "error", error })
+        setState({ status: "error", error: toApiError(err) })
       })
     return () => {
       console.log("HealthBadge: cleanup")

@@ -41,3 +41,24 @@ export class ContractError extends Error {
     this.issues = issues.map((i) => ({ path: [...i.path], message: i.message }))
   }
 }
+
+/**
+ * Anything thrown by `request` becomes an ApiError so UI state has one error
+ * type: network failures (`fetch` rejects with a TypeError, no status) and
+ * contract mismatches get their own codes.
+ */
+export function toApiError(err: unknown): ApiError {
+  if (err instanceof ApiError) return err
+  if (err instanceof ContractError) {
+    return new ApiError({
+      status: 200,
+      code: "CONTRACT_ERROR",
+      message: err.message,
+    })
+  }
+  return new ApiError({
+    status: 0,
+    code: "NETWORK_ERROR",
+    message: err instanceof Error ? err.message : "Unknown error",
+  })
+}

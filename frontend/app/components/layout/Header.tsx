@@ -9,7 +9,7 @@ export function Header() {
         ShopSphere
       </Link>
       <nav aria-label="Primary" className="flex items-center gap-4 text-sm">
-        <Link to="/scratch/grid">Products</Link>
+        <Link to="/products">Products</Link>
         <Link to="/scratch/explorer">Explorer</Link>
         <CartDrawer />
       </nav>
