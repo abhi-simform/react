@@ -1,4 +1,9 @@
-import type { CartLine, CartTotals, Coupon, ShippingRules } from "./types.ts"
+import type {
+  CartLine,
+  CartTotals,
+  CouponRule,
+  ShippingRules,
+} from "./types.ts"
 
 export const DEFAULT_SHIPPING_RULES: ShippingRules = {
   freeAbove: 499_00,
@@ -8,7 +13,7 @@ export const DEFAULT_SHIPPING_RULES: ShippingRules = {
 export const TAX_PERCENT = 18
 
 type Options = {
-  coupon?: Coupon
+  coupon?: CouponRule
   shippingRules?: ShippingRules
 }
 
@@ -43,7 +48,10 @@ export function computeTotals(
   return { subtotal, discount, shipping, tax, total, savings }
 }
 
-function couponDiscount(subtotal: number, coupon: Coupon | undefined): number {
+function couponDiscount(
+  subtotal: number,
+  coupon: CouponRule | undefined
+): number {
   if (!coupon || subtotal === 0) return 0
   if (coupon.minOrder !== undefined && subtotal < coupon.minOrder) return 0
 

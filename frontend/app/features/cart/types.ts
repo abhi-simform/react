@@ -8,7 +8,7 @@ export type CartLine = {
   mrp?: number
 }
 
-export type Coupon = {
+export type CouponRule = {
   type: "percent" | "flat"
   /** percent: 0..100, flat: paise */
   value: number

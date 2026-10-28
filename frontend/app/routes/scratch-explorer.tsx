@@ -9,7 +9,6 @@ import {
   priceHistogram,
   sortProducts,
   type HomeData,
-  type Product,
   type ProductFilters,
   type SortKey,
 } from "@/features/catalog"
@@ -18,9 +17,9 @@ import { isAbortError, withTimeout } from "@/lib/async"
 import { env } from "@/lib/env"
 import { formatCurrency } from "@/lib/format"
 import { toPaise } from "@/lib/money"
-import snapshot from "@/test/fixtures/products.json"
+import { productsFixture } from "@/test/fixtures/products"
 
-const products = snapshot.data as Product[]
+const products = productsFixture
 const topBrands = brandCounts(products).slice(0, 5)
 
 function toNumber(value: string): number | undefined {
