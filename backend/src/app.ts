@@ -22,7 +22,14 @@ export function createApp() {
   app.set("trust proxy", 1) // correct client IPs behind a reverse proxy / load balancer
 
   app.use(helmet({ crossOriginResourcePolicy: { policy: "cross-origin" } })) // allow the SPA to show API-hosted images
-  app.use(cors({ origin: env.CORS_ORIGINS, credentials: true }))
+  app.use(
+    cors({
+      origin: env.CORS_ORIGINS,
+      credentials: true,
+      // Without this the browser hides these from fetch(): the invoice filename and the replay marker.
+      exposedHeaders: ["Content-Disposition", "Idempotent-Replayed", "x-request-id"],
+    })
+  )
   app.use(compression())
   app.use(
     pinoHttp({
