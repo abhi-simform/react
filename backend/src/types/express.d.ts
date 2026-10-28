@@ -7,6 +7,8 @@ declare global {
       user?: { id: string; role: Role }
       /** Set by `validate` — the parsed + coerced body/query/params */
       valid: { body: unknown; query: unknown; params: unknown }
+      /** Set by the cart module's `cartOwner`: the user or guest whose cart this request touches */
+      cartOwner?: { userId: string } | { guestToken: string }
     }
   }
 }

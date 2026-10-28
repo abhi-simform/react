@@ -4,6 +4,11 @@ import {
   createAddressSchema,
   updateAddressSchema,
 } from "./modules/addresses/address.schema.js"
+import {
+  addItemSchema,
+  mergeSchema,
+  updateItemSchema,
+} from "./modules/cart/cart.schema.js"
 import { addWishlistSchema } from "./modules/wishlist/wishlist.schema.js"
 import { listBrandsSchema } from "./modules/categories/category.schema.js"
 import { listProductsSchema } from "./modules/products/product.schema.js"
@@ -25,6 +30,14 @@ const queryParams = (schema: z.ZodObject) =>
   }))
 
 const bearer = [{ bearerAuth: [] }]
+const cartToken = {
+  name: "x-cart-token",
+  in: "header",
+  required: false,
+  description:
+    "Guest cart id (client-generated, 16-64 url-safe chars). Ignored when Bearer is sent",
+  schema: { type: "string" },
+}
 const brandQuery = listBrandsSchema.query as z.ZodObject
 const productQuery = listProductsSchema.query as z.ZodObject
 
@@ -123,6 +136,103 @@ export const openApiDocument = {
         summary: "Update profile",
         security: bearer,
         responses: { 200: { description: "User" } },
+      },
+    },
+    "/cart": {
+      get: {
+        tags: ["Cart"],
+        summary:
+          "The cart: { items, saved, totals, hasIssues }. Lines carry availableQty, outOfStock, qtyReduced, priceChanged/previousPrice. Identify with Bearer OR x-cart-token",
+        security: [...bearer, {}],
+        parameters: [cartToken],
+        responses: {
+          200: {
+            description: "Cart view (an unknown guest token is just an empty cart)",
+          },
+          400: { description: "CART_TOKEN_REQUIRED" },
+          401: { description: "Invalid/expired Bearer token" },
+        },
+      },
+      delete: {
+        tags: ["Cart"],
+        summary: "Empty the cart (saved lines too)",
+        security: [...bearer, {}],
+        parameters: [cartToken],
+        responses: { 200: { description: "Empty cart view" } },
+      },
+    },
+    "/cart/items": {
+      post: {
+        tags: ["Cart"],
+        summary:
+          "Add qty (default 1). Existing line: quantities add up. Max min(stock, 10) per line",
+        security: [...bearer, {}],
+        parameters: [cartToken],
+        requestBody: body(addItemSchema.body),
+        responses: {
+          201: { description: "Cart view" },
+          404: { description: "NOT_FOUND (unknown or inactive product)" },
+          409: {
+            description:
+              "INSUFFICIENT_STOCK { availableQty, requested, inCart } | CART_FULL (50 lines)",
+          },
+          422: { description: "VALIDATION_ERROR" },
+        },
+      },
+    },
+    "/cart/items/{productId}": {
+      patch: {
+        tags: ["Cart"],
+        summary:
+          "Set qty and/or move between cart and saved-for-later (savedForLater: true|false)",
+        security: [...bearer, {}],
+        parameters: [
+          cartToken,
+          { name: "productId", in: "path", required: true, schema: { type: "string" } },
+        ],
+        requestBody: body(updateItemSchema.body),
+        responses: {
+          200: { description: "Cart view" },
+          404: { description: "Not in this cart" },
+          409: { description: "INSUFFICIENT_STOCK" },
+          422: { description: "VALIDATION_ERROR" },
+        },
+      },
+      delete: {
+        tags: ["Cart"],
+        summary: "Remove a line (idempotent)",
+        security: [...bearer, {}],
+        parameters: [
+          cartToken,
+          { name: "productId", in: "path", required: true, schema: { type: "string" } },
+        ],
+        responses: { 200: { description: "Cart view" } },
+      },
+    },
+    "/cart/acknowledge-prices": {
+      post: {
+        tags: ["Cart"],
+        summary: "Accept today's prices: clears every priceChanged flag",
+        security: [...bearer, {}],
+        parameters: [cartToken],
+        responses: { 200: { description: "Cart view" } },
+      },
+    },
+    "/cart/merge": {
+      post: {
+        tags: ["Cart"],
+        summary:
+          "After login: fold the guest cart (x-cart-token value in the body) into the user's cart, then delete it. Quantities add up, capped by stock",
+        security: bearer,
+        requestBody: body(mergeSchema.body),
+        responses: {
+          200: {
+            description:
+              "Cart view + merge { merged, adjusted: [{productId,name,requested,applied}], skipped: [{productId,name,reason}] }",
+          },
+          401: { description: "Unauthorized" },
+          422: { description: "VALIDATION_ERROR" },
+        },
       },
     },
     "/wishlist": {

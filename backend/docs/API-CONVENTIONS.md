@@ -134,6 +134,42 @@ All wishlist and address endpoints need `Authorization: Bearer <accessToken>` (4
 
 Address shape: `{ id, fullName, phone, line1, line2|null, landmark|null, city, state, pincode, type, isDefault, createdAt, updatedAt }`.
 
+### Cart (B3)
+
+One cart per user **or** per guest token. Every cart endpoint accepts **either** `Authorization: Bearer <accessToken>` (the user's cart) **or** `x-cart-token: <token>` (a guest cart). The token is a random id **you generate once** (`crypto.randomUUID()`, 16-64 chars of `A-Za-z0-9_-`) and keep in `localStorage`; it names a cart, it is not a credential. Neither header: `400 CART_TOKEN_REQUIRED`. A Bearer header that is invalid/expired is `401` (it is never silently downgraded to a guest, so the client refreshes and retries). Guest carts expire 30 days after their last write (Mongo TTL). Reading never creates a cart: an unknown token is an empty cart.
+
+Every endpoint below returns the **cart view** (the whole fresh cart, so a mutation response can be written straight into the Query cache):
+
+```jsonc
+{
+  "items": [Line],   // the live cart
+  "saved": [Line],   // "saved for later"
+  "totals": { "lineCount", "unitCount", "subtotal", "mrpTotal", "savings" },  // whole rupees, live lines only
+  "hasIssues": true, // any live line is outOfStock / qtyReduced / priceChanged
+  "updatedAt": "..."
+}
+// Line:
+{ "productId", "sku", "slug", "name", "brand", "imageUrl|null", "qty",
+  "unitPrice", "mrp",                 // CURRENT price (rupees)
+  "availableQty", "payableQty",       // payableQty = min(qty, availableQty): what totals count
+  "outOfStock", "qtyReduced", "priceChanged", "previousPrice",  // warnings, recomputed on EVERY read
+  "savedForLater", "addedAt" }
+```
+
+Totals deliberately stop at `subtotal / mrpTotal / savings`: shipping, tax and coupons are not server rules yet (coupons arrive with B4, orders with B5), so the client derives those from the server's lines.
+
+| Method | Path                                              | Notes                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| ------ | ------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| GET    | `/cart`                                           | The cart view. Flags answer "did anything change since I added it?": `priceChanged` (+`previousPrice`), `qtyReduced` (`availableQty < qty`), `outOfStock` (stock 0 or product archived). There is no separate validate call: revalidation is just a fresh GET.                                                                                                                                                                                            |
+| POST   | `/cart/items` `{productId, qty=1}`                | Adds; an existing line is **incremented** (and a saved line returns to the cart). `201` cart view. Limit per line = `min(stock, 10)`: `409 INSUFFICIENT_STOCK` with `details: { availableQty, requested, inCart }` (never a silent clamp). `409 CART_FULL` at 50 lines. `404` unknown/archived product. `422` bad id/qty. The increment is one conditional update: parallel adds cannot overshoot the stock.                                              |
+| PATCH  | `/cart/items/:productId` `{qty?, savedForLater?}` | Set the quantity and/or move between cart and saved. At least one field (`422` otherwise). Stock is re-checked whenever a line is (or becomes) a live cart line (`409 INSUFFICIENT_STOCK`). `404` if the product is not in this cart.                                                                                                                                                                                                                     |
+| DELETE | `/cart/items/:productId`                          | Idempotent remove (`200` cart view even if it was not there).                                                                                                                                                                                                                                                                                                                                                                                             |
+| DELETE | `/cart`                                           | Empty the cart (saved lines too).                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| POST   | `/cart/acknowledge-prices`                        | "I have seen the new prices": snapshots every line at the current price, clearing `priceChanged`.                                                                                                                                                                                                                                                                                                                                                         |
+| POST   | `/cart/merge` `{guestToken}`                      | **Bearer required.** After login: fold the guest cart into the user's cart and delete it, in one transaction. Same product: quantities add, capped at `min(stock, 10)`; new product: copied (with its saved flag); unavailable / out-of-stock products are skipped. Response = cart view + `merge: { merged, adjusted: [{productId,name,requested,applied}], skipped: [{productId,name,reason}] }`. Safe to call twice (second call finds no guest cart). |
+
+Dev customer's seeded cart: 2 live lines (one whose price has dropped since it was added) and 1 saved line.
+
 ### Image upload (B7, upload slice)
 
 `POST /uploads/images` (Bearer). `multipart/form-data` with exactly one file in the field **`file`**. Do not set `Content-Type` yourself in the browser (the boundary is added automatically).

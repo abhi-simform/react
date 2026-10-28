@@ -7,6 +7,7 @@ import { addressRoutes } from "./modules/addresses/address.routes.js"
 import { pincodeRoutes } from "./modules/pincodes/pincode.routes.js"
 import { uploadRoutes } from "./modules/uploads/upload.routes.js"
 import { wishlistRoutes } from "./modules/wishlist/wishlist.routes.js"
+import { cartRoutes } from "./modules/cart/cart.routes.js"
 import { userRoutes } from "./modules/users/user.routes.js"
 
 // Every feature module mounts here. New module = new line.
@@ -21,3 +22,4 @@ routes.use("/wishlist", wishlistRoutes)
 routes.use("/addresses", addressRoutes)
 routes.use("/pincodes", pincodeRoutes)
 routes.use("/uploads", uploadRoutes)
+routes.use("/cart", cartRoutes)

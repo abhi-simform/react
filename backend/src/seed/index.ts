@@ -9,6 +9,7 @@ import { User } from "../modules/users/user.model.js"
 import { RefreshToken } from "../modules/auth/refreshToken.model.js"
 import { Address } from "../modules/addresses/address.model.js"
 import { WishlistItem } from "../modules/wishlist/wishlist.model.js"
+import { Cart } from "../modules/cart/cart.model.js"
 import { slugify } from "../utils/slugify.js"
 import { CATALOG } from "./catalog.js"
 
@@ -35,6 +36,7 @@ async function main() {
     RefreshToken.syncIndexes(),
     Address.syncIndexes(),
     WishlistItem.syncIndexes(),
+    Cart.syncIndexes(),
   ])
 
   // Users
@@ -178,6 +180,26 @@ async function main() {
     await WishlistItem.insertMany(
       picks.map((p) => ({ user: customer._id, product: p._id }))
     )
+    // B3: the dev customer's cart has two lines (one at a price that has since dropped, so the
+    // "price changed" warning is visible) and one product saved for later.
+    const inStock = await Product.find({ status: "active", stock: { $gte: 5 } })
+      .sort({ soldCount: 1 })
+      .limit(3)
+    if (inStock.length === 3) {
+      await Cart.create({
+        user: customer._id,
+        items: [
+          { product: inStock[0]!._id, qty: 1, priceAtAdd: inStock[0]!.price },
+          { product: inStock[1]!._id, qty: 2, priceAtAdd: inStock[1]!.price + 200 },
+          {
+            product: inStock[2]!._id,
+            qty: 1,
+            priceAtAdd: inStock[2]!.price,
+            savedForLater: true,
+          },
+        ],
+      })
+    }
   }
   logger.info(
     `Seeded ${total} products, ${await Category.countDocuments()} categories, 3 users`
