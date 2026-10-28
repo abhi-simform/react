@@ -15,6 +15,8 @@ import { Deal } from "../modules/deals/deal.model.js"
 import { Banner } from "../modules/banners/banner.model.js"
 import { Payment, WebhookEvent } from "../modules/payments/payment.model.js"
 import { Order, type OrderStatus } from "../modules/orders/order.model.js"
+import { Review, Vote, maskName } from "../modules/reviews/review.model.js"
+import { Answer, Question } from "../modules/reviews/qa.model.js"
 import { slugify } from "../utils/slugify.js"
 import { CATALOG } from "./catalog.js"
 
@@ -47,6 +49,10 @@ async function main() {
     Banner.syncIndexes(),
     Order.syncIndexes(),
     Payment.syncIndexes(),
+    Review.syncIndexes(),
+    Vote.syncIndexes(),
+    Question.syncIndexes(),
+    Answer.syncIndexes(),
     WebhookEvent.syncIndexes(),
   ])
 
@@ -426,6 +432,184 @@ async function main() {
           })),
         { timestamps: false }
       )
+    }
+  }
+
+  // B7: reviewers, reviews for (almost) every product, a few photo reviews, helpful votes and Q&A.
+  // The product's ratingAvg/ratingCount are REPLACED by the real numbers computed from these reviews,
+  // so the PDP header, the histogram and the list always agree.
+  {
+    const reviewers = await User.insertMany(
+      Array.from({ length: 14 }, (_, i) => ({
+        name: `${faker.person.firstName()} ${faker.person.lastName()}`,
+        email: `reviewer${i + 1}@shopsphere.dev`,
+        emailVerified: true,
+        passwordHash,
+      }))
+    )
+    const pool = faker.helpers.shuffle(reviewers)
+    const TEXT: Record<number, string[]> = {
+      5: [
+        "Absolutely love it. Exactly as described and the quality is excellent.",
+        "Great value for money. Delivery was quick and packaging was solid.",
+        "Better than I expected. Would happily buy again and recommend to friends.",
+      ],
+      4: [
+        "Very good overall. Minor nitpicks but nothing that spoils it.",
+        "Solid product, works as advertised. Slightly pricey but worth it.",
+      ],
+      3: [
+        "It is okay. Does the job but nothing special for the price.",
+        "Average. Some things are good, some could be better.",
+      ],
+      2: [
+        "Not impressed. The finish feels cheap and it did not match the photos.",
+        "Disappointing, expected more at this price point.",
+      ],
+      1: [
+        "Stopped working within a week. Would not recommend to anyone.",
+        "Poor quality and the support was unhelpful. Returning it.",
+      ],
+    }
+    const TITLES: Record<number, string[]> = {
+      5: ["Worth it", "Great!", "Happy with it"],
+      4: ["Good buy", "Very good"],
+      3: ["Decent", "Average"],
+      2: ["Could be better", "Disappointed"],
+      1: ["Not recommended", "Poor quality"],
+    }
+    const prods = await Product.find({ status: "active" }).select("_id soldCount").lean()
+    const delivered = customer
+      ? await Order.find({ user: customer._id, status: "delivered" })
+          .sort({ createdAt: 1 })
+          .lean()
+      : []
+    const docs: object[] = []
+    for (const p of prods) {
+      // popular products have more reviews; ~15% have none yet
+      const count = faker.datatype.boolean({ probability: 0.15 })
+        ? 0
+        : faker.number.int({ min: 1, max: p.soldCount > 15000 ? 14 : 8 })
+      const who = faker.helpers.arrayElements(pool, Math.min(count, pool.length))
+      who.forEach((u, i) => {
+        const rating = faker.helpers.weightedArrayElement([
+          { weight: 5, value: 5 },
+          { weight: 4, value: 4 },
+          { weight: 2, value: 3 },
+          { weight: 1, value: 2 },
+          { weight: 1, value: 1 },
+        ])
+        const at = faker.date.recent({ days: 200 })
+        docs.push({
+          product: p._id,
+          user: u._id,
+          userName: maskName(u.name),
+          rating,
+          title: faker.helpers.arrayElement(TITLES[rating]!),
+          body: `${faker.helpers.arrayElement(TEXT[rating]!)} ${faker.lorem.sentence()}`,
+          photos:
+            rating >= 4 && i === 0 && faker.datatype.boolean({ probability: 0.25 })
+              ? [`https://picsum.photos/seed/review-${p._id}-${i}/600/600`]
+              : [],
+          verifiedPurchase: faker.datatype.boolean({ probability: 0.6 }),
+          helpfulCount: faker.number.int({ min: 0, max: 40 }),
+          createdAt: at,
+          updatedAt: at,
+        })
+      })
+    }
+    if (customer && delivered[0]) {
+      const it = delivered[0].items[0]!
+      docs.push({
+        product: it.product,
+        user: customer._id,
+        userName: maskName(customer.name),
+        rating: 4,
+        title: "Good, arrived on time",
+        body: "Bought this last month. Does what it says, the build is decent and delivery was fast.",
+        photos: [],
+        verifiedPurchase: true,
+        helpfulCount: 2,
+      })
+    }
+    // The dev customer reviewed their FIRST delivered product; the second is left for the "write a review" demo.
+    await Review.insertMany(docs)
+    // helpful votes by the dev customer on a few reviews (shows the "voted" state)
+    if (customer) {
+      const some = await Review.find({
+        user: { $ne: customer._id },
+        helpfulCount: { $gte: 20 },
+      })
+        .limit(6)
+        .lean()
+      await Vote.insertMany(
+        some.map((r) => ({ kind: "review", target: r._id, user: customer._id }))
+      )
+      await Review.updateMany(
+        { _id: { $in: some.map((r) => r._id) } },
+        { $inc: { helpfulCount: 1 } }
+      )
+    }
+    const agg = await Review.aggregate<{ _id: unknown; avg: number; n: number }>([
+      { $match: { status: "published" } },
+      { $group: { _id: "$product", avg: { $avg: "$rating" }, n: { $sum: 1 } } },
+    ])
+    await Product.updateMany({}, { ratingAvg: 0, ratingCount: 0 })
+    await Product.bulkWrite(
+      agg.map((a) => ({
+        updateOne: {
+          filter: { _id: a._id },
+          update: { ratingAvg: Math.round(a.avg * 10) / 10, ratingCount: a.n },
+        },
+      }))
+    )
+
+    // Q&A on the most popular products; the seller answers some.
+    const popular = await Product.find({ status: "active" })
+      .sort({ soldCount: -1 })
+      .limit(40)
+    const QUESTIONS = [
+      "Does this come with a warranty and how do I claim it?",
+      "Is it suitable for daily use or only occasional use?",
+      "What is included in the box when it arrives?",
+      "How does this compare with the previous model?",
+    ]
+    const ANSWERS = [
+      "Yes, it comes with a one year manufacturer warranty; keep the invoice for claims.",
+      "Works well for daily use. Mine has held up for months.",
+      "You get the product, a quick start guide and the standard accessories.",
+    ]
+    for (const p of popular) {
+      for (const text of faker.helpers.arrayElements(
+        QUESTIONS,
+        faker.number.int({ min: 1, max: 3 })
+      )) {
+        const asker = faker.helpers.arrayElement(reviewers)
+        const q = await Question.create({
+          product: p._id,
+          user: asker._id,
+          userName: maskName(asker.name),
+          text,
+          upvotes: faker.number.int({ min: 0, max: 12 }),
+        })
+        const n = faker.number.int({ min: 0, max: 3 })
+        for (let k = 0; k < n; k++) {
+          const bySeller =
+            k === 0 && seller && faker.datatype.boolean({ probability: 0.6 })
+          const who = bySeller ? seller! : faker.helpers.arrayElement(reviewers)
+          await Answer.create({
+            question: q._id,
+            product: p._id,
+            user: who._id,
+            userName: maskName(who.name),
+            text: faker.helpers.arrayElement(ANSWERS),
+            badge: bySeller ? "seller" : undefined,
+            verifiedBuyer: !bySeller && faker.datatype.boolean(),
+            upvotes: faker.number.int({ min: 0, max: 8 }),
+          })
+        }
+        if (n) await Question.updateOne({ _id: q._id }, { answerCount: n })
+      }
     }
   }
 

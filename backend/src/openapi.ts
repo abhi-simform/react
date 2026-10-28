@@ -34,6 +34,7 @@ import {
   simulateWebhookSchema,
   verifyPaymentSchema,
 } from "./modules/payments/payment.schema.js"
+import * as RS from "./modules/reviews/review.schema.js"
 import { addWishlistSchema } from "./modules/wishlist/wishlist.schema.js"
 import { listBrandsSchema } from "./modules/categories/category.schema.js"
 import { listProductsSchema } from "./modules/products/product.schema.js"
@@ -763,6 +764,278 @@ export const openApiDocument = {
           200: { description: "Payment" },
           409: { description: "NOT_PAID | REFUND_EXCEEDS_PAYMENT { refundable }" },
         },
+      },
+    },
+    "/products/{productId}/reviews/summary": {
+      get: {
+        tags: ["Reviews"],
+        summary:
+          "Rating summary from published reviews: { average, count, histogram: {1..5}, withPhotos }",
+        parameters: [
+          { name: "productId", in: "path", required: true, schema: { type: "string" } },
+        ],
+        responses: { 200: { description: "Summary" }, 404: { description: "NOT_FOUND" } },
+      },
+    },
+    "/products/{productId}/reviews/eligibility": {
+      get: {
+        tags: ["Reviews"],
+        summary:
+          "Can I review this product? { canReview, reason: ALREADY_REVIEWED | OWN_PRODUCT | null, verifiedPurchase, review }",
+        security: bearer,
+        parameters: [
+          { name: "productId", in: "path", required: true, schema: { type: "string" } },
+        ],
+        responses: { 200: { description: "Eligibility" } },
+      },
+    },
+    "/products/{productId}/reviews": {
+      get: {
+        tags: ["Reviews"],
+        summary:
+          "Published reviews (public; send Bearer to get myVote/isMine). sort helpful|newest|highest|lowest, rating=1..5, photos=true",
+        parameters: [
+          { name: "productId", in: "path", required: true, schema: { type: "string" } },
+          ...queryParams(RS.listReviewsSchema.query as z.ZodObject),
+        ],
+        responses: { 200: { description: "Review[] + page meta" } },
+      },
+      post: {
+        tags: ["Reviews"],
+        summary:
+          "Write a review (one per user per product). verifiedPurchase is computed from delivered orders. Photos must be your own uploads (POST /uploads/images), max 5",
+        security: bearer,
+        parameters: [
+          { name: "productId", in: "path", required: true, schema: { type: "string" } },
+        ],
+        requestBody: body(RS.createReviewSchema.body),
+        responses: {
+          201: { description: "Review" },
+          409: { description: "ALREADY_REVIEWED" },
+          403: { description: "OWN_PRODUCT" },
+          422: {
+            description: "VALIDATION_ERROR (photos.N for a foreign/invalid photo url)",
+          },
+        },
+      },
+    },
+    "/reviews/{id}": {
+      patch: {
+        tags: ["Reviews"],
+        summary: "Edit my review (404 for anyone else's)",
+        security: bearer,
+        parameters: [
+          { name: "id", in: "path", required: true, schema: { type: "string" } },
+        ],
+        requestBody: body(RS.updateReviewSchema.body),
+        responses: { 200: { description: "Review" } },
+      },
+      delete: {
+        tags: ["Reviews"],
+        summary: "Delete my review (admins can delete any)",
+        security: bearer,
+        parameters: [
+          { name: "id", in: "path", required: true, schema: { type: "string" } },
+        ],
+        responses: { 204: { description: "Deleted" } },
+      },
+    },
+    "/reviews/{id}/helpful": {
+      put: {
+        tags: ["Reviews"],
+        summary:
+          "Mark helpful. Idempotent: voting twice = once. 403 OWN_CONTENT on your own review",
+        security: bearer,
+        parameters: [
+          { name: "id", in: "path", required: true, schema: { type: "string" } },
+        ],
+        responses: { 200: { description: "{ helpfulCount, myVote }" } },
+      },
+      delete: {
+        tags: ["Reviews"],
+        summary: "Remove my helpful vote (idempotent)",
+        security: bearer,
+        parameters: [
+          { name: "id", in: "path", required: true, schema: { type: "string" } },
+        ],
+        responses: { 200: { description: "{ helpfulCount, myVote }" } },
+      },
+    },
+    "/reviews/{id}/report": {
+      post: {
+        tags: ["Reviews"],
+        summary: "Report a review to moderators (one report per user)",
+        security: bearer,
+        parameters: [
+          { name: "id", in: "path", required: true, schema: { type: "string" } },
+        ],
+        requestBody: body(RS.reportSchema.body),
+        responses: { 200: { description: "{ reported, alreadyReported }" } },
+      },
+    },
+    "/products/{productId}/questions": {
+      get: {
+        tags: ["Q&A"],
+        summary:
+          "Questions with their top 3 answers (seller/staff first, then most upvoted). sort helpful|newest",
+        parameters: [
+          { name: "productId", in: "path", required: true, schema: { type: "string" } },
+          ...queryParams(RS.listQuestionsSchema.query as z.ZodObject),
+        ],
+        responses: { 200: { description: "Question[] + page meta" } },
+      },
+      post: {
+        tags: ["Q&A"],
+        summary: "Ask a question",
+        security: bearer,
+        parameters: [
+          { name: "productId", in: "path", required: true, schema: { type: "string" } },
+        ],
+        requestBody: body(RS.askSchema.body),
+        responses: { 201: { description: "Question" } },
+      },
+    },
+    "/questions/{id}/answers": {
+      get: {
+        tags: ["Q&A"],
+        summary: "All answers of a question (paged)",
+        parameters: [
+          { name: "id", in: "path", required: true, schema: { type: "string" } },
+          ...queryParams(RS.listAnswersSchema.query as z.ZodObject),
+        ],
+        responses: { 200: { description: "Answer[] + page meta" } },
+      },
+      post: {
+        tags: ["Q&A"],
+        summary:
+          "Answer. badge = seller (the product's seller) | staff (admin) | null; verifiedBuyer from delivered orders",
+        security: bearer,
+        parameters: [
+          { name: "id", in: "path", required: true, schema: { type: "string" } },
+        ],
+        requestBody: body(RS.answerSchema.body),
+        responses: { 201: { description: "Answer" } },
+      },
+    },
+    "/questions/{id}/upvote": {
+      put: {
+        tags: ["Q&A"],
+        summary: "Upvote a question (idempotent; 403 on your own)",
+        security: bearer,
+        parameters: [
+          { name: "id", in: "path", required: true, schema: { type: "string" } },
+        ],
+        responses: { 200: { description: "{ upvotes, myVote }" } },
+      },
+      delete: {
+        tags: ["Q&A"],
+        summary: "Remove my upvote",
+        security: bearer,
+        parameters: [
+          { name: "id", in: "path", required: true, schema: { type: "string" } },
+        ],
+        responses: { 200: { description: "{ upvotes, myVote }" } },
+      },
+    },
+    "/answers/{id}/upvote": {
+      put: {
+        tags: ["Q&A"],
+        summary: "Upvote an answer (idempotent; 403 on your own)",
+        security: bearer,
+        parameters: [
+          { name: "id", in: "path", required: true, schema: { type: "string" } },
+        ],
+        responses: { 200: { description: "{ upvotes, myVote }" } },
+      },
+      delete: {
+        tags: ["Q&A"],
+        summary: "Remove my upvote",
+        security: bearer,
+        parameters: [
+          { name: "id", in: "path", required: true, schema: { type: "string" } },
+        ],
+        responses: { 200: { description: "{ upvotes, myVote }" } },
+      },
+    },
+    "/questions/{id}": {
+      delete: {
+        tags: ["Q&A"],
+        summary: "Delete my question (and its answers); admin can delete any",
+        security: bearer,
+        parameters: [
+          { name: "id", in: "path", required: true, schema: { type: "string" } },
+        ],
+        responses: { 204: { description: "Deleted" } },
+      },
+    },
+    "/answers/{id}": {
+      delete: {
+        tags: ["Q&A"],
+        summary: "Delete my answer; admin can delete any",
+        security: bearer,
+        parameters: [
+          { name: "id", in: "path", required: true, schema: { type: "string" } },
+        ],
+        responses: { 204: { description: "Deleted" } },
+      },
+    },
+    "/admin/reviews": {
+      get: {
+        tags: ["Admin"],
+        summary:
+          "Moderation queue. Filters: status, productId, reported=true (most reported first)",
+        security: bearer,
+        parameters: queryParams(RS.adminListReviewsSchema.query as z.ZodObject),
+        responses: {
+          200: { description: "Review[] (+ product, reportCount, moderationNote)" },
+          403: { description: "FORBIDDEN" },
+        },
+      },
+    },
+    "/admin/reviews/{id}/moderate": {
+      post: {
+        tags: ["Admin"],
+        summary:
+          "Hide or republish a review; the product's rating is recomputed from published reviews",
+        security: bearer,
+        parameters: [
+          { name: "id", in: "path", required: true, schema: { type: "string" } },
+        ],
+        requestBody: body(RS.moderateSchema.body),
+        responses: { 200: { description: "Review" } },
+      },
+    },
+    "/admin/questions": {
+      get: {
+        tags: ["Admin"],
+        summary: "All questions (filter status)",
+        security: bearer,
+        parameters: queryParams(RS.adminListQuestionsSchema.query as z.ZodObject),
+        responses: { 200: { description: "Question[]" } },
+      },
+    },
+    "/admin/questions/{id}/moderate": {
+      post: {
+        tags: ["Admin"],
+        summary: "Hide or republish a question",
+        security: bearer,
+        parameters: [
+          { name: "id", in: "path", required: true, schema: { type: "string" } },
+        ],
+        requestBody: body(RS.moderateSchema.body),
+        responses: { 200: { description: "{ id, kind, status }" } },
+      },
+    },
+    "/admin/answers/{id}/moderate": {
+      post: {
+        tags: ["Admin"],
+        summary: "Hide or republish an answer",
+        security: bearer,
+        parameters: [
+          { name: "id", in: "path", required: true, schema: { type: "string" } },
+        ],
+        requestBody: body(RS.moderateSchema.body),
+        responses: { 200: { description: "{ id, kind, status }" } },
       },
     },
     "/cart/merge": {
