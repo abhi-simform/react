@@ -2,22 +2,22 @@ import { cn } from "@/lib/utils"
 
 import { ProductCard, type ProductCardProduct } from "./ProductCard"
 
-type ProductGridProps<T extends ProductCardProduct> = {
-  products: readonly T[]
+type ProductGridProps = {
+  products: readonly ProductCardProduct[]
   /** Optional badge text per product. */
-  badgeFor?: (product: T) => string | undefined
+  badgeFor?: (product: ProductCardProduct) => string | undefined
   onAddToCart?: (product: ProductCardProduct) => void
   /** "list" is a single column. */
   view?: "grid" | "list"
 }
 
 /** 2 / 3 / 4 / 5 columns at base / md / lg / xl. Keys are product ids, never indexes. */
-export function ProductGrid<T extends ProductCardProduct>({
+export function ProductGrid({
   products,
   badgeFor,
   onAddToCart,
   view = "grid",
-}: ProductGridProps<T>) {
+}: ProductGridProps) {
   return (
     <ul
       className={cn(
@@ -30,7 +30,7 @@ export function ProductGrid<T extends ProductCardProduct>({
       {products.map((product) => {
         const badge = badgeFor?.(product)
         return (
-          <li key={product._id}>
+          <li key={product.id}>
             <ProductCard product={product} onAddToCart={onAddToCart}>
               {badge && <ProductCard.Badge>{badge}</ProductCard.Badge>}
             </ProductCard>

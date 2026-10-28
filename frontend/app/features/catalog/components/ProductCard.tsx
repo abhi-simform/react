@@ -7,11 +7,10 @@ import { WishlistHeart } from "@/features/wishlist"
 import { paths } from "@/lib/paths"
 import { cn } from "@/lib/utils"
 
-import type { Product, ProductCardData } from "../types"
+import type { ProductCardVM } from "../mappers"
 
-/** A card needs a handful of list fields: a Pick keeps it easy to fake in tests. */
-export type ProductCardProduct = ProductCardData &
-  Pick<Product, "_id" | "brand" | "stock" | "ratingCount">
+/** The card renders a view model (see `toProductCardVM`): no formatting or discount math in here. */
+export type ProductCardProduct = ProductCardVM
 
 type ProductCardProps = {
   product: ProductCardProduct
@@ -37,8 +36,7 @@ export function ProductCard({
   onNotifyMe,
   addToCartDisabled = false,
 }: ProductCardProps) {
-  const outOfStock = product.stock <= 0
-  const image = product.images[0]
+  const outOfStock = !product.inStock
 
   return (
     <article className="relative flex h-full flex-col gap-2 rounded-lg border p-2 focus-within:ring-2">
@@ -47,22 +45,20 @@ export function ProductCard({
           "relative aspect-square overflow-hidden rounded bg-neutral-100"
         )}
       >
-        {image && (
-          // Decorative: the title link right below names the product.
-          <img
-            src={image.url}
-            alt=""
-            width={400}
-            height={400}
-            loading="lazy"
-            className={cn("size-full object-cover", outOfStock && "opacity-40")}
-          />
-        )}
+        {/* Decorative: the title link right below names the product. */}
+        <img
+          src={product.image.url}
+          alt=""
+          width={400}
+          height={400}
+          loading="lazy"
+          className={cn("size-full object-cover", outOfStock && "opacity-40")}
+        />
         <div className="absolute top-1 left-1 flex flex-col items-start gap-1">
           {children}
         </div>
         <WishlistHeart
-          productId={product._id}
+          productId={product.id}
           productName={product.name}
           className="absolute top-1 right-1 z-10"
         />
@@ -80,13 +76,26 @@ export function ProductCard({
             {product.name}
           </Link>
         </h3>
-        <Rating
-          value={product.ratingAvg}
-          count={product.ratingCount}
-          size="sm"
-        />
-        <Price price={product.price} mrp={product.mrp} />
-        {outOfStock && <p className="text-xs text-red-700">Out of stock</p>}
+        {product.rating ? (
+          <Rating
+            value={product.rating.value}
+            count={product.rating.count}
+            size="sm"
+          />
+        ) : (
+          <p className="text-xs text-neutral-500">No ratings yet</p>
+        )}
+        <Price price={product.price} />
+        {product.stockNote && (
+          <p
+            className={cn(
+              "text-xs",
+              outOfStock ? "text-red-700" : "text-amber-700"
+            )}
+          >
+            {product.stockNote}
+          </p>
+        )}
       </div>
 
       {outOfStock ? (

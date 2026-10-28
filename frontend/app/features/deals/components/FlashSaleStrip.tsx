@@ -5,6 +5,7 @@ import { ErrorState } from "@/components/common/ErrorState"
 import {
   ProductCard,
   ProductCardSkeleton,
+  toProductCardVM,
   useProducts,
 } from "@/features/catalog"
 import type { Product } from "@/features/catalog"
@@ -69,7 +70,7 @@ export function FlashSaleStrip({ endsAt }: { endsAt?: number }) {
             {state.data.items.map((product) => (
               <li key={product._id} className="flex flex-col gap-1">
                 <ProductCard
-                  product={product}
+                  product={toProductCardVM(product)}
                   addToCartDisabled={countdown.isExpired}
                 >
                   <ProductCard.Badge>

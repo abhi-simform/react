@@ -2,7 +2,12 @@
 // and a switch between the buggy index keys and the correct id keys.
 import { useState } from "react"
 
-import { ProductGrid, sortProducts, type SortKey } from "@/features/catalog"
+import {
+  ProductGrid,
+  sortProducts,
+  toProductCardVM,
+  type SortKey,
+} from "@/features/catalog"
 import { IndexKeyGrid } from "@/scratch/key-bug/IndexKeyGrid"
 import { productsFixture } from "@/test/fixtures/products"
 
@@ -42,12 +47,12 @@ export default function ScratchGrid() {
         </label>
       </div>
       {useIndexKeys ? (
-        <IndexKeyGrid products={products} />
+        <IndexKeyGrid products={products.map(toProductCardVM)} />
       ) : (
         <ProductGrid
-          products={products}
+          products={products.map(toProductCardVM)}
           badgeFor={(p) =>
-            p.discountPercent >= 50 ? "Lightning deal" : undefined
+            p.price.discountPercent >= 50 ? "Lightning deal" : undefined
           }
           onAddToCart={(p) => console.log("add to cart", p.slug)}
         />

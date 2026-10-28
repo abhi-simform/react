@@ -35,6 +35,12 @@ export type { ProductCardProduct } from "./components/ProductCard"
 export { ProductCardSkeleton } from "./components/ProductCardSkeleton"
 export { ProductGrid } from "./components/ProductGrid"
 export { HomeRails } from "./components/HomeRails"
+export { FALLBACK_IMAGE, toProductCardVM, toProductDetailVM } from "./mappers"
+export type {
+  ProductCardSource,
+  ProductCardVM,
+  ProductDetailVM,
+} from "./mappers"
 export { ProductListingPage } from "./components/ProductListingPage"
 export { useProducts } from "./hooks/useProducts"
 export { useCategory, useCategoryTree } from "./hooks/useCategories"

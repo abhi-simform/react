@@ -1,4 +1,4 @@
-import { ProductGrid } from "@/features/catalog"
+import { ProductGrid, toProductCardVM } from "@/features/catalog"
 
 import { useProductsByIds } from "../hooks/useProductsByIds"
 import { useRecentlyViewed } from "../hooks/useRecentlyViewed"
@@ -18,7 +18,7 @@ export function RecentlyViewedRail() {
       {products === null ? (
         <p>Loading...</p>
       ) : (
-        <ProductGrid products={products} />
+        <ProductGrid products={products.map(toProductCardVM)} />
       )}
     </section>
   )

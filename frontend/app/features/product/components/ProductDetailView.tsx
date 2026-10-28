@@ -5,8 +5,8 @@ import { Rating } from "@/components/common/Rating"
 import { usePrevious } from "@/hooks/usePrevious"
 import { QuantityStepper } from "@/components/common/QuantityStepper"
 import { Button } from "@/components/ui/button"
-import { formatRupees } from "@/lib/format"
-import type { ProductDetail } from "@/features/catalog"
+import type { ProductDetailVM } from "@/features/catalog"
+import { toPriceVM } from "@/lib/format"
 import { WishlistHeart } from "@/features/wishlist"
 import type { Variant } from "@/types/domain"
 
@@ -17,7 +17,7 @@ import { ProductTabs } from "./ProductTabs"
 import { VariantPicker } from "./VariantPicker"
 
 type ProductDetailViewProps = {
-  product: ProductDetail
+  product: ProductDetailVM
   variants: readonly Variant[]
 }
 
@@ -29,15 +29,18 @@ export function ProductDetailView({
   const [selection, setSelection] = useState<Selection>({})
   const [qty, setQty] = useState(1)
   const variant = findVariant(variants, selection)
-  const price = variant?.price ?? product.price
-  const mrp = variant?.mrp ?? product.mrp
+  // A selected variant overrides the price: the same mapper builds the tag.
+  const price = variant?.price ?? product.amount
+  const priceVM = variant
+    ? toPriceVM(variant.price, variant.mrp)
+    : product.price
   const previousPrice = usePrevious(price)
 
   // Viewing this product syncs an external system (localStorage): an effect.
   // `push` is stable and the list is de-duplicated, so StrictMode's second
   // run changes nothing.
   const { push } = useRecentlyViewed()
-  const productId = product._id
+  const productId = product.id
   useEffect(() => push(productId), [push, productId])
   const canBuy = variant !== undefined && variant.stock > 0
   // Derived: if a variant with less stock is picked, the shown quantity is
@@ -51,13 +54,20 @@ export function ProductDetailView({
       <div className="flex flex-col gap-3">
         <p className="text-sm text-neutral-500">{product.brand}</p>
         <h1 className="text-xl font-medium">{product.name}</h1>
-        <Rating value={product.ratingAvg} count={product.ratingCount} />
-        <Price price={price} mrp={mrp} className="text-lg" />
+        {product.rating ? (
+          <Rating value={product.rating.value} count={product.rating.count} />
+        ) : (
+          <p className="text-sm text-neutral-500">No ratings yet</p>
+        )}
+        <Price price={priceVM} className="text-lg" />
         {previousPrice !== undefined && previousPrice !== price && (
           <p className="text-sm text-neutral-600">
-            Price changed from {formatRupees(previousPrice)}
+            Price changed from {toPriceVM(previousPrice, undefined).current}
           </p>
         )}
+        <p className="text-xs text-neutral-500">
+          Listed {product.listedOn}, updated {product.updatedAgo}
+        </p>
         <VariantPicker
           variants={variants}
           selection={selection}
@@ -74,7 +84,7 @@ export function ProductDetailView({
         {/* Same shared Set as the cards and the header count (no request of its own). */}
         <div className="flex items-center gap-2 text-sm">
           <WishlistHeart
-            productId={product._id}
+            productId={product.id}
             productName={product.name}
             className="border"
           />

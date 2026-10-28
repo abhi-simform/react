@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button"
 import { PAGE_SIZE, type ListingFilters } from "../filters"
 import type { useInfiniteProducts } from "../hooks/useInfiniteProducts"
 import { LoadMoreSentinel } from "./LoadMoreSentinel"
+import { toProductCardVM } from "../mappers"
 import { ProductGrid } from "./ProductGrid"
 
 type Props = {
@@ -45,7 +46,10 @@ export function InfiniteResults({
   const loadingMore = list.status === "loading-more"
   return (
     <div>
-      <ProductGrid products={list.items} view={filters.view} />
+      <ProductGrid
+        products={list.items.map(toProductCardVM)}
+        view={filters.view}
+      />
       <div
         className="mt-4 flex flex-col items-center gap-2"
         aria-busy={loadingMore}

@@ -6,6 +6,7 @@ import { useDocumentTitle } from "@/hooks/useDocumentTitle"
 import { NotFoundError } from "@/lib/notFound"
 import { paths } from "@/lib/paths"
 
+import { toProductDetailVM } from "@/features/catalog"
 import { useProduct, useRelatedProducts } from "../hooks/useProduct"
 import { variantsFixture } from "@/test/fixtures/variants"
 
@@ -70,6 +71,7 @@ export function ProductDetailPage({ slug }: { slug: string }) {
   }
 
   const product = state.data
+  const view = toProductDetailVM(product)
   return (
     <div className="mx-auto max-w-5xl">
       {/* Home > Electronics > Mobiles > Apple > iPhone 15 (real category path from the API). */}
@@ -90,7 +92,7 @@ export function ProductDetailPage({ slug }: { slug: string }) {
         {/* key = identity: a new slug is a new component, so all state resets. */}
         <ProductDetailView
           key={withoutKey ? undefined : product.slug}
-          product={product}
+          product={view}
           variants={variantsFixture(product)}
         />
         <RelatedProducts

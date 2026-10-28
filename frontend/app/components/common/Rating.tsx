@@ -1,3 +1,4 @@
+import { formatCount } from "@/lib/format"
 import { cn } from "@/lib/utils"
 
 type RatingProps = {
@@ -29,9 +30,7 @@ export function Rating({
     >
       <span aria-hidden>{"★".repeat(full) + "☆".repeat(5 - full)}</span>
       <span aria-hidden>{clamped.toFixed(1)}</span>
-      {count !== undefined && (
-        <span aria-hidden>({count.toLocaleString("en-IN")})</span>
-      )}
+      {count !== undefined && <span aria-hidden>({formatCount(count)})</span>}
     </div>
   )
 }

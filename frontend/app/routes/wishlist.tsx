@@ -5,7 +5,7 @@ import { Heart } from "lucide-react"
 import { AsyncView } from "@/components/common/AsyncView"
 import { EmptyState } from "@/components/common/EmptyState"
 import { ProductGridSkeleton } from "@/components/common/Skeletons"
-import { ProductGrid } from "@/features/catalog"
+import { ProductGrid, toProductCardVM } from "@/features/catalog"
 import { useWishlist, useWishlistProducts } from "@/features/wishlist"
 import { pageTitle } from "@/lib/pageTitle"
 import { paths } from "@/lib/paths"
@@ -43,7 +43,9 @@ export default function WishlistRoute() {
       >
         {(data) => (
           <ProductGrid
-            products={data.items.filter((p) => wishlist.isWishlisted(p._id))}
+            products={data.items
+              .filter((p) => wishlist.isWishlisted(p._id))
+              .map(toProductCardVM)}
           />
         )}
       </AsyncView>

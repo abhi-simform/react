@@ -7,6 +7,7 @@ import type { AsyncState } from "@/lib/asyncState"
 
 import { PAGE_SIZE, type ListingFilters } from "../filters"
 import type { Product, ProductListMeta } from "../types"
+import { toProductCardVM } from "../mappers"
 import { ProductGrid } from "./ProductGrid"
 
 type ListingResultsProps = {
@@ -62,7 +63,12 @@ export function ListingResults({
         )
       }}
     >
-      {(data) => <ProductGrid products={data.items} view={filters.view} />}
+      {(data) => (
+        <ProductGrid
+          products={data.items.map(toProductCardVM)}
+          view={filters.view}
+        />
+      )}
     </AsyncView>
   )
 }

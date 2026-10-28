@@ -8,6 +8,7 @@ import { ApiError } from "@/lib/api/errors"
 import { paths } from "@/lib/paths"
 
 import { getProducts } from "../api"
+import { toProductCardVM } from "../mappers"
 import { ProductGrid } from "./ProductGrid"
 
 type Rail = {
@@ -68,7 +69,7 @@ function ProductRail({ rail, forceFail }: { rail: Rail; forceFail: boolean }) {
           items.length === 0 && <EmptyState title="Nothing here yet" />
         }
       >
-        {(items) => <ProductGrid products={items} />}
+        {(items) => <ProductGrid products={items.map(toProductCardVM)} />}
       </AsyncView>
     </section>
   )

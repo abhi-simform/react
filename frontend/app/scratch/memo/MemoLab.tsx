@@ -12,6 +12,7 @@ import {
 
 import {
   ProductCard,
+  toProductCardVM,
   type ProductCardProduct,
   filterProducts,
   priceHistogram,
@@ -25,6 +26,9 @@ const items: Product[] = Array.from({ length: 4 }, (_, copy) =>
 )
   .flat()
   .slice(0, 1000)
+
+// View models are computed ONCE (6.7): a fresh object per render would defeat memo(Row).
+const viewModels = new Map(items.map((p) => [p._id, toProductCardVM(p)]))
 
 const counts = { rows: 0 }
 
@@ -124,7 +128,7 @@ export function MemoLab() {
           {filtered.slice(0, 200).map((product) => (
             <li key={product._id}>
               <Row
-                product={product}
+                product={viewModels.get(product._id)!}
                 // memo-inline: a NEW arrow function every render defeats memo.
                 onAddToCart={
                   mode === "memo-stable"
