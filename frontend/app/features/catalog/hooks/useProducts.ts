@@ -1,24 +1,15 @@
-import type { Paginated } from "@/lib/api/envelope"
-import { toQueryString } from "@/lib/api/query"
-import { useFetch, type FetchResult } from "@/hooks/useFetch"
+import { useQuery } from "@tanstack/react-query"
 
-import { getProductsByQuery } from "../api"
-import type { Product, ProductListMeta, ProductQuery } from "../types"
+import { toAsyncState } from "@/lib/queryState"
+
+import { productQueries } from "../queries"
+import type { ProductQuery } from "../types"
 
 /**
- * One of the hooks on the generic `useFetch` (6.8; deleted in Stage 9 when TanStack
- * Query replaces it). The dependency is the query STRING, a primitive.
+ * 9.1: the hand-rolled `useFetch` version of this hook (and its loading/error boilerplate) is
+ * gone. The key is the cache identity: same filters = same cache entry, shared by every
+ * component that asks. `toAsyncState` keeps the `AsyncView` UI unchanged.
  */
-export function useProducts(
-  params: ProductQuery,
-  enabled = true
-): FetchResult<Paginated<Product, ProductListMeta>> {
-  const queryString = toQueryString(params)
-  return useFetch(
-    (signal) => getProductsByQuery(queryString, signal),
-    [queryString],
-    {
-      enabled,
-    }
-  )
+export function useProducts(params: ProductQuery, enabled = true) {
+  return toAsyncState(useQuery({ ...productQueries.list(params), enabled }))
 }

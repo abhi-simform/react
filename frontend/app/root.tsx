@@ -1,3 +1,5 @@
+import { QueryClientProvider } from "@tanstack/react-query"
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools"
 import { Links, Meta, Outlet, Scripts, ScrollRestoration } from "react-router"
 
 import type { Route } from "./+types/root"
@@ -7,6 +9,7 @@ import { ThemeProvider } from "@/features/theme"
 import { ToastProvider } from "@/features/toast"
 import { WishlistProvider } from "@/features/wishlist"
 import { pageTitle } from "@/lib/pageTitle"
+import { queryClient } from "@/lib/query-client"
 
 import "./app.css"
 
@@ -37,15 +40,18 @@ export default function App() {
   // Order = dependency order: theme first (toasts read it), auth before anything that needs the
   // user (wishlist). Each one is a separate, small context: no mega-context.
   return (
-    <ThemeProvider>
-      <AuthProvider>
-        <ToastProvider>
-          <WishlistProvider>
-            <Outlet />
-          </WishlistProvider>
-        </ToastProvider>
-      </AuthProvider>
-    </ThemeProvider>
+    <QueryClientProvider client={queryClient}>
+      <ThemeProvider>
+        <AuthProvider>
+          <ToastProvider>
+            <WishlistProvider>
+              <Outlet />
+            </WishlistProvider>
+          </ToastProvider>
+        </AuthProvider>
+      </ThemeProvider>
+      {import.meta.env.DEV && <ReactQueryDevtools initialIsOpen={false} />}
+    </QueryClientProvider>
   )
 }
 
