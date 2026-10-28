@@ -25,10 +25,22 @@ export const productList = productsFixture
 
 export type Db = {
   cart: Json
+  /** The guest's cart (identified by the `x-cart-token` header): starts empty. */
+  guestCart: Json
   wishlist: Set<string>
   orders: Json[]
   addresses: Json[]
   hits: Record<string, number>
+}
+
+/** The captured seed cart has a price change on one line (a seeded edge case): start clean. */
+function tidyCart(cart: Json): Json {
+  const clean = (l: Json) => ({
+    ...l,
+    priceChanged: false,
+    previousPrice: l.unitPrice,
+  })
+  return { ...cart, items: cart.items.map(clean), saved: cart.saved.map(clean) }
 }
 
 function freshDb(): Db {
@@ -36,7 +48,8 @@ function freshDb(): Db {
   // one order that can still be cancelled
   orders[0] = { ...clone(orderDetailRaw.data), status: "placed" }
   return {
-    cart: clone(cartRaw.data),
+    cart: tidyCart(clone(cartRaw.data)),
+    guestCart: { ...clone(cartRaw.data), items: [], saved: [], coupon: null },
     wishlist: new Set(["wish-1"]),
     orders,
     addresses: clone(addressesRaw.data),

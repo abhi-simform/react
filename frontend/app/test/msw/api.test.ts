@@ -10,6 +10,7 @@ import { api, apiPaginated } from "@/lib/api/client"
 import { ApiError, ContractError } from "@/lib/api/errors"
 import { productDetail } from "@/test/msw/db"
 import { server } from "@/test/msw/server"
+import { takeUnhandled } from "@/test/msw/unhandled"
 
 import { API, authBody, fail, fakeToken, ok } from "./handlers"
 
@@ -189,5 +190,7 @@ describe("the safety net itself", () => {
     const err = await api("/not-mocked-anywhere").catch((e: unknown) => e)
     // MSW errors the request: the client reports a network failure rather than silently succeeding
     expect(err).toBeInstanceOf(ApiError)
+    // ...and setup.ts would FAIL this test for it, unless the test takes the record (here, on purpose)
+    expect(takeUnhandled()).toEqual([`GET ${API}/not-mocked-anywhere`])
   })
 })

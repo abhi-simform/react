@@ -7,6 +7,7 @@ import {
   db,
   hit,
   listProducts,
+  productList,
   productDetail,
   recomputeCart,
   user,
@@ -35,6 +36,10 @@ export const fakeToken = (expiresInSeconds = 900) => {
   const b64 = (o: object) => btoa(JSON.stringify(o))
   return `${b64({ alg: "none" })}.${b64({ sub: user.id, exp: Math.floor(Date.now() / 1000) + expiresInSeconds })}.sig`
 }
+/** Guests send `x-cart-token`, signed-in users a bearer token: two different carts. */
+const cartFor = (request: Request) =>
+  request.headers.has("x-cart-token") ? db.guestCart : db.cart
+
 export const authBody = () => ({ user, accessToken: fakeToken() })
 
 const orderPage = (items: unknown[]) => ({
@@ -86,13 +91,14 @@ export const handlers: RequestHandler[] = [
   http.get(`${API}/users/me`, () => ok(user)),
 
   // ---- cart
-  http.get(`${API}/cart`, () => ok(recomputeCart(db.cart))),
+  http.get(`${API}/cart`, ({ request }) => ok(recomputeCart(cartFor(request)))),
   http.post(`${API}/cart/items`, async ({ request }) => {
+    const cart = cartFor(request)
     const { productId, qty } = (await request.json()) as {
       productId: string
       qty: number
     }
-    const existing = db.cart.items.find(
+    const existing = cart.items.find(
       (l: { productId: string }) => l.productId === productId
     )
     if (existing) existing.qty += qty
@@ -103,11 +109,11 @@ export const handlers: RequestHandler[] = [
       const known = [...cartRaw.data.items, ...cartRaw.data.saved].find(
         (l) => l.productId === productId
       )
-      db.cart.items.push(
+      cart.items.push(
         known
           ? { ...known, qty }
           : {
-              ...db.cart.items[0],
+              ...(cart.items[0] ?? cartRaw.data.items[0]),
               productId,
               sku: product?.sku ?? `SKU-${productId}`,
               slug: product?.slug ?? productId,
@@ -118,21 +124,23 @@ export const handlers: RequestHandler[] = [
             }
       )
     }
-    return ok(recomputeCart(db.cart))
+    return ok(recomputeCart(cart))
   }),
   http.patch(`${API}/cart/items/:productId`, async ({ params, request }) => {
+    const cart = cartFor(request)
     const patch = (await request.json()) as { qty?: number }
-    const line = db.cart.items.find(
+    const line = cart.items.find(
       (l: { productId: string }) => l.productId === params.productId
     )
     if (line && patch.qty) line.qty = patch.qty
-    return ok(recomputeCart(db.cart))
+    return ok(recomputeCart(cart))
   }),
-  http.delete(`${API}/cart/items/:productId`, ({ params }) => {
-    db.cart.items = db.cart.items.filter(
+  http.delete(`${API}/cart/items/:productId`, ({ params, request }) => {
+    const cart = cartFor(request)
+    cart.items = cart.items.filter(
       (l: { productId: string }) => l.productId !== params.productId
     )
-    return ok(recomputeCart(db.cart))
+    return ok(recomputeCart(cart))
   }),
   http.post(`${API}/cart/coupon`, async ({ request }) => {
     const { code } = (await request.json()) as { code: string }
@@ -151,6 +159,7 @@ export const handlers: RequestHandler[] = [
     })
   }),
   http.get(`${API}/coupons/available`, () => ok([])),
+  http.get(`${API}/coupons/offers`, () => ok([])),
   http.post(`${API}/cart/merge`, () =>
     ok({ ...recomputeCart(db.cart), merge: { merged: 0, adjusted: [] } })
   ),
@@ -219,6 +228,39 @@ export const handlers: RequestHandler[] = [
         from: new Date(Date.now() + day).toISOString(),
         to: new Date(Date.now() + 2 * day).toISOString(),
       },
+    })
+  }),
+
+  // ---- shell and home chatter (quiet, valid, empty)
+  http.get(`${API}/banners`, () => ok([])),
+  http.get(`${API}/deals`, () => ok([])),
+  http.get(`${API}/time`, () =>
+    ok({ epochMs: Date.now(), now: new Date().toISOString() })
+  ),
+  http.get(`${API}/health`, () =>
+    ok({ status: "ok", db: "up", uptime: 1, time: new Date().toISOString() })
+  ),
+  http.get(`${API}/search/suggest`, ({ request }) => {
+    const q = (new URL(request.url).searchParams.get("q") ?? "").toLowerCase()
+    return ok({
+      query: q,
+      products: productList
+        .filter((p) => p.name.toLowerCase().includes(q))
+        .slice(0, 5)
+        .map((p) => ({
+          id: p._id,
+          name: p.name,
+          slug: p.slug,
+          brand: p.brand,
+          price: p.price,
+          image: p.images[0]?.url ?? null,
+          category: p.category
+            ? { name: p.category.name, slug: p.category.slug }
+            : null,
+        })),
+      categories: [],
+      brands: [],
+      correction: null,
     })
   }),
 

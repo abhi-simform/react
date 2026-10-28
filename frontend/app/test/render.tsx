@@ -4,11 +4,15 @@ import userEvent from "@testing-library/user-event"
 import { type ReactElement } from "react"
 import {
   createMemoryRouter,
+  Outlet,
   RouterProvider,
   type RouteObject,
 } from "react-router"
 
-import { AuthProvider } from "@/features/auth"
+import { AuthProvider, SessionCacheSync } from "@/features/auth"
+import { CartSessionSync } from "@/features/cart"
+import { WishlistSessionSync } from "@/features/wishlist"
+import { appRoutes } from "./appRoutes"
 import { ThemeProvider } from "@/features/theme"
 import { ToastProvider } from "@/features/toast"
 
@@ -77,6 +81,57 @@ export async function renderWithProviders(
     { initialEntries: [route] }
   )
   // `act` lets the auth bootstrap (a promise) settle before the test starts: no act() warnings.
+  let result!: RenderResult
+  await act(async () => {
+    result = render(<RouterProvider router={router} />)
+  })
+  return {
+    ...result,
+    user: userEvent.setup(),
+    queryClient: client,
+    location: () => ({
+      pathname: router.state.location.pathname,
+      search: router.state.location.search,
+    }),
+  }
+}
+
+/**
+ * A whole routed app (12.5): the real shell, guards and pages, with the same providers and
+ * session sync components as `root.tsx` (minus the socket and devtools). Walk it like a user.
+ */
+export async function renderApp({
+  route = "/",
+  signedIn = false,
+  queryClient,
+}: Pick<
+  Options,
+  "route" | "signedIn" | "queryClient"
+> = {}): Promise<RenderedApp> {
+  const client = queryClient ?? makeTestQueryClient()
+  if (signedIn) localStorage.setItem("shopsphere.hasSession", "true")
+  const router = createMemoryRouter(
+    [
+      {
+        element: (
+          <QueryClientProvider client={client}>
+            <ThemeProvider>
+              <AuthProvider>
+                <SessionCacheSync />
+                <CartSessionSync />
+                <WishlistSessionSync />
+                <ToastProvider>
+                  <Outlet />
+                </ToastProvider>
+              </AuthProvider>
+            </ThemeProvider>
+          </QueryClientProvider>
+        ),
+        children: appRoutes,
+      },
+    ],
+    { initialEntries: [route] }
+  )
   let result!: RenderResult
   await act(async () => {
     result = render(<RouterProvider router={router} />)
