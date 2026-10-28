@@ -1,7 +1,7 @@
 import { expect, test } from "@playwright/test"
 
 test.describe("guest browsing", () => {
-  test("search, filter by brand and sort", async ({ page }) => {
+  test("search, filter by brand and sort", async ({ page, request }) => {
     await page.goto("/")
     await page.getByRole("combobox", { name: /search/i }).fill("headphones")
     await page.getByRole("combobox", { name: /search/i }).press("Enter")
@@ -25,23 +25,23 @@ test.describe("guest browsing", () => {
 
     await page.getByLabel("Sort by").selectOption("price_asc")
     await expect(page).toHaveURL(/sort=price_asc/)
-    // the URL changes first and the old list stays on screen until the new one arrives:
-    // poll the VISIBLE prices until they are in ascending order (and there are some)
+    // The URL changes first and the old list stays on screen until the new one arrives. The page
+    // must show EXACTLY what the API returns for this URL's filters, in that order (the API's
+    // price_asc sorts by list price, while a deal card shows its deal price, so "ascending text"
+    // is not a valid check on seeded data with deals).
+    const query = new URL(page.url()).search
+    const apiRes = await request.get(
+      `http://localhost:4000/api/v1/products${query}&limit=12`
+    )
+    const expected = (
+      (await apiRes.json()) as { data: { name: string }[] }
+    ).data.map((p) => p.name)
+    expect(expected.length).toBeGreaterThan(0)
     await expect
-      .poll(async () => {
-        const prices = await page
-          .getByRole("article")
-          .evaluateAll((els) =>
-            els.map((el) =>
-              Number(el.textContent?.match(/₹([\d,]+)/)?.[1]?.replace(/,/g, ""))
-            )
-          )
-        return (
-          prices.length > 0 &&
-          prices.every((p, i) => i === 0 || p >= prices[i - 1]!)
-        )
-      })
-      .toBe(true)
+      .poll(() =>
+        page.getByRole("article").getByRole("heading").allInnerTexts()
+      )
+      .toEqual(expected)
   })
 
   test("open a product from the listing", async ({ page }) => {
