@@ -46,7 +46,13 @@ export { useProducts } from "./hooks/useProducts"
 export { useCategory, useCategoryTree } from "./hooks/useCategories"
 export { useProductFilters } from "./hooks/useProductFilters"
 export { getBrands, getCategory } from "./api"
-export { brandQueries, categoryQueries, productQueries } from "./queries"
+export {
+  brandQueries,
+  categoryQueries,
+  findProductInCache,
+  productQueries,
+} from "./queries"
+export { useProductPrefetch } from "./hooks/useProductPrefetch"
 export {
   parseFilters,
   toProductQuery,

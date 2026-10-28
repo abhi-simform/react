@@ -94,6 +94,7 @@ export function ProductDetailPage({ slug }: { slug: string }) {
           key={withoutKey ? undefined : product.slug}
           product={view}
           variants={variantsFixture(product)}
+          detailsPending={state.isPlaceholder}
         />
         <RelatedProducts
           categorySlug={product.category.slug}

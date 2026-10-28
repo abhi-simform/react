@@ -9,6 +9,7 @@ import { WishlistHeart } from "@/features/wishlist"
 import { paths } from "@/lib/paths"
 import { cn } from "@/lib/utils"
 
+import { useProductPrefetch } from "../hooks/useProductPrefetch"
 import type { ProductCardVM } from "../mappers"
 
 /** The card renders a view model (see `toProductCardVM`): no formatting or discount math in here. */
@@ -41,9 +42,13 @@ export function ProductCard({
 }: ProductCardProps) {
   const outOfStock = !product.inStock
   const addToCart = useAddToCart()
+  const prefetch = useProductPrefetch(product.slug)
 
   return (
-    <article className="relative flex h-full flex-col gap-2 rounded-lg border p-2 focus-within:ring-2">
+    <article
+      {...prefetch}
+      className="relative flex h-full flex-col gap-2 rounded-lg border p-2 focus-within:ring-2"
+    >
       <div
         className={cn(
           "relative aspect-square overflow-hidden rounded bg-neutral-100"

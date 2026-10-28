@@ -11,9 +11,22 @@ import { DevAuthPanel } from "@/features/auth"
 import { CompareTray } from "@/features/compare"
 import { useRouteFocus } from "@/hooks/useRouteFocus"
 
+import { categoryQueries } from "@/features/catalog"
+import { queryClient } from "@/lib/query-client"
 import { getBreadcrumb } from "@/types/route-handle"
 
 import type { Route } from "./+types/shell"
+
+/**
+ * Prefetch at app start (9.7): the category tree is needed by the header menu on EVERY page, so
+ * its request starts as soon as the shell route is matched, before the header renders. NOT
+ * awaited (returning the promise would hold the whole page behind it); `prefetchQuery` never
+ * throws, and the header's own `useQuery` joins the same in-flight request.
+ */
+export function clientLoader() {
+  void queryClient.prefetchQuery(categoryQueries.tree())
+  return null
+}
 
 /** Landmarks: header (banner), nav (inside Header), main, footer (contentinfo). */
 export default function ShellLayout() {

@@ -1,4 +1,4 @@
-import { queryOptions } from "@tanstack/react-query"
+import { queryOptions, type QueryClient } from "@tanstack/react-query"
 import { z } from "zod"
 
 import { api } from "@/lib/api/client"
@@ -8,7 +8,7 @@ import { brandKeys, categoryKeys, productKeys } from "@/lib/queryKeys"
 
 import { getBrands, getCategory, getProduct, getProducts } from "./api"
 import { categoryNodeSchema } from "./schemas"
-import type { ProductQuery } from "./types"
+import type { Product, ProductDetail, ProductQuery } from "./types"
 import { priceHistogram } from "./utils"
 
 /**
@@ -98,4 +98,42 @@ export const brandQueries = {
       queryFn: ({ signal }) => getBrands(categorySlug, signal),
       staleTime: STALE.static,
     }),
+}
+
+/**
+ * Seeding (9.7): the PDP can show the BASIC fields immediately when the same product is already
+ * in some cached list (listing, home rail, search, wishlist...). Every cached entry under
+ * `["products"]` is scanned: a paginated list has `items`, a rail is a plain array, a detail is
+ * a single object (skipped, it has its own entry). The long-form fields are empty until the
+ * real detail arrives, so the page has its final layout from the first paint.
+ */
+export function findProductInCache(
+  queryClient: QueryClient,
+  slug: string
+): ProductDetail | undefined {
+  for (const [, data] of queryClient.getQueriesData({
+    queryKey: productKeys.all,
+  })) {
+    const items: unknown[] = Array.isArray(data)
+      ? data
+      : data &&
+          typeof data === "object" &&
+          "items" in data &&
+          Array.isArray(data.items)
+        ? data.items
+        : []
+    const hit = items.find(
+      (p): p is Product =>
+        typeof p === "object" && p !== null && "slug" in p && p.slug === slug
+    )
+    if (hit)
+      return {
+        ...hit,
+        categoryPath: [hit.category],
+        description: "",
+        highlights: [],
+        specs: [],
+      }
+  }
+  return undefined
 }

@@ -1,3 +1,4 @@
+import { useQueryClient } from "@tanstack/react-query"
 import { useState } from "react"
 import { useNavigate, useSearchParams } from "react-router"
 
@@ -14,6 +15,8 @@ import { useProductFilters } from "../hooks/useProductFilters"
 import { useInfiniteProducts } from "../hooks/useInfiniteProducts"
 import { useProducts } from "../hooks/useProducts"
 import type { Facets } from "../types"
+import { productQueries } from "../queries"
+import { LoadMoreSentinel } from "./LoadMoreSentinel"
 import { ActiveFilterChips } from "./ActiveFilterChips"
 import { FilterSidebar } from "./FilterSidebar"
 import { Pagination } from "./Pagination"
@@ -42,6 +45,7 @@ export function ProductListingPage({
   })
   const infinite = useInfiniteProducts(query, moreMode)
   const category = useCategory(categorySlug)
+  const queryClient = useQueryClient()
   const isDesktop = useMediaQuery("(min-width: 1024px)")
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
@@ -178,6 +182,19 @@ export function ProductListingPage({
                 activeCount={activeCount}
                 onGoToPage={(page) => setFilter("page", page)}
                 onClearAll={api.clearAll}
+              />
+            )}
+            {!moreMode && meta?.hasNext && (
+              // Prefetch the NEXT page when the bottom of the grid nears the viewport (9.7):
+              // the click on "next" then finds it in the cache.
+              <LoadMoreSentinel
+                enabled
+                itemCount={meta.page}
+                onVisible={() =>
+                  void queryClient.prefetchQuery(
+                    productQueries.list({ ...query, page: meta.page + 1 })
+                  )
+                }
               />
             )}
             {!moreMode && meta && (

@@ -22,11 +22,14 @@ import { VariantPicker } from "./VariantPicker"
 type ProductDetailViewProps = {
   product: ProductDetailVM
   variants: readonly Variant[]
+  /** Basic fields came from a cached list; description, specs and reviews are still loading (9.7). */
+  detailsPending?: boolean
 }
 
 export function ProductDetailView({
   product,
   variants,
+  detailsPending = false,
 }: ProductDetailViewProps) {
   // State: only the chosen attribute values. Everything below is derived.
   const [selection, setSelection] = useState<Selection>({})
@@ -115,7 +118,14 @@ export function ProductDetailView({
         </div>
       </div>
       <div className="md:col-span-2">
-        <ProductTabs product={product} />
+        {detailsPending ? (
+          // Same box the tabs will fill: no layout jump when the real detail arrives.
+          <div aria-busy="true" className="min-h-48 rounded border p-3 text-sm">
+            <p role="status">Loading the full details...</p>
+          </div>
+        ) : (
+          <ProductTabs product={product} />
+        )}
       </div>
     </div>
   )
