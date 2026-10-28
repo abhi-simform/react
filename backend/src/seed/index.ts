@@ -711,8 +711,9 @@ async function main() {
                 body: t.body,
                 link: t.link,
                 data: { orderId: String(o._id), status: h.status },
-                createdAt: h.at,
-                readAt: new Date(h.at.getTime() + 3_600_000),
+                // The B5 history of a recently delivered order projects into the future: clamp.
+                createdAt: new Date(Math.min(h.at.getTime(), now - 3_600_000)),
+                readAt: new Date(Math.min(h.at.getTime(), now - 3_600_000) + 60_000),
               },
             ]
           : []
