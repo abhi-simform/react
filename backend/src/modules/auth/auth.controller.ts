@@ -10,6 +10,7 @@ import type {
   loginSchema,
   registerSchema,
   resetPasswordSchema,
+  sessionParamsSchema,
   verifyEmailSchema,
 } from "./auth.schema.js"
 
@@ -22,11 +23,14 @@ const cookieOptions: CookieOptions = {
   path: `${API_PREFIX}/auth`,
   maxAge: env.REFRESH_TOKEN_TTL_DAYS * 24 * 60 * 60 * 1000,
 }
-const setRefreshCookie = (res: Response, token: string) =>
+export const setRefreshCookie = (res: Response, token: string) =>
   res.cookie(REFRESH_COOKIE, token, cookieOptions)
 const clearRefreshCookie = (res: Response) =>
   res.clearCookie(REFRESH_COOKIE, { ...cookieOptions, maxAge: undefined })
-const clientInfo = (req: Request) => ({ userAgent: req.get("user-agent"), ip: req.ip })
+export const clientInfo = (req: Request) => ({
+  userAgent: req.get("user-agent"),
+  ip: req.ip,
+})
 
 // Access token goes in the JSON body; the frontend keeps it IN MEMORY (not localStorage).
 const sessionResponse = (
@@ -70,8 +74,11 @@ export const logout: RequestHandler = async (req, res) => {
 
 export const verifyEmail: RequestHandler = async (req, res) => {
   const { body } = valid<typeof verifyEmailSchema>(req)
-  await service.verifyEmail(body.token)
-  ok(res, { message: "Email verified" })
+  const { alreadyVerified } = await service.verifyEmail(body.token)
+  ok(res, {
+    message: alreadyVerified ? "Email was already verified" : "Email verified",
+    alreadyVerified,
+  })
 }
 
 export const resendVerification: RequestHandler = async (req, res) => {
@@ -94,7 +101,33 @@ export const resetPassword: RequestHandler = async (req, res) => {
 
 export const changePassword: RequestHandler = async (req, res) => {
   const { body } = valid<typeof changePasswordSchema>(req)
-  await service.changePassword(req.user!.id, body.currentPassword, body.newPassword)
+  await service.changePassword(
+    req.user!.id,
+    body.currentPassword,
+    body.newPassword,
+    req.cookies?.[REFRESH_COOKIE]
+  )
+  // This session stays signed in; every other device is signed out.
+  ok(res, { message: "Password changed. Other devices were signed out." })
+}
+
+export const listSessions: RequestHandler = async (req, res) => {
+  ok(res, await service.listSessions(req.user!.id, req.cookies?.[REFRESH_COOKIE]))
+}
+
+export const revokeSession: RequestHandler = async (req, res) => {
+  const { params } = valid<typeof sessionParamsSchema>(req)
+  const { current } = await service.revokeSession(
+    req.user!.id,
+    params.id,
+    req.cookies?.[REFRESH_COOKIE]
+  )
+  if (current) clearRefreshCookie(res)
+  noContent(res)
+}
+
+export const logoutAll: RequestHandler = async (req, res) => {
+  await service.logoutAll(req.user!.id)
   clearRefreshCookie(res)
-  ok(res, { message: "Password changed. Please sign in again." })
+  noContent(res)
 }

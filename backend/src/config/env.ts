@@ -26,6 +26,15 @@ const schema = z.object({
     .default("false")
     .transform((v) => v === "true"),
 
+  // Google sign-in (B10). Without GOOGLE_CLIENT_ID the backend falls back to a built-in MOCK
+  // Google (a local consent page) outside production, so the flow works with no credentials.
+  GOOGLE_CLIENT_ID: z.string().optional(),
+  GOOGLE_CLIENT_SECRET: z.string().optional(),
+  GOOGLE_REDIRECT_URI: z
+    .url()
+    .default("http://localhost:4000/api/v1/auth/google/callback"),
+  GOOGLE_MOCK: z.enum(["auto", "true", "false"]).default("auto"),
+
   SMTP_HOST: z.string().default("localhost"),
   SMTP_PORT: z.coerce.number().int().default(1025),
   EMAIL_FROM: z.string().default("ShopSphere <no-reply@shopsphere.local>"),
@@ -54,3 +63,10 @@ if (!parsed.success) {
 export const env = parsed.data
 export const isProd = env.NODE_ENV === "production"
 export const isTest = env.NODE_ENV === "test"
+
+/** Real Google needs both credentials. */
+export const googleConfigured = Boolean(env.GOOGLE_CLIENT_ID && env.GOOGLE_CLIENT_SECRET)
+/** Mock Google: never in production; "auto" = only when real credentials are absent. */
+export const googleMock =
+  !isProd &&
+  (env.GOOGLE_MOCK === "true" || (env.GOOGLE_MOCK === "auto" && !googleConfigured))

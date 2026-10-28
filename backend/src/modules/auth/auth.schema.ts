@@ -23,3 +23,4 @@ export const resetPasswordSchema = {
 export const changePasswordSchema = {
   body: z.object({ currentPassword: z.string().min(1), newPassword: password }),
 }
+export const sessionParamsSchema = { params: z.object({ id: z.uuid() }) }

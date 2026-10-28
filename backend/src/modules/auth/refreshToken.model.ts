@@ -7,7 +7,8 @@ const refreshTokenSchema = new Schema(
   {
     user: { type: Types.ObjectId, ref: "User", required: true, index: true },
     tokenHash: { type: String, required: true, unique: true },
-    family: { type: String, required: true, index: true },
+    family: { type: String, required: true, index: true }, // = the session id shown to users
+    startedAt: { type: Date, required: true, default: Date.now }, // when the login happened (copied on rotation)
     expiresAt: { type: Date, required: true },
     revokedAt: Date,
     userAgent: String,

@@ -22,3 +22,13 @@ authRoutes.post(
   validate(s.changePasswordSchema),
   c.changePassword
 )
+
+// Sessions (B10). The refresh cookie (path /api/v1/auth) tells us which one is "this device".
+authRoutes.get("/sessions", authenticate, c.listSessions)
+authRoutes.delete(
+  "/sessions/:id",
+  authenticate,
+  validate(s.sessionParamsSchema),
+  c.revokeSession
+)
+authRoutes.post("/logout-all", authenticate, c.logoutAll)
