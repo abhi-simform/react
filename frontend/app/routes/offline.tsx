@@ -1,9 +1,9 @@
-import { PlaceholderPage } from "@/components/common/PlaceholderPage"
+import { OfflinePage } from "@/features/offline"
 import { noindexMeta } from "@/lib/seo"
 import type { RouteHandle } from "@/types/route-handle"
 
 export default function OfflineRoute() {
-  return <PlaceholderPage title="You are offline" builtIn="13" />
+  return <OfflinePage />
 }
 
 export function meta() {

@@ -18,7 +18,10 @@ function envFile() {
   }
 }
 const env = { ...envFile(), ...process.env }
-const API = (env.VITE_API_URL ?? "http://localhost:4000/api/v1").replace(/\/$/, "")
+const API = (env.VITE_API_URL ?? "http://localhost:4000/api/v1").replace(
+  /\/$/,
+  ""
+)
 const SITE = (env.VITE_SITE_URL ?? "http://localhost:5173").replace(/\/$/, "")
 
 const get = async (path) => {
@@ -31,13 +34,16 @@ const esc = (s) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;")
 try {
   const tree = (await get("/categories")).data
   const slugs = []
-  const walk = (nodes) => nodes.forEach((n) => (slugs.push(n.slug), walk(n.children ?? [])))
+  const walk = (nodes) =>
+    nodes.forEach((n) => (slugs.push(n.slug), walk(n.children ?? [])))
   walk(tree)
 
   const products = []
   for (let page = 1; ; page++) {
     const body = await get(`/products?page=${page}&limit=60&sort=newest`)
-    products.push(...body.data.map((p) => ({ slug: p.slug, lastmod: p.updatedAt })))
+    products.push(
+      ...body.data.map((p) => ({ slug: p.slug, lastmod: p.updatedAt }))
+    )
     if (!body.meta.hasNext) break
   }
 
@@ -47,11 +53,24 @@ try {
     { loc: "/products", changefreq: "daily", priority: "0.8", lastmod: today },
     { loc: "/deals", changefreq: "hourly", priority: "0.7", lastmod: today },
     { loc: "/help", changefreq: "monthly", priority: "0.3", lastmod: today },
-    ...slugs.map((s) => ({ loc: `/c/${s}`, changefreq: "daily", priority: "0.7", lastmod: today })),
-    ...products.map((p) => ({ loc: `/p/${p.slug}`, changefreq: "weekly", priority: "0.6", lastmod: p.lastmod.slice(0, 10) })),
+    ...slugs.map((s) => ({
+      loc: `/c/${s}`,
+      changefreq: "daily",
+      priority: "0.7",
+      lastmod: today,
+    })),
+    ...products.map((p) => ({
+      loc: `/p/${p.slug}`,
+      changefreq: "weekly",
+      priority: "0.6",
+      lastmod: p.lastmod.slice(0, 10),
+    })),
   ]
   const xml = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls
-    .map((u) => `  <url><loc>${esc(SITE + u.loc)}</loc><lastmod>${u.lastmod}</lastmod><changefreq>${u.changefreq}</changefreq><priority>${u.priority}</priority></url>`)
+    .map(
+      (u) =>
+        `  <url><loc>${esc(SITE + u.loc)}</loc><lastmod>${u.lastmod}</lastmod><changefreq>${u.changefreq}</changefreq><priority>${u.priority}</priority></url>`
+    )
     .join("\n")}\n</urlset>\n`
   writeFileSync(new URL("../public/sitemap.xml", import.meta.url), xml)
 
@@ -79,8 +98,13 @@ Disallow: /*?search=
 Sitemap: ${SITE}/sitemap.xml
 `
   writeFileSync(new URL("../public/robots.txt", import.meta.url), robots)
-  console.log(`sitemap.xml: ${urls.length} URLs (${products.length} products, ${slugs.length} categories) for ${SITE}`)
+  console.log(
+    `sitemap.xml: ${urls.length} URLs (${products.length} products, ${slugs.length} categories) for ${SITE}`
+  )
 } catch (err) {
-  console.warn(`sitemap NOT updated (${err.message}); keeping the existing files`)
-  if (!existsSync(new URL("../public/sitemap.xml", import.meta.url))) process.exitCode = 1
+  console.warn(
+    `sitemap NOT updated (${err.message}); keeping the existing files`
+  )
+  if (!existsSync(new URL("../public/sitemap.xml", import.meta.url)))
+    process.exitCode = 1
 }

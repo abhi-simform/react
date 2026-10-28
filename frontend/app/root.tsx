@@ -11,6 +11,7 @@ import { RealtimeSync } from "@/features/realtime"
 import { RecentlyViewedSync } from "@/features/recommendations"
 import { WishlistSessionSync } from "@/features/wishlist"
 import { LocaleProvider } from "@/features/i18n"
+import { PwaSync } from "@/features/pwa"
 import { ThemeProvider, themeInitScript } from "@/features/theme"
 import { ToastProvider } from "@/features/toast"
 import { env } from "@/lib/env"
@@ -45,6 +46,9 @@ export function links() {
       // The SPA calls the API with `credentials: "include"`: that uses the credentialed connection pool.
       crossOrigin: "use-credentials" as const,
     },
+    // 13.10: installability. The manifest + icons; the service worker itself is registered by <PwaSync/>.
+    { rel: "manifest", href: "/manifest.webmanifest" },
+    { rel: "apple-touch-icon", href: "/icons/apple-touch-icon.png" },
     { rel: "preconnect", href: "https://picsum.photos" },
     { rel: "preconnect", href: "https://fastly.picsum.photos" },
   ]
@@ -67,6 +71,17 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         {/* Native controls and scrollbars may use either scheme (the theme script/provider picks one). */}
         <meta name="color-scheme" content="light dark" />
+        {/* The browser's own UI (address bar, task switcher) takes the brand colour; darker in dark mode. */}
+        <meta
+          name="theme-color"
+          content="#0f766e"
+          media="(prefers-color-scheme: light)"
+        />
+        <meta
+          name="theme-color"
+          content="#0b1f1d"
+          media="(prefers-color-scheme: dark)"
+        />
         {/* 13.7: sets the `dark` class before first paint (no flash). Must run before the CSS is applied. */}
         <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
         <Meta />
@@ -99,6 +114,7 @@ export default function App() {
             <WishlistSessionSync />
             <RecentlyViewedSync />
             <RealtimeSync />
+            <PwaSync />
             <ToastProvider>
               <Outlet />
             </ToastProvider>

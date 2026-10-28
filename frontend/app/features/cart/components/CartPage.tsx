@@ -1,6 +1,8 @@
 import { useIsMutating } from "@tanstack/react-query"
 import { ShoppingCart } from "lucide-react"
 import { ChargedInInr, useT } from "@/features/i18n"
+import { OfflineNotice } from "@/features/offline"
+import { useOnlineStatus } from "@/hooks/useOnlineStatus"
 import { Link } from "react-router"
 
 import { AsyncView } from "@/components/common/AsyncView"
@@ -21,6 +23,7 @@ import { FreeShippingBar } from "./FreeShippingBar"
 /** `/cart`: the server cart (guest by token, user by JWT) through the `useCart` facade. */
 export function CartPage() {
   const t = useT("cart")
+  const online = useOnlineStatus()
   const cart = useCart()
   const { totals, lines, saved } = cart
   // A cart request is in flight (quantity edit, move, coupon...): do not let the shopper leave
@@ -30,6 +33,8 @@ export function CartPage() {
 
   return (
     <div className="mx-auto max-w-5xl p-4">
+      {/* Outside AsyncView: offline, the cart request itself fails and the notice must still be there. */}
+      <OfflineNotice what="The cart and checkout" />
       <AsyncView
         state={cart.state}
         loading={<ListSkeleton rows={3} label="Loading your cart" />}
@@ -128,7 +133,7 @@ export function CartPage() {
                 <CouponBox />
                 <Button
                   nativeButton={false}
-                  disabled={lines.length === 0 || blocked || busy}
+                  disabled={lines.length === 0 || blocked || busy || !online}
                   render={<Link to={paths.checkout()} />}
                 >
                   {t("proceed")}

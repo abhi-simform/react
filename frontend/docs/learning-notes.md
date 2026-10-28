@@ -1026,3 +1026,12 @@ Backend B1 was built first (separate `backend B1:` commits): `GET /categories` n
 - `prerender` + `ssr: false` works in RR 8: static HTML for chosen routes, a fallback page for the rest. It reminded me that "client only" code runs in Node at build: module-level `localStorage` reads need guards.
 - Structured data: `aggregateRating` with zero reviews is invalid; use the live deal price in `offers.price`; the currency is the shop's (INR), not the display currency.
 - Lighthouse "SEO" fails on a `noindex` page by definition; that is the signal the tag works.
+
+## 13.10 PWA
+
+- A service worker is a proxy you write: the safe shape is an ALLOW-list (precache + a few public GET rules) and "do nothing" for the rest. For the API the gate is doubled: an allow-listed path AND no credentials header AND the server's own `Cache-Control: public` on the response (B12 marks the catalog public; cart/orders/me are `private, no-cache` and the worker would not store them anyway).
+- A new version must WAIT (no `skipWaiting`) until the user presses Reload, otherwise a deploy can swap the JavaScript of a tab that is paying. The first install also "changes the controller": reload only after the user asked.
+- Precaching a lazy chunk is not enough: its own static imports must be there, or the dynamic `import()` fails offline with a confusing "Failed to fetch dynamically imported module". The build script follows the import graph (static edges only).
+- Lighthouse 13 has no PWA score; Chrome's `Page.getInstallabilityErrors` (CDP) says why an app is not installable.
+- Playwright: requests made by a service worker are invisible to `context.route`; with `route` active, offline navigations are not answered by the worker. Block workers in general specs, allow them in the PWA spec, and keep those tests free of `route`.
+- Documented for debugging: DevTools > Application > Clear site data (+ unregister), or the console snippet in `docs/pwa.md`.

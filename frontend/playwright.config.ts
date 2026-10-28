@@ -24,6 +24,10 @@ export default defineConfig({
   expect: { timeout: 10_000 },
   use: {
     baseURL: "http://localhost:5173",
+    // 13.10: the production build registers a service worker. Requests made BY a service worker are not seen
+    // by `context.route` (the rate-limit header per test, the mocked payment endpoints), so the suite blocks
+    // it by default and `pwa.spec.ts` opts back in with `test.use({ serviceWorkers: "allow" })`.
+    serviceWorkers: "block",
     // A trace of the failed test's first retry (CI) and, locally, of every failure.
     trace: CI ? "on-first-retry" : "retain-on-failure",
     screenshot: "only-on-failure",

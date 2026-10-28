@@ -33,6 +33,7 @@ export const paths = {
   cart: () => "/cart",
   wishlist: () => "/wishlist",
   help: () => "/help",
+  offline: () => "/offline",
   policy: (slug: string) => generatePath("/policies/:slug", { slug }),
 
   /** `from` = where to return after login (validated again by `getReturnTo` on the way back). */

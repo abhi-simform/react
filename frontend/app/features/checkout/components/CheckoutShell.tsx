@@ -4,6 +4,7 @@ import { FormProvider, useForm, useFormContext } from "react-hook-form"
 import { Navigate, Outlet, useLocation } from "react-router"
 
 import { useAuth } from "@/features/auth"
+import { OfflineNotice } from "@/features/offline"
 import { paths } from "@/lib/paths"
 
 import { CheckoutCartProvider, type CheckoutCart } from "../cartContext"
@@ -57,6 +58,7 @@ export function CheckoutShell({ cart }: { cart: CheckoutCart }) {
           <StepperSync />
           <div className="mx-auto grid max-w-5xl gap-6 p-4 md:grid-cols-[1fr_18rem]">
             <div>
+              <OfflineNotice what="Checkout" />
               <CheckoutStepper />
               <StepGuard>
                 <Outlet />

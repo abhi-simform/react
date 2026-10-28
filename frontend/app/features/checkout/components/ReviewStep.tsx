@@ -8,6 +8,7 @@ import { addressQueries } from "@/features/account"
 import { useAuth } from "@/features/auth"
 import { CouponBox, describeCouponReason } from "@/features/cart"
 import { ChargedInInr, useT } from "@/features/i18n"
+import { useOnlineStatus } from "@/hooks/useOnlineStatus"
 import { usePlaceOrder } from "@/features/orders"
 import { Button } from "@/components/ui/button"
 import { useSingleFlight } from "@/hooks/useSingleFlight"
@@ -34,6 +35,7 @@ import { withDelivery } from "../totals"
  */
 export function ReviewStep() {
   const t = useT("checkout")
+  const online = useOnlineStatus()
   const { getValues } = useFormContext<CheckoutInput>()
   const { user } = useAuth()
   const navigate = useNavigate()
@@ -208,7 +210,7 @@ export function ReviewStep() {
       <div className="flex flex-wrap gap-2">
         <Button
           type="button"
-          disabled={place.isPending || lines.length === 0}
+          disabled={place.isPending || lines.length === 0 || !online}
           onClick={() => void submit()}
         >
           {place.isPending

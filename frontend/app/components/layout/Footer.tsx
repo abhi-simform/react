@@ -1,4 +1,5 @@
 import { Link } from "react-router"
+import { InstallButton } from "@/features/pwa"
 import { paths } from "@/lib/paths"
 
 export function Footer() {
@@ -9,6 +10,7 @@ export function Footer() {
         <Link to={paths.help()}>Help</Link>
         <Link to={paths.policy("returns")}>Returns</Link>
         <Link to={paths.policy("privacy")}>Privacy</Link>
+        <InstallButton />
       </nav>
     </footer>
   )

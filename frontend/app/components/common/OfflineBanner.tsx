@@ -1,4 +1,7 @@
+import { Link } from "react-router"
+
 import { useOnlineStatus } from "@/hooks/useOnlineStatus"
+import { paths } from "@/lib/paths"
 
 /** Polite live region: announced when the connection drops, gone when it returns. */
 export function OfflineBanner() {
@@ -8,7 +11,10 @@ export function OfflineBanner() {
       {!online && (
         <p className="bg-warning-muted p-2 text-center text-sm text-warning">
           You are offline. Showing what we already have; new requests will fail
-          until you reconnect.
+          until you reconnect.{" "}
+          <Link className="underline" to={paths.offline()}>
+            What works offline
+          </Link>
         </p>
       )}
     </div>
