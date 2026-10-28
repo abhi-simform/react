@@ -1,6 +1,7 @@
 import { Loader2 } from "lucide-react"
 import { useState } from "react"
-import { useForm } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { useForm, type DefaultValues } from "react-hook-form"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -13,66 +14,45 @@ import {
 } from "@/components/ui/dialog"
 import type { ApiError } from "@/lib/api/errors"
 
-import { PHONE_RE, PINCODE_RE } from "@/lib/fields"
+import { INDIA_STATES, isIndiaState } from "@/lib/indiaStates"
 
-import { ADDRESS_TYPES, type Address, type AddressInput } from "../schemas"
+import {
+  ADDRESS_TYPES,
+  addressFormSchema,
+  type Address,
+  type AddressFormInput,
+  type AddressFormOutput,
+  type AddressInput,
+} from "../schemas"
 
-/** 7.1: the form values. Was one `useState` object in 6.3 (plain, controlled); now React Hook Form. */
-type Fields = {
-  fullName: string
-  phone: string
-  line1: string
-  line2: string
-  landmark: string
-  city: string
-  state: string
-  pincode: string
-  type: AddressInput["type"]
-  isDefault: boolean
-}
-
-const EMPTY: Fields = {
+/** `DefaultValues` is a deep partial: a field may start `undefined` (no state chosen). */
+const EMPTY: DefaultValues<AddressFormInput> = {
   fullName: "",
   phone: "",
   line1: "",
   line2: "",
   landmark: "",
   city: "",
-  state: "",
+  state: undefined, // no state chosen yet ("" is not one of the enum values)
   pincode: "",
   type: "home",
   isDefault: false,
 }
 
-const fromAddress = (a: Address): Fields => ({
+const fromAddress = (a: Address): DefaultValues<AddressFormInput> => ({
   fullName: a.fullName,
   phone: a.phone,
   line1: a.line1,
   line2: a.line2 ?? "",
   landmark: a.landmark ?? "",
   city: a.city,
-  state: a.state,
+  // The API accepts any text; the form only offers the list. An unknown legacy value
+  // starts unselected so the user must pick one.
+  state: isIndiaState(a.state) ? a.state : undefined,
   pincode: a.pincode,
   type: a.type,
   isDefault: a.isDefault,
 })
-
-/** Empty optional fields are omitted; the API would reject "" for nothing. */
-function toInput(f: Fields, editing: boolean): AddressInput {
-  return {
-    fullName: f.fullName,
-    phone: f.phone,
-    line1: f.line1,
-    ...(f.line2 ? { line2: f.line2 } : {}),
-    ...(f.landmark ? { landmark: f.landmark } : {}),
-    city: f.city,
-    state: f.state,
-    pincode: f.pincode,
-    type: f.type,
-    // PATCH cannot change the default flag (it has its own endpoint).
-    ...(editing ? {} : { isDefault: f.isDefault }),
-  }
-}
 
 type Props = {
   /** `undefined` = closed, `"new"` = create, an address = edit it. */
@@ -123,7 +103,7 @@ const FIELD_NAMES = [
   "state",
   "pincode",
 ] as const
-type TextField = (typeof FIELD_NAMES)[number]
+type TextField = Exclude<(typeof FIELD_NAMES)[number], "state">
 
 function AddressForm({
   existing,
@@ -141,33 +121,36 @@ function AddressForm({
     handleSubmit,
     setError,
     formState: { errors, isSubmitting },
-  } = useForm<Fields>({
+  } = useForm<AddressFormInput, unknown, AddressFormOutput>({
+    resolver: zodResolver(addressFormSchema),
     defaultValues: existing ? fromAddress(existing) : EMPTY,
   })
   // A server 422 on a field goes under that field (setError); anything else is a form-level note.
   const [generalError, setGeneralError] = useState<string>()
 
-  async function submit(values: Fields) {
+  async function submit(values: AddressFormOutput) {
     setGeneralError(undefined)
+    // PATCH cannot change the default flag (it has its own endpoint).
+    const { isDefault, ...rest } = values
+    const input: AddressInput = existing ? rest : { ...rest, isDefault }
     // RHF awaits this promise: `isSubmitting` is true until it settles, which also
     // blocks a second submit while the first request is running.
-    const error = await onSubmit(
-      toInput(values, existing !== undefined),
-      existing
-    )
+    const error = await onSubmit(input, existing)
     if (!error) return onClose()
     const fieldErrors = Object.entries(error.fieldErrors).filter(([path]) =>
       (FIELD_NAMES as readonly string[]).includes(path)
     )
     if (fieldErrors.length === 0) return setGeneralError(error.message)
     for (const [path, message] of fieldErrors)
-      setError(path as TextField, { type: "server", message })
+      setError(path as (typeof FIELD_NAMES)[number], {
+        type: "server",
+        message,
+      })
   }
 
   const text = (
     key: TextField,
     label: string,
-    rules: Parameters<typeof register<TextField>>[1],
     extra: React.ComponentProps<"input"> = {}
   ) => (
     <label className="flex flex-col text-sm">
@@ -176,7 +159,7 @@ function AddressForm({
         className="rounded border p-1"
         aria-invalid={errors[key] ? true : undefined}
         aria-describedby={errors[key] ? `err-${key}` : undefined}
-        {...register(key, rules)}
+        {...register(key)}
         {...extra}
       />
       {errors[key] && (
@@ -205,64 +188,43 @@ function AddressForm({
           {generalError}
         </p>
       )}
-      {text(
-        "fullName",
-        "Full name",
-        {
-          required: "Enter the recipient's name",
-          minLength: { value: 2, message: "At least 2 characters" },
-        },
-        { autoComplete: "name", autoFocus: true }
-      )}
-      {text(
-        "phone",
-        "Mobile number",
-        {
-          required: "Enter a mobile number",
-          pattern: {
-            value: PHONE_RE,
-            message: "Enter a valid 10-digit mobile number",
-          },
-        },
-        { inputMode: "numeric", autoComplete: "tel-national" }
-      )}
-      {text(
-        "line1",
-        "House, street",
-        {
-          required: "Enter the house / street",
-          minLength: { value: 3, message: "At least 3 characters" },
-        },
-        { autoComplete: "address-line1" }
-      )}
-      {text("line2", "Area (optional)", {}, { autoComplete: "address-line2" })}
-      {text("landmark", "Landmark (optional)", {})}
+      {text("fullName", "Full name", { autoComplete: "name", autoFocus: true })}
+      {text("phone", "Mobile number", {
+        inputMode: "numeric",
+        autoComplete: "tel-national",
+      })}
+      {text("line1", "House, street", { autoComplete: "address-line1" })}
+      {text("line2", "Area (optional)", { autoComplete: "address-line2" })}
+      {text("landmark", "Landmark (optional)")}
       <div className="grid grid-cols-2 gap-2">
-        {text(
-          "city",
-          "City",
-          { required: "Enter the city" },
-          { autoComplete: "address-level2" }
-        )}
-        {text(
-          "state",
-          "State",
-          { required: "Enter the state" },
-          { autoComplete: "address-level1" }
-        )}
+        {text("city", "City", { autoComplete: "address-level2" })}
+        <label className="flex flex-col text-sm">
+          State
+          <select
+            className="rounded border p-1"
+            aria-invalid={errors.state ? true : undefined}
+            aria-describedby={errors.state ? "err-state" : undefined}
+            {...register("state")}
+          >
+            <option value="">Select...</option>
+            {INDIA_STATES.map((st) => (
+              <option key={st} value={st}>
+                {st}
+              </option>
+            ))}
+          </select>
+          {errors.state && (
+            <span id="err-state" role="alert" className="text-xs text-red-700">
+              {errors.state.message}
+            </span>
+          )}
+        </label>
       </div>
-      {text(
-        "pincode",
-        "Pincode",
-        {
-          required: "Enter a pincode",
-          pattern: {
-            value: PINCODE_RE,
-            message: "Enter a valid 6-digit pincode",
-          },
-        },
-        { inputMode: "numeric", maxLength: 6, autoComplete: "postal-code" }
-      )}
+      {text("pincode", "Pincode", {
+        inputMode: "numeric",
+        maxLength: 6,
+        autoComplete: "postal-code",
+      })}
       <label className="flex flex-col text-sm">
         Type
         <select className="rounded border p-1" {...register("type")}>

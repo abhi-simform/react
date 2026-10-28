@@ -44,6 +44,35 @@ export async function loginAsDevRole(role: Role): Promise<AuthUser> {
   )
 }
 
+/** Real sign-in (7.2): the email/password the user typed, against `POST /auth/login`. */
+export async function loginWithPassword(credentials: {
+  email: string
+  password: string
+}): Promise<AuthUser> {
+  return adopt(
+    await api("/auth/login", {
+      method: "POST",
+      body: credentials,
+      schema: authResponseSchema,
+    })
+  )
+}
+
+/** Real sign-up (7.2): `POST /auth/register` creates the account AND signs it in. */
+export async function registerAccount(input: {
+  name: string
+  email: string
+  password: string
+}): Promise<AuthUser> {
+  return adopt(
+    await api("/auth/register", {
+      method: "POST",
+      body: input,
+      schema: authResponseSchema,
+    })
+  )
+}
+
 /**
  * Refresh TOKEN ROTATION means each call invalidates the cookie it used: two refreshes
  * in parallel would make the second one look like a stolen, replayed token and the

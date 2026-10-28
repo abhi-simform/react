@@ -13,6 +13,8 @@ import { useLocalStorage } from "@/hooks/useLocalStorage"
 import {
   endSession,
   loginAsDevRole,
+  loginWithPassword,
+  registerAccount,
   onSessionLost,
   refreshSession,
 } from "./session"
@@ -30,6 +32,14 @@ type AuthValue = {
   user: AuthUser | null
   /** Rejects when the API is unreachable or refuses the dev account. */
   login: (role?: Role) => Promise<void>
+  /** Real credentials (7.2). Rejects with an `ApiError` the form maps to fields. */
+  signIn: (credentials: { email: string; password: string }) => Promise<void>
+  /** Creates the account and signs in. Resolves with the user, for a confirmation message. */
+  signUp: (input: {
+    name: string
+    email: string
+    password: string
+  }) => Promise<AuthUser>
   logout: () => Promise<void>
 }
 
@@ -121,6 +131,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     },
     [setRemembered]
   )
+  const adoptUser = useCallback(
+    (user: AuthUser) => {
+      setRemembered(user)
+      setSession({ status: "authenticated", user })
+    },
+    [setRemembered]
+  )
+  const signIn = useCallback(
+    async (credentials: { email: string; password: string }) => {
+      adoptUser(await loginWithPassword(credentials))
+    },
+    [adoptUser]
+  )
+  const signUp = useCallback(
+    async (input: { name: string; email: string; password: string }) => {
+      const user = await registerAccount(input)
+      adoptUser(user)
+      return user
+    },
+    [adoptUser]
+  )
   const logout = useCallback(async () => {
     forget()
     setSession({ status: "anonymous", user: null })
@@ -128,8 +159,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [forget])
 
   const value = useMemo<AuthValue>(
-    () => ({ ...session, login, logout }),
-    [session, login, logout]
+    () => ({ ...session, login, signIn, signUp, logout }),
+    [session, login, signIn, signUp, logout]
   )
   return <AuthContext value={value}>{children}</AuthContext>
 }

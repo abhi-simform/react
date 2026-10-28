@@ -1,9 +1,9 @@
-import { PlaceholderPage } from "@/components/common/PlaceholderPage"
+import { RegisterForm } from "@/features/auth"
 import { pageTitle } from "@/lib/pageTitle"
 import type { RouteHandle } from "@/types/route-handle"
 
 export default function RegisterRoute() {
-  return <PlaceholderPage title="Create account" builtIn="7 and 10" />
+  return <RegisterForm />
 }
 
 export function meta() {

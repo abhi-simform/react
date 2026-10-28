@@ -1,20 +1,22 @@
 import { useId } from "react"
+import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm, useWatch, type Control } from "react-hook-form"
 
 import { Button } from "@/components/ui/button"
 
+import { reviewSchema, type ReviewInput, type ReviewOutput } from "../schemas"
+
 const MAX_CHARS = 500
-const MIN_CHARS = 20
 const STAR_LABELS = ["Terrible", "Poor", "Okay", "Good", "Excellent"]
 
-export type ReviewPayload = { rating: number; text: string }
-
-/** What the inputs hold: a radio group gives a STRING ("4"), converted on submit. */
-type ReviewFields = { rating: string; text: string }
+/** Derived from the schema (7.2): no hand-written interface to drift. */
+export type ReviewPayload = ReviewOutput
 
 /**
- * 7.1: React Hook Form with the BUILT-IN rules (no resolver yet; 7.2 moves the rules into
- * a Zod schema). Inputs are uncontrolled: `register` hands each one a ref + handlers, so
+ * 7.1 + 7.2: React Hook Form with the rules in a Zod schema (`../schemas.ts`, via
+ * `zodResolver`). The radio group yields the string "4"; the schema coerces it, so
+ * `useForm` takes the INPUT type and the OUTPUT type separately. Inputs are uncontrolled:
+ * `register` hands each one a ref + handlers, so
  * typing does not re-render this component. Only what we SUBSCRIBE to re-renders:
  * `formState.errors` (read below) and `useWatch` inside `CharCount` (its own component).
  */
@@ -30,13 +32,14 @@ export function ReviewForm({
     control,
     reset,
     formState: { errors, isSubmitting },
-  } = useForm<ReviewFields>({
+  } = useForm<ReviewInput, unknown, ReviewOutput>({
+    resolver: zodResolver(reviewSchema),
     defaultValues: { rating: "", text: "" },
     mode: "onSubmit", // first validation on submit, then on every change (reValidateMode)
   })
 
-  async function submit(values: ReviewFields) {
-    await onSubmit({ rating: Number(values.rating), text: values.text.trim() })
+  async function submit(values: ReviewOutput) {
+    await onSubmit(values) // already a number and trimmed
     reset()
   }
 
@@ -60,7 +63,7 @@ export function ReviewForm({
                   id={`${id}-star-${value}`}
                   type="radio"
                   value={value}
-                  {...register("rating", { required: "Choose a star rating" })}
+                  {...register("rating")}
                   className="peer sr-only"
                 />
                 <label
@@ -97,17 +100,7 @@ export function ReviewForm({
           rows={4}
           aria-invalid={errors.text ? true : undefined}
           aria-describedby={`${id}-count${errors.text ? ` ${id}-text-error` : ""}`}
-          {...register("text", {
-            required: "Write a few words about the product",
-            minLength: {
-              value: MIN_CHARS,
-              message: `Write at least ${MIN_CHARS} characters`,
-            },
-            maxLength: {
-              value: MAX_CHARS,
-              message: `At most ${MAX_CHARS} characters`,
-            },
-          })}
+          {...register("text")}
           className="block w-full rounded border p-2 text-sm"
         />
         <CharCount id={`${id}-count`} control={control} />
@@ -137,7 +130,7 @@ function CharCount({
   control,
 }: {
   id: string
-  control: Control<ReviewFields>
+  control: Control<ReviewInput, unknown, ReviewOutput>
 }) {
   const text = useWatch({ control, name: "text" })
   return (
