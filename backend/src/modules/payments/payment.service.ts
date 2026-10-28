@@ -3,7 +3,7 @@ import mongoose, { Types } from "mongoose"
 import { env, paymentMock } from "../../config/env.js"
 import { logger } from "../../config/logger.js"
 import { ApiError } from "../../utils/ApiError.js"
-import { notifyPlaced } from "../orders/order.mail.js"
+import { onOrderStatusChanged, onRefundSettled } from "../orders/order.events.js"
 import { Order } from "../orders/order.model.js"
 import { User } from "../users/user.model.js"
 import {
@@ -170,7 +170,7 @@ export async function markPaid(providerOrderId: string, info: PaidInfo) {
     return { first: true as const, payment, order }
   })
   if (result.first) {
-    if (result.order) void notifyPlaced(String(result.order.user), result.order)
+    if (result.order) void onOrderStatusChanged(result.order, "pending_payment")
     else
       await refundOrder(String(result.payment.order), {
         reason: "Payment received after the order was cancelled",
@@ -421,7 +421,7 @@ export async function settleRefund(providerRefundId: string, success: boolean) {
   payment.refundedAmount = processed
   await payment.save()
   const full = processed >= payment.amount
-  await Order.updateOne(
+  const order = await Order.findOneAndUpdate(
     { _id: payment.order },
     {
       $set: {
@@ -433,8 +433,12 @@ export async function settleRefund(providerRefundId: string, success: boolean) {
               ? "partially_refunded"
               : "paid",
       },
-    }
+    },
+    { returnDocument: "after" }
   )
+  // B9: tell the shopper (and any open order page) the money is back.
+  const settled = payment.refunds.find((r) => r.providerRefundId === providerRefundId)
+  if (success && order && settled) void onRefundSettled(order, settled.amount)
   return payment
 }
 

@@ -32,6 +32,10 @@ import {
   recentlyViewedRoutes,
   recommendationRoutes,
 } from "./modules/recommendations/recommendations.routes.js"
+import {
+  adminNotificationRoutes,
+  notificationRoutes,
+} from "./modules/notifications/notification.routes.js"
 import { userRoutes } from "./modules/users/user.routes.js"
 
 // Every feature module mounts here. New module = new line.
@@ -45,6 +49,8 @@ routes.use("/products/:productId", productReviewRoutes)
 routes.use("/products", productDiscoveryRoutes)
 routes.use("/products", productRoutes)
 routes.use("/search", searchRoutes)
+routes.use("/notifications", notificationRoutes)
+routes.use("/admin/notifications", adminNotificationRoutes)
 routes.use("/me/recently-viewed", recentlyViewedRoutes)
 routes.use("/recommendations", recommendationRoutes)
 routes.use("/wishlist", wishlistRoutes)

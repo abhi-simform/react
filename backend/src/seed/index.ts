@@ -18,6 +18,8 @@ import { Order, type OrderStatus } from "../modules/orders/order.model.js"
 import { Review, Vote, maskName } from "../modules/reviews/review.model.js"
 import { Answer, Question } from "../modules/reviews/qa.model.js"
 import { RecentlyViewed } from "../modules/recommendations/recentlyViewed.model.js"
+import { Notification } from "../modules/notifications/notification.model.js"
+import { orderTemplate } from "../modules/notifications/notification.templates.js"
 import { slugify } from "../utils/slugify.js"
 import { CATALOG } from "./catalog.js"
 
@@ -56,6 +58,7 @@ async function main() {
     Answer.syncIndexes(),
     WebhookEvent.syncIndexes(),
     RecentlyViewed.syncIndexes(),
+    Notification.syncIndexes(),
   ])
 
   // Users
@@ -683,6 +686,50 @@ async function main() {
         }))
       )
     }
+  }
+
+  // B9: the dev customer's notification history, built from their seeded orders with the SAME
+  // templates the live system uses. Older ones are read; the newest few are unread (bell badge).
+  if (customer) {
+    const mine = await Order.find({ user: customer._id, orderNumber: /^SS-SEED-0/ })
+      .sort({ createdAt: 1 })
+      .lean()
+    const rows: Record<string, unknown>[] = mine.flatMap((o) =>
+      o.statusHistory.flatMap((h) => {
+        const t = orderTemplate(
+          { id: String(o._id), orderNumber: o.orderNumber },
+          h.status,
+          null
+        )
+        return t
+          ? [
+              {
+                user: customer._id,
+                category: t.category,
+                type: t.type,
+                title: t.title,
+                body: t.body,
+                link: t.link,
+                data: { orderId: String(o._id), status: h.status },
+                createdAt: h.at,
+                readAt: new Date(h.at.getTime() + 3_600_000),
+              },
+            ]
+          : []
+      })
+    )
+    rows.sort((a, b) => +(a.createdAt as Date) - +(b.createdAt as Date))
+    for (const r of rows.slice(-4)) delete r.readAt // newest 4 unread
+    rows.push({
+      user: customer._id,
+      category: "offers",
+      type: "offer.broadcast",
+      title: "Weekend flash sale is live",
+      body: "Up to 50% off on top brands. Ends Sunday.",
+      link: "/deals",
+      createdAt: new Date(now - 2 * 3_600_000),
+    })
+    await Notification.insertMany(rows, { timestamps: false })
   }
 
   logger.info(

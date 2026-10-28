@@ -41,6 +41,11 @@ import * as RS from "./modules/reviews/review.schema.js"
 import { addWishlistSchema } from "./modules/wishlist/wishlist.schema.js"
 import { listBrandsSchema } from "./modules/categories/category.schema.js"
 import { listProductsSchema } from "./modules/products/product.schema.js"
+import {
+  broadcastSchema,
+  listNotificationsSchema,
+  updatePrefsSchema,
+} from "./modules/notifications/notification.schema.js"
 import { suggestSchema } from "./modules/search/search.schema.js"
 import {
   compareSchema,
@@ -1419,6 +1424,89 @@ export const openApiDocument = {
         summary: "Clear my recently viewed list",
         security: bearer,
         responses: { 204: { description: "Cleared" } },
+      },
+    },
+    "/notifications": {
+      get: {
+        tags: ["Notifications"],
+        summary:
+          "My notifications, newest first. Filters: unread=true, category (orders|offers|account). meta adds unreadCount. Item = { id, category, type, title, body, link, data, read, readAt, createdAt }",
+        security: bearer,
+        parameters: queryParams(listNotificationsSchema.query as z.ZodObject),
+        responses: {
+          200: { description: "Notification[]" },
+          401: { description: "UNAUTHORIZED" },
+        },
+      },
+    },
+    "/notifications/unread-count": {
+      get: {
+        tags: ["Notifications"],
+        summary: "{ count } for the bell badge",
+        security: bearer,
+        responses: { 200: { description: "{ count }" } },
+      },
+    },
+    "/notifications/read-all": {
+      post: {
+        tags: ["Notifications"],
+        summary: "Mark everything read: { updated, unreadCount: 0 }",
+        security: bearer,
+        responses: { 200: { description: "ok" } },
+      },
+    },
+    "/notifications/{id}/read": {
+      post: {
+        tags: ["Notifications"],
+        summary:
+          "Mark one read (idempotent; the first readAt is kept): { notification, unreadCount }. Someone else's id is 404",
+        security: bearer,
+        parameters: [
+          { name: "id", in: "path", required: true, schema: { type: "string" } },
+        ],
+        responses: { 200: { description: "ok" }, 404: { description: "NOT_FOUND" } },
+      },
+    },
+    "/notifications/{id}": {
+      delete: {
+        tags: ["Notifications"],
+        summary: "Delete one of my notifications",
+        security: bearer,
+        parameters: [
+          { name: "id", in: "path", required: true, schema: { type: "string" } },
+        ],
+        responses: { 204: { description: "Deleted" }, 404: { description: "NOT_FOUND" } },
+      },
+    },
+    "/notifications/preferences": {
+      get: {
+        tags: ["Notifications"],
+        summary: "{ orders|offers|account: { inApp, email } }",
+        security: bearer,
+        responses: { 200: { description: "Preferences" } },
+      },
+      patch: {
+        tags: ["Notifications"],
+        summary: "Partial update of the switches; returns the full preferences",
+        security: bearer,
+        requestBody: body(updatePrefsSchema.body),
+        responses: {
+          200: { description: "Preferences" },
+          422: { description: "VALIDATION_ERROR" },
+        },
+      },
+    },
+    "/admin/notifications/broadcast": {
+      post: {
+        tags: ["Notifications"],
+        summary:
+          "Admin: send an offers notification to every customer who allows in-app offers (pushed live). link must be a same-site path",
+        security: bearer,
+        requestBody: body(broadcastSchema.body),
+        responses: {
+          201: { description: "{ sent }" },
+          403: { description: "FORBIDDEN" },
+        },
       },
     },
     "/products/{idOrSlug}": {

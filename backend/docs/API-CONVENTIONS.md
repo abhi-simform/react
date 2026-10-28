@@ -367,7 +367,7 @@ Orders also expose `deliveredAt` and `returnableUntil` (set while `delivered`, n
 | POST   | `/admin/returns/:id/decision` `{decision: approve\|reject, note?}` | approve: `return_requested -> returned`, only the returned units go back to stock. reject: back to `delivered`.                                                                                                                                                                             |
 | POST   | `/admin/returns/:id/refund` `{note?}`                              | `returned -> refunded`. Razorpay orders: a gateway refund for `refundAmount` (instant on the mock, `refund_pending` until the webhook on real Razorpay; the order's `paymentStatus` then becomes `partially_refunded` or `refunded`). COD: marked refunded (money is returned out of band). |
 
-Notifications and live updates for returns arrive with the rest of B9 (Stage 11.9). The seed has no pending return: the dev customer's recent delivered order (3 days ago) is inside the window, the older one (20 days) is outside it.
+Return events notify and push live (see "Notifications and realtime (B9)" below). The seed has no pending return: the dev customer's recent delivered order (3 days ago) is inside the window, the older one (20 days) is outside it.
 
 ### Search suggestions, recently viewed, recommendations, compare (B8)
 
@@ -386,3 +386,36 @@ Product rows in every rail below have the same shape as `GET /products` list row
 | GET    | `/products/compare?ids=a,b,c`                               | Public. 2-4 ids (`422` otherwise), `404` if one is missing/inactive. `{ products[...], specs[{ key, values[], differs }] }`; `values[i]` belongs to `products[i]` (`null` = the product has no such spec).                                                                                                                                                                                                  |
 
 Seed: ~120 historical delivered orders by the reviewer accounts (popular products bought with siblings from their category) feed "also bought"; the dev customer has 6 recently viewed products.
+
+### Notifications and realtime (B9, completed)
+
+In-app + email notifications, Socket.io push, and order tracking events. Every order status change (placement, payment confirmed, packed, shipped, out for delivery, delivered, cancelled, return requested/approved/declined, refund started) goes through ONE function, `onOrderStatusChanged` (`modules/orders/order.events.ts`), after the change is committed. It (1) emits `order:status` and (2) stores a notification, pushes it and, for the important steps, emails it, honouring the user's preferences. A refund the gateway has finished emits `order:payment` and a "refund processed" notification. These are fire-and-forget: a notification failure never fails the order change.
+
+| Method    | Path                                                     | Notes                                                                                                                                                                                                            |
+| --------- | -------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| GET       | `/notifications?page&limit&unread&category`              | Bearer. Newest first. `meta` = page meta + `unreadCount`. Item = `{ id, category (orders\|offers\|account), type ("order.shipped", "return.approved", ...), title, body, link, data, read, readAt, createdAt }`. |
+| GET       | `/notifications/unread-count`                            | Bearer. `{ count }` (the bell badge).                                                                                                                                                                            |
+| POST      | `/notifications/:id/read`                                | Bearer. Idempotent (first `readAt` kept). `{ notification, unreadCount }`. Someone else's id is `404`.                                                                                                           |
+| POST      | `/notifications/read-all`                                | Bearer. `{ updated, unreadCount: 0 }`.                                                                                                                                                                           |
+| DELETE    | `/notifications/:id`                                     | Bearer. `204`.                                                                                                                                                                                                   |
+| GET/PATCH | `/notifications/preferences`                             | Bearer. `{ orders, offers, account }`, each `{ inApp, email }`. Defaults: orders on/on, offers on/off, account on/on. PATCH is partial (`{ "orders": { "email": false } }`).                                     |
+| POST      | `/admin/notifications/broadcast` `{title, body?, link?}` | Admin. An `offers` notification to every customer who allows in-app offers. `link` must be a same-site path. `{ sent }`.                                                                                         |
+
+Notifications expire after 90 days (TTL index). Templates live in code (`notification.templates.ts`); the "templates" admin screen is not built.
+
+**Socket.io** (same port as the API, path `/socket.io`):
+
+- Connect with `io(API_ORIGIN, { auth: (cb) => cb({ token: currentAccessToken }) })`. The access token is verified in the handshake. Refusal arrives as `connect_error` with `err.data.code` = `UNAUTHORIZED` (no token), `INVALID_TOKEN`, or `TOKEN_EXPIRED` (refresh the access token, then reconnect).
+- A token is only checked at the handshake, so the server cuts a socket off when ITS token expires: it emits `auth:expired` and disconnects (`io server disconnect`, which socket.io does NOT auto-reconnect: the client must refresh and `connect()` again).
+- Each user's sockets join the room `user:<id>`; the server only emits there, so a client never sees another user's events.
+
+| Event (server to client) | Payload                                                                                                                                                                                       |
+| ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `ready`                  | `{ userId, serverTime }` right after the handshake succeeds.                                                                                                                                  |
+| `notification:new`       | `{ notification, unreadCount }` (same item shape as the REST list; the count is fresh, so the badge needs no second request).                                                                 |
+| `order:status`           | `{ orderId, orderNumber, status, from, paymentStatus, returnStatus, entry: { status, at, note } }`: `entry` is the new `statusHistory` line, append it; `status` replaces the order's status. |
+| `order:payment`          | `{ orderId, paymentStatus }` (refund settled).                                                                                                                                                |
+| `auth:expired`           | The access token behind this socket expired; reconnect with a fresh one.                                                                                                                      |
+
+Events are NOT replayed. After a reconnect the client must refetch what it shows (`/notifications/unread-count`, the open order); that is how a missed event stays harmless.
+Seed: the dev customer has notifications generated from their seeded orders with the live templates (the newest 4 are unread) plus an offers notification.

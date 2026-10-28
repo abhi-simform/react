@@ -10,7 +10,7 @@ import { COD_MAX_TOTAL, priceOrder } from "../pricing/pricing.js"
 import { addBusinessDays, checkPincode } from "../pincodes/pincode.service.js"
 import { Product } from "../products/product.model.js"
 import { isOwnUpload } from "../uploads/ownership.js"
-import { notifyPlaced } from "./order.mail.js"
+import { onOrderStatusChanged } from "./order.events.js"
 import { onOrderCancelled, onRefundDue } from "../payments/payment.service.js"
 import {
   CANCELLABLE,
@@ -81,7 +81,7 @@ export async function placeOrder(userId: string, key: string, input: PlaceOrderI
     const order = await mongoose.connection.transaction(async (session) =>
       createOrder(userId, key, hash, input, session)
     )
-    void notifyPlaced(userId, order)
+    void onOrderStatusChanged(order, null)
     return { order, replayed: false }
   } catch (err) {
     // Two parallel requests with the same key: the loser either trips the unique index or finds the
@@ -334,12 +334,14 @@ async function restock(
 
 /** Customer cancel: only before packing. Releases stock, the deal claim and the coupon use. */
 export async function cancelOrder(userId: string, id: string, reason?: string) {
+  let from = "placed"
   return mongoose.connection
     .transaction(async (session) => {
       const current = await Order.findOne({ _id: id, user: userId }).session(session)
       if (!current) throw ApiError.notFound("Order not found")
       if (!CANCELLABLE.includes(current.status))
         throw invalidTransition(current.status, "cancelled")
+      from = current.status
       const wasPaid = current.payment?.status === "paid"
       // The status guard makes a double-click (or two tabs) cancel exactly once.
       const order = await Order.findOneAndUpdate(
@@ -368,7 +370,9 @@ export async function cancelOrder(userId: string, id: string, reason?: string) {
     })
     .then(async (order) => {
       await onOrderCancelled(order) // B6: refund a captured payment / close the unpaid one
-      return (await Order.findById(order._id)) ?? order
+      const fresh = (await Order.findById(order._id)) ?? order
+      void onOrderStatusChanged(fresh, from) // B9: live event + notification
+      return fresh
     })
 }
 
@@ -487,6 +491,7 @@ export async function requestReturn(
     { returnDocument: "after" }
   )
   if (!order) throw invalidTransition(current.status, "returned")
+  void onOrderStatusChanged(order, "delivered")
   return order
 }
 
@@ -529,10 +534,12 @@ export async function transitionOrder(
   to: OrderStatus,
   note?: string
 ) {
+  let from: string = to
   return mongoose.connection
     .transaction(async (session) => {
       const current = await Order.findById(id).session(session)
       if (!current) throw ApiError.notFound("Order not found")
+      from = current.status
       if (!canTransition(current.status, to))
         throw new ApiError(
           409,
@@ -601,7 +608,9 @@ export async function transitionOrder(
     .then(async (order) => {
       if (to === "cancelled") await onOrderCancelled(order)
       if (to === "refunded") await onRefundDue(order)
-      return (await Order.findById(order._id)) ?? order
+      const fresh = (await Order.findById(order._id)) ?? order
+      void onOrderStatusChanged(fresh, from) // B9: live event + notification
+      return fresh
     })
 }
 

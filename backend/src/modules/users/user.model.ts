@@ -18,6 +18,21 @@ const userSchema = new Schema(
     emailVerified: { type: Boolean, default: false },
     isActive: { type: Boolean, default: true },
     lastLoginAt: Date,
+    // Notification preferences (B9): per category, in-app and email switches.
+    notificationPrefs: {
+      orders: {
+        inApp: { type: Boolean, default: true },
+        email: { type: Boolean, default: true },
+      },
+      offers: {
+        inApp: { type: Boolean, default: true },
+        email: { type: Boolean, default: false },
+      },
+      account: {
+        inApp: { type: Boolean, default: true },
+        email: { type: Boolean, default: true },
+      },
+    },
     // Only the HASH of one-time tokens is stored.
     emailVerifyTokenHash: { type: String, select: false },
     emailVerifyExpires: { type: Date, select: false },
