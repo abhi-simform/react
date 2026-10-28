@@ -1,6 +1,13 @@
 // Throwaway Stage 1 route: a client-side product explorer over the static fixture.
 import { useState } from "react"
 
+import { List } from "@/components/common/List"
+import { QuantityInput } from "@/components/common/QuantityInput"
+import { Rating } from "@/components/common/Rating"
+import { statusLabel } from "@/features/orders"
+import { useToggle } from "@/hooks/useToggle"
+import { ordersFixture } from "@/test/fixtures/orders"
+
 import {
   brandCounts,
   filterProducts,
@@ -27,6 +34,39 @@ function toNumber(value: string): number | undefined {
   if (value.trim() === "") return undefined
   const n = Number(value)
   return Number.isFinite(n) ? n : undefined
+}
+
+// 2.5 playground: typed building blocks used with products and with orders.
+function TypedLab() {
+  const [showOrders, toggleOrders] = useToggle(true)
+  const [qty, setQty] = useState(1)
+  return (
+    <section className="border-t pt-3 text-sm md:col-span-2">
+      <h2 className="font-medium">Typed components (2.5)</h2>
+      <div className="my-2 flex items-center gap-3">
+        <button className="border p-1" onClick={toggleOrders}>
+          {showOrders ? "Hide" : "Show"} orders
+        </button>
+        <label className="flex items-center gap-2">
+          Qty
+          <QuantityInput value={qty} onValueChange={setQty} max={10} />
+        </label>
+        <Rating value={4.3} count={1234} size="sm" />
+      </div>
+      {showOrders && (
+        <List
+          items={ordersFixture}
+          getKey={(order) => order._id}
+          renderItem={(order) => (
+            <>
+              {order.orderNumber}: {statusLabel(order.status)}
+            </>
+          )}
+          empty={<p>No orders</p>}
+        />
+      )}
+    </section>
+  )
 }
 
 // 1.6 playground: promises against the real API, triggered from event handlers (no effects yet).
@@ -255,15 +295,22 @@ export default function ScratchExplorer() {
           Top brands overall:{" "}
           {topBrands.map((b) => `${b.brand} (${b.count})`).join(", ")}
         </p>
-        <ul className="grid gap-1 text-sm">
-          {items.map((p) => (
-            <li key={p._id}>
-              {p.name} · {p.brand} · {formatCurrency(toPaise(p.price))} ·{" "}
-              {p.ratingAvg}★ · stock {p.stock} · {p.discountPercent}% off
-            </li>
-          ))}
-        </ul>
+        <div className="grid gap-1 text-sm">
+          <List
+            items={items}
+            getKey={(p) => p._id}
+            renderItem={(p) => (
+              <>
+                {p.name} · {p.brand} · {formatCurrency(toPaise(p.price))} ·{" "}
+                <Rating value={p.ratingAvg} count={p.ratingCount} size="sm" /> ·
+                stock {p.stock} · {p.discountPercent}% off
+              </>
+            )}
+            empty={<p>No products match these filters.</p>}
+          />
+        </div>
       </section>
+      <TypedLab />
       <AsyncLab />
     </main>
   )
