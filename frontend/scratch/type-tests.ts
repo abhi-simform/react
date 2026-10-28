@@ -2,13 +2,14 @@
 import { getProduct, getProducts } from "../app/features/catalog/api.ts"
 import { request } from "../app/lib/api/client.ts"
 import type { Paginated } from "../app/lib/api/envelope.ts"
+import {
+  productQuerySchema,
+  productSchema,
+} from "../app/features/catalog/schemas.ts"
+import type { z } from "zod"
 import { groupBy } from "../app/lib/groupBy.ts"
-import type {
-  CartItem,
-  Order,
-  Product,
-  ProductDetail,
-} from "../app/types/domain.ts"
+import type { Product, ProductDetail } from "../app/features/catalog/schemas.ts"
+import type { CartItem, Order } from "../app/types/domain.ts"
 
 // request<T> returns exactly T
 export const a: Promise<Product[]> = request<Product[]>("/products")
@@ -48,3 +49,18 @@ export const input2: Omit<CartItem, "priceSnapshot"> = {
   // @ts-expect-error priceSnapshot was omitted, so it is an excess property
   priceSnapshot: 1,
 }
+
+// With a schema, T is INFERRED from it: no generic argument, no lie.
+const opts = { schema: productSchema }
+export const inferred: Promise<Product> = request("/products/x", opts)
+// @ts-expect-error the schema says Product, not string
+export const wrong: Promise<string> = request("/products/x", opts)
+
+// z.input (what you feed the schema) vs z.infer / z.output (what you get back)
+type QueryIn = z.input<typeof productQuerySchema>
+type QueryOut = z.infer<typeof productQuerySchema>
+export const qin: QueryIn = { brand: "Apple,boAt", minPrice: "100" } // raw strings
+const base = { page: 1, limit: 20, sort: "relevance" } as const
+export const qout: QueryOut = { ...base, brand: ["Apple"], minPrice: 100 }
+// @ts-expect-error the OUTPUT brand is an array, not the raw csv string
+export const qbad: QueryOut = { ...base, brand: "Apple,boAt" }

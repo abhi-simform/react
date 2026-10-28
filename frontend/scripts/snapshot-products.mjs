@@ -20,7 +20,14 @@ do {
 const out = {
   success: true,
   data: items,
-  meta: { page: 1, limit: items.length, total: items.length, totalPages: 1 },
+  meta: {
+    page: 1,
+    limit: items.length,
+    total: items.length,
+    totalPages: 1,
+    hasNext: false,
+    hasPrev: false,
+  },
 }
 await writeFile(
   new URL("../app/test/fixtures/products.json", import.meta.url),

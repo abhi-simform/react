@@ -11,6 +11,20 @@ export {
   sortProducts,
 } from "./utils"
 export type { PriceBucket, SortKey } from "./utils"
-export type { Product, ProductFilters } from "./types"
+export { getProduct, getProducts } from "./api"
+export {
+  productDetailSchema,
+  productQuerySchema,
+  productSchema,
+} from "./schemas"
+export type {
+  Product,
+  ProductCardData,
+  ProductDetail,
+  ProductFilters,
+  ProductQuery,
+  ProductSort,
+  ProductStatus,
+} from "./types"
 export { loadHomeData } from "./homeData"
 export type { HomeData } from "./homeData"

@@ -1,6 +1,5 @@
 // Run: node scratch/04-sort.ts
 import assert from "node:assert/strict"
-import { readFileSync } from "node:fs"
 
 import {
   compareBy,
@@ -8,16 +7,10 @@ import {
   type SortKey,
 } from "../app/features/catalog/utils.ts"
 import type { Product } from "../app/features/catalog/types.ts"
+import { loadProducts } from "./load-products.ts"
 import { deepFreeze } from "../app/lib/immutable.ts"
 
-const products = deepFreeze(
-  JSON.parse(
-    readFileSync(
-      new URL("../app/test/fixtures/products.json", import.meta.url),
-      "utf8"
-    )
-  ).data as Product[]
-)
+const products = deepFreeze(loadProducts())
 const snapshot = products.map((p) => p._id)
 
 const keys: SortKey[] = [
@@ -96,5 +89,5 @@ assert.deepEqual(
 )
 
 // frozen input would throw with .sort()
-assert.throws(() => (products as Product[]).sort(), TypeError)
+assert.throws(() => products.sort(), TypeError)
 console.log("1.4 ok")

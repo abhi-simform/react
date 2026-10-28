@@ -2,23 +2,16 @@
 // Expected counts were computed independently with a throwaway Python script
 // over products.json (not with the code under test).
 import assert from "node:assert/strict"
-import { readFileSync } from "node:fs"
 
 import {
   filterProducts,
   filterWithFacets,
 } from "../app/features/catalog/utils.ts"
 import type { Product } from "../app/features/catalog/types.ts"
+import { loadProducts } from "./load-products.ts"
 import { deepFreeze } from "../app/lib/immutable.ts"
 
-const products = deepFreeze(
-  JSON.parse(
-    readFileSync(
-      new URL("../app/test/fixtures/products.json", import.meta.url),
-      "utf8"
-    )
-  ).data as Product[]
-)
+const products = deepFreeze(loadProducts())
 const count = (f: Parameters<typeof filterProducts>[1]) =>
   filterProducts(products, f).length
 

@@ -1,14 +1,18 @@
 import { request, requestPaginated } from "@/lib/api/client"
 import type { Paginated } from "@/lib/api/envelope"
 import { toQueryString } from "@/lib/api/query"
-import type { ProductDetail } from "@/types/domain"
 
-import type { Product, ProductQuery } from "./types"
+import { productDetailSchema, productSchema } from "./schemas"
+import type { Product, ProductDetail, ProductQuery } from "./types"
 
 export const getProducts = (
   query: ProductQuery = {}
 ): Promise<Paginated<Product>> =>
-  requestPaginated<Product>(`/products${toQueryString(query)}`)
+  requestPaginated(`/products${toQueryString(query)}`, {
+    schema: productSchema,
+  })
 
 export const getProduct = (slug: string): Promise<ProductDetail> =>
-  request<ProductDetail>(`/products/${encodeURIComponent(slug)}`)
+  request(`/products/${encodeURIComponent(slug)}`, {
+    schema: productDetailSchema,
+  })

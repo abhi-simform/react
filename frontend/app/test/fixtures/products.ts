@@ -1,19 +1,9 @@
-import type { Product, ProductStatus } from "@/types/domain"
+import { paginatedSchema } from "@/lib/api/schemas"
+import { productSchema } from "@/features/catalog/schemas"
 
 import raw from "./products.json"
 
-// `satisfies Product[]` on the raw JSON import fails: JSON modules widen
-// string literals, so `status` is `string`, not "active" | "draft" | "archived".
-// That is the compiler finding a real gap between "what JSON can prove" and
-// "what the type promises". A small runtime check closes it (Zod replaces this in 2.6).
-function toStatus(value: string): ProductStatus {
-  if (value === "active" || value === "draft" || value === "archived") {
-    return value
-  }
-  throw new Error(`Unknown product status in fixture: ${value}`)
-}
-
-export const productsFixture: Product[] = raw.data.map((p) => ({
-  ...p,
-  status: toStatus(p.status),
-}))
+// The snapshot is validated with the same schema the live API uses, so the
+// fixture cannot drift from the contract (it replaces the Stage 2.1 loader that
+// narrowed `status` by hand).
+export const productsFixture = paginatedSchema(productSchema).parse(raw).data

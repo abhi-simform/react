@@ -16022,6 +16022,8 @@
     "page": 1,
     "limit": 308,
     "total": 308,
-    "totalPages": 1
+    "totalPages": 1,
+    "hasNext": false,
+    "hasPrev": false
   }
 }

@@ -1,11 +1,11 @@
 // Run: node scratch/03-totals-histogram.ts
 // Expected values below were calculated by hand (paise).
 import assert from "node:assert/strict"
-import { readFileSync } from "node:fs"
 
 import { computeTotals } from "../app/features/cart/totals.ts"
 import { brandCounts, priceHistogram } from "../app/features/catalog/utils.ts"
 import type { Product } from "../app/features/catalog/types.ts"
+import { loadProducts } from "./load-products.ts"
 import { toPaise } from "../app/lib/money.ts"
 
 // 1. empty cart: everything zero (needs the explicit reduce initial value)
@@ -121,12 +121,7 @@ for (const t of [
 assert.throws(() => ([] as number[]).reduce((a, b) => a + b), TypeError)
 
 // ---- histogram / brandCounts on the real fixture
-const products = JSON.parse(
-  readFileSync(
-    new URL("../app/test/fixtures/products.json", import.meta.url),
-    "utf8"
-  )
-).data as Product[]
+const products = loadProducts()
 const total = (bs: { count: number }[]) => bs.reduce((s, b) => s + b.count, 0)
 
 for (const n of [1, 5, 10, 20, 1000]) {

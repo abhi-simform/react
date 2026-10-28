@@ -3,7 +3,8 @@ import { List } from "../app/components/common/List.tsx"
 import { QuantityInput } from "../app/components/common/QuantityInput.tsx"
 import { Rating } from "../app/components/common/Rating.tsx"
 import { useToggle } from "../app/hooks/useToggle.ts"
-import type { Order, Product } from "../app/types/domain.ts"
+import type { Product } from "../app/features/catalog/schemas.ts"
+import type { Order } from "../app/types/domain.ts"
 
 declare const products: Product[]
 

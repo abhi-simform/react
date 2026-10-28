@@ -6,7 +6,7 @@ import { request } from "@/lib/api/client"
 import { ApiError } from "@/lib/api/errors"
 import { groupBy } from "@/lib/groupBy"
 import { toQueryString } from "@/lib/api/query"
-import type { Product } from "@/types/domain"
+import type { Product } from "@/features/catalog/schemas"
 
 const page = await getProducts({
   limit: 3,

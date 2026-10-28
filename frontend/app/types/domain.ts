@@ -3,6 +3,8 @@
 // data model (learning-plan 2.3) for entities whose backend phase has not landed
 // yet (marked "planned"). Types are erased at runtime: nothing here validates
 // anything; Stage 2.6 adds Zod schemas for the parts that cross the network.
+// Product and ProductDetail are NOT here: they are inferred from the Zod schemas
+// in features/catalog/schemas.ts, so there is no hand-written copy to drift.
 
 /** Whole Indian rupees, exactly as the API sends them (`price: 59999`). */
 export type Money = number
@@ -49,43 +51,6 @@ export type Category = {
   slug: string
   image?: string
   children: Category[]
-}
-
-export type ProductStatus = "active" | "draft" | "archived"
-
-/** A product as returned in LISTS (`GET /products`). */
-export type Product = {
-  _id: Id
-  name: string
-  slug: string
-  brand: string
-  category: { _id: Id; name: string; slug: string }
-  /** category + ancestors, ids only in list responses */
-  categoryPath: Id[]
-  tags: string[]
-  price: Money
-  mrp: Money
-  discountPercent: number
-  images: { url: string; alt?: string }[]
-  stock: number
-  sku: string
-  ratingAvg: number
-  ratingCount: number
-  soldCount: number
-  isFeatured: boolean
-  status: ProductStatus
-  /** seller user id */
-  seller: Id
-  createdAt: ISODateString
-  updatedAt: ISODateString
-}
-
-/** `GET /products/:idOrSlug`: the list shape plus the long-form fields; categoryPath is expanded. */
-export type ProductDetail = Omit<Product, "categoryPath"> & {
-  description: string
-  highlights: string[]
-  specs: { key: string; value: string }[]
-  categoryPath: { _id: Id; name: string; slug: string }[]
 }
 
 /** planned (B1): today a brand is only a string on the product. */

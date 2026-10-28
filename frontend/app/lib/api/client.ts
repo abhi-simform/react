@@ -1,8 +1,16 @@
+import type { z } from "zod"
+
 import { env } from "@/lib/env"
 
-import { ApiError } from "./errors"
-import { isApiSuccess, type Paginated, type PageMeta } from "./envelope"
+import { ApiError, ContractError } from "./errors"
+import { isApiSuccess, type Paginated } from "./envelope"
 import { getJson } from "./getJson"
+import { apiEnvelopeSchema, paginatedSchema } from "./schemas"
+
+type Options<T> = RequestInit & {
+  /** Validate `data` against this schema; `T` is inferred from it. */
+  schema?: z.ZodType<T>
+}
 
 function send(path: string, init?: RequestInit): Promise<unknown> {
   return getJson(`${env.VITE_API_URL}${path}`, {
@@ -13,39 +21,59 @@ function send(path: string, init?: RequestInit): Promise<unknown> {
   })
 }
 
-function unwrap(body: unknown): { data: unknown; meta?: PageMeta } {
-  if (!isApiSuccess(body)) {
-    throw new ApiError({
-      status: 200,
-      code: "BAD_ENVELOPE",
-      message: "Response was not a success envelope",
-    })
-  }
-  return body
+function badEnvelope(message: string): ApiError {
+  return new ApiError({ status: 200, code: "BAD_ENVELOPE", message })
+}
+
+function contractError(path: string, error: z.ZodError): ContractError {
+  const err = new ContractError(path, error.issues)
+  console.error(err.message, error.issues)
+  return err
 }
 
 /**
- * Call the API and return the envelope's `data`.
- * NOTE: `T` is the caller's claim, not a check (the one `as` below). 2.6 makes
- * this safe by validating against a Zod schema.
+ * Validate responses in development only (strict feedback while we build) and
+ * trust the server in production builds (saves CPU on big lists). Trade-off:
+ * in production a contract change is no longer caught at the boundary, it shows
+ * up later as `undefined`/`NaN` in the UI, so error reporting (Stage 14) matters.
  */
-export async function request<T>(path: string, init?: RequestInit): Promise<T> {
-  const { data } = unwrap(await send(path, init))
-  return data as T // trusted generic until a schema is supplied
+const VALIDATE = env.DEV
+
+/**
+ * Call the API and return the envelope's `data`.
+ * With `schema`, `data` is parsed (dev) and `T` comes from the schema.
+ * Without it, `T` is the caller's claim, not a check (the one `as` below).
+ */
+export async function request<T>(
+  path: string,
+  { schema, ...init }: Options<T> = {}
+): Promise<T> {
+  const body = await send(path, init)
+
+  if (schema && VALIDATE) {
+    const result = apiEnvelopeSchema(schema).safeParse(body)
+    if (!result.success) throw contractError(path, result.error)
+    return result.data.data
+  }
+  if (!isApiSuccess(body))
+    throw badEnvelope("Response was not a success envelope")
+  return body.data as T // trusted generic: no schema, or validation is off
 }
 
 /** List endpoints: `data` is the array, `meta` carries paging. */
 export async function requestPaginated<T>(
   path: string,
-  init?: RequestInit
+  { schema, ...init }: Options<T> = {}
 ): Promise<Paginated<T>> {
-  const { data, meta } = unwrap(await send(path, init))
-  if (!Array.isArray(data) || !meta) {
-    throw new ApiError({
-      status: 200,
-      code: "BAD_ENVELOPE",
-      message: "Expected a list with meta",
-    })
+  const body = await send(path, init)
+
+  if (schema && VALIDATE) {
+    const result = paginatedSchema(schema).safeParse(body)
+    if (!result.success) throw contractError(path, result.error)
+    return { items: result.data.data, meta: result.data.meta }
   }
-  return { items: data as T[], meta } // trusted generic until a schema is supplied
+  if (!isApiSuccess(body) || !Array.isArray(body.data) || !body.meta) {
+    throw badEnvelope("Expected a list envelope with meta")
+  }
+  return { items: body.data as T[], meta: body.meta } // trusted generic
 }
