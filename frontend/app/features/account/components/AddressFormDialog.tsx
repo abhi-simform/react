@@ -1,8 +1,18 @@
 import { Loader2 } from "lucide-react"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { useForm, type DefaultValues } from "react-hook-form"
+import { useEffect } from "react"
+import { Controller, useForm, type DefaultValues } from "react-hook-form"
 
 import { Button } from "@/components/ui/button"
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+import { Switch } from "@/components/ui/switch"
 import {
   Dialog,
   DialogContent,
@@ -81,10 +91,9 @@ export function AddressFormDialog({
       onOpenChange={(open) => !open && onClose()}
     >
       <DialogContent>
-        {/* Mounted only while open, keyed by the target: the form state resets on every open. */}
+        {/* Mounted only while open. Switching to another address calls `reset()` inside (7.4). */}
         {target !== undefined && (
           <AddressForm
-            key={target === "new" ? "new" : target.id}
             existing={target === "new" ? undefined : target}
             pending={pending}
             onSubmit={onSubmit}
@@ -122,11 +131,22 @@ function AddressForm({
     register,
     handleSubmit,
     setError,
+    reset,
+    control,
     formState: { errors, isSubmitting },
   } = useForm<AddressFormInput, unknown, AddressFormOutput>({
     resolver: zodResolver(addressFormSchema),
     defaultValues: existing ? fromAddress(existing) : EMPTY,
   })
+
+  // `defaultValues` are read ONCE. When the same form instance is pointed at a different
+  // address (or "new"), reset() replaces values, clears errors and the dirty state.
+  const targetId = existing?.id ?? "new"
+  useEffect(() => {
+    reset(existing ? fromAddress(existing) : EMPTY)
+    // Only the identity of the target matters; `existing` changes after every save.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [targetId, reset])
 
   // Single flight: a same-tick second submit (Enter + click) never reaches the API.
   const save = useSingleFlight(async (values: AddressFormOutput) => {
@@ -180,19 +200,36 @@ function AddressForm({
       <div className="grid grid-cols-2 gap-2">
         {text("city", "City", { autoComplete: "address-level2" })}
         <FormField label="State" error={errors.state?.message}>
-          {(control) => (
-            <select
-              className="rounded border p-1"
-              {...control}
-              {...register("state")}
-            >
-              <option value="">Select...</option>
-              {INDIA_STATES.map((st) => (
-                <option key={st} value={st}>
-                  {st}
-                </option>
-              ))}
-            </select>
+          {(control_) => (
+            // A base-ui Select is not a native <select>: no `ref`/`onChange` for `register`.
+            // Controller bridges: `field.value/onChange/onBlur/ref` <-> the widget's props.
+            <Controller
+              control={control}
+              name="state"
+              render={({ field }) => (
+                <Select
+                  name={field.name}
+                  value={field.value ?? null}
+                  onValueChange={field.onChange}
+                >
+                  <SelectTrigger
+                    ref={field.ref} // so "focus the first invalid field" can focus it
+                    onBlur={field.onBlur}
+                    className="w-full"
+                    {...control_}
+                  >
+                    <SelectValue placeholder="Select a state" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {INDIA_STATES.map((st) => (
+                      <SelectItem key={st} value={st}>
+                        {st}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
+            />
           )}
         </FormField>
       </div>
@@ -201,26 +238,44 @@ function AddressForm({
         maxLength: 6,
         autoComplete: "postal-code",
       })}
-      <FormField label="Type">
-        {(control) => (
-          <select
-            className="rounded border p-1"
-            {...control}
-            {...register("type")}
-          >
-            {ADDRESS_TYPES.map((t) => (
-              <option key={t} value={t}>
-                {t}
-              </option>
-            ))}
-          </select>
+      <Controller
+        control={control}
+        name="type"
+        render={({ field }) => (
+          <fieldset className="flex flex-col gap-1 text-sm">
+            <legend>Address type</legend>
+            <RadioGroup
+              name={field.name}
+              value={field.value}
+              onValueChange={field.onChange}
+              className="flex gap-4"
+            >
+              {ADDRESS_TYPES.map((t) => (
+                <label key={t} className="flex items-center gap-1">
+                  <RadioGroupItem value={t} onBlur={field.onBlur} />
+                  {t}
+                </label>
+              ))}
+            </RadioGroup>
+          </fieldset>
         )}
-      </FormField>
+      />
       {!existing && (
-        <label className="flex items-center gap-2 text-sm">
-          <input type="checkbox" {...register("isDefault")} />
-          Make this my default address
-        </label>
+        <Controller
+          control={control}
+          name="isDefault"
+          render={({ field }) => (
+            <label className="flex items-center gap-2 text-sm">
+              <Switch
+                checked={field.value}
+                onCheckedChange={field.onChange}
+                onBlur={field.onBlur}
+                ref={field.ref}
+              />
+              Make this my default address
+            </label>
+          )}
+        />
       )}
       <DialogFooter>
         <Button type="button" variant="outline" onClick={onClose}>
