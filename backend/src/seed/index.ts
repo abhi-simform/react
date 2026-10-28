@@ -13,7 +13,7 @@ import { Cart } from "../modules/cart/cart.model.js"
 import { Coupon } from "../modules/coupons/coupon.model.js"
 import { Deal } from "../modules/deals/deal.model.js"
 import { Banner } from "../modules/banners/banner.model.js"
-import { Order } from "../modules/orders/order.model.js"
+import { Order, type OrderStatus } from "../modules/orders/order.model.js"
 import { slugify } from "../utils/slugify.js"
 import { CATALOG } from "./catalog.js"
 
@@ -314,6 +314,97 @@ async function main() {
       sortOrder: 3,
     },
   ])
+
+  // B5: a few past orders for the dev customer so /orders has history in every state
+  // (stock is NOT touched: these are historical snapshots).
+  if (customer) {
+    const addr = await Address.findOne({ user: customer._id, isDefault: true })
+    const hist = await Product.find({ status: "active" })
+      .sort({ soldCount: -1 })
+      .skip(10)
+      .limit(4)
+    const day = 86_400_000
+    const plan: { status: OrderStatus; daysAgo: number; pm: "cod" | "razorpay" }[] = [
+      { status: "delivered", daysAgo: 20, pm: "cod" },
+      { status: "delivered", daysAgo: 3, pm: "razorpay" },
+      { status: "shipped", daysAgo: 2, pm: "cod" },
+      { status: "cancelled", daysAgo: 8, pm: "cod" },
+    ]
+    if (addr && hist.length === 4) {
+      await Order.insertMany(
+        plan.map((o, n) => {
+          const p = hist[n]!
+          const qty = 1 + (n % 2)
+          const subtotal = p.price * qty
+          const tax = Math.round(subtotal * 0.18)
+          const shipping = subtotal > 499 ? 0 : 40
+          const createdAt = new Date(now - o.daysAgo * day)
+          const flow: OrderStatus[] =
+            o.status === "cancelled"
+              ? ["placed", "cancelled"]
+              : o.status === "shipped"
+                ? ["placed", "packed", "shipped"]
+                : ["placed", "packed", "shipped", "out_for_delivery", "delivered"]
+          return {
+            orderNumber: `SS-SEED-${String(n + 1).padStart(6, "0")}`,
+            user: customer._id,
+            items: [
+              {
+                product: p._id,
+                sku: p.sku,
+                title: p.name,
+                image: p.images[0]?.url,
+                unitPrice: p.price,
+                mrp: p.mrp,
+                qty,
+                lineTotal: subtotal,
+              },
+            ],
+            addressSnapshot: {
+              fullName: addr.fullName,
+              phone: addr.phone,
+              line1: addr.line1,
+              landmark: addr.landmark,
+              city: addr.city,
+              state: addr.state,
+              pincode: addr.pincode,
+              type: addr.type,
+            },
+            delivery: {
+              method: "standard",
+              estimatedFrom: new Date(createdAt.getTime() + 2 * day),
+              estimatedTo: new Date(createdAt.getTime() + 4 * day),
+            },
+            status: o.status,
+            statusHistory: flow.map((status, i) => ({
+              status,
+              at: new Date(createdAt.getTime() + i * day),
+            })),
+            pricing: {
+              subtotal,
+              discount: 0,
+              shipping,
+              tax,
+              total: subtotal + shipping + tax,
+            },
+            payment: {
+              method: o.pm,
+              status: o.status === "delivered" ? "paid" : "pending",
+            },
+            deliveredAt:
+              o.status === "delivered"
+                ? new Date(createdAt.getTime() + 4 * day)
+                : undefined,
+            cancelledAt:
+              o.status === "cancelled" ? new Date(createdAt.getTime() + day) : undefined,
+            cancelReason: o.status === "cancelled" ? "Ordered by mistake" : undefined,
+            createdAt,
+          }
+        }),
+        { timestamps: false }
+      )
+    }
+  }
 
   logger.info(
     `Seeded ${total} products, ${await Category.countDocuments()} categories, 3 users`

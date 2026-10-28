@@ -13,6 +13,7 @@ import { adminBannerRoutes, bannerRoutes } from "./modules/banners/banner.routes
 import { adminCouponRoutes, couponRoutes } from "./modules/coupons/coupon.routes.js"
 import { adminDealRoutes, dealRoutes } from "./modules/deals/deal.routes.js"
 import { timeRoutes } from "./modules/health/time.routes.js"
+import { adminOrderRoutes, orderRoutes } from "./modules/orders/order.routes.js"
 import { userRoutes } from "./modules/users/user.routes.js"
 
 // Every feature module mounts here. New module = new line.
@@ -36,3 +37,5 @@ routes.use("/time", timeRoutes)
 routes.use("/admin/coupons", adminCouponRoutes)
 routes.use("/admin/deals", adminDealRoutes)
 routes.use("/admin/banners", adminBannerRoutes)
+routes.use("/orders", orderRoutes)
+routes.use("/admin/orders", adminOrderRoutes)

@@ -19,6 +19,13 @@ import {
 import { applyCouponSchema, createCouponSchema } from "./modules/coupons/coupon.schema.js"
 import { createDealSchema, listDealsSchema } from "./modules/deals/deal.schema.js"
 import { createBannerSchema } from "./modules/banners/banner.routes.js"
+import {
+  adminStatusSchema,
+  cancelOrderSchema,
+  listOrdersSchema,
+  placeOrderSchema,
+  returnOrderSchema,
+} from "./modules/orders/order.schema.js"
 import { addWishlistSchema } from "./modules/wishlist/wishlist.schema.js"
 import { listBrandsSchema } from "./modules/categories/category.schema.js"
 import { listProductsSchema } from "./modules/products/product.schema.js"
@@ -515,6 +522,131 @@ export const openApiDocument = {
           { name: "id", in: "path", required: true, schema: { type: "string" } },
         ],
         responses: { 204: { description: "Deleted" } },
+      },
+    },
+    "/orders": {
+      post: {
+        tags: ["Orders"],
+        summary:
+          "Place an order from the cart, in ONE transaction (re-price, reserve stock, claim deal units, redeem coupon, empty cart). COD starts as placed, razorpay as pending_payment. Idempotent per Idempotency-Key header",
+        security: bearer,
+        parameters: [
+          {
+            name: "Idempotency-Key",
+            in: "header",
+            required: true,
+            description:
+              "Client-generated id (crypto.randomUUID()), one per checkout attempt. A retry returns the first order (200 + Idempotent-Replayed: true)",
+            schema: { type: "string" },
+          },
+        ],
+        requestBody: body(placeOrderSchema.body),
+        responses: {
+          201: { description: "Order" },
+          200: { description: "Replay of an earlier request with the same key" },
+          400: { description: "IDEMPOTENCY_KEY_REQUIRED" },
+          404: { description: "NOT_FOUND (address)" },
+          409: {
+            description:
+              "INSUFFICIENT_STOCK { items:[{productId,name,requested,availableQty}] } | PRICE_CHANGED { expectedTotal, actualTotal }",
+          },
+          422: {
+            description:
+              "VALIDATION_ERROR | CART_EMPTY | PINCODE_UNSERVICEABLE | COD_NOT_AVAILABLE | COUPON_INVALID | IDEMPOTENCY_KEY_REUSED",
+          },
+        },
+      },
+      get: {
+        tags: ["Orders"],
+        summary: "My orders, newest first. Filters: status, search (order number)",
+        security: bearer,
+        parameters: queryParams(listOrdersSchema.query as z.ZodObject),
+        responses: { 200: { description: "Order[] + page meta" } },
+      },
+    },
+    "/orders/{id}": {
+      get: {
+        tags: ["Orders"],
+        summary:
+          "One of my orders (status, statusHistory, pricing, addressSnapshot, items snapshot). Someone else's id is 404",
+        security: bearer,
+        parameters: [
+          { name: "id", in: "path", required: true, schema: { type: "string" } },
+        ],
+        responses: { 200: { description: "Order" }, 404: { description: "NOT_FOUND" } },
+      },
+    },
+    "/orders/{id}/cancel": {
+      post: {
+        tags: ["Orders"],
+        summary:
+          "Cancel (only pending_payment or placed). Releases stock, deal claim and coupon use",
+        security: bearer,
+        parameters: [
+          { name: "id", in: "path", required: true, schema: { type: "string" } },
+        ],
+        requestBody: body(cancelOrderSchema.body),
+        responses: {
+          200: { description: "Order" },
+          409: { description: "INVALID_TRANSITION" },
+        },
+      },
+    },
+    "/orders/{id}/return": {
+      post: {
+        tags: ["Orders"],
+        summary: "Request a return (delivered orders, within 7 days of delivery)",
+        security: bearer,
+        parameters: [
+          { name: "id", in: "path", required: true, schema: { type: "string" } },
+        ],
+        requestBody: body(returnOrderSchema.body),
+        responses: {
+          200: { description: "Order (return_requested)" },
+          409: { description: "INVALID_TRANSITION | RETURN_WINDOW_CLOSED" },
+          422: { description: "VALIDATION_ERROR" },
+        },
+      },
+    },
+    "/orders/{id}/invoice": {
+      get: {
+        tags: ["Orders"],
+        summary:
+          "Invoice PDF (attachment). Bearer is required, so download with fetch + blob, not a plain link",
+        security: bearer,
+        parameters: [
+          { name: "id", in: "path", required: true, schema: { type: "string" } },
+        ],
+        responses: {
+          200: { description: "application/pdf" },
+          409: { description: "INVOICE_NOT_AVAILABLE (pending_payment / cancelled)" },
+          404: { description: "NOT_FOUND" },
+        },
+      },
+    },
+    "/admin/orders": {
+      get: {
+        tags: ["Admin"],
+        summary: "All orders (same filters as /orders)",
+        security: bearer,
+        parameters: queryParams(listOrdersSchema.query as z.ZodObject),
+        responses: { 200: { description: "Order[]" }, 403: { description: "FORBIDDEN" } },
+      },
+    },
+    "/admin/orders/{id}/status": {
+      post: {
+        tags: ["Admin"],
+        summary:
+          "Move an order along the state machine (placed > packed > shipped > out_for_delivery > delivered; return_requested > returned > refunded)",
+        security: bearer,
+        parameters: [
+          { name: "id", in: "path", required: true, schema: { type: "string" } },
+        ],
+        requestBody: body(adminStatusSchema.body),
+        responses: {
+          200: { description: "Order" },
+          409: { description: "INVALID_TRANSITION { status, allowed }" },
+        },
       },
     },
     "/cart/merge": {

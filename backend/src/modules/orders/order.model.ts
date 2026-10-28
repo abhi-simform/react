@@ -58,6 +58,34 @@ const itemSchema = new Schema(
   { _id: false }
 )
 
+// A sub-schema (not a nested object) because it has a field NAMED `type`, which Mongoose would
+// otherwise read as "the type of addressSnapshot".
+const addressSnapshotSchema = new Schema(
+  {
+    fullName: String,
+    phone: String,
+    line1: String,
+    line2: String,
+    landmark: String,
+    city: String,
+    state: String,
+    pincode: String,
+    type: String,
+  },
+  { _id: false }
+)
+
+const pricingSchema = new Schema(
+  {
+    subtotal: { type: Number, required: true },
+    discount: { type: Number, required: true },
+    shipping: { type: Number, required: true },
+    tax: { type: Number, required: true },
+    total: { type: Number, required: true },
+  },
+  { _id: false }
+)
+
 const historySchema = new Schema(
   {
     status: { type: String, enum: ORDER_STATUSES, required: true },
@@ -74,17 +102,7 @@ const orderSchema = new Schema(
     user: { type: Types.ObjectId, ref: "User", required: true },
     items: { type: [itemSchema], required: true },
     // Copied, not referenced: editing or deleting the address later must not rewrite history.
-    addressSnapshot: {
-      fullName: String,
-      phone: String,
-      line1: String,
-      line2: String,
-      landmark: String,
-      city: String,
-      state: String,
-      pincode: String,
-      type: String,
-    },
+    addressSnapshot: addressSnapshotSchema,
     delivery: {
       method: { type: String, enum: ["standard", "express"], default: "standard" },
       slot: String, // "YYYY-MM-DD|9-12" as chosen in checkout
@@ -93,13 +111,7 @@ const orderSchema = new Schema(
     },
     status: { type: String, enum: ORDER_STATUSES, required: true },
     statusHistory: { type: [historySchema], default: [] },
-    pricing: {
-      subtotal: { type: Number, required: true },
-      discount: { type: Number, required: true },
-      shipping: { type: Number, required: true },
-      tax: { type: Number, required: true },
-      total: { type: Number, required: true },
-    },
+    pricing: { type: pricingSchema, required: true },
     coupon: { code: String, discount: Number },
     payment: {
       method: { type: String, enum: ["cod", "razorpay"], required: true },
