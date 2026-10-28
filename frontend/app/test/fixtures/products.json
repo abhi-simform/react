@@ -11,15 +11,8 @@
         "name": "Skincare",
         "slug": "skincare"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59e0c",
-        "6ac73852c8f724367eb59e0d"
-      ],
-      "tags": [
-        "skincare",
-        "the ordinary",
-        "night cream"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59e0c", "6ac73852c8f724367eb59e0d"],
+      "tags": ["skincare", "the ordinary", "night cream"],
       "price": 1354,
       "mrp": 2820,
       "discountPercent": 52,
@@ -63,15 +56,8 @@
         "name": "Men's Clothing",
         "slug": "men-s-clothing"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59d97",
-        "6ac73852c8f724367eb59d98"
-      ],
-      "tags": [
-        "men's clothing",
-        "h&m",
-        "slim fit shirt"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59d97", "6ac73852c8f724367eb59d98"],
+      "tags": ["men's clothing", "h&m", "slim fit shirt"],
       "price": 2774,
       "mrp": 3650,
       "discountPercent": 24,
@@ -115,15 +101,8 @@
         "name": "Men's Clothing",
         "slug": "men-s-clothing"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59d97",
-        "6ac73852c8f724367eb59d98"
-      ],
-      "tags": [
-        "men's clothing",
-        "u.s. polo",
-        "hoodie"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59d97", "6ac73852c8f724367eb59d98"],
+      "tags": ["men's clothing", "u.s. polo", "hoodie"],
       "price": 750,
       "mrp": 1000,
       "discountPercent": 25,
@@ -167,15 +146,8 @@
         "name": "Headphones & Audio",
         "slug": "headphones-audio"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59d3a",
-        "6ac73852c8f724367eb59d69"
-      ],
-      "tags": [
-        "headphones & audio",
-        "sony",
-        "earbuds"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59d3a", "6ac73852c8f724367eb59d69"],
+      "tags": ["headphones & audio", "sony", "earbuds"],
       "price": 15388,
       "mrp": 22630,
       "discountPercent": 32,
@@ -219,15 +191,8 @@
         "name": "Kitchen Appliances",
         "slug": "kitchen-appliances"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59ddd",
-        "6ac73852c8f724367eb59dde"
-      ],
-      "tags": [
-        "kitchen appliances",
-        "bajaj",
-        "air fryer"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59ddd", "6ac73852c8f724367eb59dde"],
+      "tags": ["kitchen appliances", "bajaj", "air fryer"],
       "price": 8663,
       "mrp": 11250,
       "discountPercent": 23,
@@ -271,15 +236,8 @@
         "name": "Women's Clothing",
         "slug": "women-s-clothing"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59d97",
-        "6ac73852c8f724367eb59daf"
-      ],
-      "tags": [
-        "women's clothing",
-        "w",
-        "top"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59d97", "6ac73852c8f724367eb59daf"],
+      "tags": ["women's clothing", "w", "top"],
       "price": 2397,
       "mrp": 5100,
       "discountPercent": 53,
@@ -323,15 +281,8 @@
         "name": "Footwear",
         "slug": "footwear"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59d97",
-        "6ac73852c8f724367eb59dc6"
-      ],
-      "tags": [
-        "footwear",
-        "skechers",
-        "slides"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59d97", "6ac73852c8f724367eb59dc6"],
+      "tags": ["footwear", "skechers", "slides"],
       "price": 7650,
       "mrp": 8500,
       "discountPercent": 10,
@@ -375,15 +326,8 @@
         "name": "Headphones & Audio",
         "slug": "headphones-audio"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59d3a",
-        "6ac73852c8f724367eb59d69"
-      ],
-      "tags": [
-        "headphones & audio",
-        "boat",
-        "soundbar"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59d3a", "6ac73852c8f724367eb59d69"],
+      "tags": ["headphones & audio", "boat", "soundbar"],
       "price": 14860,
       "mrp": 26070,
       "discountPercent": 43,
@@ -427,15 +371,8 @@
         "name": "Furniture",
         "slug": "furniture"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59ddd",
-        "6ac73852c8f724367eb59df5"
-      ],
-      "tags": [
-        "furniture",
-        "godrej interio",
-        "study table"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59ddd", "6ac73852c8f724367eb59df5"],
+      "tags": ["furniture", "godrej interio", "study table"],
       "price": 18137,
       "mrp": 27070,
       "discountPercent": 33,
@@ -479,15 +416,8 @@
         "name": "Women's Clothing",
         "slug": "women-s-clothing"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59d97",
-        "6ac73852c8f724367eb59daf"
-      ],
-      "tags": [
-        "women's clothing",
-        "h&m",
-        "palazzo"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59d97", "6ac73852c8f724367eb59daf"],
+      "tags": ["women's clothing", "h&m", "palazzo"],
       "price": 1430,
       "mrp": 1430,
       "discountPercent": 0,
@@ -531,15 +461,8 @@
         "name": "Kitchen Appliances",
         "slug": "kitchen-appliances"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59ddd",
-        "6ac73852c8f724367eb59dde"
-      ],
-      "tags": [
-        "kitchen appliances",
-        "butterfly",
-        "air fryer"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59ddd", "6ac73852c8f724367eb59dde"],
+      "tags": ["kitchen appliances", "butterfly", "air fryer"],
       "price": 15360,
       "mrp": 15360,
       "discountPercent": 0,
@@ -583,15 +506,8 @@
         "name": "Furniture",
         "slug": "furniture"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59ddd",
-        "6ac73852c8f724367eb59df5"
-      ],
-      "tags": [
-        "furniture",
-        "wakefit",
-        "office chair"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59ddd", "6ac73852c8f724367eb59df5"],
+      "tags": ["furniture", "wakefit", "office chair"],
       "price": 5580,
       "mrp": 7750,
       "discountPercent": 28,
@@ -635,15 +551,8 @@
         "name": "Technology & Programming",
         "slug": "technology-programming"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59e3b",
-        "6ac73852c8f724367eb59e53"
-      ],
-      "tags": [
-        "technology & programming",
-        "pragmatic",
-        "cookbook"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59e3b", "6ac73852c8f724367eb59e53"],
+      "tags": ["technology & programming", "pragmatic", "cookbook"],
       "price": 1324,
       "mrp": 1540,
       "discountPercent": 14,
@@ -687,15 +596,8 @@
         "name": "Kitchen Appliances",
         "slug": "kitchen-appliances"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59ddd",
-        "6ac73852c8f724367eb59dde"
-      ],
-      "tags": [
-        "kitchen appliances",
-        "bajaj",
-        "electric kettle"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59ddd", "6ac73852c8f724367eb59dde"],
+      "tags": ["kitchen appliances", "bajaj", "electric kettle"],
       "price": 10716,
       "mrp": 13230,
       "discountPercent": 19,
@@ -739,15 +641,8 @@
         "name": "Technology & Programming",
         "slug": "technology-programming"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59e3b",
-        "6ac73852c8f724367eb59e53"
-      ],
-      "tags": [
-        "technology & programming",
-        "o'reilly",
-        "in action"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59e3b", "6ac73852c8f724367eb59e53"],
+      "tags": ["technology & programming", "o'reilly", "in action"],
       "price": 1200,
       "mrp": 1690,
       "discountPercent": 29,
@@ -791,15 +686,8 @@
         "name": "Footwear",
         "slug": "footwear"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59d97",
-        "6ac73852c8f724367eb59dc6"
-      ],
-      "tags": [
-        "footwear",
-        "adidas",
-        "formal shoes"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59d97", "6ac73852c8f724367eb59dc6"],
+      "tags": ["footwear", "adidas", "formal shoes"],
       "price": 6612,
       "mrp": 7600,
       "discountPercent": 13,
@@ -843,15 +731,8 @@
         "name": "Smartwatches",
         "slug": "smartwatches"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59d3a",
-        "6ac73852c8f724367eb59d80"
-      ],
-      "tags": [
-        "smartwatches",
-        "apple",
-        "fitness band"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59d3a", "6ac73852c8f724367eb59d80"],
+      "tags": ["smartwatches", "apple", "fitness band"],
       "price": 41627,
       "mrp": 58630,
       "discountPercent": 29,
@@ -895,15 +776,8 @@
         "name": "Fiction",
         "slug": "fiction"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59e3b",
-        "6ac73852c8f724367eb59e3c"
-      ],
-      "tags": [
-        "fiction",
-        "hachette",
-        "novel"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59e3b", "6ac73852c8f724367eb59e3c"],
+      "tags": ["fiction", "hachette", "novel"],
       "price": 227,
       "mrp": 270,
       "discountPercent": 16,
@@ -947,15 +821,8 @@
         "name": "Skincare",
         "slug": "skincare"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59e0c",
-        "6ac73852c8f724367eb59e0d"
-      ],
-      "tags": [
-        "skincare",
-        "lakmé",
-        "face serum"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59e0c", "6ac73852c8f724367eb59e0d"],
+      "tags": ["skincare", "lakmé", "face serum"],
       "price": 1245,
       "mrp": 1310,
       "discountPercent": 5,
@@ -999,15 +866,8 @@
         "name": "Mobiles",
         "slug": "mobiles"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59d3a",
-        "6ac73852c8f724367eb59d3b"
-      ],
-      "tags": [
-        "mobiles",
-        "google",
-        "smartphone 5g"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59d3a", "6ac73852c8f724367eb59d3b"],
+      "tags": ["mobiles", "google", "smartphone 5g"],
       "price": 29091,
       "mrp": 47690,
       "discountPercent": 39,
@@ -1051,15 +911,8 @@
         "name": "Smartwatches",
         "slug": "smartwatches"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59d3a",
-        "6ac73852c8f724367eb59d80"
-      ],
-      "tags": [
-        "smartwatches",
-        "fire-boltt",
-        "fitness band"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59d3a", "6ac73852c8f724367eb59d80"],
+      "tags": ["smartwatches", "fire-boltt", "fitness band"],
       "price": 25238,
       "mrp": 40060,
       "discountPercent": 37,
@@ -1103,15 +956,8 @@
         "name": "Fiction",
         "slug": "fiction"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59e3b",
-        "6ac73852c8f724367eb59e3c"
-      ],
-      "tags": [
-        "fiction",
-        "penguin",
-        "thriller"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59e3b", "6ac73852c8f724367eb59e3c"],
+      "tags": ["fiction", "penguin", "thriller"],
       "price": 697,
       "mrp": 810,
       "discountPercent": 14,
@@ -1155,15 +1001,8 @@
         "name": "Gym & Fitness",
         "slug": "gym-fitness"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59e6a",
-        "6ac73852c8f724367eb59e6b"
-      ],
-      "tags": [
-        "gym & fitness",
-        "fitkit",
-        "protein shaker"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59e6a", "6ac73852c8f724367eb59e6b"],
+      "tags": ["gym & fitness", "fitkit", "protein shaker"],
       "price": 16574,
       "mrp": 20980,
       "discountPercent": 21,
@@ -1207,15 +1046,8 @@
         "name": "Mobiles",
         "slug": "mobiles"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59d3a",
-        "6ac73852c8f724367eb59d3b"
-      ],
-      "tags": [
-        "mobiles",
-        "xiaomi",
-        "pro max"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59d3a", "6ac73852c8f724367eb59d3b"],
+      "tags": ["mobiles", "xiaomi", "pro max"],
       "price": 39570,
       "mrp": 51390,
       "discountPercent": 23,
@@ -1259,15 +1091,8 @@
         "name": "Technology & Programming",
         "slug": "technology-programming"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59e3b",
-        "6ac73852c8f724367eb59e53"
-      ],
-      "tags": [
-        "technology & programming",
-        "apress",
-        "in action"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59e3b", "6ac73852c8f724367eb59e53"],
+      "tags": ["technology & programming", "apress", "in action"],
       "price": 405,
       "mrp": 880,
       "discountPercent": 54,
@@ -1311,15 +1136,8 @@
         "name": "Mobiles",
         "slug": "mobiles"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59d3a",
-        "6ac73852c8f724367eb59d3b"
-      ],
-      "tags": [
-        "mobiles",
-        "google",
-        "ultra"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59d3a", "6ac73852c8f724367eb59d3b"],
+      "tags": ["mobiles", "google", "ultra"],
       "price": 80903,
       "mrp": 117250,
       "discountPercent": 31,
@@ -1363,15 +1181,8 @@
         "name": "Gym & Fitness",
         "slug": "gym-fitness"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59e6a",
-        "6ac73852c8f724367eb59e6b"
-      ],
-      "tags": [
-        "gym & fitness",
-        "nivia",
-        "dumbbell set"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59e6a", "6ac73852c8f724367eb59e6b"],
+      "tags": ["gym & fitness", "nivia", "dumbbell set"],
       "price": 5352,
       "mrp": 9730,
       "discountPercent": 45,
@@ -1415,15 +1226,8 @@
         "name": "Smartwatches",
         "slug": "smartwatches"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59d3a",
-        "6ac73852c8f724367eb59d80"
-      ],
-      "tags": [
-        "smartwatches",
-        "samsung",
-        "sports watch"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59d3a", "6ac73852c8f724367eb59d80"],
+      "tags": ["smartwatches", "samsung", "sports watch"],
       "price": 25622,
       "mrp": 44950,
       "discountPercent": 43,
@@ -1467,15 +1271,8 @@
         "name": "Mobiles",
         "slug": "mobiles"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59d3a",
-        "6ac73852c8f724367eb59d3b"
-      ],
-      "tags": [
-        "mobiles",
-        "oneplus",
-        "neo"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59d3a", "6ac73852c8f724367eb59d3b"],
+      "tags": ["mobiles", "oneplus", "neo"],
       "price": 18380,
       "mrp": 27030,
       "discountPercent": 32,
@@ -1519,15 +1316,8 @@
         "name": "Technology & Programming",
         "slug": "technology-programming"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59e3b",
-        "6ac73852c8f724367eb59e53"
-      ],
-      "tags": [
-        "technology & programming",
-        "pragmatic",
-        "handbook"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59e3b", "6ac73852c8f724367eb59e53"],
+      "tags": ["technology & programming", "pragmatic", "handbook"],
       "price": 1273,
       "mrp": 2960,
       "discountPercent": 57,
@@ -1571,15 +1361,8 @@
         "name": "Furniture",
         "slug": "furniture"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59ddd",
-        "6ac73852c8f724367eb59df5"
-      ],
-      "tags": [
-        "furniture",
-        "urban ladder",
-        "sofa set"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59ddd", "6ac73852c8f724367eb59df5"],
+      "tags": ["furniture", "urban ladder", "sofa set"],
       "price": 38502,
       "mrp": 42780,
       "discountPercent": 10,
@@ -1623,15 +1406,8 @@
         "name": "Technology & Programming",
         "slug": "technology-programming"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59e3b",
-        "6ac73852c8f724367eb59e53"
-      ],
-      "tags": [
-        "technology & programming",
-        "packt",
-        "handbook"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59e3b", "6ac73852c8f724367eb59e53"],
+      "tags": ["technology & programming", "packt", "handbook"],
       "price": 988,
       "mrp": 1300,
       "discountPercent": 24,
@@ -1675,15 +1451,8 @@
         "name": "Headphones & Audio",
         "slug": "headphones-audio"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59d3a",
-        "6ac73852c8f724367eb59d69"
-      ],
-      "tags": [
-        "headphones & audio",
-        "bose",
-        "bluetooth speaker"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59d3a", "6ac73852c8f724367eb59d69"],
+      "tags": ["headphones & audio", "bose", "bluetooth speaker"],
       "price": 11256,
       "mrp": 26800,
       "discountPercent": 58,
@@ -1727,15 +1496,8 @@
         "name": "Mobiles",
         "slug": "mobiles"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59d3a",
-        "6ac73852c8f724367eb59d3b"
-      ],
-      "tags": [
-        "mobiles",
-        "oneplus",
-        "pro max"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59d3a", "6ac73852c8f724367eb59d3b"],
+      "tags": ["mobiles", "oneplus", "pro max"],
       "price": 12474,
       "mrp": 13130,
       "discountPercent": 5,
@@ -1779,15 +1541,8 @@
         "name": "Kitchen Appliances",
         "slug": "kitchen-appliances"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59ddd",
-        "6ac73852c8f724367eb59dde"
-      ],
-      "tags": [
-        "kitchen appliances",
-        "havells",
-        "mixer grinder"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59ddd", "6ac73852c8f724367eb59dde"],
+      "tags": ["kitchen appliances", "havells", "mixer grinder"],
       "price": 2815,
       "mrp": 3910,
       "discountPercent": 28,
@@ -1831,15 +1586,8 @@
         "name": "Fiction",
         "slug": "fiction"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59e3b",
-        "6ac73852c8f724367eb59e3c"
-      ],
-      "tags": [
-        "fiction",
-        "rupa",
-        "classic edition"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59e3b", "6ac73852c8f724367eb59e3c"],
+      "tags": ["fiction", "rupa", "classic edition"],
       "price": 227,
       "mrp": 280,
       "discountPercent": 19,
@@ -1883,15 +1631,8 @@
         "name": "Smartwatches",
         "slug": "smartwatches"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59d3a",
-        "6ac73852c8f724367eb59d80"
-      ],
-      "tags": [
-        "smartwatches",
-        "noise",
-        "smartwatch"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59d3a", "6ac73852c8f724367eb59d80"],
+      "tags": ["smartwatches", "noise", "smartwatch"],
       "price": 42690,
       "mrp": 42690,
       "discountPercent": 0,
@@ -1935,15 +1676,8 @@
         "name": "Laptops",
         "slug": "laptops"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59d3a",
-        "6ac73852c8f724367eb59d52"
-      ],
-      "tags": [
-        "laptops",
-        "apple",
-        "laptop"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59d3a", "6ac73852c8f724367eb59d52"],
+      "tags": ["laptops", "apple", "laptop"],
       "price": 98654,
       "mrp": 126480,
       "discountPercent": 22,
@@ -1987,15 +1721,8 @@
         "name": "Grooming",
         "slug": "grooming"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59e0c",
-        "6ac73852c8f724367eb59e24"
-      ],
-      "tags": [
-        "grooming",
-        "beardo",
-        "beard oil"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59e0c", "6ac73852c8f724367eb59e24"],
+      "tags": ["grooming", "beardo", "beard oil"],
       "price": 3671,
       "mrp": 3990,
       "discountPercent": 8,
@@ -2039,15 +1766,8 @@
         "name": "Men's Clothing",
         "slug": "men-s-clothing"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59d97",
-        "6ac73852c8f724367eb59d98"
-      ],
-      "tags": [
-        "men's clothing",
-        "peter england",
-        "slim fit shirt"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59d97", "6ac73852c8f724367eb59d98"],
+      "tags": ["men's clothing", "peter england", "slim fit shirt"],
       "price": 1470,
       "mrp": 2100,
       "discountPercent": 30,
@@ -2091,15 +1811,8 @@
         "name": "Mobiles",
         "slug": "mobiles"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59d3a",
-        "6ac73852c8f724367eb59d3b"
-      ],
-      "tags": [
-        "mobiles",
-        "oneplus",
-        "neo"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59d3a", "6ac73852c8f724367eb59d3b"],
+      "tags": ["mobiles", "oneplus", "neo"],
       "price": 32192,
       "mrp": 80480,
       "discountPercent": 60,
@@ -2143,15 +1856,8 @@
         "name": "Men's Clothing",
         "slug": "men-s-clothing"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59d97",
-        "6ac73852c8f724367eb59d98"
-      ],
-      "tags": [
-        "men's clothing",
-        "h&m",
-        "chinos"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59d97", "6ac73852c8f724367eb59d98"],
+      "tags": ["men's clothing", "h&m", "chinos"],
       "price": 5386,
       "mrp": 5730,
       "discountPercent": 6,
@@ -2195,15 +1901,8 @@
         "name": "Fiction",
         "slug": "fiction"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59e3b",
-        "6ac73852c8f724367eb59e3c"
-      ],
-      "tags": [
-        "fiction",
-        "bloomsbury",
-        "thriller"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59e3b", "6ac73852c8f724367eb59e3c"],
+      "tags": ["fiction", "bloomsbury", "thriller"],
       "price": 525,
       "mrp": 740,
       "discountPercent": 29,
@@ -2247,15 +1946,8 @@
         "name": "Laptops",
         "slug": "laptops"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59d3a",
-        "6ac73852c8f724367eb59d52"
-      ],
-      "tags": [
-        "laptops",
-        "acer",
-        "notebook"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59d3a", "6ac73852c8f724367eb59d52"],
+      "tags": ["laptops", "acer", "notebook"],
       "price": 34434,
       "mrp": 38690,
       "discountPercent": 11,
@@ -2299,15 +1991,8 @@
         "name": "Grooming",
         "slug": "grooming"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59e0c",
-        "6ac73852c8f724367eb59e24"
-      ],
-      "tags": [
-        "grooming",
-        "beardo",
-        "electric shaver"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59e0c", "6ac73852c8f724367eb59e24"],
+      "tags": ["grooming", "beardo", "electric shaver"],
       "price": 1810,
       "mrp": 1810,
       "discountPercent": 0,
@@ -2351,15 +2036,8 @@
         "name": "Headphones & Audio",
         "slug": "headphones-audio"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59d3a",
-        "6ac73852c8f724367eb59d69"
-      ],
-      "tags": [
-        "headphones & audio",
-        "jbl",
-        "wireless headphones"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59d3a", "6ac73852c8f724367eb59d69"],
+      "tags": ["headphones & audio", "jbl", "wireless headphones"],
       "price": 20163,
       "mrp": 21450,
       "discountPercent": 6,
@@ -2403,15 +2081,8 @@
         "name": "Furniture",
         "slug": "furniture"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59ddd",
-        "6ac73852c8f724367eb59df5"
-      ],
-      "tags": [
-        "furniture",
-        "ikea",
-        "bed"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59ddd", "6ac73852c8f724367eb59df5"],
+      "tags": ["furniture", "ikea", "bed"],
       "price": 18951,
       "mrp": 43070,
       "discountPercent": 56,
@@ -2455,15 +2126,8 @@
         "name": "Skincare",
         "slug": "skincare"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59e0c",
-        "6ac73852c8f724367eb59e0d"
-      ],
-      "tags": [
-        "skincare",
-        "minimalist",
-        "face wash"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59e0c", "6ac73852c8f724367eb59e0d"],
+      "tags": ["skincare", "minimalist", "face wash"],
       "price": 792,
       "mrp": 1070,
       "discountPercent": 26,
@@ -2507,15 +2171,8 @@
         "name": "Fiction",
         "slug": "fiction"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59e3b",
-        "6ac73852c8f724367eb59e3c"
-      ],
-      "tags": [
-        "fiction",
-        "hachette",
-        "thriller"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59e3b", "6ac73852c8f724367eb59e3c"],
+      "tags": ["fiction", "hachette", "thriller"],
       "price": 317,
       "mrp": 720,
       "discountPercent": 56,
@@ -2559,15 +2216,8 @@
         "name": "Men's Clothing",
         "slug": "men-s-clothing"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59d97",
-        "6ac73852c8f724367eb59d98"
-      ],
-      "tags": [
-        "men's clothing",
-        "levi's",
-        "chinos"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59d97", "6ac73852c8f724367eb59d98"],
+      "tags": ["men's clothing", "levi's", "chinos"],
       "price": 1363,
       "mrp": 1770,
       "discountPercent": 23,
@@ -2611,15 +2261,8 @@
         "name": "Headphones & Audio",
         "slug": "headphones-audio"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59d3a",
-        "6ac73852c8f724367eb59d69"
-      ],
-      "tags": [
-        "headphones & audio",
-        "sony",
-        "wireless headphones"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59d3a", "6ac73852c8f724367eb59d69"],
+      "tags": ["headphones & audio", "sony", "wireless headphones"],
       "price": 26810,
       "mrp": 26810,
       "discountPercent": 0,
@@ -2663,15 +2306,8 @@
         "name": "Furniture",
         "slug": "furniture"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59ddd",
-        "6ac73852c8f724367eb59df5"
-      ],
-      "tags": [
-        "furniture",
-        "godrej interio",
-        "office chair"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59ddd", "6ac73852c8f724367eb59df5"],
+      "tags": ["furniture", "godrej interio", "office chair"],
       "price": 29291,
       "mrp": 42450,
       "discountPercent": 31,
@@ -2715,15 +2351,8 @@
         "name": "Mobiles",
         "slug": "mobiles"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59d3a",
-        "6ac73852c8f724367eb59d3b"
-      ],
-      "tags": [
-        "mobiles",
-        "realme",
-        "smartphone 5g"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59d3a", "6ac73852c8f724367eb59d3b"],
+      "tags": ["mobiles", "realme", "smartphone 5g"],
       "price": 117220,
       "mrp": 117220,
       "discountPercent": 0,
@@ -2767,15 +2396,8 @@
         "name": "Smartwatches",
         "slug": "smartwatches"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59d3a",
-        "6ac73852c8f724367eb59d80"
-      ],
-      "tags": [
-        "smartwatches",
-        "apple",
-        "fitness band"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59d3a", "6ac73852c8f724367eb59d80"],
+      "tags": ["smartwatches", "apple", "fitness band"],
       "price": 33381,
       "mrp": 45110,
       "discountPercent": 26,
@@ -2819,15 +2441,8 @@
         "name": "Men's Clothing",
         "slug": "men-s-clothing"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59d97",
-        "6ac73852c8f724367eb59d98"
-      ],
-      "tags": [
-        "men's clothing",
-        "u.s. polo",
-        "slim fit shirt"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59d97", "6ac73852c8f724367eb59d98"],
+      "tags": ["men's clothing", "u.s. polo", "slim fit shirt"],
       "price": 1058,
       "mrp": 1260,
       "discountPercent": 16,
@@ -2871,15 +2486,8 @@
         "name": "Laptops",
         "slug": "laptops"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59d3a",
-        "6ac73852c8f724367eb59d52"
-      ],
-      "tags": [
-        "laptops",
-        "dell",
-        "notebook"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59d3a", "6ac73852c8f724367eb59d52"],
+      "tags": ["laptops", "dell", "notebook"],
       "price": 159100,
       "mrp": 159100,
       "discountPercent": 0,
@@ -2923,15 +2531,8 @@
         "name": "Gym & Fitness",
         "slug": "gym-fitness"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59e6a",
-        "6ac73852c8f724367eb59e6b"
-      ],
-      "tags": [
-        "gym & fitness",
-        "nivia",
-        "treadmill"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59e6a", "6ac73852c8f724367eb59e6b"],
+      "tags": ["gym & fitness", "nivia", "treadmill"],
       "price": 27739,
       "mrp": 33420,
       "discountPercent": 17,
@@ -2975,15 +2576,8 @@
         "name": "Skincare",
         "slug": "skincare"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59e0c",
-        "6ac73852c8f724367eb59e0d"
-      ],
-      "tags": [
-        "skincare",
-        "nivea",
-        "moisturiser"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59e0c", "6ac73852c8f724367eb59e0d"],
+      "tags": ["skincare", "nivea", "moisturiser"],
       "price": 1557,
       "mrp": 2780,
       "discountPercent": 44,
@@ -3027,15 +2621,8 @@
         "name": "Gym & Fitness",
         "slug": "gym-fitness"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59e6a",
-        "6ac73852c8f724367eb59e6b"
-      ],
-      "tags": [
-        "gym & fitness",
-        "boldfit",
-        "dumbbell set"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59e6a", "6ac73852c8f724367eb59e6b"],
+      "tags": ["gym & fitness", "boldfit", "dumbbell set"],
       "price": 12800,
       "mrp": 12800,
       "discountPercent": 0,
@@ -3079,15 +2666,8 @@
         "name": "Laptops",
         "slug": "laptops"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59d3a",
-        "6ac73852c8f724367eb59d52"
-      ],
-      "tags": [
-        "laptops",
-        "apple",
-        "laptop"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59d3a", "6ac73852c8f724367eb59d52"],
+      "tags": ["laptops", "apple", "laptop"],
       "price": 86394,
       "mrp": 123420,
       "discountPercent": 30,
@@ -3131,15 +2711,8 @@
         "name": "Headphones & Audio",
         "slug": "headphones-audio"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59d3a",
-        "6ac73852c8f724367eb59d69"
-      ],
-      "tags": [
-        "headphones & audio",
-        "sennheiser",
-        "wireless headphones"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59d3a", "6ac73852c8f724367eb59d69"],
+      "tags": ["headphones & audio", "sennheiser", "wireless headphones"],
       "price": 26884,
       "mrp": 28600,
       "discountPercent": 6,
@@ -3183,15 +2756,8 @@
         "name": "Women's Clothing",
         "slug": "women-s-clothing"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59d97",
-        "6ac73852c8f724367eb59daf"
-      ],
-      "tags": [
-        "women's clothing",
-        "h&m",
-        "maxi dress"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59d97", "6ac73852c8f724367eb59daf"],
+      "tags": ["women's clothing", "h&m", "maxi dress"],
       "price": 2220,
       "mrp": 4270,
       "discountPercent": 48,
@@ -3235,15 +2801,8 @@
         "name": "Kitchen Appliances",
         "slug": "kitchen-appliances"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59ddd",
-        "6ac73852c8f724367eb59dde"
-      ],
-      "tags": [
-        "kitchen appliances",
-        "bajaj",
-        "toaster"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59ddd", "6ac73852c8f724367eb59dde"],
+      "tags": ["kitchen appliances", "bajaj", "toaster"],
       "price": 2853,
       "mrp": 6340,
       "discountPercent": 55,
@@ -3287,15 +2846,8 @@
         "name": "Men's Clothing",
         "slug": "men-s-clothing"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59d97",
-        "6ac73852c8f724367eb59d98"
-      ],
-      "tags": [
-        "men's clothing",
-        "u.s. polo",
-        "slim fit shirt"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59d97", "6ac73852c8f724367eb59d98"],
+      "tags": ["men's clothing", "u.s. polo", "slim fit shirt"],
       "price": 5130,
       "mrp": 5130,
       "discountPercent": 0,
@@ -3339,15 +2891,8 @@
         "name": "Gym & Fitness",
         "slug": "gym-fitness"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59e6a",
-        "6ac73852c8f724367eb59e6b"
-      ],
-      "tags": [
-        "gym & fitness",
-        "fitkit",
-        "yoga mat"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59e6a", "6ac73852c8f724367eb59e6b"],
+      "tags": ["gym & fitness", "fitkit", "yoga mat"],
       "price": 27150,
       "mrp": 38240,
       "discountPercent": 29,
@@ -3391,15 +2936,8 @@
         "name": "Gym & Fitness",
         "slug": "gym-fitness"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59e6a",
-        "6ac73852c8f724367eb59e6b"
-      ],
-      "tags": [
-        "gym & fitness",
-        "decathlon",
-        "resistance bands"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59e6a", "6ac73852c8f724367eb59e6b"],
+      "tags": ["gym & fitness", "decathlon", "resistance bands"],
       "price": 7570,
       "mrp": 9120,
       "discountPercent": 17,
@@ -3443,15 +2981,8 @@
         "name": "Fiction",
         "slug": "fiction"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59e3b",
-        "6ac73852c8f724367eb59e3c"
-      ],
-      "tags": [
-        "fiction",
-        "rupa",
-        "thriller"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59e3b", "6ac73852c8f724367eb59e3c"],
+      "tags": ["fiction", "rupa", "thriller"],
       "price": 540,
       "mrp": 750,
       "discountPercent": 28,
@@ -3495,15 +3026,8 @@
         "name": "Fiction",
         "slug": "fiction"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59e3b",
-        "6ac73852c8f724367eb59e3c"
-      ],
-      "tags": [
-        "fiction",
-        "penguin",
-        "fantasy saga"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59e3b", "6ac73852c8f724367eb59e3c"],
+      "tags": ["fiction", "penguin", "fantasy saga"],
       "price": 714,
       "mrp": 840,
       "discountPercent": 15,
@@ -3547,15 +3071,8 @@
         "name": "Smartwatches",
         "slug": "smartwatches"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59d3a",
-        "6ac73852c8f724367eb59d80"
-      ],
-      "tags": [
-        "smartwatches",
-        "samsung",
-        "fitness band"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59d3a", "6ac73852c8f724367eb59d80"],
+      "tags": ["smartwatches", "samsung", "fitness band"],
       "price": 56159,
       "mrp": 64550,
       "discountPercent": 13,
@@ -3599,15 +3116,8 @@
         "name": "Mobiles",
         "slug": "mobiles"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59d3a",
-        "6ac73852c8f724367eb59d3b"
-      ],
-      "tags": [
-        "mobiles",
-        "google",
-        "lite"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59d3a", "6ac73852c8f724367eb59d3b"],
+      "tags": ["mobiles", "google", "lite"],
       "price": 44912,
       "mrp": 86370,
       "discountPercent": 48,
@@ -3651,15 +3161,8 @@
         "name": "Smartwatches",
         "slug": "smartwatches"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59d3a",
-        "6ac73852c8f724367eb59d80"
-      ],
-      "tags": [
-        "smartwatches",
-        "fire-boltt",
-        "fitness band"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59d3a", "6ac73852c8f724367eb59d80"],
+      "tags": ["smartwatches", "fire-boltt", "fitness band"],
       "price": 46528,
       "mrp": 50030,
       "discountPercent": 7,
@@ -3703,15 +3206,8 @@
         "name": "Fiction",
         "slug": "fiction"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59e3b",
-        "6ac73852c8f724367eb59e3c"
-      ],
-      "tags": [
-        "fiction",
-        "rupa",
-        "classic edition"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59e3b", "6ac73852c8f724367eb59e3c"],
+      "tags": ["fiction", "rupa", "classic edition"],
       "price": 740,
       "mrp": 740,
       "discountPercent": 0,
@@ -3755,15 +3251,8 @@
         "name": "Furniture",
         "slug": "furniture"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59ddd",
-        "6ac73852c8f724367eb59df5"
-      ],
-      "tags": [
-        "furniture",
-        "wakefit",
-        "sofa set"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59ddd", "6ac73852c8f724367eb59df5"],
+      "tags": ["furniture", "wakefit", "sofa set"],
       "price": 12670,
       "mrp": 12670,
       "discountPercent": 0,
@@ -3807,15 +3296,8 @@
         "name": "Skincare",
         "slug": "skincare"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59e0c",
-        "6ac73852c8f724367eb59e0d"
-      ],
-      "tags": [
-        "skincare",
-        "cetaphil",
-        "moisturiser"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59e0c", "6ac73852c8f724367eb59e0d"],
+      "tags": ["skincare", "cetaphil", "moisturiser"],
       "price": 528,
       "mrp": 600,
       "discountPercent": 12,
@@ -3859,15 +3341,8 @@
         "name": "Gym & Fitness",
         "slug": "gym-fitness"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59e6a",
-        "6ac73852c8f724367eb59e6b"
-      ],
-      "tags": [
-        "gym & fitness",
-        "fitkit",
-        "yoga mat"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59e6a", "6ac73852c8f724367eb59e6b"],
+      "tags": ["gym & fitness", "fitkit", "yoga mat"],
       "price": 23107,
       "mrp": 26560,
       "discountPercent": 13,
@@ -3911,15 +3386,8 @@
         "name": "Mobiles",
         "slug": "mobiles"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59d3a",
-        "6ac73852c8f724367eb59d3b"
-      ],
-      "tags": [
-        "mobiles",
-        "xiaomi",
-        "pro max"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59d3a", "6ac73852c8f724367eb59d3b"],
+      "tags": ["mobiles", "xiaomi", "pro max"],
       "price": 45964,
       "mrp": 75350,
       "discountPercent": 39,
@@ -3963,15 +3431,8 @@
         "name": "Headphones & Audio",
         "slug": "headphones-audio"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59d3a",
-        "6ac73852c8f724367eb59d69"
-      ],
-      "tags": [
-        "headphones & audio",
-        "boat",
-        "neckband"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59d3a", "6ac73852c8f724367eb59d69"],
+      "tags": ["headphones & audio", "boat", "neckband"],
       "price": 12760,
       "mrp": 12760,
       "discountPercent": 0,
@@ -4015,15 +3476,8 @@
         "name": "Smartwatches",
         "slug": "smartwatches"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59d3a",
-        "6ac73852c8f724367eb59d80"
-      ],
-      "tags": [
-        "smartwatches",
-        "samsung",
-        "fitness band"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59d3a", "6ac73852c8f724367eb59d80"],
+      "tags": ["smartwatches", "samsung", "fitness band"],
       "price": 16632,
       "mrp": 27720,
       "discountPercent": 40,
@@ -4067,15 +3521,8 @@
         "name": "Gym & Fitness",
         "slug": "gym-fitness"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59e6a",
-        "6ac73852c8f724367eb59e6b"
-      ],
-      "tags": [
-        "gym & fitness",
-        "nivia",
-        "treadmill"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59e6a", "6ac73852c8f724367eb59e6b"],
+      "tags": ["gym & fitness", "nivia", "treadmill"],
       "price": 2470,
       "mrp": 2470,
       "discountPercent": 0,
@@ -4119,15 +3566,8 @@
         "name": "Women's Clothing",
         "slug": "women-s-clothing"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59d97",
-        "6ac73852c8f724367eb59daf"
-      ],
-      "tags": [
-        "women's clothing",
-        "libas",
-        "maxi dress"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59d97", "6ac73852c8f724367eb59daf"],
+      "tags": ["women's clothing", "libas", "maxi dress"],
       "price": 5264,
       "mrp": 7520,
       "discountPercent": 30,
@@ -4171,15 +3611,8 @@
         "name": "Smartwatches",
         "slug": "smartwatches"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59d3a",
-        "6ac73852c8f724367eb59d80"
-      ],
-      "tags": [
-        "smartwatches",
-        "amazfit",
-        "fitness band"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59d3a", "6ac73852c8f724367eb59d80"],
+      "tags": ["smartwatches", "amazfit", "fitness band"],
       "price": 54081,
       "mrp": 59430,
       "discountPercent": 9,
@@ -4223,15 +3656,8 @@
         "name": "Grooming",
         "slug": "grooming"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59e0c",
-        "6ac73852c8f724367eb59e24"
-      ],
-      "tags": [
-        "grooming",
-        "philips",
-        "hair dryer"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59e0c", "6ac73852c8f724367eb59e24"],
+      "tags": ["grooming", "philips", "hair dryer"],
       "price": 813,
       "mrp": 1290,
       "discountPercent": 37,
@@ -4275,15 +3701,8 @@
         "name": "Headphones & Audio",
         "slug": "headphones-audio"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59d3a",
-        "6ac73852c8f724367eb59d69"
-      ],
-      "tags": [
-        "headphones & audio",
-        "jbl",
-        "bluetooth speaker"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59d3a", "6ac73852c8f724367eb59d69"],
+      "tags": ["headphones & audio", "jbl", "bluetooth speaker"],
       "price": 9962,
       "mrp": 11320,
       "discountPercent": 12,
@@ -4327,15 +3746,8 @@
         "name": "Headphones & Audio",
         "slug": "headphones-audio"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59d3a",
-        "6ac73852c8f724367eb59d69"
-      ],
-      "tags": [
-        "headphones & audio",
-        "boat",
-        "wireless headphones"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59d3a", "6ac73852c8f724367eb59d69"],
+      "tags": ["headphones & audio", "boat", "wireless headphones"],
       "price": 8668,
       "mrp": 9850,
       "discountPercent": 12,
@@ -4379,15 +3791,8 @@
         "name": "Women's Clothing",
         "slug": "women-s-clothing"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59d97",
-        "6ac73852c8f724367eb59daf"
-      ],
-      "tags": [
-        "women's clothing",
-        "libas",
-        "top"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59d97", "6ac73852c8f724367eb59daf"],
+      "tags": ["women's clothing", "libas", "top"],
       "price": 3626,
       "mrp": 4590,
       "discountPercent": 21,
@@ -4431,15 +3836,8 @@
         "name": "Men's Clothing",
         "slug": "men-s-clothing"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59d97",
-        "6ac73852c8f724367eb59d98"
-      ],
-      "tags": [
-        "men's clothing",
-        "u.s. polo",
-        "polo t-shirt"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59d97", "6ac73852c8f724367eb59d98"],
+      "tags": ["men's clothing", "u.s. polo", "polo t-shirt"],
       "price": 2949,
       "mrp": 4040,
       "discountPercent": 27,
@@ -4483,15 +3881,8 @@
         "name": "Gym & Fitness",
         "slug": "gym-fitness"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59e6a",
-        "6ac73852c8f724367eb59e6b"
-      ],
-      "tags": [
-        "gym & fitness",
-        "decathlon",
-        "resistance bands"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59e6a", "6ac73852c8f724367eb59e6b"],
+      "tags": ["gym & fitness", "decathlon", "resistance bands"],
       "price": 31464,
       "mrp": 34960,
       "discountPercent": 10,
@@ -4535,15 +3926,8 @@
         "name": "Skincare",
         "slug": "skincare"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59e0c",
-        "6ac73852c8f724367eb59e0d"
-      ],
-      "tags": [
-        "skincare",
-        "neutrogena",
-        "face serum"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59e0c", "6ac73852c8f724367eb59e0d"],
+      "tags": ["skincare", "neutrogena", "face serum"],
       "price": 629,
       "mrp": 740,
       "discountPercent": 15,
@@ -4587,15 +3971,8 @@
         "name": "Women's Clothing",
         "slug": "women-s-clothing"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59d97",
-        "6ac73852c8f724367eb59daf"
-      ],
-      "tags": [
-        "women's clothing",
-        "global desi",
-        "kurta set"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59d97", "6ac73852c8f724367eb59daf"],
+      "tags": ["women's clothing", "global desi", "kurta set"],
       "price": 1246,
       "mrp": 1780,
       "discountPercent": 30,
@@ -4639,15 +4016,8 @@
         "name": "Skincare",
         "slug": "skincare"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59e0c",
-        "6ac73852c8f724367eb59e0d"
-      ],
-      "tags": [
-        "skincare",
-        "neutrogena",
-        "face serum"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59e0c", "6ac73852c8f724367eb59e0d"],
+      "tags": ["skincare", "neutrogena", "face serum"],
       "price": 2064,
       "mrp": 2680,
       "discountPercent": 23,
@@ -4691,15 +4061,8 @@
         "name": "Footwear",
         "slug": "footwear"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59d97",
-        "6ac73852c8f724367eb59dc6"
-      ],
-      "tags": [
-        "footwear",
-        "skechers",
-        "sneakers"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59d97", "6ac73852c8f724367eb59dc6"],
+      "tags": ["footwear", "skechers", "sneakers"],
       "price": 10780,
       "mrp": 10780,
       "discountPercent": 0,
@@ -4743,15 +4106,8 @@
         "name": "Footwear",
         "slug": "footwear"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59d97",
-        "6ac73852c8f724367eb59dc6"
-      ],
-      "tags": [
-        "footwear",
-        "puma",
-        "slides"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59d97", "6ac73852c8f724367eb59dc6"],
+      "tags": ["footwear", "puma", "slides"],
       "price": 3324,
       "mrp": 3910,
       "discountPercent": 15,
@@ -4795,15 +4151,8 @@
         "name": "Technology & Programming",
         "slug": "technology-programming"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59e3b",
-        "6ac73852c8f724367eb59e53"
-      ],
-      "tags": [
-        "technology & programming",
-        "apress",
-        "cookbook"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59e3b", "6ac73852c8f724367eb59e53"],
+      "tags": ["technology & programming", "apress", "cookbook"],
       "price": 1892,
       "mrp": 2490,
       "discountPercent": 24,
@@ -4847,15 +4196,8 @@
         "name": "Laptops",
         "slug": "laptops"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59d3a",
-        "6ac73852c8f724367eb59d52"
-      ],
-      "tags": [
-        "laptops",
-        "lenovo",
-        "laptop"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59d3a", "6ac73852c8f724367eb59d52"],
+      "tags": ["laptops", "lenovo", "laptop"],
       "price": 66052,
       "mrp": 115880,
       "discountPercent": 43,
@@ -4899,15 +4241,8 @@
         "name": "Men's Clothing",
         "slug": "men-s-clothing"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59d97",
-        "6ac73852c8f724367eb59d98"
-      ],
-      "tags": [
-        "men's clothing",
-        "h&m",
-        "denim jeans"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59d97", "6ac73852c8f724367eb59d98"],
+      "tags": ["men's clothing", "h&m", "denim jeans"],
       "price": 5530,
       "mrp": 5530,
       "discountPercent": 0,
@@ -4951,15 +4286,8 @@
         "name": "Women's Clothing",
         "slug": "women-s-clothing"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59d97",
-        "6ac73852c8f724367eb59daf"
-      ],
-      "tags": [
-        "women's clothing",
-        "libas",
-        "palazzo"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59d97", "6ac73852c8f724367eb59daf"],
+      "tags": ["women's clothing", "libas", "palazzo"],
       "price": 5124,
       "mrp": 7320,
       "discountPercent": 30,
@@ -5003,15 +4331,8 @@
         "name": "Footwear",
         "slug": "footwear"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59d97",
-        "6ac73852c8f724367eb59dc6"
-      ],
-      "tags": [
-        "footwear",
-        "puma",
-        "running shoes"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59d97", "6ac73852c8f724367eb59dc6"],
+      "tags": ["footwear", "puma", "running shoes"],
       "price": 5090,
       "mrp": 5090,
       "discountPercent": 0,
@@ -5055,15 +4376,8 @@
         "name": "Mobiles",
         "slug": "mobiles"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59d3a",
-        "6ac73852c8f724367eb59d3b"
-      ],
-      "tags": [
-        "mobiles",
-        "samsung",
-        "lite"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59d3a", "6ac73852c8f724367eb59d3b"],
+      "tags": ["mobiles", "samsung", "lite"],
       "price": 68411,
       "mrp": 77740,
       "discountPercent": 12,
@@ -5107,15 +4421,8 @@
         "name": "Footwear",
         "slug": "footwear"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59d97",
-        "6ac73852c8f724367eb59dc6"
-      ],
-      "tags": [
-        "footwear",
-        "skechers",
-        "slides"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59d97", "6ac73852c8f724367eb59dc6"],
+      "tags": ["footwear", "skechers", "slides"],
       "price": 469,
       "mrp": 920,
       "discountPercent": 49,
@@ -5159,15 +4466,8 @@
         "name": "Furniture",
         "slug": "furniture"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59ddd",
-        "6ac73852c8f724367eb59df5"
-      ],
-      "tags": [
-        "furniture",
-        "urban ladder",
-        "office chair"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59ddd", "6ac73852c8f724367eb59df5"],
+      "tags": ["furniture", "urban ladder", "office chair"],
       "price": 34509,
       "mrp": 37510,
       "discountPercent": 8,
@@ -5211,15 +4511,8 @@
         "name": "Women's Clothing",
         "slug": "women-s-clothing"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59d97",
-        "6ac73852c8f724367eb59daf"
-      ],
-      "tags": [
-        "women's clothing",
-        "w",
-        "maxi dress"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59d97", "6ac73852c8f724367eb59daf"],
+      "tags": ["women's clothing", "w", "maxi dress"],
       "price": 2797,
       "mrp": 3940,
       "discountPercent": 29,
@@ -5263,15 +4556,8 @@
         "name": "Technology & Programming",
         "slug": "technology-programming"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59e3b",
-        "6ac73852c8f724367eb59e53"
-      ],
-      "tags": [
-        "technology & programming",
-        "packt",
-        "handbook"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59e3b", "6ac73852c8f724367eb59e53"],
+      "tags": ["technology & programming", "packt", "handbook"],
       "price": 391,
       "mrp": 550,
       "discountPercent": 29,
@@ -5315,15 +4601,8 @@
         "name": "Grooming",
         "slug": "grooming"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59e0c",
-        "6ac73852c8f724367eb59e24"
-      ],
-      "tags": [
-        "grooming",
-        "braun",
-        "trimmer"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59e0c", "6ac73852c8f724367eb59e24"],
+      "tags": ["grooming", "braun", "trimmer"],
       "price": 7290,
       "mrp": 7290,
       "discountPercent": 0,
@@ -5367,15 +4646,8 @@
         "name": "Mobiles",
         "slug": "mobiles"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59d3a",
-        "6ac73852c8f724367eb59d3b"
-      ],
-      "tags": [
-        "mobiles",
-        "apple",
-        "neo"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59d3a", "6ac73852c8f724367eb59d3b"],
+      "tags": ["mobiles", "apple", "neo"],
       "price": 12970,
       "mrp": 12970,
       "discountPercent": 0,
@@ -5419,15 +4691,8 @@
         "name": "Kitchen Appliances",
         "slug": "kitchen-appliances"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59ddd",
-        "6ac73852c8f724367eb59dde"
-      ],
-      "tags": [
-        "kitchen appliances",
-        "havells",
-        "toaster"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59ddd", "6ac73852c8f724367eb59dde"],
+      "tags": ["kitchen appliances", "havells", "toaster"],
       "price": 7428,
       "mrp": 11980,
       "discountPercent": 38,
@@ -5471,15 +4736,8 @@
         "name": "Smartwatches",
         "slug": "smartwatches"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59d3a",
-        "6ac73852c8f724367eb59d80"
-      ],
-      "tags": [
-        "smartwatches",
-        "garmin",
-        "sports watch"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59d3a", "6ac73852c8f724367eb59d80"],
+      "tags": ["smartwatches", "garmin", "sports watch"],
       "price": 56088,
       "mrp": 62320,
       "discountPercent": 10,
@@ -5523,15 +4781,8 @@
         "name": "Mobiles",
         "slug": "mobiles"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59d3a",
-        "6ac73852c8f724367eb59d3b"
-      ],
-      "tags": [
-        "mobiles",
-        "apple",
-        "neo"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59d3a", "6ac73852c8f724367eb59d3b"],
+      "tags": ["mobiles", "apple", "neo"],
       "price": 106760,
       "mrp": 106760,
       "discountPercent": 0,
@@ -5575,15 +4826,8 @@
         "name": "Mobiles",
         "slug": "mobiles"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59d3a",
-        "6ac73852c8f724367eb59d3b"
-      ],
-      "tags": [
-        "mobiles",
-        "xiaomi",
-        "neo"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59d3a", "6ac73852c8f724367eb59d3b"],
+      "tags": ["mobiles", "xiaomi", "neo"],
       "price": 52601,
       "mrp": 116890,
       "discountPercent": 55,
@@ -5627,15 +4871,8 @@
         "name": "Kitchen Appliances",
         "slug": "kitchen-appliances"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59ddd",
-        "6ac73852c8f724367eb59dde"
-      ],
-      "tags": [
-        "kitchen appliances",
-        "butterfly",
-        "toaster"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59ddd", "6ac73852c8f724367eb59dde"],
+      "tags": ["kitchen appliances", "butterfly", "toaster"],
       "price": 562,
       "mrp": 1060,
       "discountPercent": 47,
@@ -5679,15 +4916,8 @@
         "name": "Technology & Programming",
         "slug": "technology-programming"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59e3b",
-        "6ac73852c8f724367eb59e53"
-      ],
-      "tags": [
-        "technology & programming",
-        "manning",
-        "in action"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59e3b", "6ac73852c8f724367eb59e53"],
+      "tags": ["technology & programming", "manning", "in action"],
       "price": 1404,
       "mrp": 1510,
       "discountPercent": 7,
@@ -5731,15 +4961,8 @@
         "name": "Footwear",
         "slug": "footwear"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59d97",
-        "6ac73852c8f724367eb59dc6"
-      ],
-      "tags": [
-        "footwear",
-        "adidas",
-        "running shoes"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59d97", "6ac73852c8f724367eb59dc6"],
+      "tags": ["footwear", "adidas", "running shoes"],
       "price": 6957,
       "mrp": 8090,
       "discountPercent": 14,
@@ -5783,15 +5006,8 @@
         "name": "Gym & Fitness",
         "slug": "gym-fitness"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59e6a",
-        "6ac73852c8f724367eb59e6b"
-      ],
-      "tags": [
-        "gym & fitness",
-        "cosco",
-        "yoga mat"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59e6a", "6ac73852c8f724367eb59e6b"],
+      "tags": ["gym & fitness", "cosco", "yoga mat"],
       "price": 37830,
       "mrp": 37830,
       "discountPercent": 0,
@@ -5835,15 +5051,8 @@
         "name": "Mobiles",
         "slug": "mobiles"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59d3a",
-        "6ac73852c8f724367eb59d3b"
-      ],
-      "tags": [
-        "mobiles",
-        "realme",
-        "pro max"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59d3a", "6ac73852c8f724367eb59d3b"],
+      "tags": ["mobiles", "realme", "pro max"],
       "price": 11726,
       "mrp": 14300,
       "discountPercent": 18,
@@ -5887,15 +5096,8 @@
         "name": "Laptops",
         "slug": "laptops"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59d3a",
-        "6ac73852c8f724367eb59d52"
-      ],
-      "tags": [
-        "laptops",
-        "hp",
-        "laptop"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59d3a", "6ac73852c8f724367eb59d52"],
+      "tags": ["laptops", "hp", "laptop"],
       "price": 173540,
       "mrp": 173540,
       "discountPercent": 0,
@@ -5939,15 +5141,8 @@
         "name": "Women's Clothing",
         "slug": "women-s-clothing"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59d97",
-        "6ac73852c8f724367eb59daf"
-      ],
-      "tags": [
-        "women's clothing",
-        "libas",
-        "palazzo"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59d97", "6ac73852c8f724367eb59daf"],
+      "tags": ["women's clothing", "libas", "palazzo"],
       "price": 4790,
       "mrp": 5150,
       "discountPercent": 7,
@@ -5991,15 +5186,8 @@
         "name": "Women's Clothing",
         "slug": "women-s-clothing"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59d97",
-        "6ac73852c8f724367eb59daf"
-      ],
-      "tags": [
-        "women's clothing",
-        "h&m",
-        "saree"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59d97", "6ac73852c8f724367eb59daf"],
+      "tags": ["women's clothing", "h&m", "saree"],
       "price": 3088,
       "mrp": 7720,
       "discountPercent": 60,
@@ -6043,15 +5231,8 @@
         "name": "Laptops",
         "slug": "laptops"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59d3a",
-        "6ac73852c8f724367eb59d52"
-      ],
-      "tags": [
-        "laptops",
-        "asus",
-        "ultrabook"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59d3a", "6ac73852c8f724367eb59d52"],
+      "tags": ["laptops", "asus", "ultrabook"],
       "price": 186026,
       "mrp": 197900,
       "discountPercent": 6,
@@ -6095,15 +5276,8 @@
         "name": "Women's Clothing",
         "slug": "women-s-clothing"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59d97",
-        "6ac73852c8f724367eb59daf"
-      ],
-      "tags": [
-        "women's clothing",
-        "global desi",
-        "maxi dress"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59d97", "6ac73852c8f724367eb59daf"],
+      "tags": ["women's clothing", "global desi", "maxi dress"],
       "price": 3009,
       "mrp": 3670,
       "discountPercent": 18,
@@ -6147,15 +5321,8 @@
         "name": "Grooming",
         "slug": "grooming"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59e0c",
-        "6ac73852c8f724367eb59e24"
-      ],
-      "tags": [
-        "grooming",
-        "park avenue",
-        "trimmer"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59e0c", "6ac73852c8f724367eb59e24"],
+      "tags": ["grooming", "park avenue", "trimmer"],
       "price": 3553,
       "mrp": 7250,
       "discountPercent": 51,
@@ -6199,15 +5366,8 @@
         "name": "Technology & Programming",
         "slug": "technology-programming"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59e3b",
-        "6ac73852c8f724367eb59e53"
-      ],
-      "tags": [
-        "technology & programming",
-        "o'reilly",
-        "handbook"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59e3b", "6ac73852c8f724367eb59e53"],
+      "tags": ["technology & programming", "o'reilly", "handbook"],
       "price": 2840,
       "mrp": 2840,
       "discountPercent": 0,
@@ -6251,15 +5411,8 @@
         "name": "Headphones & Audio",
         "slug": "headphones-audio"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59d3a",
-        "6ac73852c8f724367eb59d69"
-      ],
-      "tags": [
-        "headphones & audio",
-        "jbl",
-        "neckband"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59d3a", "6ac73852c8f724367eb59d69"],
+      "tags": ["headphones & audio", "jbl", "neckband"],
       "price": 24290,
       "mrp": 24290,
       "discountPercent": 0,
@@ -6303,15 +5456,8 @@
         "name": "Gym & Fitness",
         "slug": "gym-fitness"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59e6a",
-        "6ac73852c8f724367eb59e6b"
-      ],
-      "tags": [
-        "gym & fitness",
-        "decathlon",
-        "treadmill"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59e6a", "6ac73852c8f724367eb59e6b"],
+      "tags": ["gym & fitness", "decathlon", "treadmill"],
       "price": 23256,
       "mrp": 25840,
       "discountPercent": 10,
@@ -6355,15 +5501,8 @@
         "name": "Kitchen Appliances",
         "slug": "kitchen-appliances"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59ddd",
-        "6ac73852c8f724367eb59dde"
-      ],
-      "tags": [
-        "kitchen appliances",
-        "morphy richards",
-        "induction cooktop"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59ddd", "6ac73852c8f724367eb59dde"],
+      "tags": ["kitchen appliances", "morphy richards", "induction cooktop"],
       "price": 1801,
       "mrp": 2770,
       "discountPercent": 35,
@@ -6407,15 +5546,8 @@
         "name": "Footwear",
         "slug": "footwear"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59d97",
-        "6ac73852c8f724367eb59dc6"
-      ],
-      "tags": [
-        "footwear",
-        "nike",
-        "formal shoes"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59d97", "6ac73852c8f724367eb59dc6"],
+      "tags": ["footwear", "nike", "formal shoes"],
       "price": 2862,
       "mrp": 5840,
       "discountPercent": 51,
@@ -6459,15 +5591,8 @@
         "name": "Grooming",
         "slug": "grooming"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59e0c",
-        "6ac73852c8f724367eb59e24"
-      ],
-      "tags": [
-        "grooming",
-        "beardo",
-        "hair dryer"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59e0c", "6ac73852c8f724367eb59e24"],
+      "tags": ["grooming", "beardo", "hair dryer"],
       "price": 3363,
       "mrp": 7820,
       "discountPercent": 57,
@@ -6511,15 +5636,8 @@
         "name": "Men's Clothing",
         "slug": "men-s-clothing"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59d97",
-        "6ac73852c8f724367eb59d98"
-      ],
-      "tags": [
-        "men's clothing",
-        "h&m",
-        "polo t-shirt"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59d97", "6ac73852c8f724367eb59d98"],
+      "tags": ["men's clothing", "h&m", "polo t-shirt"],
       "price": 2257,
       "mrp": 4030,
       "discountPercent": 44,
@@ -6563,15 +5681,8 @@
         "name": "Kitchen Appliances",
         "slug": "kitchen-appliances"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59ddd",
-        "6ac73852c8f724367eb59dde"
-      ],
-      "tags": [
-        "kitchen appliances",
-        "morphy richards",
-        "toaster"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59ddd", "6ac73852c8f724367eb59dde"],
+      "tags": ["kitchen appliances", "morphy richards", "toaster"],
       "price": 719,
       "mrp": 790,
       "discountPercent": 9,
@@ -6615,15 +5726,8 @@
         "name": "Women's Clothing",
         "slug": "women-s-clothing"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59d97",
-        "6ac73852c8f724367eb59daf"
-      ],
-      "tags": [
-        "women's clothing",
-        "h&m",
-        "palazzo"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59d97", "6ac73852c8f724367eb59daf"],
+      "tags": ["women's clothing", "h&m", "palazzo"],
       "price": 3404,
       "mrp": 3700,
       "discountPercent": 8,
@@ -6667,15 +5771,8 @@
         "name": "Footwear",
         "slug": "footwear"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59d97",
-        "6ac73852c8f724367eb59dc6"
-      ],
-      "tags": [
-        "footwear",
-        "bata",
-        "sandals"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59d97", "6ac73852c8f724367eb59dc6"],
+      "tags": ["footwear", "bata", "sandals"],
       "price": 1029,
       "mrp": 1390,
       "discountPercent": 26,
@@ -6719,15 +5816,8 @@
         "name": "Mobiles",
         "slug": "mobiles"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59d3a",
-        "6ac73852c8f724367eb59d3b"
-      ],
-      "tags": [
-        "mobiles",
-        "oneplus",
-        "neo"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59d3a", "6ac73852c8f724367eb59d3b"],
+      "tags": ["mobiles", "oneplus", "neo"],
       "price": 52950,
       "mrp": 61570,
       "discountPercent": 14,
@@ -6771,15 +5861,8 @@
         "name": "Footwear",
         "slug": "footwear"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59d97",
-        "6ac73852c8f724367eb59dc6"
-      ],
-      "tags": [
-        "footwear",
-        "crocs",
-        "sandals"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59d97", "6ac73852c8f724367eb59dc6"],
+      "tags": ["footwear", "crocs", "sandals"],
       "price": 3430,
       "mrp": 3610,
       "discountPercent": 5,
@@ -6823,15 +5906,8 @@
         "name": "Laptops",
         "slug": "laptops"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59d3a",
-        "6ac73852c8f724367eb59d52"
-      ],
-      "tags": [
-        "laptops",
-        "dell",
-        "laptop"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59d3a", "6ac73852c8f724367eb59d52"],
+      "tags": ["laptops", "dell", "laptop"],
       "price": 94833,
       "mrp": 139460,
       "discountPercent": 32,
@@ -6875,15 +5951,8 @@
         "name": "Furniture",
         "slug": "furniture"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59ddd",
-        "6ac73852c8f724367eb59df5"
-      ],
-      "tags": [
-        "furniture",
-        "nilkamal",
-        "study table"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59ddd", "6ac73852c8f724367eb59df5"],
+      "tags": ["furniture", "nilkamal", "study table"],
       "price": 55890,
       "mrp": 55890,
       "discountPercent": 0,
@@ -6927,15 +5996,8 @@
         "name": "Women's Clothing",
         "slug": "women-s-clothing"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59d97",
-        "6ac73852c8f724367eb59daf"
-      ],
-      "tags": [
-        "women's clothing",
-        "libas",
-        "top"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59d97", "6ac73852c8f724367eb59daf"],
+      "tags": ["women's clothing", "libas", "top"],
       "price": 6821,
       "mrp": 7840,
       "discountPercent": 13,
@@ -6979,15 +6041,8 @@
         "name": "Kitchen Appliances",
         "slug": "kitchen-appliances"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59ddd",
-        "6ac73852c8f724367eb59dde"
-      ],
-      "tags": [
-        "kitchen appliances",
-        "philips",
-        "mixer grinder"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59ddd", "6ac73852c8f724367eb59dde"],
+      "tags": ["kitchen appliances", "philips", "mixer grinder"],
       "price": 4454,
       "mrp": 5120,
       "discountPercent": 13,
@@ -7031,15 +6086,8 @@
         "name": "Kitchen Appliances",
         "slug": "kitchen-appliances"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59ddd",
-        "6ac73852c8f724367eb59dde"
-      ],
-      "tags": [
-        "kitchen appliances",
-        "morphy richards",
-        "mixer grinder"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59ddd", "6ac73852c8f724367eb59dde"],
+      "tags": ["kitchen appliances", "morphy richards", "mixer grinder"],
       "price": 4081,
       "mrp": 5370,
       "discountPercent": 24,
@@ -7083,15 +6131,8 @@
         "name": "Grooming",
         "slug": "grooming"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59e0c",
-        "6ac73852c8f724367eb59e24"
-      ],
-      "tags": [
-        "grooming",
-        "wahl",
-        "electric shaver"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59e0c", "6ac73852c8f724367eb59e24"],
+      "tags": ["grooming", "wahl", "electric shaver"],
       "price": 6860,
       "mrp": 6860,
       "discountPercent": 0,
@@ -7135,15 +6176,8 @@
         "name": "Women's Clothing",
         "slug": "women-s-clothing"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59d97",
-        "6ac73852c8f724367eb59daf"
-      ],
-      "tags": [
-        "women's clothing",
-        "libas",
-        "top"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59d97", "6ac73852c8f724367eb59daf"],
+      "tags": ["women's clothing", "libas", "top"],
       "price": 2620,
       "mrp": 2620,
       "discountPercent": 0,
@@ -7187,15 +6221,8 @@
         "name": "Footwear",
         "slug": "footwear"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59d97",
-        "6ac73852c8f724367eb59dc6"
-      ],
-      "tags": [
-        "footwear",
-        "skechers",
-        "running shoes"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59d97", "6ac73852c8f724367eb59dc6"],
+      "tags": ["footwear", "skechers", "running shoes"],
       "price": 4653,
       "mrp": 7270,
       "discountPercent": 36,
@@ -7239,15 +6266,8 @@
         "name": "Skincare",
         "slug": "skincare"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59e0c",
-        "6ac73852c8f724367eb59e0d"
-      ],
-      "tags": [
-        "skincare",
-        "lakmé",
-        "moisturiser"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59e0c", "6ac73852c8f724367eb59e0d"],
+      "tags": ["skincare", "lakmé", "moisturiser"],
       "price": 737,
       "mrp": 1010,
       "discountPercent": 27,
@@ -7291,15 +6311,8 @@
         "name": "Technology & Programming",
         "slug": "technology-programming"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59e3b",
-        "6ac73852c8f724367eb59e53"
-      ],
-      "tags": [
-        "technology & programming",
-        "manning",
-        "in action"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59e3b", "6ac73852c8f724367eb59e53"],
+      "tags": ["technology & programming", "manning", "in action"],
       "price": 1010,
       "mrp": 1010,
       "discountPercent": 0,
@@ -7343,15 +6356,8 @@
         "name": "Laptops",
         "slug": "laptops"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59d3a",
-        "6ac73852c8f724367eb59d52"
-      ],
-      "tags": [
-        "laptops",
-        "asus",
-        "laptop"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59d3a", "6ac73852c8f724367eb59d52"],
+      "tags": ["laptops", "asus", "laptop"],
       "price": 50779,
       "mrp": 68620,
       "discountPercent": 26,
@@ -7395,15 +6401,8 @@
         "name": "Grooming",
         "slug": "grooming"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59e0c",
-        "6ac73852c8f724367eb59e24"
-      ],
-      "tags": [
-        "grooming",
-        "braun",
-        "beard oil"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59e0c", "6ac73852c8f724367eb59e24"],
+      "tags": ["grooming", "braun", "beard oil"],
       "price": 132,
       "mrp": 210,
       "discountPercent": 37,
@@ -7447,15 +6446,8 @@
         "name": "Technology & Programming",
         "slug": "technology-programming"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59e3b",
-        "6ac73852c8f724367eb59e53"
-      ],
-      "tags": [
-        "technology & programming",
-        "pragmatic",
-        "cookbook"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59e3b", "6ac73852c8f724367eb59e53"],
+      "tags": ["technology & programming", "pragmatic", "cookbook"],
       "price": 910,
       "mrp": 910,
       "discountPercent": 0,
@@ -7499,15 +6491,8 @@
         "name": "Footwear",
         "slug": "footwear"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59d97",
-        "6ac73852c8f724367eb59dc6"
-      ],
-      "tags": [
-        "footwear",
-        "bata",
-        "formal shoes"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59d97", "6ac73852c8f724367eb59dc6"],
+      "tags": ["footwear", "bata", "formal shoes"],
       "price": 6660,
       "mrp": 6660,
       "discountPercent": 0,
@@ -7551,15 +6536,8 @@
         "name": "Footwear",
         "slug": "footwear"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59d97",
-        "6ac73852c8f724367eb59dc6"
-      ],
-      "tags": [
-        "footwear",
-        "bata",
-        "sandals"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59d97", "6ac73852c8f724367eb59dc6"],
+      "tags": ["footwear", "bata", "sandals"],
       "price": 4997,
       "mrp": 6940,
       "discountPercent": 28,
@@ -7603,15 +6581,8 @@
         "name": "Gym & Fitness",
         "slug": "gym-fitness"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59e6a",
-        "6ac73852c8f724367eb59e6b"
-      ],
-      "tags": [
-        "gym & fitness",
-        "decathlon",
-        "treadmill"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59e6a", "6ac73852c8f724367eb59e6b"],
+      "tags": ["gym & fitness", "decathlon", "treadmill"],
       "price": 19448,
       "mrp": 25590,
       "discountPercent": 24,
@@ -7655,15 +6626,8 @@
         "name": "Technology & Programming",
         "slug": "technology-programming"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59e3b",
-        "6ac73852c8f724367eb59e53"
-      ],
-      "tags": [
-        "technology & programming",
-        "o'reilly",
-        "complete guide"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59e3b", "6ac73852c8f724367eb59e53"],
+      "tags": ["technology & programming", "o'reilly", "complete guide"],
       "price": 580,
       "mrp": 580,
       "discountPercent": 0,
@@ -7707,15 +6671,8 @@
         "name": "Grooming",
         "slug": "grooming"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59e0c",
-        "6ac73852c8f724367eb59e24"
-      ],
-      "tags": [
-        "grooming",
-        "philips",
-        "trimmer"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59e0c", "6ac73852c8f724367eb59e24"],
+      "tags": ["grooming", "philips", "trimmer"],
       "price": 5730,
       "mrp": 7640,
       "discountPercent": 25,
@@ -7759,15 +6716,8 @@
         "name": "Fiction",
         "slug": "fiction"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59e3b",
-        "6ac73852c8f724367eb59e3c"
-      ],
-      "tags": [
-        "fiction",
-        "harpercollins",
-        "thriller"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59e3b", "6ac73852c8f724367eb59e3c"],
+      "tags": ["fiction", "harpercollins", "thriller"],
       "price": 608,
       "mrp": 810,
       "discountPercent": 25,
@@ -7811,15 +6761,8 @@
         "name": "Men's Clothing",
         "slug": "men-s-clothing"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59d97",
-        "6ac73852c8f724367eb59d98"
-      ],
-      "tags": [
-        "men's clothing",
-        "allen solly",
-        "slim fit shirt"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59d97", "6ac73852c8f724367eb59d98"],
+      "tags": ["men's clothing", "allen solly", "slim fit shirt"],
       "price": 1980,
       "mrp": 1980,
       "discountPercent": 0,
@@ -7863,15 +6806,8 @@
         "name": "Technology & Programming",
         "slug": "technology-programming"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59e3b",
-        "6ac73852c8f724367eb59e53"
-      ],
-      "tags": [
-        "technology & programming",
-        "manning",
-        "cookbook"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59e3b", "6ac73852c8f724367eb59e53"],
+      "tags": ["technology & programming", "manning", "cookbook"],
       "price": 1148,
       "mrp": 2550,
       "discountPercent": 55,
@@ -7915,15 +6851,8 @@
         "name": "Headphones & Audio",
         "slug": "headphones-audio"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59d3a",
-        "6ac73852c8f724367eb59d69"
-      ],
-      "tags": [
-        "headphones & audio",
-        "bose",
-        "bluetooth speaker"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59d3a", "6ac73852c8f724367eb59d69"],
+      "tags": ["headphones & audio", "bose", "bluetooth speaker"],
       "price": 1492,
       "mrp": 3470,
       "discountPercent": 57,
@@ -7967,15 +6896,8 @@
         "name": "Headphones & Audio",
         "slug": "headphones-audio"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59d3a",
-        "6ac73852c8f724367eb59d69"
-      ],
-      "tags": [
-        "headphones & audio",
-        "jbl",
-        "neckband"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59d3a", "6ac73852c8f724367eb59d69"],
+      "tags": ["headphones & audio", "jbl", "neckband"],
       "price": 23587,
       "mrp": 29120,
       "discountPercent": 19,
@@ -8019,15 +6941,8 @@
         "name": "Fiction",
         "slug": "fiction"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59e3b",
-        "6ac73852c8f724367eb59e3c"
-      ],
-      "tags": [
-        "fiction",
-        "bloomsbury",
-        "fantasy saga"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59e3b", "6ac73852c8f724367eb59e3c"],
+      "tags": ["fiction", "bloomsbury", "fantasy saga"],
       "price": 510,
       "mrp": 510,
       "discountPercent": 0,
@@ -8071,15 +6986,8 @@
         "name": "Furniture",
         "slug": "furniture"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59ddd",
-        "6ac73852c8f724367eb59df5"
-      ],
-      "tags": [
-        "furniture",
-        "godrej interio",
-        "sofa set"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59ddd", "6ac73852c8f724367eb59df5"],
+      "tags": ["furniture", "godrej interio", "sofa set"],
       "price": 50762,
       "mrp": 59720,
       "discountPercent": 15,
@@ -8123,15 +7031,8 @@
         "name": "Furniture",
         "slug": "furniture"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59ddd",
-        "6ac73852c8f724367eb59df5"
-      ],
-      "tags": [
-        "furniture",
-        "durian",
-        "bookshelf"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59ddd", "6ac73852c8f724367eb59df5"],
+      "tags": ["furniture", "durian", "bookshelf"],
       "price": 39057,
       "mrp": 42920,
       "discountPercent": 9,
@@ -8175,15 +7076,8 @@
         "name": "Skincare",
         "slug": "skincare"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59e0c",
-        "6ac73852c8f724367eb59e0d"
-      ],
-      "tags": [
-        "skincare",
-        "lakmé",
-        "face wash"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59e0c", "6ac73852c8f724367eb59e0d"],
+      "tags": ["skincare", "lakmé", "face wash"],
       "price": 1021,
       "mrp": 1730,
       "discountPercent": 41,
@@ -8227,15 +7121,8 @@
         "name": "Laptops",
         "slug": "laptops"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59d3a",
-        "6ac73852c8f724367eb59d52"
-      ],
-      "tags": [
-        "laptops",
-        "dell",
-        "laptop"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59d3a", "6ac73852c8f724367eb59d52"],
+      "tags": ["laptops", "dell", "laptop"],
       "price": 80349,
       "mrp": 131720,
       "discountPercent": 39,
@@ -8279,15 +7166,8 @@
         "name": "Grooming",
         "slug": "grooming"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59e0c",
-        "6ac73852c8f724367eb59e24"
-      ],
-      "tags": [
-        "grooming",
-        "wahl",
-        "electric shaver"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59e0c", "6ac73852c8f724367eb59e24"],
+      "tags": ["grooming", "wahl", "electric shaver"],
       "price": 2533,
       "mrp": 4020,
       "discountPercent": 37,
@@ -8331,15 +7211,8 @@
         "name": "Furniture",
         "slug": "furniture"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59ddd",
-        "6ac73852c8f724367eb59df5"
-      ],
-      "tags": [
-        "furniture",
-        "urban ladder",
-        "office chair"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59ddd", "6ac73852c8f724367eb59df5"],
+      "tags": ["furniture", "urban ladder", "office chair"],
       "price": 2359,
       "mrp": 2650,
       "discountPercent": 11,
@@ -8383,15 +7256,8 @@
         "name": "Smartwatches",
         "slug": "smartwatches"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59d3a",
-        "6ac73852c8f724367eb59d80"
-      ],
-      "tags": [
-        "smartwatches",
-        "fire-boltt",
-        "fitness band"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59d3a", "6ac73852c8f724367eb59d80"],
+      "tags": ["smartwatches", "fire-boltt", "fitness band"],
       "price": 10688,
       "mrp": 23750,
       "discountPercent": 55,
@@ -8435,15 +7301,8 @@
         "name": "Skincare",
         "slug": "skincare"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59e0c",
-        "6ac73852c8f724367eb59e0d"
-      ],
-      "tags": [
-        "skincare",
-        "lakmé",
-        "face wash"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59e0c", "6ac73852c8f724367eb59e0d"],
+      "tags": ["skincare", "lakmé", "face wash"],
       "price": 842,
       "mrp": 990,
       "discountPercent": 15,
@@ -8487,15 +7346,8 @@
         "name": "Grooming",
         "slug": "grooming"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59e0c",
-        "6ac73852c8f724367eb59e24"
-      ],
-      "tags": [
-        "grooming",
-        "gillette",
-        "beard oil"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59e0c", "6ac73852c8f724367eb59e24"],
+      "tags": ["grooming", "gillette", "beard oil"],
       "price": 5506,
       "mrp": 6970,
       "discountPercent": 21,
@@ -8539,15 +7391,8 @@
         "name": "Gym & Fitness",
         "slug": "gym-fitness"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59e6a",
-        "6ac73852c8f724367eb59e6b"
-      ],
-      "tags": [
-        "gym & fitness",
-        "lifelong",
-        "dumbbell set"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59e6a", "6ac73852c8f724367eb59e6b"],
+      "tags": ["gym & fitness", "lifelong", "dumbbell set"],
       "price": 18085,
       "mrp": 36170,
       "discountPercent": 50,
@@ -8591,15 +7436,8 @@
         "name": "Skincare",
         "slug": "skincare"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59e0c",
-        "6ac73852c8f724367eb59e0d"
-      ],
-      "tags": [
-        "skincare",
-        "nivea",
-        "night cream"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59e0c", "6ac73852c8f724367eb59e0d"],
+      "tags": ["skincare", "nivea", "night cream"],
       "price": 630,
       "mrp": 630,
       "discountPercent": 0,
@@ -8643,15 +7481,8 @@
         "name": "Technology & Programming",
         "slug": "technology-programming"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59e3b",
-        "6ac73852c8f724367eb59e53"
-      ],
-      "tags": [
-        "technology & programming",
-        "packt",
-        "handbook"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59e3b", "6ac73852c8f724367eb59e53"],
+      "tags": ["technology & programming", "packt", "handbook"],
       "price": 1540,
       "mrp": 1540,
       "discountPercent": 0,
@@ -8695,15 +7526,8 @@
         "name": "Fiction",
         "slug": "fiction"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59e3b",
-        "6ac73852c8f724367eb59e3c"
-      ],
-      "tags": [
-        "fiction",
-        "harpercollins",
-        "classic edition"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59e3b", "6ac73852c8f724367eb59e3c"],
+      "tags": ["fiction", "harpercollins", "classic edition"],
       "price": 257,
       "mrp": 310,
       "discountPercent": 17,
@@ -8747,15 +7571,8 @@
         "name": "Footwear",
         "slug": "footwear"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59d97",
-        "6ac73852c8f724367eb59dc6"
-      ],
-      "tags": [
-        "footwear",
-        "crocs",
-        "formal shoes"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59d97", "6ac73852c8f724367eb59dc6"],
+      "tags": ["footwear", "crocs", "formal shoes"],
       "price": 3373,
       "mrp": 8030,
       "discountPercent": 58,
@@ -8799,15 +7616,8 @@
         "name": "Kitchen Appliances",
         "slug": "kitchen-appliances"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59ddd",
-        "6ac73852c8f724367eb59dde"
-      ],
-      "tags": [
-        "kitchen appliances",
-        "havells",
-        "electric kettle"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59ddd", "6ac73852c8f724367eb59dde"],
+      "tags": ["kitchen appliances", "havells", "electric kettle"],
       "price": 4905,
       "mrp": 5910,
       "discountPercent": 17,
@@ -8851,15 +7661,8 @@
         "name": "Skincare",
         "slug": "skincare"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59e0c",
-        "6ac73852c8f724367eb59e0d"
-      ],
-      "tags": [
-        "skincare",
-        "minimalist",
-        "face serum"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59e0c", "6ac73852c8f724367eb59e0d"],
+      "tags": ["skincare", "minimalist", "face serum"],
       "price": 440,
       "mrp": 440,
       "discountPercent": 0,
@@ -8903,15 +7706,8 @@
         "name": "Gym & Fitness",
         "slug": "gym-fitness"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59e6a",
-        "6ac73852c8f724367eb59e6b"
-      ],
-      "tags": [
-        "gym & fitness",
-        "cosco",
-        "dumbbell set"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59e6a", "6ac73852c8f724367eb59e6b"],
+      "tags": ["gym & fitness", "cosco", "dumbbell set"],
       "price": 9463,
       "mrp": 12290,
       "discountPercent": 23,
@@ -8955,15 +7751,8 @@
         "name": "Furniture",
         "slug": "furniture"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59ddd",
-        "6ac73852c8f724367eb59df5"
-      ],
-      "tags": [
-        "furniture",
-        "ikea",
-        "bed"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59ddd", "6ac73852c8f724367eb59df5"],
+      "tags": ["furniture", "ikea", "bed"],
       "price": 18626,
       "mrp": 39630,
       "discountPercent": 53,
@@ -9007,15 +7796,8 @@
         "name": "Skincare",
         "slug": "skincare"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59e0c",
-        "6ac73852c8f724367eb59e0d"
-      ],
-      "tags": [
-        "skincare",
-        "cetaphil",
-        "face serum"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59e0c", "6ac73852c8f724367eb59e0d"],
+      "tags": ["skincare", "cetaphil", "face serum"],
       "price": 1384,
       "mrp": 1870,
       "discountPercent": 26,
@@ -9059,15 +7841,8 @@
         "name": "Grooming",
         "slug": "grooming"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59e0c",
-        "6ac73852c8f724367eb59e24"
-      ],
-      "tags": [
-        "grooming",
-        "beardo",
-        "hair dryer"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59e0c", "6ac73852c8f724367eb59e24"],
+      "tags": ["grooming", "beardo", "hair dryer"],
       "price": 3673,
       "mrp": 6930,
       "discountPercent": 47,
@@ -9111,15 +7886,8 @@
         "name": "Gym & Fitness",
         "slug": "gym-fitness"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59e6a",
-        "6ac73852c8f724367eb59e6b"
-      ],
-      "tags": [
-        "gym & fitness",
-        "nivia",
-        "protein shaker"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59e6a", "6ac73852c8f724367eb59e6b"],
+      "tags": ["gym & fitness", "nivia", "protein shaker"],
       "price": 16090,
       "mrp": 16090,
       "discountPercent": 0,
@@ -9163,15 +7931,8 @@
         "name": "Fiction",
         "slug": "fiction"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59e3b",
-        "6ac73852c8f724367eb59e3c"
-      ],
-      "tags": [
-        "fiction",
-        "hachette",
-        "fantasy saga"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59e3b", "6ac73852c8f724367eb59e3c"],
+      "tags": ["fiction", "hachette", "fantasy saga"],
       "price": 214,
       "mrp": 240,
       "discountPercent": 11,
@@ -9215,15 +7976,8 @@
         "name": "Footwear",
         "slug": "footwear"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59d97",
-        "6ac73852c8f724367eb59dc6"
-      ],
-      "tags": [
-        "footwear",
-        "nike",
-        "sneakers"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59d97", "6ac73852c8f724367eb59dc6"],
+      "tags": ["footwear", "nike", "sneakers"],
       "price": 1904,
       "mrp": 2240,
       "discountPercent": 15,
@@ -9267,15 +8021,8 @@
         "name": "Grooming",
         "slug": "grooming"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59e0c",
-        "6ac73852c8f724367eb59e24"
-      ],
-      "tags": [
-        "grooming",
-        "beardo",
-        "trimmer"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59e0c", "6ac73852c8f724367eb59e24"],
+      "tags": ["grooming", "beardo", "trimmer"],
       "price": 5737,
       "mrp": 7450,
       "discountPercent": 23,
@@ -9319,15 +8066,8 @@
         "name": "Kitchen Appliances",
         "slug": "kitchen-appliances"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59ddd",
-        "6ac73852c8f724367eb59dde"
-      ],
-      "tags": [
-        "kitchen appliances",
-        "philips",
-        "electric kettle"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59ddd", "6ac73852c8f724367eb59dde"],
+      "tags": ["kitchen appliances", "philips", "electric kettle"],
       "price": 1655,
       "mrp": 3310,
       "discountPercent": 50,
@@ -9371,15 +8111,8 @@
         "name": "Footwear",
         "slug": "footwear"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59d97",
-        "6ac73852c8f724367eb59dc6"
-      ],
-      "tags": [
-        "footwear",
-        "crocs",
-        "formal shoes"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59d97", "6ac73852c8f724367eb59dc6"],
+      "tags": ["footwear", "crocs", "formal shoes"],
       "price": 2494,
       "mrp": 4300,
       "discountPercent": 42,
@@ -9423,15 +8156,8 @@
         "name": "Fiction",
         "slug": "fiction"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59e3b",
-        "6ac73852c8f724367eb59e3c"
-      ],
-      "tags": [
-        "fiction",
-        "hachette",
-        "fantasy saga"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59e3b", "6ac73852c8f724367eb59e3c"],
+      "tags": ["fiction", "hachette", "fantasy saga"],
       "price": 277,
       "mrp": 330,
       "discountPercent": 16,
@@ -9475,15 +8201,8 @@
         "name": "Women's Clothing",
         "slug": "women-s-clothing"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59d97",
-        "6ac73852c8f724367eb59daf"
-      ],
-      "tags": [
-        "women's clothing",
-        "zara",
-        "kurta set"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59d97", "6ac73852c8f724367eb59daf"],
+      "tags": ["women's clothing", "zara", "kurta set"],
       "price": 2494,
       "mrp": 4300,
       "discountPercent": 42,
@@ -9527,15 +8246,8 @@
         "name": "Women's Clothing",
         "slug": "women-s-clothing"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59d97",
-        "6ac73852c8f724367eb59daf"
-      ],
-      "tags": [
-        "women's clothing",
-        "libas",
-        "palazzo"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59d97", "6ac73852c8f724367eb59daf"],
+      "tags": ["women's clothing", "libas", "palazzo"],
       "price": 2427,
       "mrp": 2790,
       "discountPercent": 13,
@@ -9579,15 +8291,8 @@
         "name": "Furniture",
         "slug": "furniture"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59ddd",
-        "6ac73852c8f724367eb59df5"
-      ],
-      "tags": [
-        "furniture",
-        "ikea",
-        "study table"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59ddd", "6ac73852c8f724367eb59df5"],
+      "tags": ["furniture", "ikea", "study table"],
       "price": 15660,
       "mrp": 15660,
       "discountPercent": 0,
@@ -9631,15 +8336,8 @@
         "name": "Women's Clothing",
         "slug": "women-s-clothing"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59d97",
-        "6ac73852c8f724367eb59daf"
-      ],
-      "tags": [
-        "women's clothing",
-        "h&m",
-        "maxi dress"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59d97", "6ac73852c8f724367eb59daf"],
+      "tags": ["women's clothing", "h&m", "maxi dress"],
       "price": 4036,
       "mrp": 5310,
       "discountPercent": 24,
@@ -9683,15 +8381,8 @@
         "name": "Footwear",
         "slug": "footwear"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59d97",
-        "6ac73852c8f724367eb59dc6"
-      ],
-      "tags": [
-        "footwear",
-        "crocs",
-        "running shoes"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59d97", "6ac73852c8f724367eb59dc6"],
+      "tags": ["footwear", "crocs", "running shoes"],
       "price": 6610,
       "mrp": 9180,
       "discountPercent": 28,
@@ -9735,15 +8426,8 @@
         "name": "Smartwatches",
         "slug": "smartwatches"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59d3a",
-        "6ac73852c8f724367eb59d80"
-      ],
-      "tags": [
-        "smartwatches",
-        "fire-boltt",
-        "sports watch"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59d3a", "6ac73852c8f724367eb59d80"],
+      "tags": ["smartwatches", "fire-boltt", "sports watch"],
       "price": 34112,
       "mrp": 42640,
       "discountPercent": 20,
@@ -9787,15 +8471,8 @@
         "name": "Grooming",
         "slug": "grooming"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59e0c",
-        "6ac73852c8f724367eb59e24"
-      ],
-      "tags": [
-        "grooming",
-        "philips",
-        "electric shaver"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59e0c", "6ac73852c8f724367eb59e24"],
+      "tags": ["grooming", "philips", "electric shaver"],
       "price": 3884,
       "mrp": 5470,
       "discountPercent": 29,
@@ -9839,15 +8516,8 @@
         "name": "Skincare",
         "slug": "skincare"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59e0c",
-        "6ac73852c8f724367eb59e0d"
-      ],
-      "tags": [
-        "skincare",
-        "the ordinary",
-        "moisturiser"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59e0c", "6ac73852c8f724367eb59e0d"],
+      "tags": ["skincare", "the ordinary", "moisturiser"],
       "price": 635,
       "mrp": 1410,
       "discountPercent": 55,
@@ -9891,15 +8561,8 @@
         "name": "Headphones & Audio",
         "slug": "headphones-audio"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59d3a",
-        "6ac73852c8f724367eb59d69"
-      ],
-      "tags": [
-        "headphones & audio",
-        "noise",
-        "earbuds"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59d3a", "6ac73852c8f724367eb59d69"],
+      "tags": ["headphones & audio", "noise", "earbuds"],
       "price": 2477,
       "mrp": 4060,
       "discountPercent": 39,
@@ -9943,15 +8606,8 @@
         "name": "Gym & Fitness",
         "slug": "gym-fitness"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59e6a",
-        "6ac73852c8f724367eb59e6b"
-      ],
-      "tags": [
-        "gym & fitness",
-        "fitkit",
-        "yoga mat"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59e6a", "6ac73852c8f724367eb59e6b"],
+      "tags": ["gym & fitness", "fitkit", "yoga mat"],
       "price": 1270,
       "mrp": 1270,
       "discountPercent": 0,
@@ -9995,15 +8651,8 @@
         "name": "Fiction",
         "slug": "fiction"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59e3b",
-        "6ac73852c8f724367eb59e3c"
-      ],
-      "tags": [
-        "fiction",
-        "rupa",
-        "novel"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59e3b", "6ac73852c8f724367eb59e3c"],
+      "tags": ["fiction", "rupa", "novel"],
       "price": 389,
       "mrp": 540,
       "discountPercent": 28,
@@ -10047,15 +8696,8 @@
         "name": "Skincare",
         "slug": "skincare"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59e0c",
-        "6ac73852c8f724367eb59e0d"
-      ],
-      "tags": [
-        "skincare",
-        "the ordinary",
-        "sunscreen spf 50"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59e0c", "6ac73852c8f724367eb59e0d"],
+      "tags": ["skincare", "the ordinary", "sunscreen spf 50"],
       "price": 1147,
       "mrp": 1260,
       "discountPercent": 9,
@@ -10099,15 +8741,8 @@
         "name": "Skincare",
         "slug": "skincare"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59e0c",
-        "6ac73852c8f724367eb59e0d"
-      ],
-      "tags": [
-        "skincare",
-        "lakmé",
-        "sunscreen spf 50"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59e0c", "6ac73852c8f724367eb59e0d"],
+      "tags": ["skincare", "lakmé", "sunscreen spf 50"],
       "price": 1378,
       "mrp": 2870,
       "discountPercent": 52,
@@ -10151,15 +8786,8 @@
         "name": "Smartwatches",
         "slug": "smartwatches"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59d3a",
-        "6ac73852c8f724367eb59d80"
-      ],
-      "tags": [
-        "smartwatches",
-        "fire-boltt",
-        "sports watch"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59d3a", "6ac73852c8f724367eb59d80"],
+      "tags": ["smartwatches", "fire-boltt", "sports watch"],
       "price": 39275,
       "mrp": 56920,
       "discountPercent": 31,
@@ -10203,15 +8831,8 @@
         "name": "Kitchen Appliances",
         "slug": "kitchen-appliances"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59ddd",
-        "6ac73852c8f724367eb59dde"
-      ],
-      "tags": [
-        "kitchen appliances",
-        "prestige",
-        "air fryer"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59ddd", "6ac73852c8f724367eb59dde"],
+      "tags": ["kitchen appliances", "prestige", "air fryer"],
       "price": 9812,
       "mrp": 10550,
       "discountPercent": 7,
@@ -10255,15 +8876,8 @@
         "name": "Skincare",
         "slug": "skincare"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59e0c",
-        "6ac73852c8f724367eb59e0d"
-      ],
-      "tags": [
-        "skincare",
-        "neutrogena",
-        "face wash"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59e0c", "6ac73852c8f724367eb59e0d"],
+      "tags": ["skincare", "neutrogena", "face wash"],
       "price": 532,
       "mrp": 1210,
       "discountPercent": 56,
@@ -10307,15 +8921,8 @@
         "name": "Smartwatches",
         "slug": "smartwatches"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59d3a",
-        "6ac73852c8f724367eb59d80"
-      ],
-      "tags": [
-        "smartwatches",
-        "apple",
-        "fitness band"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59d3a", "6ac73852c8f724367eb59d80"],
+      "tags": ["smartwatches", "apple", "fitness band"],
       "price": 9351,
       "mrp": 10390,
       "discountPercent": 10,
@@ -10359,15 +8966,8 @@
         "name": "Fiction",
         "slug": "fiction"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59e3b",
-        "6ac73852c8f724367eb59e3c"
-      ],
-      "tags": [
-        "fiction",
-        "rupa",
-        "thriller"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59e3b", "6ac73852c8f724367eb59e3c"],
+      "tags": ["fiction", "rupa", "thriller"],
       "price": 330,
       "mrp": 560,
       "discountPercent": 41,
@@ -10411,15 +9011,8 @@
         "name": "Mobiles",
         "slug": "mobiles"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59d3a",
-        "6ac73852c8f724367eb59d3b"
-      ],
-      "tags": [
-        "mobiles",
-        "apple",
-        "neo"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59d3a", "6ac73852c8f724367eb59d3b"],
+      "tags": ["mobiles", "apple", "neo"],
       "price": 44807,
       "mrp": 64010,
       "discountPercent": 30,
@@ -10463,15 +9056,8 @@
         "name": "Furniture",
         "slug": "furniture"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59ddd",
-        "6ac73852c8f724367eb59df5"
-      ],
-      "tags": [
-        "furniture",
-        "godrej interio",
-        "bookshelf"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59ddd", "6ac73852c8f724367eb59df5"],
+      "tags": ["furniture", "godrej interio", "bookshelf"],
       "price": 16731,
       "mrp": 25740,
       "discountPercent": 35,
@@ -10515,15 +9101,8 @@
         "name": "Technology & Programming",
         "slug": "technology-programming"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59e3b",
-        "6ac73852c8f724367eb59e53"
-      ],
-      "tags": [
-        "technology & programming",
-        "manning",
-        "in action"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59e3b", "6ac73852c8f724367eb59e53"],
+      "tags": ["technology & programming", "manning", "in action"],
       "price": 599,
       "mrp": 1460,
       "discountPercent": 59,
@@ -10567,15 +9146,8 @@
         "name": "Men's Clothing",
         "slug": "men-s-clothing"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59d97",
-        "6ac73852c8f724367eb59d98"
-      ],
-      "tags": [
-        "men's clothing",
-        "peter england",
-        "denim jeans"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59d97", "6ac73852c8f724367eb59d98"],
+      "tags": ["men's clothing", "peter england", "denim jeans"],
       "price": 2063,
       "mrp": 2750,
       "discountPercent": 25,
@@ -10619,15 +9191,8 @@
         "name": "Grooming",
         "slug": "grooming"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59e0c",
-        "6ac73852c8f724367eb59e24"
-      ],
-      "tags": [
-        "grooming",
-        "gillette",
-        "beard oil"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59e0c", "6ac73852c8f724367eb59e24"],
+      "tags": ["grooming", "gillette", "beard oil"],
       "price": 6750,
       "mrp": 6750,
       "discountPercent": 0,
@@ -10671,15 +9236,8 @@
         "name": "Men's Clothing",
         "slug": "men-s-clothing"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59d97",
-        "6ac73852c8f724367eb59d98"
-      ],
-      "tags": [
-        "men's clothing",
-        "levi's",
-        "polo t-shirt"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59d97", "6ac73852c8f724367eb59d98"],
+      "tags": ["men's clothing", "levi's", "polo t-shirt"],
       "price": 3990,
       "mrp": 3990,
       "discountPercent": 0,
@@ -10723,15 +9281,8 @@
         "name": "Headphones & Audio",
         "slug": "headphones-audio"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59d3a",
-        "6ac73852c8f724367eb59d69"
-      ],
-      "tags": [
-        "headphones & audio",
-        "bose",
-        "wireless headphones"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59d3a", "6ac73852c8f724367eb59d69"],
+      "tags": ["headphones & audio", "bose", "wireless headphones"],
       "price": 16212,
       "mrp": 27020,
       "discountPercent": 40,
@@ -10775,15 +9326,8 @@
         "name": "Laptops",
         "slug": "laptops"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59d3a",
-        "6ac73852c8f724367eb59d52"
-      ],
-      "tags": [
-        "laptops",
-        "hp",
-        "gaming laptop"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59d3a", "6ac73852c8f724367eb59d52"],
+      "tags": ["laptops", "hp", "gaming laptop"],
       "price": 75500,
       "mrp": 164130,
       "discountPercent": 54,
@@ -10827,15 +9371,8 @@
         "name": "Kitchen Appliances",
         "slug": "kitchen-appliances"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59ddd",
-        "6ac73852c8f724367eb59dde"
-      ],
-      "tags": [
-        "kitchen appliances",
-        "butterfly",
-        "mixer grinder"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59ddd", "6ac73852c8f724367eb59dde"],
+      "tags": ["kitchen appliances", "butterfly", "mixer grinder"],
       "price": 8330,
       "mrp": 8330,
       "discountPercent": 0,
@@ -10879,15 +9416,8 @@
         "name": "Women's Clothing",
         "slug": "women-s-clothing"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59d97",
-        "6ac73852c8f724367eb59daf"
-      ],
-      "tags": [
-        "women's clothing",
-        "h&m",
-        "maxi dress"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59d97", "6ac73852c8f724367eb59daf"],
+      "tags": ["women's clothing", "h&m", "maxi dress"],
       "price": 8580,
       "mrp": 8580,
       "discountPercent": 0,
@@ -10931,15 +9461,8 @@
         "name": "Gym & Fitness",
         "slug": "gym-fitness"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59e6a",
-        "6ac73852c8f724367eb59e6b"
-      ],
-      "tags": [
-        "gym & fitness",
-        "lifelong",
-        "protein shaker"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59e6a", "6ac73852c8f724367eb59e6b"],
+      "tags": ["gym & fitness", "lifelong", "protein shaker"],
       "price": 11050,
       "mrp": 22100,
       "discountPercent": 50,
@@ -10983,15 +9506,8 @@
         "name": "Furniture",
         "slug": "furniture"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59ddd",
-        "6ac73852c8f724367eb59df5"
-      ],
-      "tags": [
-        "furniture",
-        "wakefit",
-        "office chair"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59ddd", "6ac73852c8f724367eb59df5"],
+      "tags": ["furniture", "wakefit", "office chair"],
       "price": 14529,
       "mrp": 16700,
       "discountPercent": 13,
@@ -11035,15 +9551,8 @@
         "name": "Fiction",
         "slug": "fiction"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59e3b",
-        "6ac73852c8f724367eb59e3c"
-      ],
-      "tags": [
-        "fiction",
-        "harpercollins",
-        "fantasy saga"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59e3b", "6ac73852c8f724367eb59e3c"],
+      "tags": ["fiction", "harpercollins", "fantasy saga"],
       "price": 230,
       "mrp": 230,
       "discountPercent": 0,
@@ -11087,15 +9596,8 @@
         "name": "Fiction",
         "slug": "fiction"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59e3b",
-        "6ac73852c8f724367eb59e3c"
-      ],
-      "tags": [
-        "fiction",
-        "rupa",
-        "classic edition"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59e3b", "6ac73852c8f724367eb59e3c"],
+      "tags": ["fiction", "rupa", "classic edition"],
       "price": 130,
       "mrp": 260,
       "discountPercent": 50,
@@ -11139,15 +9641,8 @@
         "name": "Headphones & Audio",
         "slug": "headphones-audio"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59d3a",
-        "6ac73852c8f724367eb59d69"
-      ],
-      "tags": [
-        "headphones & audio",
-        "sony",
-        "soundbar"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59d3a", "6ac73852c8f724367eb59d69"],
+      "tags": ["headphones & audio", "sony", "soundbar"],
       "price": 5216,
       "mrp": 5490,
       "discountPercent": 5,
@@ -11191,15 +9686,8 @@
         "name": "Skincare",
         "slug": "skincare"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59e0c",
-        "6ac73852c8f724367eb59e0d"
-      ],
-      "tags": [
-        "skincare",
-        "neutrogena",
-        "face wash"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59e0c", "6ac73852c8f724367eb59e0d"],
+      "tags": ["skincare", "neutrogena", "face wash"],
       "price": 338,
       "mrp": 450,
       "discountPercent": 25,
@@ -11243,15 +9731,8 @@
         "name": "Laptops",
         "slug": "laptops"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59d3a",
-        "6ac73852c8f724367eb59d52"
-      ],
-      "tags": [
-        "laptops",
-        "acer",
-        "gaming laptop"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59d3a", "6ac73852c8f724367eb59d52"],
+      "tags": ["laptops", "acer", "gaming laptop"],
       "price": 129532,
       "mrp": 137800,
       "discountPercent": 6,
@@ -11295,15 +9776,8 @@
         "name": "Footwear",
         "slug": "footwear"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59d97",
-        "6ac73852c8f724367eb59dc6"
-      ],
-      "tags": [
-        "footwear",
-        "nike",
-        "formal shoes"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59d97", "6ac73852c8f724367eb59dc6"],
+      "tags": ["footwear", "nike", "formal shoes"],
       "price": 10610,
       "mrp": 10610,
       "discountPercent": 0,
@@ -11347,15 +9821,8 @@
         "name": "Men's Clothing",
         "slug": "men-s-clothing"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59d97",
-        "6ac73852c8f724367eb59d98"
-      ],
-      "tags": [
-        "men's clothing",
-        "levi's",
-        "slim fit shirt"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59d97", "6ac73852c8f724367eb59d98"],
+      "tags": ["men's clothing", "levi's", "slim fit shirt"],
       "price": 4110,
       "mrp": 4110,
       "discountPercent": 0,
@@ -11399,15 +9866,8 @@
         "name": "Grooming",
         "slug": "grooming"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59e0c",
-        "6ac73852c8f724367eb59e24"
-      ],
-      "tags": [
-        "grooming",
-        "gillette",
-        "electric shaver"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59e0c", "6ac73852c8f724367eb59e24"],
+      "tags": ["grooming", "gillette", "electric shaver"],
       "price": 5632,
       "mrp": 7410,
       "discountPercent": 24,
@@ -11451,15 +9911,8 @@
         "name": "Technology & Programming",
         "slug": "technology-programming"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59e3b",
-        "6ac73852c8f724367eb59e53"
-      ],
-      "tags": [
-        "technology & programming",
-        "packt",
-        "cookbook"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59e3b", "6ac73852c8f724367eb59e53"],
+      "tags": ["technology & programming", "packt", "cookbook"],
       "price": 916,
       "mrp": 1290,
       "discountPercent": 29,
@@ -11503,15 +9956,8 @@
         "name": "Smartwatches",
         "slug": "smartwatches"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59d3a",
-        "6ac73852c8f724367eb59d80"
-      ],
-      "tags": [
-        "smartwatches",
-        "samsung",
-        "sports watch"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59d3a", "6ac73852c8f724367eb59d80"],
+      "tags": ["smartwatches", "samsung", "sports watch"],
       "price": 27553,
       "mrp": 31670,
       "discountPercent": 13,
@@ -11555,15 +10001,8 @@
         "name": "Men's Clothing",
         "slug": "men-s-clothing"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59d97",
-        "6ac73852c8f724367eb59d98"
-      ],
-      "tags": [
-        "men's clothing",
-        "allen solly",
-        "hoodie"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59d97", "6ac73852c8f724367eb59d98"],
+      "tags": ["men's clothing", "allen solly", "hoodie"],
       "price": 1258,
       "mrp": 1700,
       "discountPercent": 26,
@@ -11607,15 +10046,8 @@
         "name": "Kitchen Appliances",
         "slug": "kitchen-appliances"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59ddd",
-        "6ac73852c8f724367eb59dde"
-      ],
-      "tags": [
-        "kitchen appliances",
-        "prestige",
-        "induction cooktop"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59ddd", "6ac73852c8f724367eb59dde"],
+      "tags": ["kitchen appliances", "prestige", "induction cooktop"],
       "price": 4997,
       "mrp": 5260,
       "discountPercent": 5,
@@ -11659,15 +10091,8 @@
         "name": "Laptops",
         "slug": "laptops"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59d3a",
-        "6ac73852c8f724367eb59d52"
-      ],
-      "tags": [
-        "laptops",
-        "hp",
-        "notebook"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59d3a", "6ac73852c8f724367eb59d52"],
+      "tags": ["laptops", "hp", "notebook"],
       "price": 99070,
       "mrp": 117940,
       "discountPercent": 16,
@@ -11711,15 +10136,8 @@
         "name": "Men's Clothing",
         "slug": "men-s-clothing"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59d97",
-        "6ac73852c8f724367eb59d98"
-      ],
-      "tags": [
-        "men's clothing",
-        "levi's",
-        "polo t-shirt"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59d97", "6ac73852c8f724367eb59d98"],
+      "tags": ["men's clothing", "levi's", "polo t-shirt"],
       "price": 1540,
       "mrp": 1540,
       "discountPercent": 0,
@@ -11763,15 +10181,8 @@
         "name": "Headphones & Audio",
         "slug": "headphones-audio"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59d3a",
-        "6ac73852c8f724367eb59d69"
-      ],
-      "tags": [
-        "headphones & audio",
-        "boat",
-        "earbuds"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59d3a", "6ac73852c8f724367eb59d69"],
+      "tags": ["headphones & audio", "boat", "earbuds"],
       "price": 4800,
       "mrp": 4800,
       "discountPercent": 0,
@@ -11815,15 +10226,8 @@
         "name": "Women's Clothing",
         "slug": "women-s-clothing"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59d97",
-        "6ac73852c8f724367eb59daf"
-      ],
-      "tags": [
-        "women's clothing",
-        "zara",
-        "maxi dress"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59d97", "6ac73852c8f724367eb59daf"],
+      "tags": ["women's clothing", "zara", "maxi dress"],
       "price": 808,
       "mrp": 850,
       "discountPercent": 5,
@@ -11867,15 +10271,8 @@
         "name": "Fiction",
         "slug": "fiction"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59e3b",
-        "6ac73852c8f724367eb59e3c"
-      ],
-      "tags": [
-        "fiction",
-        "penguin",
-        "fantasy saga"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59e3b", "6ac73852c8f724367eb59e3c"],
+      "tags": ["fiction", "penguin", "fantasy saga"],
       "price": 595,
       "mrp": 640,
       "discountPercent": 7,
@@ -11919,15 +10316,8 @@
         "name": "Smartwatches",
         "slug": "smartwatches"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59d3a",
-        "6ac73852c8f724367eb59d80"
-      ],
-      "tags": [
-        "smartwatches",
-        "noise",
-        "sports watch"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59d3a", "6ac73852c8f724367eb59d80"],
+      "tags": ["smartwatches", "noise", "sports watch"],
       "price": 45406,
       "mrp": 61360,
       "discountPercent": 26,
@@ -11971,15 +10361,8 @@
         "name": "Mobiles",
         "slug": "mobiles"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59d3a",
-        "6ac73852c8f724367eb59d3b"
-      ],
-      "tags": [
-        "mobiles",
-        "oneplus",
-        "ultra"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59d3a", "6ac73852c8f724367eb59d3b"],
+      "tags": ["mobiles", "oneplus", "ultra"],
       "price": 51906,
       "mrp": 63300,
       "discountPercent": 18,
@@ -12023,15 +10406,8 @@
         "name": "Technology & Programming",
         "slug": "technology-programming"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59e3b",
-        "6ac73852c8f724367eb59e53"
-      ],
-      "tags": [
-        "technology & programming",
-        "manning",
-        "complete guide"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59e3b", "6ac73852c8f724367eb59e53"],
+      "tags": ["technology & programming", "manning", "complete guide"],
       "price": 2056,
       "mrp": 2570,
       "discountPercent": 20,
@@ -12075,15 +10451,8 @@
         "name": "Grooming",
         "slug": "grooming"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59e0c",
-        "6ac73852c8f724367eb59e24"
-      ],
-      "tags": [
-        "grooming",
-        "park avenue",
-        "hair dryer"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59e0c", "6ac73852c8f724367eb59e24"],
+      "tags": ["grooming", "park avenue", "hair dryer"],
       "price": 1175,
       "mrp": 1250,
       "discountPercent": 6,
@@ -12127,15 +10496,8 @@
         "name": "Technology & Programming",
         "slug": "technology-programming"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59e3b",
-        "6ac73852c8f724367eb59e53"
-      ],
-      "tags": [
-        "technology & programming",
-        "o'reilly",
-        "cookbook"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59e3b", "6ac73852c8f724367eb59e53"],
+      "tags": ["technology & programming", "o'reilly", "cookbook"],
       "price": 442,
       "mrp": 960,
       "discountPercent": 54,
@@ -12179,15 +10541,8 @@
         "name": "Women's Clothing",
         "slug": "women-s-clothing"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59d97",
-        "6ac73852c8f724367eb59daf"
-      ],
-      "tags": [
-        "women's clothing",
-        "w",
-        "palazzo"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59d97", "6ac73852c8f724367eb59daf"],
+      "tags": ["women's clothing", "w", "palazzo"],
       "price": 3119,
       "mrp": 4050,
       "discountPercent": 23,
@@ -12231,15 +10586,8 @@
         "name": "Men's Clothing",
         "slug": "men-s-clothing"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59d97",
-        "6ac73852c8f724367eb59d98"
-      ],
-      "tags": [
-        "men's clothing",
-        "levi's",
-        "denim jeans"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59d97", "6ac73852c8f724367eb59d98"],
+      "tags": ["men's clothing", "levi's", "denim jeans"],
       "price": 4120,
       "mrp": 4430,
       "discountPercent": 7,
@@ -12283,15 +10631,8 @@
         "name": "Furniture",
         "slug": "furniture"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59ddd",
-        "6ac73852c8f724367eb59df5"
-      ],
-      "tags": [
-        "furniture",
-        "durian",
-        "sofa set"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59ddd", "6ac73852c8f724367eb59df5"],
+      "tags": ["furniture", "durian", "sofa set"],
       "price": 32137,
       "mrp": 45910,
       "discountPercent": 30,
@@ -12335,15 +10676,8 @@
         "name": "Skincare",
         "slug": "skincare"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59e0c",
-        "6ac73852c8f724367eb59e0d"
-      ],
-      "tags": [
-        "skincare",
-        "nivea",
-        "moisturiser"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59e0c", "6ac73852c8f724367eb59e0d"],
+      "tags": ["skincare", "nivea", "moisturiser"],
       "price": 880,
       "mrp": 880,
       "discountPercent": 0,
@@ -12387,15 +10721,8 @@
         "name": "Mobiles",
         "slug": "mobiles"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59d3a",
-        "6ac73852c8f724367eb59d3b"
-      ],
-      "tags": [
-        "mobiles",
-        "realme",
-        "pro max"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59d3a", "6ac73852c8f724367eb59d3b"],
+      "tags": ["mobiles", "realme", "pro max"],
       "price": 54208,
       "mrp": 123200,
       "discountPercent": 56,
@@ -12439,15 +10766,8 @@
         "name": "Gym & Fitness",
         "slug": "gym-fitness"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59e6a",
-        "6ac73852c8f724367eb59e6b"
-      ],
-      "tags": [
-        "gym & fitness",
-        "boldfit",
-        "yoga mat"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59e6a", "6ac73852c8f724367eb59e6b"],
+      "tags": ["gym & fitness", "boldfit", "yoga mat"],
       "price": 11735,
       "mrp": 25510,
       "discountPercent": 54,
@@ -12491,15 +10811,8 @@
         "name": "Technology & Programming",
         "slug": "technology-programming"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59e3b",
-        "6ac73852c8f724367eb59e53"
-      ],
-      "tags": [
-        "technology & programming",
-        "packt",
-        "cookbook"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59e3b", "6ac73852c8f724367eb59e53"],
+      "tags": ["technology & programming", "packt", "cookbook"],
       "price": 857,
       "mrp": 2090,
       "discountPercent": 59,
@@ -12543,15 +10856,8 @@
         "name": "Men's Clothing",
         "slug": "men-s-clothing"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59d97",
-        "6ac73852c8f724367eb59d98"
-      ],
-      "tags": [
-        "men's clothing",
-        "h&m",
-        "chinos"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59d97", "6ac73852c8f724367eb59d98"],
+      "tags": ["men's clothing", "h&m", "chinos"],
       "price": 1937,
       "mrp": 2980,
       "discountPercent": 35,
@@ -12595,15 +10901,8 @@
         "name": "Furniture",
         "slug": "furniture"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59ddd",
-        "6ac73852c8f724367eb59df5"
-      ],
-      "tags": [
-        "furniture",
-        "durian",
-        "office chair"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59ddd", "6ac73852c8f724367eb59df5"],
+      "tags": ["furniture", "durian", "office chair"],
       "price": 48374,
       "mrp": 56910,
       "discountPercent": 15,
@@ -12647,15 +10946,8 @@
         "name": "Fiction",
         "slug": "fiction"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59e3b",
-        "6ac73852c8f724367eb59e3c"
-      ],
-      "tags": [
-        "fiction",
-        "penguin",
-        "thriller"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59e3b", "6ac73852c8f724367eb59e3c"],
+      "tags": ["fiction", "penguin", "thriller"],
       "price": 332,
       "mrp": 810,
       "discountPercent": 59,
@@ -12699,15 +10991,8 @@
         "name": "Kitchen Appliances",
         "slug": "kitchen-appliances"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59ddd",
-        "6ac73852c8f724367eb59dde"
-      ],
-      "tags": [
-        "kitchen appliances",
-        "bajaj",
-        "mixer grinder"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59ddd", "6ac73852c8f724367eb59dde"],
+      "tags": ["kitchen appliances", "bajaj", "mixer grinder"],
       "price": 2900,
       "mrp": 2900,
       "discountPercent": 0,
@@ -12751,15 +11036,8 @@
         "name": "Women's Clothing",
         "slug": "women-s-clothing"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59d97",
-        "6ac73852c8f724367eb59daf"
-      ],
-      "tags": [
-        "women's clothing",
-        "h&m",
-        "kurta set"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59d97", "6ac73852c8f724367eb59daf"],
+      "tags": ["women's clothing", "h&m", "kurta set"],
       "price": 877,
       "mrp": 1070,
       "discountPercent": 18,
@@ -12803,15 +11081,8 @@
         "name": "Fiction",
         "slug": "fiction"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59e3b",
-        "6ac73852c8f724367eb59e3c"
-      ],
-      "tags": [
-        "fiction",
-        "hachette",
-        "fantasy saga"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59e3b", "6ac73852c8f724367eb59e3c"],
+      "tags": ["fiction", "hachette", "fantasy saga"],
       "price": 213,
       "mrp": 300,
       "discountPercent": 29,
@@ -12855,15 +11126,8 @@
         "name": "Kitchen Appliances",
         "slug": "kitchen-appliances"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59ddd",
-        "6ac73852c8f724367eb59dde"
-      ],
-      "tags": [
-        "kitchen appliances",
-        "butterfly",
-        "mixer grinder"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59ddd", "6ac73852c8f724367eb59dde"],
+      "tags": ["kitchen appliances", "butterfly", "mixer grinder"],
       "price": 5954,
       "mrp": 6690,
       "discountPercent": 11,
@@ -12907,15 +11171,8 @@
         "name": "Gym & Fitness",
         "slug": "gym-fitness"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59e6a",
-        "6ac73852c8f724367eb59e6b"
-      ],
-      "tags": [
-        "gym & fitness",
-        "nivia",
-        "protein shaker"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59e6a", "6ac73852c8f724367eb59e6b"],
+      "tags": ["gym & fitness", "nivia", "protein shaker"],
       "price": 8400,
       "mrp": 8400,
       "discountPercent": 0,
@@ -12959,15 +11216,8 @@
         "name": "Mobiles",
         "slug": "mobiles"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59d3a",
-        "6ac73852c8f724367eb59d3b"
-      ],
-      "tags": [
-        "mobiles",
-        "realme",
-        "smartphone 5g"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59d3a", "6ac73852c8f724367eb59d3b"],
+      "tags": ["mobiles", "realme", "smartphone 5g"],
       "price": 63995,
       "mrp": 125480,
       "discountPercent": 49,
@@ -13011,15 +11261,8 @@
         "name": "Furniture",
         "slug": "furniture"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59ddd",
-        "6ac73852c8f724367eb59df5"
-      ],
-      "tags": [
-        "furniture",
-        "nilkamal",
-        "office chair"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59ddd", "6ac73852c8f724367eb59df5"],
+      "tags": ["furniture", "nilkamal", "office chair"],
       "price": 6422,
       "mrp": 15290,
       "discountPercent": 58,
@@ -13063,15 +11306,8 @@
         "name": "Men's Clothing",
         "slug": "men-s-clothing"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59d97",
-        "6ac73852c8f724367eb59d98"
-      ],
-      "tags": [
-        "men's clothing",
-        "u.s. polo",
-        "hoodie"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59d97", "6ac73852c8f724367eb59d98"],
+      "tags": ["men's clothing", "u.s. polo", "hoodie"],
       "price": 712,
       "mrp": 1130,
       "discountPercent": 37,
@@ -13115,15 +11351,8 @@
         "name": "Laptops",
         "slug": "laptops"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59d3a",
-        "6ac73852c8f724367eb59d52"
-      ],
-      "tags": [
-        "laptops",
-        "apple",
-        "gaming laptop"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59d3a", "6ac73852c8f724367eb59d52"],
+      "tags": ["laptops", "apple", "gaming laptop"],
       "price": 144245,
       "mrp": 171720,
       "discountPercent": 16,
@@ -13167,15 +11396,8 @@
         "name": "Furniture",
         "slug": "furniture"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59ddd",
-        "6ac73852c8f724367eb59df5"
-      ],
-      "tags": [
-        "furniture",
-        "godrej interio",
-        "sofa set"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59ddd", "6ac73852c8f724367eb59df5"],
+      "tags": ["furniture", "godrej interio", "sofa set"],
       "price": 8646,
       "mrp": 14410,
       "discountPercent": 40,
@@ -13219,15 +11441,8 @@
         "name": "Smartwatches",
         "slug": "smartwatches"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59d3a",
-        "6ac73852c8f724367eb59d80"
-      ],
-      "tags": [
-        "smartwatches",
-        "samsung",
-        "smartwatch"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59d3a", "6ac73852c8f724367eb59d80"],
+      "tags": ["smartwatches", "samsung", "smartwatch"],
       "price": 1103,
       "mrp": 2250,
       "discountPercent": 51,
@@ -13271,15 +11486,8 @@
         "name": "Gym & Fitness",
         "slug": "gym-fitness"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59e6a",
-        "6ac73852c8f724367eb59e6b"
-      ],
-      "tags": [
-        "gym & fitness",
-        "cosco",
-        "protein shaker"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59e6a", "6ac73852c8f724367eb59e6b"],
+      "tags": ["gym & fitness", "cosco", "protein shaker"],
       "price": 32625,
       "mrp": 37500,
       "discountPercent": 13,
@@ -13323,15 +11531,8 @@
         "name": "Furniture",
         "slug": "furniture"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59ddd",
-        "6ac73852c8f724367eb59df5"
-      ],
-      "tags": [
-        "furniture",
-        "urban ladder",
-        "study table"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59ddd", "6ac73852c8f724367eb59df5"],
+      "tags": ["furniture", "urban ladder", "study table"],
       "price": 13161,
       "mrp": 25310,
       "discountPercent": 48,
@@ -13375,15 +11576,8 @@
         "name": "Mobiles",
         "slug": "mobiles"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59d3a",
-        "6ac73852c8f724367eb59d3b"
-      ],
-      "tags": [
-        "mobiles",
-        "google",
-        "lite"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59d3a", "6ac73852c8f724367eb59d3b"],
+      "tags": ["mobiles", "google", "lite"],
       "price": 38549,
       "mrp": 82020,
       "discountPercent": 53,
@@ -13427,15 +11621,8 @@
         "name": "Grooming",
         "slug": "grooming"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59e0c",
-        "6ac73852c8f724367eb59e24"
-      ],
-      "tags": [
-        "grooming",
-        "wahl",
-        "trimmer"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59e0c", "6ac73852c8f724367eb59e24"],
+      "tags": ["grooming", "wahl", "trimmer"],
       "price": 4400,
       "mrp": 5000,
       "discountPercent": 12,
@@ -13479,15 +11666,8 @@
         "name": "Smartwatches",
         "slug": "smartwatches"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59d3a",
-        "6ac73852c8f724367eb59d80"
-      ],
-      "tags": [
-        "smartwatches",
-        "fire-boltt",
-        "sports watch"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59d3a", "6ac73852c8f724367eb59d80"],
+      "tags": ["smartwatches", "fire-boltt", "sports watch"],
       "price": 32053,
       "mrp": 34840,
       "discountPercent": 8,
@@ -13531,15 +11711,8 @@
         "name": "Kitchen Appliances",
         "slug": "kitchen-appliances"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59ddd",
-        "6ac73852c8f724367eb59dde"
-      ],
-      "tags": [
-        "kitchen appliances",
-        "butterfly",
-        "induction cooktop"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59ddd", "6ac73852c8f724367eb59dde"],
+      "tags": ["kitchen appliances", "butterfly", "induction cooktop"],
       "price": 3936,
       "mrp": 6150,
       "discountPercent": 36,
@@ -13583,15 +11756,8 @@
         "name": "Headphones & Audio",
         "slug": "headphones-audio"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59d3a",
-        "6ac73852c8f724367eb59d69"
-      ],
-      "tags": [
-        "headphones & audio",
-        "noise",
-        "bluetooth speaker"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59d3a", "6ac73852c8f724367eb59d69"],
+      "tags": ["headphones & audio", "noise", "bluetooth speaker"],
       "price": 24003,
       "mrp": 26670,
       "discountPercent": 10,
@@ -13635,15 +11801,8 @@
         "name": "Laptops",
         "slug": "laptops"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59d3a",
-        "6ac73852c8f724367eb59d52"
-      ],
-      "tags": [
-        "laptops",
-        "apple",
-        "notebook"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59d3a", "6ac73852c8f724367eb59d52"],
+      "tags": ["laptops", "apple", "notebook"],
       "price": 50460,
       "mrp": 58000,
       "discountPercent": 13,
@@ -13687,15 +11846,8 @@
         "name": "Technology & Programming",
         "slug": "technology-programming"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59e3b",
-        "6ac73852c8f724367eb59e53"
-      ],
-      "tags": [
-        "technology & programming",
-        "o'reilly",
-        "handbook"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59e3b", "6ac73852c8f724367eb59e53"],
+      "tags": ["technology & programming", "o'reilly", "handbook"],
       "price": 1580,
       "mrp": 1580,
       "discountPercent": 0,
@@ -13739,15 +11891,8 @@
         "name": "Laptops",
         "slug": "laptops"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59d3a",
-        "6ac73852c8f724367eb59d52"
-      ],
-      "tags": [
-        "laptops",
-        "asus",
-        "ultrabook"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59d3a", "6ac73852c8f724367eb59d52"],
+      "tags": ["laptops", "asus", "ultrabook"],
       "price": 187620,
       "mrp": 187620,
       "discountPercent": 0,
@@ -13791,15 +11936,8 @@
         "name": "Headphones & Audio",
         "slug": "headphones-audio"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59d3a",
-        "6ac73852c8f724367eb59d69"
-      ],
-      "tags": [
-        "headphones & audio",
-        "boat",
-        "earbuds"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59d3a", "6ac73852c8f724367eb59d69"],
+      "tags": ["headphones & audio", "boat", "earbuds"],
       "price": 4497,
       "mrp": 6160,
       "discountPercent": 27,
@@ -13843,15 +11981,8 @@
         "name": "Technology & Programming",
         "slug": "technology-programming"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59e3b",
-        "6ac73852c8f724367eb59e53"
-      ],
-      "tags": [
-        "technology & programming",
-        "pragmatic",
-        "cookbook"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59e3b", "6ac73852c8f724367eb59e53"],
+      "tags": ["technology & programming", "pragmatic", "cookbook"],
       "price": 1293,
       "mrp": 2350,
       "discountPercent": 45,
@@ -13895,15 +12026,8 @@
         "name": "Skincare",
         "slug": "skincare"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59e0c",
-        "6ac73852c8f724367eb59e0d"
-      ],
-      "tags": [
-        "skincare",
-        "cetaphil",
-        "sunscreen spf 50"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59e0c", "6ac73852c8f724367eb59e0d"],
+      "tags": ["skincare", "cetaphil", "sunscreen spf 50"],
       "price": 2252,
       "mrp": 2850,
       "discountPercent": 21,
@@ -13947,15 +12071,8 @@
         "name": "Kitchen Appliances",
         "slug": "kitchen-appliances"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59ddd",
-        "6ac73852c8f724367eb59dde"
-      ],
-      "tags": [
-        "kitchen appliances",
-        "prestige",
-        "electric kettle"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59ddd", "6ac73852c8f724367eb59dde"],
+      "tags": ["kitchen appliances", "prestige", "electric kettle"],
       "price": 1657,
       "mrp": 2630,
       "discountPercent": 37,
@@ -13999,15 +12116,8 @@
         "name": "Mobiles",
         "slug": "mobiles"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59d3a",
-        "6ac73852c8f724367eb59d3b"
-      ],
-      "tags": [
-        "mobiles",
-        "xiaomi",
-        "ultra"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59d3a", "6ac73852c8f724367eb59d3b"],
+      "tags": ["mobiles", "xiaomi", "ultra"],
       "price": 35912,
       "mrp": 40350,
       "discountPercent": 11,
@@ -14051,15 +12161,8 @@
         "name": "Men's Clothing",
         "slug": "men-s-clothing"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59d97",
-        "6ac73852c8f724367eb59d98"
-      ],
-      "tags": [
-        "men's clothing",
-        "allen solly",
-        "chinos"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59d97", "6ac73852c8f724367eb59d98"],
+      "tags": ["men's clothing", "allen solly", "chinos"],
       "price": 5010,
       "mrp": 5330,
       "discountPercent": 6,
@@ -14103,15 +12206,8 @@
         "name": "Women's Clothing",
         "slug": "women-s-clothing"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59d97",
-        "6ac73852c8f724367eb59daf"
-      ],
-      "tags": [
-        "women's clothing",
-        "h&m",
-        "top"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59d97", "6ac73852c8f724367eb59daf"],
+      "tags": ["women's clothing", "h&m", "top"],
       "price": 4120,
       "mrp": 4120,
       "discountPercent": 0,
@@ -14155,15 +12251,8 @@
         "name": "Headphones & Audio",
         "slug": "headphones-audio"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59d3a",
-        "6ac73852c8f724367eb59d69"
-      ],
-      "tags": [
-        "headphones & audio",
-        "noise",
-        "earbuds"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59d3a", "6ac73852c8f724367eb59d69"],
+      "tags": ["headphones & audio", "noise", "earbuds"],
       "price": 13718,
       "mrp": 28580,
       "discountPercent": 52,
@@ -14207,15 +12296,8 @@
         "name": "Kitchen Appliances",
         "slug": "kitchen-appliances"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59ddd",
-        "6ac73852c8f724367eb59dde"
-      ],
-      "tags": [
-        "kitchen appliances",
-        "bajaj",
-        "toaster"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59ddd", "6ac73852c8f724367eb59dde"],
+      "tags": ["kitchen appliances", "bajaj", "toaster"],
       "price": 10058,
       "mrp": 11430,
       "discountPercent": 12,
@@ -14259,15 +12341,8 @@
         "name": "Grooming",
         "slug": "grooming"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59e0c",
-        "6ac73852c8f724367eb59e24"
-      ],
-      "tags": [
-        "grooming",
-        "park avenue",
-        "hair dryer"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59e0c", "6ac73852c8f724367eb59e24"],
+      "tags": ["grooming", "park avenue", "hair dryer"],
       "price": 3870,
       "mrp": 3870,
       "discountPercent": 0,
@@ -14311,15 +12386,8 @@
         "name": "Men's Clothing",
         "slug": "men-s-clothing"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59d97",
-        "6ac73852c8f724367eb59d98"
-      ],
-      "tags": [
-        "men's clothing",
-        "puma",
-        "chinos"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59d97", "6ac73852c8f724367eb59d98"],
+      "tags": ["men's clothing", "puma", "chinos"],
       "price": 3150,
       "mrp": 3580,
       "discountPercent": 12,
@@ -14363,15 +12431,8 @@
         "name": "Gym & Fitness",
         "slug": "gym-fitness"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59e6a",
-        "6ac73852c8f724367eb59e6b"
-      ],
-      "tags": [
-        "gym & fitness",
-        "fitkit",
-        "yoga mat"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59e6a", "6ac73852c8f724367eb59e6b"],
+      "tags": ["gym & fitness", "fitkit", "yoga mat"],
       "price": 4375,
       "mrp": 6530,
       "discountPercent": 33,
@@ -14415,15 +12476,8 @@
         "name": "Laptops",
         "slug": "laptops"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59d3a",
-        "6ac73852c8f724367eb59d52"
-      ],
-      "tags": [
-        "laptops",
-        "hp",
-        "gaming laptop"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59d3a", "6ac73852c8f724367eb59d52"],
+      "tags": ["laptops", "hp", "gaming laptop"],
       "price": 176680,
       "mrp": 176680,
       "discountPercent": 0,
@@ -14467,15 +12521,8 @@
         "name": "Laptops",
         "slug": "laptops"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59d3a",
-        "6ac73852c8f724367eb59d52"
-      ],
-      "tags": [
-        "laptops",
-        "apple",
-        "gaming laptop"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59d3a", "6ac73852c8f724367eb59d52"],
+      "tags": ["laptops", "apple", "gaming laptop"],
       "price": 176344,
       "mrp": 187600,
       "discountPercent": 6,
@@ -14519,15 +12566,8 @@
         "name": "Skincare",
         "slug": "skincare"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59e0c",
-        "6ac73852c8f724367eb59e0d"
-      ],
-      "tags": [
-        "skincare",
-        "lakmé",
-        "face wash"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59e0c", "6ac73852c8f724367eb59e0d"],
+      "tags": ["skincare", "lakmé", "face wash"],
       "price": 160,
       "mrp": 340,
       "discountPercent": 53,
@@ -14571,15 +12611,8 @@
         "name": "Laptops",
         "slug": "laptops"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59d3a",
-        "6ac73852c8f724367eb59d52"
-      ],
-      "tags": [
-        "laptops",
-        "lenovo",
-        "ultrabook"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59d3a", "6ac73852c8f724367eb59d52"],
+      "tags": ["laptops", "lenovo", "ultrabook"],
       "price": 83674,
       "mrp": 194590,
       "discountPercent": 57,
@@ -14623,15 +12656,8 @@
         "name": "Smartwatches",
         "slug": "smartwatches"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59d3a",
-        "6ac73852c8f724367eb59d80"
-      ],
-      "tags": [
-        "smartwatches",
-        "noise",
-        "smartwatch"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59d3a", "6ac73852c8f724367eb59d80"],
+      "tags": ["smartwatches", "noise", "smartwatch"],
       "price": 42437,
       "mrp": 59770,
       "discountPercent": 29,
@@ -14675,15 +12701,8 @@
         "name": "Fiction",
         "slug": "fiction"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59e3b",
-        "6ac73852c8f724367eb59e3c"
-      ],
-      "tags": [
-        "fiction",
-        "penguin",
-        "fantasy saga"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59e3b", "6ac73852c8f724367eb59e3c"],
+      "tags": ["fiction", "penguin", "fantasy saga"],
       "price": 191,
       "mrp": 390,
       "discountPercent": 51,
@@ -14727,15 +12746,8 @@
         "name": "Headphones & Audio",
         "slug": "headphones-audio"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59d3a",
-        "6ac73852c8f724367eb59d69"
-      ],
-      "tags": [
-        "headphones & audio",
-        "bose",
-        "soundbar"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59d3a", "6ac73852c8f724367eb59d69"],
+      "tags": ["headphones & audio", "bose", "soundbar"],
       "price": 8085,
       "mrp": 10500,
       "discountPercent": 23,
@@ -14779,15 +12791,8 @@
         "name": "Laptops",
         "slug": "laptops"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59d3a",
-        "6ac73852c8f724367eb59d52"
-      ],
-      "tags": [
-        "laptops",
-        "acer",
-        "gaming laptop"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59d3a", "6ac73852c8f724367eb59d52"],
+      "tags": ["laptops", "acer", "gaming laptop"],
       "price": 103037,
       "mrp": 108460,
       "discountPercent": 5,
@@ -14831,15 +12836,8 @@
         "name": "Skincare",
         "slug": "skincare"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59e0c",
-        "6ac73852c8f724367eb59e0d"
-      ],
-      "tags": [
-        "skincare",
-        "neutrogena",
-        "night cream"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59e0c", "6ac73852c8f724367eb59e0d"],
+      "tags": ["skincare", "neutrogena", "night cream"],
       "price": 1047,
       "mrp": 1150,
       "discountPercent": 9,
@@ -14883,15 +12881,8 @@
         "name": "Smartwatches",
         "slug": "smartwatches"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59d3a",
-        "6ac73852c8f724367eb59d80"
-      ],
-      "tags": [
-        "smartwatches",
-        "apple",
-        "fitness band"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59d3a", "6ac73852c8f724367eb59d80"],
+      "tags": ["smartwatches", "apple", "fitness band"],
       "price": 32983,
       "mrp": 40720,
       "discountPercent": 19,
@@ -14935,15 +12926,8 @@
         "name": "Grooming",
         "slug": "grooming"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59e0c",
-        "6ac73852c8f724367eb59e24"
-      ],
-      "tags": [
-        "grooming",
-        "gillette",
-        "hair dryer"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59e0c", "6ac73852c8f724367eb59e24"],
+      "tags": ["grooming", "gillette", "hair dryer"],
       "price": 940,
       "mrp": 1000,
       "discountPercent": 6,
@@ -14987,15 +12971,8 @@
         "name": "Technology & Programming",
         "slug": "technology-programming"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59e3b",
-        "6ac73852c8f724367eb59e53"
-      ],
-      "tags": [
-        "technology & programming",
-        "apress",
-        "in action"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59e3b", "6ac73852c8f724367eb59e53"],
+      "tags": ["technology & programming", "apress", "in action"],
       "price": 1152,
       "mrp": 1920,
       "discountPercent": 40,
@@ -15039,15 +13016,8 @@
         "name": "Footwear",
         "slug": "footwear"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59d97",
-        "6ac73852c8f724367eb59dc6"
-      ],
-      "tags": [
-        "footwear",
-        "bata",
-        "formal shoes"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59d97", "6ac73852c8f724367eb59dc6"],
+      "tags": ["footwear", "bata", "formal shoes"],
       "price": 4204,
       "mrp": 5390,
       "discountPercent": 22,
@@ -15091,15 +13061,8 @@
         "name": "Headphones & Audio",
         "slug": "headphones-audio"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59d3a",
-        "6ac73852c8f724367eb59d69"
-      ],
-      "tags": [
-        "headphones & audio",
-        "boat",
-        "neckband"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59d3a", "6ac73852c8f724367eb59d69"],
+      "tags": ["headphones & audio", "boat", "neckband"],
       "price": 13352,
       "mrp": 23020,
       "discountPercent": 42,
@@ -15143,15 +13106,8 @@
         "name": "Footwear",
         "slug": "footwear"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59d97",
-        "6ac73852c8f724367eb59dc6"
-      ],
-      "tags": [
-        "footwear",
-        "adidas",
-        "formal shoes"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59d97", "6ac73852c8f724367eb59dc6"],
+      "tags": ["footwear", "adidas", "formal shoes"],
       "price": 4664,
       "mrp": 5980,
       "discountPercent": 22,
@@ -15195,15 +13151,8 @@
         "name": "Grooming",
         "slug": "grooming"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59e0c",
-        "6ac73852c8f724367eb59e24"
-      ],
-      "tags": [
-        "grooming",
-        "braun",
-        "trimmer"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59e0c", "6ac73852c8f724367eb59e24"],
+      "tags": ["grooming", "braun", "trimmer"],
       "price": 7320,
       "mrp": 7320,
       "discountPercent": 0,
@@ -15247,15 +13196,8 @@
         "name": "Mobiles",
         "slug": "mobiles"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59d3a",
-        "6ac73852c8f724367eb59d3b"
-      ],
-      "tags": [
-        "mobiles",
-        "oneplus",
-        "smartphone 5g"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59d3a", "6ac73852c8f724367eb59d3b"],
+      "tags": ["mobiles", "oneplus", "smartphone 5g"],
       "price": 11245,
       "mrp": 22490,
       "discountPercent": 50,
@@ -15299,15 +13241,8 @@
         "name": "Kitchen Appliances",
         "slug": "kitchen-appliances"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59ddd",
-        "6ac73852c8f724367eb59dde"
-      ],
-      "tags": [
-        "kitchen appliances",
-        "bajaj",
-        "mixer grinder"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59ddd", "6ac73852c8f724367eb59dde"],
+      "tags": ["kitchen appliances", "bajaj", "mixer grinder"],
       "price": 2153,
       "mrp": 2340,
       "discountPercent": 8,
@@ -15351,15 +13286,8 @@
         "name": "Furniture",
         "slug": "furniture"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59ddd",
-        "6ac73852c8f724367eb59df5"
-      ],
-      "tags": [
-        "furniture",
-        "nilkamal",
-        "office chair"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59ddd", "6ac73852c8f724367eb59df5"],
+      "tags": ["furniture", "nilkamal", "office chair"],
       "price": 11029,
       "mrp": 21210,
       "discountPercent": 48,
@@ -15403,15 +13331,8 @@
         "name": "Grooming",
         "slug": "grooming"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59e0c",
-        "6ac73852c8f724367eb59e24"
-      ],
-      "tags": [
-        "grooming",
-        "philips",
-        "electric shaver"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59e0c", "6ac73852c8f724367eb59e24"],
+      "tags": ["grooming", "philips", "electric shaver"],
       "price": 1436,
       "mrp": 1730,
       "discountPercent": 17,
@@ -15455,15 +13376,8 @@
         "name": "Men's Clothing",
         "slug": "men-s-clothing"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59d97",
-        "6ac73852c8f724367eb59d98"
-      ],
-      "tags": [
-        "men's clothing",
-        "puma",
-        "hoodie"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59d97", "6ac73852c8f724367eb59d98"],
+      "tags": ["men's clothing", "puma", "hoodie"],
       "price": 1853,
       "mrp": 3860,
       "discountPercent": 52,
@@ -15507,15 +13421,8 @@
         "name": "Footwear",
         "slug": "footwear"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59d97",
-        "6ac73852c8f724367eb59dc6"
-      ],
-      "tags": [
-        "footwear",
-        "bata",
-        "slides"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59d97", "6ac73852c8f724367eb59dc6"],
+      "tags": ["footwear", "bata", "slides"],
       "price": 747,
       "mrp": 1010,
       "discountPercent": 26,
@@ -15559,15 +13466,8 @@
         "name": "Laptops",
         "slug": "laptops"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59d3a",
-        "6ac73852c8f724367eb59d52"
-      ],
-      "tags": [
-        "laptops",
-        "dell",
-        "laptop"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59d3a", "6ac73852c8f724367eb59d52"],
+      "tags": ["laptops", "dell", "laptop"],
       "price": 62854,
       "mrp": 142850,
       "discountPercent": 56,
@@ -15611,15 +13511,8 @@
         "name": "Fiction",
         "slug": "fiction"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59e3b",
-        "6ac73852c8f724367eb59e3c"
-      ],
-      "tags": [
-        "fiction",
-        "penguin",
-        "classic edition"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59e3b", "6ac73852c8f724367eb59e3c"],
+      "tags": ["fiction", "penguin", "classic edition"],
       "price": 770,
       "mrp": 770,
       "discountPercent": 0,
@@ -15663,15 +13556,8 @@
         "name": "Laptops",
         "slug": "laptops"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59d3a",
-        "6ac73852c8f724367eb59d52"
-      ],
-      "tags": [
-        "laptops",
-        "asus",
-        "gaming laptop"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59d3a", "6ac73852c8f724367eb59d52"],
+      "tags": ["laptops", "asus", "gaming laptop"],
       "price": 76598,
       "mrp": 96960,
       "discountPercent": 21,
@@ -15715,15 +13601,8 @@
         "name": "Footwear",
         "slug": "footwear"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59d97",
-        "6ac73852c8f724367eb59dc6"
-      ],
-      "tags": [
-        "footwear",
-        "puma",
-        "formal shoes"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59d97", "6ac73852c8f724367eb59dc6"],
+      "tags": ["footwear", "puma", "formal shoes"],
       "price": 12822,
       "mrp": 14090,
       "discountPercent": 9,
@@ -15767,15 +13646,8 @@
         "name": "Smartwatches",
         "slug": "smartwatches"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59d3a",
-        "6ac73852c8f724367eb59d80"
-      ],
-      "tags": [
-        "smartwatches",
-        "fire-boltt",
-        "sports watch"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59d3a", "6ac73852c8f724367eb59d80"],
+      "tags": ["smartwatches", "fire-boltt", "sports watch"],
       "price": 43352,
       "mrp": 49830,
       "discountPercent": 13,
@@ -15819,15 +13691,8 @@
         "name": "Furniture",
         "slug": "furniture"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59ddd",
-        "6ac73852c8f724367eb59df5"
-      ],
-      "tags": [
-        "furniture",
-        "wakefit",
-        "sofa set"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59ddd", "6ac73852c8f724367eb59df5"],
+      "tags": ["furniture", "wakefit", "sofa set"],
       "price": 20293,
       "mrp": 23060,
       "discountPercent": 12,
@@ -15871,15 +13736,8 @@
         "name": "Headphones & Audio",
         "slug": "headphones-audio"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59d3a",
-        "6ac73852c8f724367eb59d69"
-      ],
-      "tags": [
-        "headphones & audio",
-        "boat",
-        "earbuds"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59d3a", "6ac73852c8f724367eb59d69"],
+      "tags": ["headphones & audio", "boat", "earbuds"],
       "price": 13261,
       "mrp": 14900,
       "discountPercent": 11,
@@ -15923,15 +13781,8 @@
         "name": "Gym & Fitness",
         "slug": "gym-fitness"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59e6a",
-        "6ac73852c8f724367eb59e6b"
-      ],
-      "tags": [
-        "gym & fitness",
-        "lifelong",
-        "yoga mat"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59e6a", "6ac73852c8f724367eb59e6b"],
+      "tags": ["gym & fitness", "lifelong", "yoga mat"],
       "price": 35955,
       "mrp": 39950,
       "discountPercent": 10,
@@ -15975,15 +13826,8 @@
         "name": "Smartwatches",
         "slug": "smartwatches"
       },
-      "categoryPath": [
-        "6ac73852c8f724367eb59d3a",
-        "6ac73852c8f724367eb59d80"
-      ],
-      "tags": [
-        "smartwatches",
-        "noise",
-        "smartwatch"
-      ],
+      "categoryPath": ["6ac73852c8f724367eb59d3a", "6ac73852c8f724367eb59d80"],
+      "tags": ["smartwatches", "noise", "smartwatch"],
       "price": 2536,
       "mrp": 3210,
       "discountPercent": 21,

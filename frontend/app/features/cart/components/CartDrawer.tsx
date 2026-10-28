@@ -32,7 +32,7 @@ export function CartDrawer() {
           <SheetDescription>Your cart is empty.</SheetDescription>
         </SheetHeader>
         <div className="flex flex-col gap-2 p-4">
-          <Link to="/scratch/grid" className="underline">
+          <Link to="/products" className="underline">
             Browse products
           </Link>
         </div>

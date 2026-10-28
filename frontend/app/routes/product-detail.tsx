@@ -32,7 +32,7 @@ export default function ProductDetailRoute({ params }: Route.ComponentProps) {
     return (
       <div className="p-4">
         <h1>Product not found</h1>
-        <Link to="/scratch/grid">Back to the grid</Link>
+        <Link to="/products">Back to products</Link>
       </div>
     )
   }
