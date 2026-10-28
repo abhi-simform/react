@@ -4,7 +4,6 @@ import { describe, it } from "vitest"
 
 import { computeTotals } from "@/features/cart/totals"
 import { brandCounts, priceHistogram } from "@/features/catalog/utils"
-import type { Product } from "@/features/catalog/types"
 import { loadProducts } from "@/test/fixtures/productList"
 import { toPaise } from "@/lib/money"
 

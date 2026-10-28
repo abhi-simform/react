@@ -10,7 +10,7 @@ import {
 } from "./format"
 
 // Intl output has non-breaking spaces in some locales: compare on normalised text.
-const flat = (s: string) => s.replace(/ /g, " ")
+const flat = (s: string) => s.replace(/[\u00a0\u202f]/g, " ")
 
 describe("formatCurrency (integer paise -> text)", () => {
   it.each([

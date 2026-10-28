@@ -59,5 +59,11 @@ export default tseslint.config(
   ...features.map((name) => ({
     files: [`app/features/${name}/**/*.{ts,tsx}`],
     rules: internalsRule(name),
-  }))
+  })),
+  // Stage 12: tests may reach into a feature's internals (that is what a unit test of an
+  // internal module IS) and may use `any`-free fixtures with JSON casts.
+  {
+    files: ["app/**/*.test.{ts,tsx}", "app/test/**/*.{ts,tsx}"],
+    rules: { "no-restricted-imports": "off" },
+  }
 )

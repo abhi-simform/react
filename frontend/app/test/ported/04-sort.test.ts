@@ -2,7 +2,6 @@ import assert from "node:assert/strict"
 import { describe, it } from "vitest"
 
 import { compareBy, sortProducts, type SortKey } from "@/features/catalog/utils"
-import type { Product } from "@/features/catalog/types"
 import { loadProducts } from "@/test/fixtures/productList"
 import { deepFreeze } from "@/lib/immutable"
 

@@ -1,5 +1,5 @@
 import { screen, within } from "@testing-library/react"
-import { beforeEach, describe, expect, it } from "vitest"
+import { beforeEach, describe, expect, it, vi } from "vitest"
 
 import { renderWithProviders } from "@/test/render"
 import cart from "@/test/fixtures/api/cart.json"
@@ -40,12 +40,7 @@ describe("CartDrawer (signed in, server cart)", () => {
   })
 
   it("removing a line removes it and offers Undo, which brings it back", async () => {
-    const { user } = await renderWithProviders(<CartDrawer />, {
-      signedIn: true,
-    })
-    useCartUi.getState().setDrawerOpen(true)
-    const dialog = await screen.findByRole("dialog", { name: "Your cart" })
-    await within(dialog).findByRole("link", { name: first.name })
+    const { user, dialog } = await openDrawer()
 
     await user.click(
       within(dialog).getByRole("button", { name: `Remove ${first.name}` })
@@ -64,14 +59,9 @@ describe("CartDrawer (signed in, server cart)", () => {
   })
 
   it("changing the quantity updates the subtotal", async () => {
-    const { user } = await renderWithProviders(<CartDrawer />, {
-      signedIn: true,
-    })
-    useCartUi.getState().setDrawerOpen(true)
-    const dialog = await screen.findByRole("dialog", { name: "Your cart" })
+    const { user, dialog } = await openDrawer()
     const subtotal = async () =>
       (await within(dialog).findByText("Subtotal")).parentElement!.textContent
-    await within(dialog).findByRole("link", { name: first.name })
     const before = await subtotal()
     await user.click(
       within(dialog).getAllByRole("button", {
