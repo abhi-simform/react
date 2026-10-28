@@ -1,6 +1,7 @@
 import { useRef } from "react"
 import { Outlet, useMatches } from "react-router"
 
+import { OfflineBanner } from "@/components/common/OfflineBanner"
 import { RouteErrorView } from "@/components/common/RouteErrorView"
 import { Breadcrumbs } from "@/components/layout/Breadcrumbs"
 import { Footer } from "@/components/layout/Footer"
@@ -30,6 +31,7 @@ export default function ShellLayout() {
       >
         Skip to content
       </a>
+      <OfflineBanner />
       <Header />
       {/* tabIndex -1 lets the skip link and useRouteFocus move keyboard focus here. */}
       <main

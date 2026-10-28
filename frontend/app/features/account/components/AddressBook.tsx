@@ -1,10 +1,12 @@
 import { useState } from "react"
 import { toast } from "sonner"
 
+import { MapPin } from "lucide-react"
+
+import { AsyncView } from "@/components/common/AsyncView"
 import { EmptyState } from "@/components/common/EmptyState"
-import { ErrorState } from "@/components/common/ErrorState"
+import { ListSkeleton } from "@/components/common/Skeletons"
 import { Button } from "@/components/ui/button"
-import { assertNever } from "@/lib/assert"
 
 import { NEW_ROW, useAddresses } from "../hooks/useAddresses"
 import type { Address, AddressInput } from "../schemas"
@@ -30,27 +32,33 @@ export function AddressBook() {
     if (!error) toast.success("Address deleted")
   }
 
-  const state = book.state
-  let content: React.ReactNode
-  switch (state.status) {
-    case "idle":
-    case "loading":
-      content = <p aria-busy="true">Loading addresses...</p>
-      break
-    case "error":
-      content = <ErrorState error={state.error} onRetry={book.reload} />
-      break
-    case "success":
-      content =
-        state.data.length === 0 ? (
-          <EmptyState title="No saved addresses yet">
-            <Button onClick={() => setTarget("new")}>
-              Add your first address
-            </Button>
-          </EmptyState>
-        ) : (
+  return (
+    <div className="flex flex-col gap-3">
+      <div className="flex items-center justify-between">
+        <h1 className="text-xl font-medium">Addresses</h1>
+        <Button onClick={() => setTarget("new")}>Add address</Button>
+      </div>
+      <AsyncView
+        state={{ ...book.state, reload: book.reload }}
+        loading={<ListSkeleton rows={2} label="Loading addresses" />}
+        empty={(addresses) =>
+          addresses.length === 0 && (
+            <EmptyState
+              icon={<MapPin className="size-8" />}
+              title="No saved addresses yet"
+              description="Add one to check out faster."
+              action={
+                <Button onClick={() => setTarget("new")}>
+                  Add your first address
+                </Button>
+              }
+            />
+          )
+        }
+      >
+        {(addresses) => (
           <ul className="grid gap-3 md:grid-cols-2">
-            {state.data.map((a) => (
+            {addresses.map((a) => (
               <li key={a.id}>
                 <AddressCard
                   address={a}
@@ -63,19 +71,8 @@ export function AddressBook() {
               </li>
             ))}
           </ul>
-        )
-      break
-    default:
-      content = assertNever(state)
-  }
-
-  return (
-    <div className="flex flex-col gap-3">
-      <div className="flex items-center justify-between">
-        <h1 className="text-xl font-medium">Addresses</h1>
-        <Button onClick={() => setTarget("new")}>Add address</Button>
-      </div>
-      {content}
+        )}
+      </AsyncView>
       <AddressFormDialog
         target={target}
         pending={
