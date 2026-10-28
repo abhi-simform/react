@@ -9,21 +9,20 @@ import { ListSkeleton } from "@/components/common/Skeletons"
 import { Button } from "@/components/ui/button"
 import {
   AddressFormDialog,
-  createAddress,
+  useCreateAddress,
   addressQueries,
   type Address,
   type AddressInput,
 } from "@/features/account"
-import { useQuery, useQueryClient } from "@tanstack/react-query"
+import { useQuery } from "@tanstack/react-query"
 import { toApiError, type ApiError } from "@/lib/api/errors"
-import { addressKeys } from "@/lib/queryKeys"
 import { toAsyncState } from "@/lib/queryState"
 
 import type { CheckoutInput } from "../schemas"
 
 /** Step 1: pick a saved address or add a new one (the same dialog and API as /account/addresses). */
 export function AddressStep() {
-  const queryClient = useQueryClient()
+  const createMutation = useCreateAddress()
   const list = toAsyncState(useQuery(addressQueries.list()))
   const {
     register,
@@ -44,8 +43,7 @@ export function AddressStep() {
 
   async function saveNew(input: AddressInput): Promise<ApiError | null> {
     try {
-      const created = await createAddress(input)
-      await queryClient.invalidateQueries({ queryKey: addressKeys.all })
+      const created = await createMutation.mutateAsync(input)
       select(created)
       toast.success("Address added")
       return null
@@ -144,7 +142,7 @@ export function AddressStep() {
       </AsyncView>
       <AddressFormDialog
         target={adding ? "new" : undefined}
-        pending={false}
+        pending={createMutation.isPending}
         onClose={() => setAdding(false)}
         onSubmit={(input) => saveNew(input)}
       />

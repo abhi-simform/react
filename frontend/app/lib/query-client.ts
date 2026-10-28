@@ -1,4 +1,5 @@
-import { QueryClient } from "@tanstack/react-query"
+import { MutationCache, QueryClient } from "@tanstack/react-query"
+import { toast } from "sonner"
 
 import { ApiError } from "@/lib/api/errors"
 
@@ -38,6 +39,22 @@ export function shouldRetry(count: number, error: Error): boolean {
   return count < 2
 }
 
+declare module "@tanstack/react-query" {
+  interface Register {
+    /** `silent: true` = this mutation reports its own errors; skip the global toast. */
+    mutationMeta: { silent?: boolean }
+  }
+}
+
+/**
+ * Which failures deserve the ONE generic toast? The unexpected ones: network, timeout, 5xx
+ * (and non-ApiErrors). A 4xx (422 field errors, 409 conflict, 404) is something the caller
+ * knows how to explain, so it handles it itself.
+ */
+export function isUnexpected(error: unknown): boolean {
+  return !(error instanceof ApiError) || error.status === 0 || error.status >= 500
+}
+
 /**
  * ONE QueryClient for the whole app, created at module scope: a client created inside a
  * component body would be rebuilt (and its cache lost) on every render. The app runs in SPA
@@ -45,6 +62,18 @@ export function shouldRetry(count: number, error: Error): boolean {
  * (otherwise one user's cache leaks into the next response).
  */
 export const queryClient = new QueryClient({
+  // The global mutation error handler (9.4): one consistent toast for unexpected failures. A
+  // fixed toast `id` makes Sonner REPLACE it instead of stacking, so a burst of failures (or a
+  // handler that also toasts) still shows exactly one. `meta: { silent: true }` opts out.
+  mutationCache: new MutationCache({
+    onError: (error, _variables, _context, mutation) => {
+      if (mutation.meta?.silent || !isUnexpected(error)) return
+      toast.error("Something went wrong on our side", {
+        id: "mutation-error",
+        description: error instanceof ApiError ? error.message : undefined,
+      })
+    },
+  }),
   defaultOptions: {
     queries: {
       // A middle default; every feature picks its own from `STALE` (see queries.ts files).

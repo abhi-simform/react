@@ -1,8 +1,12 @@
-import { useReducer, useRef } from "react"
+import {
+  useMutation,
+  useMutationState,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query"
+import { useState } from "react"
 
 import { toApiError, type ApiError } from "@/lib/api/errors"
-import { useQuery, useQueryClient } from "@tanstack/react-query"
-
 import { addressKeys } from "@/lib/queryKeys"
 import { toAsyncState } from "@/lib/queryState"
 
@@ -13,153 +17,122 @@ import {
   updateAddress,
 } from "../addresses.api"
 import { addressQueries } from "../queries"
-import type { Address, AddressInput } from "../schemas"
+import type { AddressInput } from "../schemas"
 
 export type AddressOp = "create" | "update" | "remove" | "default"
 /** Pending marker for the "Add address" action (no row exists yet). */
 export const NEW_ROW = "new"
 
-/** Mutation bookkeeping only. The list itself is `useFetch` (6.8); before it was a reducer written by hand (6.3). */
-type State = {
-  /** Which row is busy with which operation (a row can only do one thing at a time). */
-  pending: Record<string, AddressOp>
-  /** Last failure of a row-level action (remove / set default), shown inline on that row. */
-  rowErrors: Record<string, string>
-}
+const mutationKey = (op: AddressOp) => [...addressKeys.all, op] as const
 
-type Action =
-  | { type: "start"; key: string; op: AddressOp }
-  | { type: "finish"; key: string; error?: string }
-
-function reducer(state: State, action: Action): State {
-  switch (action.type) {
-    case "start": {
-      const { [action.key]: _old, ...rowErrors } = state.rowErrors
-      return {
-        pending: { ...state.pending, [action.key]: action.op },
-        rowErrors,
-      }
-    }
-    case "finish": {
-      const { [action.key]: _done, ...pending } = state.pending
-      return {
-        pending,
-        rowErrors: action.error
-          ? { ...state.rowErrors, [action.key]: action.error }
-          : state.rowErrors,
-      }
-    }
-  }
+/**
+ * Create (9.4): used by the address book AND the checkout address step. On success it
+ * invalidates the whole `addressKeys.all` family and RETURNS that promise, so the mutation
+ * stays `isPending` until the list has refetched (the button spinner never ends before the new
+ * row appears). `silent`: the form maps 422/409 itself (via `mutateAsync` + try/catch), and the
+ * caller's toast reports failures, so the global toast would be a duplicate for 5xx.
+ */
+export function useCreateAddress() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationKey: mutationKey("create"),
+    mutationFn: (input: AddressInput) => createAddress(input),
+    meta: { silent: true },
+    onSuccess: () =>
+      queryClient.invalidateQueries({ queryKey: addressKeys.all }),
+  })
 }
 
 /**
- * Hand-rolled CRUD (6.3). Data flow decisions, per operation:
- * - create: REFETCH (`reload` keeps the old list visible while it runs). The server decides
- *   ordering and whether the new row became the default (first address, or `isDefault`).
- * - update: PATCH local state from the response (one row, nothing else changes).
- * - set default: PATCH (flip the flag on every row from the response id).
- * - remove: PATCH using `newDefaultId` from the response (the server auto-promotes one).
- * Trade-off: patching saves a request and keeps scroll/focus, but copies server rules into
- * the client (a rule change silently desyncs it); refetching is always right and costs a
- * round trip. Failures never touch the local list, so there is no rollback to get wrong.
+ * Address CRUD as four mutations (9.4); the list is a query. Every success invalidates
+ * `addressKeys.all` instead of patching the cache by hand: the server decides ordering, the
+ * default flag and the auto-promotion on delete, so the client no longer re-implements those
+ * rules (pain journal C.8). Trade-off: one extra GET per mutation.
+ * Per-row pending state is derived from the mutations themselves (`useMutationState` reads
+ * `variables`), not from a hand-made map; a repeated click on a busy row is ignored.
  */
 export function useAddresses() {
   const queryClient = useQueryClient()
-  const query = useQuery(addressQueries.list())
-  const list = {
-    ...toAsyncState(query),
-    reload: () => void queryClient.invalidateQueries({ queryKey: addressKeys.all }),
-    setData: (update: (previous: Address[]) => Address[]) =>
-      queryClient.setQueryData<Address[]>(addressKeys.list(), (old) =>
-        old ? update(old) : old
-      ),
-  }
-  const [state, dispatch] = useReducer(reducer, { pending: {}, rowErrors: {} })
-  // A ref, not state: two clicks in the same tick both see the OLD state, but they
-  // see the same ref. This is what really prevents a double POST.
-  const busy = useRef(new Set<string>())
+  const list = toAsyncState(useQuery(addressQueries.list()))
+  const invalidate = () =>
+    queryClient.invalidateQueries({ queryKey: addressKeys.all })
+  /** Last failure of a row-level action (remove / set default), shown inline on that row. */
+  const [rowErrors, setRowErrors] = useState<Record<string, string>>({})
 
-  /** Runs one mutation for one row: guard, mark pending, always unmark. Returns the error or null. */
-  async function run<T>(
-    key: string,
-    op: AddressOp,
-    action: () => Promise<T>,
-    onSuccess: (result: T) => void,
-    inlineError: boolean
-  ): Promise<ApiError | null> {
-    if (busy.current.has(key)) return null // already running: ignore the repeat
-    busy.current.add(key)
-    dispatch({ type: "start", key, op })
+  const createMutation = useCreateAddress()
+  const updateMutation = useMutation({
+    mutationKey: mutationKey("update"),
+    mutationFn: ({ id, input }: { id: string; input: Partial<AddressInput> }) =>
+      updateAddress(id, input),
+    meta: { silent: true },
+    onSuccess: invalidate,
+  })
+  const defaultMutation = useMutation({
+    mutationKey: mutationKey("default"),
+    mutationFn: (id: string) => setDefaultAddress(id),
+    onSuccess: invalidate,
+  })
+  const removeMutation = useMutation({
+    mutationKey: mutationKey("remove"),
+    mutationFn: (id: string) => deleteAddress(id),
+    onSuccess: invalidate,
+  })
+
+  // Which row is busy with which operation: read from the in-flight mutations' variables.
+  const busyRows = useMutationState({
+    filters: {
+      status: "pending",
+      predicate: (m) => m.options.mutationKey?.[0] === addressKeys.all[0],
+    },
+    select: (m): [string, AddressOp] => {
+      const op = m.options.mutationKey?.[1] as AddressOp
+      const v = m.state.variables
+      const id =
+        op === "create"
+          ? NEW_ROW
+          : op === "update"
+            ? (v as { id: string }).id
+            : (v as string)
+      return [id, op]
+    },
+  })
+  const pending = Object.fromEntries(busyRows) as Record<string, AddressOp>
+
+  /** Resolves with the error (the form maps field errors from it) or null. */
+  async function settle(work: Promise<unknown>): Promise<ApiError | null> {
     try {
-      onSuccess(await action())
-      dispatch({ type: "finish", key })
+      await work
       return null
     } catch (err) {
-      const error = toApiError(err)
-      dispatch({
-        type: "finish",
-        key,
-        error: inlineError ? error.message : undefined,
-      })
-      return error
-    } finally {
-      busy.current.delete(key)
+      return toApiError(err)
     }
   }
 
-  const create = (input: AddressInput) =>
-    run(
-      NEW_ROW,
-      "create",
-      () => createAddress(input),
-      () => list.reload(),
-      false
-    )
+  const create = (input: AddressInput) => {
+    if (pending[NEW_ROW]) return Promise.resolve(null) // double submit: ignored
+    return settle(createMutation.mutateAsync(input))
+  }
+  const update = (id: string, input: Partial<AddressInput>) => {
+    if (pending[id]) return Promise.resolve(null)
+    return settle(updateMutation.mutateAsync({ id, input }))
+  }
 
-  const update = (id: string, input: Partial<AddressInput>) =>
-    run(
-      id,
-      "update",
-      () => updateAddress(id, input),
-      (saved) =>
-        list.setData((items) =>
-          items.map((a) => (a.id === saved.id ? saved : a))
-        ),
-      false
-    )
-
+  async function rowAction(id: string, work: () => Promise<unknown>) {
+    if (pending[id]) return null
+    setRowErrors(({ [id]: _old, ...rest }) => rest)
+    const error = await settle(work())
+    if (error) setRowErrors((e) => ({ ...e, [id]: error.message }))
+    return error
+  }
   const setDefault = (id: string) =>
-    run(
-      id,
-      "default",
-      () => setDefaultAddress(id),
-      (saved) =>
-        list.setData((items) =>
-          items.map((a) =>
-            a.id === saved.id ? saved : { ...a, isDefault: false }
-          )
-        ),
-      true
-    )
-
+    rowAction(id, () => defaultMutation.mutateAsync(id))
   const remove = (id: string) =>
-    run(
-      id,
-      "remove",
-      () => deleteAddress(id),
-      ({ deletedId, newDefaultId }) =>
-        list.setData((items) =>
-          items
-            .filter((a) => a.id !== deletedId)
-            .map((a) => (a.id === newDefaultId ? { ...a, isDefault: true } : a))
-        ),
-      true
-    )
+    rowAction(id, () => removeMutation.mutateAsync(id))
 
   return {
     state: list,
-    pending: state.pending,
-    rowErrors: state.rowErrors,
+    pending,
+    rowErrors,
     create,
     update,
     remove,
