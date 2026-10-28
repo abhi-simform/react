@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test"
+import { expect, test } from "./support/fixtures"
 
 /**
  * 12.9: WCAG contrast of the theme tokens, light and dark. The browser resolves each `oklch()`

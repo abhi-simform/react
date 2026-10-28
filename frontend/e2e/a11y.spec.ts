@@ -141,19 +141,39 @@ test.describe("keyboard, focus, reflow, motion", () => {
       const missing: string[] = []
       for (let i = 0; i < 40; i++) {
         await page.keyboard.press("Tab")
-        const stop = await page.evaluate(() => {
+        const stop = await page.evaluate(async () => {
           const el = document.activeElement as HTMLElement | null
           if (!el || el === document.body) return null
-          const s = getComputedStyle(el)
-          const outline =
-            s.outlineStyle !== "none" &&
-            parseFloat(s.outlineWidth) > 0 &&
-            s.outlineColor !== "rgba(0, 0, 0, 0)"
-          const shadow = s.boxShadow !== "none"
-          const underline = s.textDecorationLine.includes("underline")
+          // let focus transitions (ring fade-in) finish before reading the styles
+          await Promise.all(
+            document
+              .getAnimations()
+              .map((a) => a.finished.catch(() => undefined))
+          )
+          const shows = (node: Element) => {
+            const s = getComputedStyle(node)
+            const outline =
+              s.outlineStyle !== "none" &&
+              parseFloat(s.outlineWidth) > 0 &&
+              s.outlineColor !== "rgba(0, 0, 0, 0)"
+            return (
+              outline ||
+              s.boxShadow !== "none" ||
+              s.textDecorationLine.includes("underline")
+            )
+          }
+          // the control itself, or a container that shows `focus-within` (a card whose stretched
+          // title link carries the ring on the card)
+          let visible = shows(el)
+          for (
+            let node = el.parentElement;
+            !visible && node && node !== document.body;
+            node = node.parentElement
+          )
+            visible = node.matches(":focus-within") && shows(node)
           return {
             name: `${el.tagName.toLowerCase()} "${(el.getAttribute("aria-label") ?? el.textContent ?? "").trim().slice(0, 30)}"`,
-            visible: outline || shadow || underline,
+            visible,
           }
         })
         // the Query devtools toggle exists only under `vite dev`: not part of the product

@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test"
+import { expect, test } from "./support/fixtures"
 
 test.describe("guest browsing", () => {
   test("search, filter by brand and sort", async ({ page, request }) => {

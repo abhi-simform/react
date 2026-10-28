@@ -8,7 +8,7 @@
     "start": "react-router-serve ./build/server/index.js",
     "typecheck": "react-router typegen && tsc",
     "format": "prettier --write \"**/*.{ts,tsx}\"",
-    "lint": "eslint app --max-warnings=0",
+    "lint": "eslint app e2e --max-warnings=0",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",

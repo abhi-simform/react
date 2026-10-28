@@ -78,5 +78,11 @@ export default tseslint.config(
   {
     files: ["app/**/*.test.{ts,tsx}", "app/test/**/*.{ts,tsx}"],
     rules: { "no-restricted-imports": "off" },
+  },
+  // Playwright fixtures call a function named `use`: not a React hook.
+  {
+    files: ["e2e/**/*.ts"],
+    languageOptions: { globals: globals.node },
+    rules: { "react-hooks/rules-of-hooks": "off" },
   }
 )

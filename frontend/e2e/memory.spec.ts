@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test"
+import { expect, test } from "./support/fixtures"
 
 /**
  * 12.7 leak drill, automated: "heap snapshots before/after navigating 20 times". Chrome's
