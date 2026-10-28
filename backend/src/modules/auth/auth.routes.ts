@@ -32,3 +32,8 @@ authRoutes.delete(
   c.revokeSession
 )
 authRoutes.post("/logout-all", authenticate, c.logoutAll)
+
+// Google sign-in (B10): browser navigations, not fetch calls. See auth.controller.ts.
+authRoutes.get("/google", c.googleStart)
+authRoutes.get("/google/mock", c.googleMockConsent)
+authRoutes.get("/google/callback", c.googleCallback)
