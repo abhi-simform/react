@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react"
 
 import { toApiError } from "@/lib/api/errors"
+import { isAbortError } from "@/lib/async"
 import type { Paginated } from "@/lib/api/envelope"
 import { toQueryString } from "@/lib/api/query"
 import type { AsyncState } from "@/lib/asyncState"
@@ -34,13 +35,18 @@ export function useProducts(
   const requestKey = `${queryString}#${reloadKey}`
 
   useEffect(() => {
-    getProductsByQuery(queryString)
+    // Cleanup aborts the request of the previous page/retry, so a slow older
+    // response can never overwrite a newer one (4.3).
+    const controller = new AbortController()
+    getProductsByQuery(queryString, controller.signal)
       .then((data) => setSettled({ key: requestKey, status: "success", data }))
       .catch((err: unknown) => {
+        if (isAbortError(err)) return // superseded or unmounted: not a failure
         const error = toApiError(err)
         console.error("useProducts failed:", error.code)
         setSettled({ key: requestKey, status: "error", error })
       })
+    return () => controller.abort()
   }, [queryString, requestKey])
 
   const reload = () => setReloadKey((k) => k + 1)
