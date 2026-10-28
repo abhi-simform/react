@@ -106,3 +106,45 @@ The dragged value now re-renders the slider and its label only; INP of the point
 - React Router 8 already wraps its router state updates in `React.startTransition` (`useTransitions` is on by default), and its docs warn against wrapping navigations in your own: so URL-driven filter changes were NOT wrapped in `startTransition`; the transition is used on purely local state.
 - The earlier Stage 4 / 6 lab `app/routes/dev/memo.tsx` stays as the "toy" version; this is the real-page version.
 - Honest limit: I did not drive React DevTools' Profiler UI ("why did this render" flamegraphs). `<Profiler>` gives commit counts and times, which is what the table needs; the explanations (identity of view models, `.map` creating elements) were checked by changing one thing at a time (rows B to E).
+
+## 13.3 Bundle size and code splitting
+
+Tools: `ANALYZE=1 npm run build` (rollup-plugin-visualizer: `build/stats.html` treemap + `build/stats.json`), `npm run analyze` (per-package table + 50 kB check),
+`npm run perf:budget` / `scripts/perf/js-budget.mjs` (compressed JS bytes a page really downloads, from the browser, with a budget).
+
+### Initial JS (kB gzip on the wire, everything requested while the page loads; files in parentheses)
+
+| Page | Baseline (13.1) | After the Compiler (13.2) | After 13.3 lazy loading | Delta vs 13.2 |
+| --- | --- | --- | --- | --- |
+| `/` | 321 (44) | 350 (45) | **320** (47) | -30 kB (-8.6%) |
+| `/products` | 316 (41) | 343 (42) | **313** (44) | -30 kB |
+| PDP | 344 (47) | 382 (48) | **343** (51) | -39 kB |
+| `/cart` | 315 (41) | 343 (42) | **313** (44) | -30 kB |
+
+Honest reading: **React Compiler added ~29 kB gzip (+9%) of JS** (memoization cache code in every component), and the lazy loading below gave exactly that back. Net against
+the pre-Stage-13 baseline: about zero (-1 kB on `/`). The Compiler's runtime win (13.2) is paid for in bytes; lazy loading is what keeps it free. Numbers are rounded; the baseline was rebuilt
+from commit `fda6131` in a throwaway worktree to get a like-for-like figure (Lighthouse's own "JS" column counts headers too and reads ~15 kB higher).
+
+What was split off the first load:
+
+- `socket.io-client` + engine.io (~20 kB gzip): `lib/socket.ts` now hands out a facade; the real client is `import()`ed the first time someone connects (after sign-in). A guest never downloads it. Listeners registered before the load are remembered and attached to the real socket afterwards; a `wanted` flag stops a connect that lost a race with sign-out.
+- The cart drawer's contents (`CartSheet`: line rows, coupon form, react-hook-form ~15 kB gzip): loaded on first open, **prefetched on hover/focus of the Cart button**.
+- The notification bell popover (base-ui popover + rows + mutations): `NotificationBell` is a tiny wrapper with a same-size placeholder button as the Suspense fallback (no header shift); the menu loads after sign-in.
+- PDP: the photo lightbox dialog (on first click, prefetched on hover), the review editor `ReviewDialog` (on first open), `QaSection` (two react-hook-form forms; fallback is a `min-h-24` status line).
+- Route prefetch: `prefetch="intent"` on the header links and the product-card title link (RR injects `<link rel="modulepreload">` on hover/focus).
+- Already fine, verified: `lucide-react` icons are imported by name (the whole package contributes 17 kB raw / ~7 kB gzip), the compare drawer was already its own chunk, routes are split by the framework.
+- `lazyNamed` (lib) is the one-line glue for named exports.
+- Fallbacks are overlays or reserve their height, so no layout shift: the lightbox/cart sheet/review dialog are portalled overlays; the Q&A panel and the bell keep their space.
+
+### What I tried and did NOT keep (so you do not repeat it)
+
+- `"sideEffects": ["**/*.css"]` in `package.json` lets the bundler drop unused barrel re-exports (the `auth` chunk was carrying every form, the `catalog` chunk carried the listing page and the compare table on `/`). JS fell to **292 kB**, but Rolldown then emitted ~106 files per page, and Lighthouse's simulated slow 4G got worse (LCP +~1 s on a single run; the noise on this metric is about +-0.5 s, so the signal is weak but the direction was bad). Two attempts to merge the pieces back with `advancedChunks` (vendor groups; a `minShareCount` shared group) made it 323 and 336 kB. **Not adopted.** The proper fix is to stop importing from the big barrels where only one function is needed (the shell imports `categoryQueries` from the catalog barrel, which drags the whole catalog feature into the first load). That is a refactor, not a config switch: noted as the next step.
+- Budget (regression guard, kB gzip): `/` 335, listing 330, PDP 360, cart 330 (`npm run perf:budget`).
+
+### Biggest dependencies in the client bundle (`npm run analyze`; numbers are an ESTIMATE: per-module gzip scaled to the real total)
+
+```
+```
+
+- **No dependency over 50 kB gzip without a justification**: `react-dom` (~60 kB measured on the wire in `entry.client`; the estimator over-counts) and `@base-ui/react` (74 kB estimated across the whole app, but it is spread over ~10 components and per-route chunks; no page downloads it all) are recorded in `scripts/perf/deps.mjs` with the reason, and `npm run analyze` fails for any new package over 50 kB that is not listed.
+- Other notes: `zod` (~27 kB) is on the critical path because every API response is validated (Stage 9 decision; `zod/mini` would save ~half but means rewriting every schema); `cn` (shadcn's class merger, ~9 kB) ships its tables/engine; `sonner` ~8 kB.

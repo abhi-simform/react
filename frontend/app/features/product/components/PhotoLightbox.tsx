@@ -1,7 +1,10 @@
-import { useState } from "react"
+import { Suspense, useState } from "react"
 
-import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog"
+import { lazyNamed } from "@/lib/lazyNamed"
 import { safeImageSrc } from "@/lib/safeUrl"
+
+const loadDialog = () => import("./PhotoDialog")
+const PhotoDialog = lazyNamed(loadDialog, "PhotoDialog")
 
 /** Thumbnails that open a larger view in a dialog (focus trap, Escape and the backdrop close it). */
 export function PhotoLightbox({
@@ -20,6 +23,7 @@ export function PhotoLightbox({
           <li key={url}>
             <button
               type="button"
+              onPointerEnter={() => void loadDialog()}
               onClick={() => setOpen(url)}
               aria-label={`Open photo ${i + 1} of ${photos.length}`}
             >
@@ -33,18 +37,12 @@ export function PhotoLightbox({
           </li>
         ))}
       </ul>
-      <Dialog open={open !== null} onOpenChange={(o) => !o && setOpen(null)}>
-        <DialogContent className="sm:max-w-xl">
-          <DialogTitle className="sr-only">{label} photo</DialogTitle>
-          {open && (
-            <img
-              src={safeImageSrc(open) ?? undefined}
-              alt={label}
-              className="max-h-[70vh] w-full object-contain"
-            />
-          )}
-        </DialogContent>
-      </Dialog>
+      {open !== null && (
+        // Loaded on first click (the dialog + focus trap + animation are not needed to LOOK at thumbnails).
+        <Suspense fallback={null}>
+          <PhotoDialog url={open} label={label} onClose={() => setOpen(null)} />
+        </Suspense>
+      )}
     </>
   )
 }

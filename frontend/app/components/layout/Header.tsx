@@ -40,13 +40,13 @@ export function Header() {
         aria-label="Primary"
         className="flex flex-wrap items-center gap-4 text-sm"
       >
-        <NavLink to={paths.products()} className={navClass}>
+        <NavLink to={paths.products()} className={navClass} prefetch="intent">
           Products
         </NavLink>
-        <NavLink to={paths.deals()} className={navClass}>
+        <NavLink to={paths.deals()} className={navClass} prefetch="intent">
           Deals
         </NavLink>
-        <NavLink to={paths.compare()} className={navClass}>
+        <NavLink to={paths.compare()} className={navClass} prefetch="intent">
           Compare
         </NavLink>
         {import.meta.env.DEV && (

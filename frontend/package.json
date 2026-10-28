@@ -15,6 +15,8 @@
     "e2e": "playwright test",
     "e2e:ui": "playwright test --ui",
     "e2e:report": "playwright show-report",
+    "analyze": "ANALYZE=1 react-router build && node scripts/perf/deps.mjs --check",
+    "perf:budget": "node scripts/perf/js-budget.mjs --check",
     "format:check": "prettier --check \"**/*.{ts,tsx}\"",
     "check": "npm run format:check && npm run lint && npm run typecheck && npm test && npm run build",
     "prepare": "node scripts/install-hooks.mjs || true"
@@ -72,6 +74,7 @@
     "msw": "^2.15.0",
     "prettier": "^3.9.9",
     "prettier-plugin-tailwindcss": "^0.8.1",
+    "rollup-plugin-visualizer": "^7.1.1",
     "tailwindcss": "^4",
     "typescript": "^6.0.2",
     "typescript-eslint": "^8.72.1",

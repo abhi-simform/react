@@ -84,6 +84,7 @@ function ProductCardBase({
         <h3 className="line-clamp-2 text-sm font-medium">
           <Link
             to={paths.product(product.slug)}
+            prefetch="intent"
             className="after:absolute after:inset-0 focus:outline-none"
           >
             {product.name}

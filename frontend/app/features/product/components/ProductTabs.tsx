@@ -1,11 +1,16 @@
 import { SectionBoundary } from "@/components/common/SectionBoundary"
+import { Suspense } from "react"
 import { useSearchParams } from "react-router"
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import type { ProductDetailVM } from "@/features/catalog"
 
-import { QaSection } from "./QaSection"
+import { lazyNamed } from "@/lib/lazyNamed"
 import { ReviewsSection } from "./ReviewsSection"
+
+// 13.3: questions and answers (two react-hook-form forms) are their own chunk, fetched after the buy
+// box and gallery instead of inside the product page's first download.
+const QaSection = lazyNamed(() => import("./QaSection"), "QaSection")
 
 const TABS = ["description", "specs", "reviews", "qa"] as const
 type TabName = (typeof TABS)[number]
@@ -75,7 +80,15 @@ export function ProductTabs({ product }: { product: ProductDetailVM }) {
       </TabsContent>
       <TabsContent value="qa">
         <SectionBoundary label="questions and answers" resetKeys={[product.id]}>
-          <QaSection productId={product.id} />
+          <Suspense
+            fallback={
+              <p role="status" className="min-h-24 text-sm">
+                Loading questions...
+              </p>
+            }
+          >
+            <QaSection productId={product.id} />
+          </Suspense>
         </SectionBoundary>
       </TabsContent>
     </Tabs>

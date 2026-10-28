@@ -963,3 +963,12 @@ Backend B1 was built first (separate `backend B1:` commits): `GET /categories` n
 - The slider fix is not a render fix but a data-flow fix: keep the dragged value in local state, write the URL on release: 43 requests -> 2.
 - React Compiler adopted (Vite 8: `@rolldown/plugin-babel` + `reactCompilerPreset`). It made `memo(ProductGrid)` and `useMemo(shown)` redundant; it did NOT make `memo(ProductCard)` + `useMemo(cards)` redundant (a parent's `.map` still creates fresh child elements). Removing them made the grid 5x slower, so they stay, with a comment.
 - React Router 8 wraps its state updates in `startTransition` itself; do not wrap navigations again.
+
+## 13.3 Bundle size and code splitting
+
+- Measure from the browser, not from the build log: the build prints per-chunk sizes, but what matters is the bytes of everything a PAGE requests. `scripts/perf/js-budget.mjs` sums `responseBodySize` of scripts; a budget there fails `npm run perf:budget`.
+- The React Compiler costs bytes (+29 kB gzip, +9%): its payoff is rendering speed, so look at both columns. Lazy loading (socket.io, cart sheet, bell popover, lightbox, review editor, Q&A forms) paid it back.
+- `React.lazy` needs default exports; `lazyNamed(() => import("./X"), "X")` adapts our named ones. A lazy component needs a Suspense fallback that either reserves its space or is an overlay, otherwise the page shifts.
+- Prefetch on intent (`onPointerEnter`/`onFocus` calling the same `import()`; `<Link prefetch="intent">` for routes) is what makes lazy loading free at the moment of use.
+- `sideEffects: false` shrinks the bundle by dropping unused barrel exports but explodes the chunk count (106 files); on a slow simulated network that hurt more than the bytes helped. Fewer, bigger chunks vs fewer bytes is a real trade-off: measure on a throttled profile.
+- A facade for a lazily loaded client (`getSocket()` returns a stable object that queues `on()` calls until the real socket exists) lets every call site stay synchronous.

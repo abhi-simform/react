@@ -1,4 +1,4 @@
-import { io, type Socket } from "socket.io-client"
+import type { Socket } from "socket.io-client"
 
 import { getApiConfig } from "@/lib/api/client"
 import { env } from "@/lib/env"
@@ -22,7 +22,6 @@ export type SocketStatus =
   | "connected"
   | "disconnected" // lost; Socket.io retries with backoff by itself
 
-let socket: Socket | null = null
 let status: SocketStatus = "idle"
 const listeners = new Set<() => void>()
 
@@ -38,23 +37,80 @@ export function subscribeSocketStatus(listener: () => void) {
   return () => listeners.delete(listener)
 }
 
-export function getSocket(): Socket {
-  if (socket) return socket
+type Listener = (...args: never[]) => void
+/** The slice of the Socket.io API the app uses (see `getSocket`). */
+export type SocketHandle = {
+  on(event: string, listener: Listener): void
+  off(event: string, listener: Listener): void
+  connect(): void
+  disconnect(): void
+  readonly active: boolean
+}
+
+// 13.3: `socket.io-client` (+ engine.io, ~20 kB gzip) is loaded with a dynamic `import()` the first
+// time someone CONNECTS, i.e. after sign-in. A guest never downloads it. Everything that wants the
+// socket before that (a bell subscribing to events, the connection hook registering handlers) talks
+// to the facade below, which remembers the listeners and attaches them when the real socket exists.
+let real: Socket | null = null
+let loading: Promise<Socket> | null = null
+let wanted = false
+const registry = new Set<readonly [string, Listener]>()
+
+function createSocket(io: typeof import("socket.io-client").io): Socket {
   const origin = new URL(env.VITE_API_URL).origin
-  socket = io(origin, {
+  const created = io(origin, {
     autoConnect: false,
     withCredentials: true,
     auth: (cb) => cb({ token: getApiConfig().getAccessToken?.() ?? "" }),
   })
-  socket.on("connect", () => setStatus("connected"))
-  socket.on("disconnect", () => setStatus("disconnected"))
+  created.on("connect", () => setStatus("connected"))
+  created.on("disconnect", () => setStatus("disconnected"))
   // A refused handshake (expired token) lands here; the feature decides what to do about it.
-  socket.on("connect_error", () => setStatus("disconnected"))
+  created.on("connect_error", () => setStatus("disconnected"))
+  for (const [event, listener] of registry)
+    created.on(event, listener as (...args: unknown[]) => void)
   // Dev only, like `window.queryClient`: `__socket.connected`, `__socket.disconnect()` ...
   if (import.meta.env.DEV && typeof window !== "undefined")
-    (window as unknown as { __socket: Socket }).__socket = socket
-  return socket
+    (window as unknown as { __socket: Socket }).__socket = created
+  return created
 }
+
+function loadSocket(): Promise<Socket> {
+  loading ??= import("socket.io-client").then(
+    ({ io }) => (real = createSocket(io))
+  )
+  return loading
+}
+
+const facade: SocketHandle = {
+  on(event, listener) {
+    registry.add([event, listener])
+    real?.on(event, listener as (...args: unknown[]) => void)
+  },
+  off(event, listener) {
+    for (const entry of registry)
+      if (entry[0] === event && entry[1] === listener) registry.delete(entry)
+    real?.off(event, listener as (...args: unknown[]) => void)
+  },
+  connect() {
+    wanted = true
+    // `wanted` can flip while the chunk downloads (sign-out, StrictMode's cleanup): honour the LATEST wish.
+    void loadSocket().then((s) => {
+      if (wanted) s.connect()
+    })
+  },
+  disconnect() {
+    wanted = false
+    real?.disconnect()
+  },
+  get active() {
+    // Loading counts as "on its way": a second connectSocket() must not start a second attempt.
+    return real ? real.active : loading !== null
+  },
+}
+
+/** THE socket handle: always the same object; the real Socket.io client behind it is created lazily. */
+export const getSocket = (): SocketHandle => facade
 
 // ---- connecting, StrictMode-safe ---------------------------------------------------------------
 
@@ -88,7 +144,8 @@ export function releaseSocket() {
   clearTimeout(releaseTimer)
   releaseTimer = setTimeout(() => {
     connectedAs = null
-    socket?.disconnect()
+    wanted = false
+    real?.disconnect()
     setStatus("idle")
   }, 0)
 }

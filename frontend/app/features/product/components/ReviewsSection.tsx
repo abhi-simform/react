@@ -1,5 +1,5 @@
 import { Loader2 } from "lucide-react"
-import { useEffect, useRef, useState } from "react"
+import { Suspense, useEffect, useRef, useState } from "react"
 import { useLocation, useNavigate, useSearchParams } from "react-router"
 
 import { ErrorState } from "@/components/common/ErrorState"
@@ -28,7 +28,11 @@ import type { ReviewFilter, ReviewSort } from "../reviews.api"
 import type { Review } from "../reviews.schemas"
 import { RatingHistogram } from "./RatingHistogram"
 import { ReviewCard } from "./ReviewCard"
-import { ReviewDialog } from "./ReviewDialog"
+import { lazyNamed } from "@/lib/lazyNamed"
+
+// 13.3: the review editor (react-hook-form, zod resolver, photo upload) loads when someone starts writing.
+const loadReviewDialog = () => import("./ReviewDialog")
+const ReviewDialog = lazyNamed(loadReviewDialog, "ReviewDialog")
 
 /**
  * The reviews tab (11.6): API-driven summary + histogram (click a bar to filter), sort, photo
@@ -59,6 +63,9 @@ export function ReviewsSection({
   const [dialog, setDialog] = useState<{ open: boolean; existing?: Review }>({
     open: false,
   })
+  // Mount the (lazy) editor from the first time it is opened, and keep it mounted so it can animate out.
+  const [dialogWanted, setDialogWanted] = useState(false)
+  if (dialog.open && !dialogWanted) setDialogWanted(true)
 
   const toLogin = () =>
     void navigate(paths.login(location.pathname + location.search))
@@ -241,13 +248,17 @@ export function ReviewsSection({
         )}
       </div>
 
-      <ReviewDialog
-        productId={product.id}
-        slug={product.slug}
-        existing={dialog.existing}
-        open={dialog.open}
-        onOpenChange={(open) => setDialog((d) => ({ ...d, open }))}
-      />
+      {dialogWanted && (
+        <Suspense fallback={null}>
+          <ReviewDialog
+            productId={product.id}
+            slug={product.slug}
+            existing={dialog.existing}
+            open={dialog.open}
+            onOpenChange={(open) => setDialog((d) => ({ ...d, open }))}
+          />
+        </Suspense>
+      )}
     </div>
   )
 }
