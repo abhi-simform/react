@@ -64,7 +64,12 @@ export function ProductCard({
           className={cn("size-full object-cover", outOfStock && "opacity-40")}
         />
         <div className="absolute top-1 left-1 flex flex-col items-start gap-1">
-          {children}
+          {children ??
+            (product.deal && (
+              <ProductCardBadge>
+                {product.deal.badge ?? "Deal"}
+              </ProductCardBadge>
+            ))}
         </div>
         <WishlistHeart
           productId={product.id}

@@ -21,6 +21,19 @@ const categoryRefSchema = z.object({
   slug: z.string(),
 })
 
+/** B4: the live deal on a product (list rows and detail); `null` when none. Whole rupees. */
+export const dealInfoSchema = z.object({
+  id: z.string(),
+  dealPrice: z.number(),
+  startsAt: z.string(),
+  endsAt: z.string(),
+  stockLimit: z.number().int(),
+  claimed: z.number().int(),
+  remaining: z.number().int(),
+  badge: z.string().nullable(),
+})
+export type DealInfo = z.infer<typeof dealInfoSchema>
+
 /** A product as returned in LISTS (`GET /products`). Unknown keys (like `__v`) are stripped. */
 export const productSchema = z.object({
   _id: z.string(),
@@ -42,6 +55,8 @@ export const productSchema = z.object({
   isFeatured: z.boolean(),
   status: productStatusSchema,
   seller: z.string(),
+  /** Optional: wishlist/recently-viewed rows may not carry it. */
+  deal: dealInfoSchema.nullish(),
   createdAt: z.iso.datetime(),
   updatedAt: z.iso.datetime(),
 })

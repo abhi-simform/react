@@ -9,6 +9,7 @@ import type { ProductDetailVM } from "@/features/catalog"
 import { toPriceVM } from "@/lib/format"
 import { useAddToCart } from "@/features/cart"
 import { CompareToggle } from "@/features/compare"
+import { DealEndsNote } from "@/features/deals"
 import { DeliveryCheck } from "@/features/delivery"
 import { WishlistHeart } from "@/features/wishlist"
 import type { Variant } from "@/types/domain"
@@ -37,10 +38,14 @@ export function ProductDetailView({
   const addToCart = useAddToCart()
   const variant = findVariant(variants, selection)
   // A selected variant overrides the price: the same mapper builds the tag.
-  const price = variant?.price ?? product.amount
-  const priceVM = variant
-    ? toPriceVM(variant.price, variant.mrp)
-    : product.price
+  // A live deal (B4) beats a variant's price: the server charges the deal price per product.
+  const price = product.deal
+    ? product.amount
+    : (variant?.price ?? product.amount)
+  const priceVM =
+    variant && !product.deal
+      ? toPriceVM(variant.price, variant.mrp)
+      : product.price
   const previousPrice = usePrevious(price)
 
   // Viewing this product syncs an external system (localStorage): an effect.
@@ -67,6 +72,7 @@ export function ProductDetailView({
           <p className="text-sm text-neutral-500">No ratings yet</p>
         )}
         <Price price={priceVM} className="text-lg" />
+        {product.deal && <DealEndsNote endsAt={product.deal.endsAt} />}
         {previousPrice !== undefined && previousPrice !== price && (
           <p className="text-sm text-neutral-600">
             Price changed from {toPriceVM(previousPrice, undefined).current}

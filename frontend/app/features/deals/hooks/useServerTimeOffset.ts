@@ -1,8 +1,18 @@
+import { useQuery } from "@tanstack/react-query"
+
+import { dealQueries } from "../queries"
+
 /**
- * Stub (4.6): returns 0, "client clock is right". Stage 11 (B4) replaces it
- * with `serverTime - clientTime` measured once from the time endpoint (and
- * corrected for the request's round trip).
+ * `serverTime - clientTime` in ms (11.2). Measured from `GET /time` ONCE (`staleTime: Infinity`)
+ * and again whenever the tab regains focus (`refetchOnWindowFocus: "always"` ignores staleness):
+ * a laptop that slept, or a user who changed the OS clock, is corrected without a reload.
+ * Until the first answer it is 0 (the client clock), so a countdown never waits for the network.
+ * Feed it to `useCountdown(endsAt, { serverOffsetMs })`.
  */
 export function useServerTimeOffset(): number {
-  return 0
+  const { data } = useQuery({
+    ...dealQueries.serverOffset(),
+    refetchOnWindowFocus: "always",
+  })
+  return data ?? 0
 }

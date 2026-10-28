@@ -1,36 +1,32 @@
-import { STALE } from "@/lib/query-client"
-import { useState } from "react"
+import { useQuery } from "@tanstack/react-query"
 
 import { EmptyState } from "@/components/common/EmptyState"
 import { ErrorState } from "@/components/common/ErrorState"
-import {
-  ProductCard,
-  ProductCardSkeleton,
-  toProductCardVM,
-  useProducts,
-} from "@/features/catalog"
-import type { Product } from "@/features/catalog"
+import { ProductCardSkeleton } from "@/features/catalog"
 import { useCountdown } from "@/hooks/useCountdown"
+import { toApiError } from "@/lib/api/errors"
 import { formatCountdown } from "@/lib/duration"
 
 import { useServerTimeOffset } from "../hooks/useServerTimeOffset"
+import { dealQueries } from "../queries"
+import { DealCard } from "./DealCard"
 
-const DEFAULT_DURATION_MS = 90 * 60_000
-const DEAL_QUERY = { sort: "discount", limit: 4 } as const
-
-/** Fake "claimed" share, stable per product: derived from data we have. */
-const claimedPercent = (p: Product) => 30 + (p.soldCount % 65)
+const STRIP_QUERY = { status: "active", limit: 4 } as const
 
 /**
- * Home strip with the four deepest discounts and ONE countdown for all of
- * them. The end time is fake (now + 90 min, fixed at mount) until B4 provides
- * real deals; `endsAt` can be overridden to test the expired state.
+ * Home strip, backed by `GET /deals` (11.2; it was a fixed "now + 90 min" with fake claims before
+ * B4). The header counts down to the soonest-ending deal; every card has its own end time,
+ * "claimed" bar and Ended state (`DealCard`). `endsAt` overrides the header's target: the
+ * /dev/countdown lab uses it to watch the expired state without waiting.
  */
 export function FlashSaleStrip({ endsAt }: { endsAt?: number }) {
-  const [defaultEnd] = useState(() => Date.now() + DEFAULT_DURATION_MS)
+  const q = useQuery(dealQueries.list(STRIP_QUERY))
   const serverOffsetMs = useServerTimeOffset()
-  const countdown = useCountdown(endsAt ?? defaultEnd, { serverOffsetMs })
-  const state = useProducts(DEAL_QUERY, { staleTime: STALE.deals })
+  const soonest = q.data
+    ?.map((d) => new Date(d.endsAt).getTime())
+    .sort((a, b) => a - b)[0]
+  const countdown = useCountdown(endsAt ?? soonest ?? 0, { serverOffsetMs })
+  const hasDeals = (q.data?.length ?? 0) > 0
 
   return (
     <section aria-labelledby="flash-sale-title" className="rounded border p-3">
@@ -38,23 +34,22 @@ export function FlashSaleStrip({ endsAt }: { endsAt?: number }) {
         <h2 id="flash-sale-title" className="font-medium">
           Flash sale
         </h2>
-        <p>
-          {countdown.isExpired ? (
-            <strong>Deal ended</strong>
-          ) : (
-            <>
-              Ends in{" "}
-              <time role="timer" className="font-mono font-semibold">
-                {formatCountdown(countdown)}
-              </time>
-            </>
-          )}
-        </p>
+        {hasDeals && (
+          <p>
+            {countdown.isExpired ? (
+              <strong>Deal ended</strong>
+            ) : (
+              <>
+                Ends in{" "}
+                <time role="timer" className="font-mono font-semibold">
+                  {formatCountdown(countdown)}
+                </time>
+              </>
+            )}
+          </p>
+        )}
       </div>
-      {state.status === "error" && (
-        <ErrorState error={state.error} onRetry={state.reload} />
-      )}
-      {(state.status === "loading" || state.status === "idle") && (
+      {q.isPending ? (
         <ul className="grid grid-cols-2 gap-3 md:grid-cols-4">
           {Array.from({ length: 4 }, (_, i) => (
             <li key={i}>
@@ -62,34 +57,22 @@ export function FlashSaleStrip({ endsAt }: { endsAt?: number }) {
             </li>
           ))}
         </ul>
+      ) : !q.data ? (
+        <ErrorState
+          error={toApiError(q.error)}
+          onRetry={() => void q.refetch()}
+        />
+      ) : !hasDeals ? (
+        <EmptyState title="No deals right now" />
+      ) : (
+        <ul className="grid grid-cols-2 gap-3 md:grid-cols-4">
+          {q.data.map((deal) => (
+            <li key={deal.id}>
+              <DealCard deal={deal} />
+            </li>
+          ))}
+        </ul>
       )}
-      {state.status === "success" &&
-        (state.data.items.length === 0 ? (
-          <EmptyState title="No deals right now" />
-        ) : (
-          <ul className="grid grid-cols-2 gap-3 md:grid-cols-4">
-            {state.data.items.map((product) => (
-              <li key={product._id} className="flex flex-col gap-1">
-                <ProductCard
-                  product={toProductCardVM(product)}
-                  addToCartDisabled={countdown.isExpired}
-                >
-                  <ProductCard.Badge>
-                    {countdown.isExpired ? "Deal ended" : "Lightning deal"}
-                  </ProductCard.Badge>
-                </ProductCard>
-                <label className="text-xs">
-                  Claimed {claimedPercent(product)}%
-                  <progress
-                    className="block w-full"
-                    max={100}
-                    value={claimedPercent(product)}
-                  />
-                </label>
-              </li>
-            ))}
-          </ul>
-        ))}
     </section>
   )
 }

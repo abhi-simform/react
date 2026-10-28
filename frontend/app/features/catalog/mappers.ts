@@ -52,6 +52,8 @@ export type ProductCardVM = {
   amount: number
   /** List price (MRP) in whole rupees. */
   mrpAmount: number
+  /** The live deal (B4): `price` is already the deal price, `mrp` crossed out. `null` = no deal. */
+  deal: { endsAt: string; remaining: number; badge: string | null } | null
   /** `null` = nobody has rated it yet: render "No ratings yet", not "0.0 (0)". */
   rating: RatingVM | null
   inStock: boolean
@@ -73,6 +75,7 @@ export type ProductCardSource = Pick<
   | "ratingCount"
   | "stock"
   | "sku"
+  | "deal"
 >
 
 export function toRatingVM(average: number, count: number): RatingVM | null {
@@ -82,6 +85,9 @@ export function toRatingVM(average: number, count: number): RatingVM | null {
 
 export function toProductCardVM(product: ProductCardSource): ProductCardVM {
   const inStock = product.stock > 0
+  // A live deal REPLACES the selling price on every card/PDP: one mapper, every surface.
+  const deal = product.deal ?? null
+  const sellingPrice = deal ? deal.dealPrice : product.price
   return {
     id: product._id,
     slug: product.slug,
@@ -90,8 +96,11 @@ export function toProductCardVM(product: ProductCardSource): ProductCardVM {
     sku: product.sku,
     stock: product.stock,
     image: toImages(product.images, product.name)[0]!,
-    price: toPriceVM(product.price, product.mrp),
-    amount: product.price,
+    price: toPriceVM(sellingPrice, product.mrp),
+    amount: sellingPrice,
+    deal: deal
+      ? { endsAt: deal.endsAt, remaining: deal.remaining, badge: deal.badge }
+      : null,
     mrpAmount: product.mrp,
     rating: toRatingVM(product.ratingAvg, product.ratingCount),
     inStock,

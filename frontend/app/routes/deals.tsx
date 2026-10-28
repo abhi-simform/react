@@ -1,9 +1,9 @@
-import { PlaceholderPage } from "@/components/common/PlaceholderPage"
+import { DealsPage } from "@/features/deals"
 import { pageTitle } from "@/lib/pageTitle"
 import type { RouteHandle } from "@/types/route-handle"
 
 export default function DealsRoute() {
-  return <PlaceholderPage title="Deals and flash sales" builtIn="11" />
+  return <DealsPage />
 }
 
 export function meta() {
