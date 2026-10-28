@@ -1,6 +1,7 @@
 // Throwaway (Stage 4): effect experiments.
 import { HealthBadge } from "@/components/common/HealthBadge"
 import { DerivedFilter, EffectFilter } from "@/scratch/effects/DerivedStateDemo"
+import { DebounceDemo } from "@/scratch/effects/DebounceDemo"
 import { AbortSearch, NaiveSearch } from "@/scratch/effects/SearchRaceDemo"
 
 export default function ScratchEffects() {
@@ -14,6 +15,7 @@ export default function ScratchEffects() {
       <DerivedFilter />
       <NaiveSearch />
       <AbortSearch />
+      <DebounceDemo />
     </div>
   )
 }
