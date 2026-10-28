@@ -2,7 +2,11 @@ import { useSearchParams } from "react-router"
 
 import { HealthBadge } from "@/components/common/HealthBadge"
 import { HomeRails } from "@/features/catalog"
-import { RecentlyViewedRail } from "@/features/product"
+import {
+  ForYouRail,
+  RecentlyViewedRail,
+  TrendingRail,
+} from "@/features/recommendations"
 import { FlashSaleStrip } from "@/features/deals"
 import { pageTitle } from "@/lib/pageTitle"
 
@@ -13,8 +17,10 @@ export default function Home() {
       <h1 className="text-xl font-medium">ShopSphere</h1>
       <HealthBadge />
       <FlashSaleStrip />
-      <HomeRails failRail={searchParams.get("failRail")} />
+      <ForYouRail />
+      <TrendingRail />
       <RecentlyViewedRail />
+      <HomeRails failRail={searchParams.get("failRail")} />
     </div>
   )
 }

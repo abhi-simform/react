@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { useState } from "react"
 
 import { Price } from "@/components/common/Price"
 import { Rating } from "@/components/common/Rating"
@@ -11,10 +11,10 @@ import { useAddToCart } from "@/features/cart"
 import { CompareToggle } from "@/features/compare"
 import { DealEndsNote } from "@/features/deals"
 import { DeliveryCheck } from "@/features/delivery"
+import { useTrackView } from "@/features/recommendations"
 import { WishlistHeart } from "@/features/wishlist"
 import type { Variant } from "@/types/domain"
 
-import { useRecentlyViewed } from "../hooks/useRecentlyViewed"
 import { findVariant, stockMessage, type Selection } from "../variants"
 import { Gallery } from "./Gallery"
 import { ProductTabs } from "./ProductTabs"
@@ -48,12 +48,8 @@ export function ProductDetailView({
       : product.price
   const previousPrice = usePrevious(price)
 
-  // Viewing this product syncs an external system (localStorage): an effect.
-  // `push` is stable and the list is de-duplicated, so StrictMode's second
-  // run changes nothing.
-  const { push } = useRecentlyViewed()
-  const productId = product.id
-  useEffect(() => push(productId), [push, productId])
+  // "Viewed" is recorded after 3 s on the page (B8): server list when signed in, local list for guests.
+  useTrackView(product.id)
   const canBuy = variant !== undefined && variant.stock > 0
   // Derived: if a variant with less stock is picked, the shown quantity is
   // capped in render. No effect to "fix up" state afterwards.

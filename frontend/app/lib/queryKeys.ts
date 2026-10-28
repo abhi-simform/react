@@ -111,14 +111,33 @@ export const relatedKeys = {
     [...relatedKeys.all, categorySlug, excludeSlug] as const,
 }
 
-export const similarKeys = {
-  all: ["similar"] as const,
-  list: (productId: string) => [...similarKeys.all, productId] as const,
-}
-
 export const notificationKeys = {
   all: ["notifications"] as const,
-  list: () => [...notificationKeys.all, "list"] as const,
+  list: (filter: Filters = {}) =>
+    [...notificationKeys.all, "list", filter] as const,
+  /** The 10 newest, for the bell dropdown (not the full page). */
+  latest: () => [...notificationKeys.all, "latest"] as const,
+  unread: () => [...notificationKeys.all, "unread-count"] as const,
+  prefs: () => [...notificationKeys.all, "prefs"] as const,
+}
+
+/**
+ * Rails (B8). `owner` is "guest" or the user id: "for you" and "recently viewed" differ per
+ * person, so two owners never share an entry; `similar`/`alsoBought`/`trending` are the same for
+ * everyone.
+ */
+export const railKeys = {
+  all: ["rails"] as const,
+  similar: (productId: string) =>
+    [...railKeys.all, "similar", productId] as const,
+  alsoBought: (productId: string) =>
+    [...railKeys.all, "also-bought", productId] as const,
+  trending: (category?: string) =>
+    [...railKeys.all, "trending", category ?? null] as const,
+  forYou: (owner: string, seed: readonly string[]) =>
+    [...railKeys.all, "for-you", owner, seed] as const,
+  recentlyViewed: (owner: string, ids: readonly string[] = []) =>
+    [...railKeys.all, "recently-viewed", owner, ids] as const,
 }
 
 export const profileKeys = {

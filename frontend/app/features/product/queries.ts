@@ -2,12 +2,7 @@ import { infiniteQueryOptions, queryOptions } from "@tanstack/react-query"
 
 import { getProducts } from "@/features/catalog"
 import { STALE } from "@/lib/query-client"
-import {
-  questionKeys,
-  relatedKeys,
-  reviewKeys,
-  similarKeys,
-} from "@/lib/queryKeys"
+import { questionKeys, relatedKeys, reviewKeys } from "@/lib/queryKeys"
 
 import {
   getAnswers,
@@ -84,24 +79,6 @@ export const questionQueries = {
         getAnswers(questionId, pageParam, signal),
       getNextPageParam: (last) =>
         last.meta.hasNext ? last.meta.page + 1 : undefined,
-      staleTime: STALE.catalog,
-    }),
-}
-
-/** "Similar products": same category, most popular, minus this one (needs the product's category). */
-export const similarQueries = {
-  list: (productId: string, categorySlug: string) =>
-    queryOptions({
-      queryKey: similarKeys.list(productId),
-      queryFn: async ({ signal }) =>
-        (
-          await getProducts(
-            { category: categorySlug, limit: 7, sort: "popularity" },
-            signal
-          )
-        ).items
-          .filter((p) => p._id !== productId)
-          .slice(0, 6),
       staleTime: STALE.catalog,
     }),
 }

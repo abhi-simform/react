@@ -7,6 +7,7 @@ import {
   notificationKeys,
   orderKeys,
   profileKeys,
+  railKeys,
   wishlistKeys,
 } from "@/lib/queryKeys"
 
@@ -20,6 +21,7 @@ const USER_SCOPED = [
   profileKeys.all,
   notificationKeys.all,
   cartKeys.all,
+  railKeys.all,
 ] as const
 
 /**

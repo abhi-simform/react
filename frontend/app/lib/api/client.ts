@@ -214,6 +214,28 @@ export async function apiPaginatedWithMeta<T, M extends PageMeta>(
   return { items: body.data as T[], meta: body.meta as M }
 }
 
+/**
+ * Plain (non-paged) endpoints whose envelope carries its OWN `meta` (`/recommendations/for-you`:
+ * `{ personalised }`, `/products/:id/also-bought`: `{ source }`). `api()` returns only `data`.
+ */
+export async function apiWithMeta<T, M>(
+  path: string,
+  options: ApiOptions<T> & { metaSchema: z.ZodType<M> }
+): Promise<{ data: T; meta: M }> {
+  const { metaSchema, schema } = options
+  const { body } = await send(path, options)
+  if (schema && VALIDATE) {
+    const result = apiEnvelopeSchema(schema)
+      .extend({ meta: metaSchema })
+      .safeParse(body)
+    if (!result.success) throw contractError(path, result.error)
+    return { data: result.data.data, meta: result.data.meta }
+  }
+  if (!isApiSuccess(body))
+    throw badEnvelope("Response was not a success envelope")
+  return { data: body.data as T, meta: (body.meta ?? {}) as M }
+}
+
 export const apiPaginated = <T>(
   path: string,
   options: ApiOptions<T> = {}
