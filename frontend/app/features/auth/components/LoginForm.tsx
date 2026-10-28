@@ -11,6 +11,7 @@ import { applyApiError } from "@/lib/forms/applyApiError"
 import { paths } from "@/lib/paths"
 
 import { useAuth } from "../AuthProvider"
+import { GoogleButton } from "./GoogleButton"
 import { getReturnTo } from "../returnTo"
 import { loginSchema, type LoginValues } from "../schemas"
 
@@ -30,7 +31,7 @@ export function LoginForm() {
     try {
       await signIn(values)
       // `replace`: Back must not return to the login form.
-      navigate(getReturnTo(location.state), { replace: true })
+      navigate(getReturnTo(location), { replace: true })
     } catch (err) {
       applyApiError(toApiError(err), setError, {
         fields: ["email", "password"],
@@ -84,11 +85,15 @@ export function LoginForm() {
       <Button type="submit" disabled={isSubmitting}>
         {isSubmitting ? "Signing in..." : "Log in"}
       </Button>
+      <Link to={paths.forgotPassword()} className="text-sm underline">
+        Forgot your password?
+      </Link>
+      <p className="text-center text-sm text-neutral-500">or</p>
+      <GoogleButton />
       <p className="text-sm">
         New here?{" "}
         <Link
-          to={paths.register()}
-          state={location.state}
+          to={paths.register(getReturnTo(location, ""))}
           className="underline"
         >
           Create an account

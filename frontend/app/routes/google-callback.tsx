@@ -1,10 +1,14 @@
-import { PlaceholderPage } from "@/components/common/PlaceholderPage"
+import { GoogleCallback } from "@/features/auth"
 import { pageTitle } from "@/lib/pageTitle"
 
 export default function GoogleCallbackRoute() {
-  return <PlaceholderPage title="Signing you in with Google" builtIn="10" />
+  return <GoogleCallback />
 }
 
 export function meta() {
-  return [{ title: pageTitle("Signing you in") }]
+  return [
+    { title: pageTitle("Signing you in") },
+    // The URL may carry a one-time token: never leak it through the Referer header.
+    { name: "referrer", content: "no-referrer" },
+  ]
 }
