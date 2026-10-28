@@ -67,3 +67,7 @@ Pitfall seen in the explorer's number inputs: `Number("")` is `0`, so an empty b
 ## 1.4 sort and comparators
 
 `sortProducts` always uses `toSorted` (never `sort`) so the incoming array is untouched; `relevance` returns a copy in server order. `compareBy(...selectors)` composes comparators (first decides, later break ties) and compares strings with `Intl.Collator("en", { sensitivity: "base" })`. Tie-breaks for price/discount/newest: rating desc, then name; rating sorts by `ratingAvg` then `ratingCount` then name. `scratch/04-sort.ts` checks the original array (deep-frozen) is unchanged by reference and content, ties are ordered (5 neighbouring equal prices exist in the data), and that `["Zebra","Éclair"].toSorted()` puts "Éclair" after "Zebra" (UTF-16 code order) while the collator puts it next to "Eclair". `Array.prototype.sort` is stable in modern engines (asserted with a small stability case); `sort()` on frozen data throws, which is exactly the bug it would be on React props.
+
+## 1.5 Optional chaining, nullish coalescing
+
+`displayDiscount` and `safeBrandName` (in `features/catalog/utils.ts`) are checked in `scratch/05-defensive.ts` with `console.assert` (silent when green). `a || b` replaces every falsy value (`0`, `""`, `NaN`), `a ?? b` only `null`/`undefined`. ShopSphere example: a free-sample product with `price: 0` shown as `price || 99` becomes ₹99, which is a wrong price on screen; `price ?? 99` keeps `0`. Likewise a `discountPercent` of `0` must render as "No discount" deliberately, not because `0` was falsy.

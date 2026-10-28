@@ -186,3 +186,18 @@ export function sortProducts(
   if (sortKey === "relevance") return [...products]
   return products.toSorted(comparators[sortKey])
 }
+
+// ---- defensive display helpers
+
+/** `0` is a legitimate discount; only null/undefined/NaN mean "unknown". */
+export function displayDiscount(product: {
+  discountPercent?: number | null
+}): string {
+  const pct = product.discountPercent ?? 0
+  return Number.isFinite(pct) && pct > 0 ? `${pct}% off` : "No discount"
+}
+
+export function safeBrandName(product: { brand?: string | null }): string {
+  // `||` would also replace "" (fine here), but `??` is the right default habit.
+  return product.brand?.trim() || "Unbranded"
+}
