@@ -31,6 +31,8 @@ export function QuantityStepper({
   const id = useId()
   const [draft, setDraft] = useState<string | null>(null)
   const effectiveMax = Math.max(min, max)
+  // "Decrease quantity of Noise C33": several steppers on one page (cart lines) must tell apart.
+  const noun = label.charAt(0).toLowerCase() + label.slice(1)
 
   function commitDraft() {
     if (draft !== null && /^-?\d+$/.test(draft.trim())) {
@@ -56,7 +58,7 @@ export function QuantityStepper({
       </label>
       <button
         type="button"
-        aria-label="Decrease quantity"
+        aria-label={`Decrease ${noun}`}
         disabled={value <= min}
         onClick={() => {
           setDraft(null)
@@ -84,7 +86,7 @@ export function QuantityStepper({
       />
       <button
         type="button"
-        aria-label="Increase quantity"
+        aria-label={`Increase ${noun}`}
         disabled={value >= effectiveMax}
         onClick={() => {
           setDraft(null)

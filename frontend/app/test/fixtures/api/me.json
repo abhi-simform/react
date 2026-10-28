@@ -1,0 +1,14 @@
+{
+  "success": true,
+  "data": {
+    "id": "6ae22fe252117f090b5b4b75",
+    "name": "Casey Customer",
+    "email": "customer@shopsphere.dev",
+    "role": "customer",
+    "phone": null,
+    "avatarUrl": null,
+    "emailVerified": true,
+    "providers": ["password"],
+    "createdAt": "2026-10-28T17:24:50.745Z"
+  }
+}

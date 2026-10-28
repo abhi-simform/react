@@ -1,0 +1,35 @@
+{
+  "success": true,
+  "data": [
+    {
+      "id": "6ae22fe252117f090b5b4cbe",
+      "fullName": "Casey Customer",
+      "phone": "9876543210",
+      "line1": "12, MG Road",
+      "line2": null,
+      "landmark": "Near Metro Station",
+      "city": "Bengaluru",
+      "state": "Karnataka",
+      "pincode": "560001",
+      "type": "home",
+      "isDefault": true,
+      "createdAt": "2026-10-28T17:24:50.901Z",
+      "updatedAt": "2026-10-28T17:24:50.901Z"
+    },
+    {
+      "id": "6ae22fe252117f090b5b4cbf",
+      "fullName": "Casey Customer",
+      "phone": "9876543210",
+      "line1": "4th Floor, Tech Park, Baner",
+      "line2": null,
+      "landmark": null,
+      "city": "Pune",
+      "state": "Maharashtra",
+      "pincode": "411045",
+      "type": "work",
+      "isDefault": false,
+      "createdAt": "2026-10-28T17:24:50.901Z",
+      "updatedAt": "2026-10-28T17:24:50.901Z"
+    }
+  ]
+}

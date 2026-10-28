@@ -1,0 +1,83 @@
+{
+  "success": true,
+  "data": {
+    "items": [
+      {
+        "productId": "6ae22fe252117f090b5b4bc4",
+        "sku": "SMA-00074",
+        "slug": "noise-c33-smartwatch-sma-00074",
+        "name": "Noise C33 Smartwatch",
+        "brand": "Noise",
+        "imageUrl": "https://picsum.photos/seed/noise-c33-smartwatch-sma-00074-0/800/800",
+        "qty": 1,
+        "unitPrice": 2536,
+        "mrp": 3210,
+        "availableQty": 251,
+        "payableQty": 1,
+        "outOfStock": false,
+        "qtyReduced": false,
+        "priceChanged": false,
+        "previousPrice": 2536,
+        "deal": null,
+        "savedForLater": false,
+        "addedAt": "2026-10-28T17:24:50.910Z"
+      },
+      {
+        "productId": "6ae22fe252117f090b5b4c3e",
+        "sku": "FUR-00189",
+        "slug": "wakefit-m91-sofa-set-fur-00189",
+        "name": "Wakefit M91 Sofa Set",
+        "brand": "Wakefit",
+        "imageUrl": "https://picsum.photos/seed/wakefit-m91-sofa-set-fur-00189-0/800/800",
+        "qty": 2,
+        "unitPrice": 20293,
+        "mrp": 23060,
+        "availableQty": 149,
+        "payableQty": 2,
+        "outOfStock": false,
+        "qtyReduced": false,
+        "priceChanged": true,
+        "previousPrice": 20493,
+        "deal": null,
+        "savedForLater": false,
+        "addedAt": "2026-10-28T17:24:50.910Z"
+      }
+    ],
+    "saved": [
+      {
+        "productId": "6ae22fe252117f090b5b4bd0",
+        "sku": "SMA-00086",
+        "slug": "fire-boltt-w18-sports-watch-sma-00086",
+        "name": "Fire-Boltt W18 Sports Watch",
+        "brand": "Fire-Boltt",
+        "imageUrl": "https://picsum.photos/seed/fire-boltt-w18-sports-watch-sma-00086-0/800/800",
+        "qty": 1,
+        "unitPrice": 43352,
+        "mrp": 49830,
+        "availableQty": 248,
+        "payableQty": 1,
+        "outOfStock": false,
+        "qtyReduced": false,
+        "priceChanged": false,
+        "previousPrice": 43352,
+        "deal": null,
+        "savedForLater": true,
+        "addedAt": "2026-10-28T17:24:50.910Z"
+      }
+    ],
+    "totals": {
+      "lineCount": 2,
+      "unitCount": 3,
+      "subtotal": 43122,
+      "mrpTotal": 49330,
+      "savings": 6208,
+      "discount": 0,
+      "shipping": 0,
+      "tax": 7762,
+      "total": 50884
+    },
+    "coupon": null,
+    "hasIssues": true,
+    "updatedAt": "2026-10-28T17:24:50.910Z"
+  }
+}

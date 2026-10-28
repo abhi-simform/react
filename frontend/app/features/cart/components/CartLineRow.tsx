@@ -83,27 +83,27 @@ export function CartLineRow({
               size="sm"
               disabled={line.outOfStock}
               onClick={() => actions.moveToCart(line.productId)}
+              aria-label={`Move to cart ${line.name}`}
             >
               Move to cart
-              <span className="sr-only"> {line.name}</span>
             </Button>
           ) : (
             <Button
               variant="outline"
               size="sm"
               onClick={() => actions.saveForLater(line.productId)}
+              aria-label={`Save for later ${line.name}`}
             >
               Save for later
-              <span className="sr-only"> {line.name}</span>
             </Button>
           )}
           <Button
             variant="outline"
             size="sm"
             onClick={() => actions.remove(line.productId)}
+            aria-label={`Remove ${line.name}`}
           >
             Remove
-            <span className="sr-only"> {line.name}</span>
           </Button>
         </div>
         {line.outOfStock && (

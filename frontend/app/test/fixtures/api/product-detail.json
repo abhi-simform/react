@@ -1,0 +1,72 @@
+{
+  "success": true,
+  "data": {
+    "_id": "6ae22fe252117f090b5b4c4b",
+    "name": "The Ordinary J63 Night Cream",
+    "slug": "the-ordinary-j63-night-cream-ski-00200",
+    "description": "Discover the stylish new Bacon with an exciting mix of Bamboo ingredients Conculco dolor exercitationem. Vere corona adipisci coepi excepturi. Certus apostolus totus vulnus comprehendo creber.",
+    "highlights": [
+      "Modern plastic build",
+      "Handcrafted steel build",
+      "Luxurious gold build",
+      "Oriental wooden build"
+    ],
+    "brand": "The Ordinary",
+    "category": {
+      "_id": "6ae22fe252117f090b5b4c49",
+      "name": "Skincare",
+      "slug": "skincare"
+    },
+    "categoryPath": [
+      {
+        "_id": "6ae22fe252117f090b5b4c48",
+        "name": "Beauty & Personal Care",
+        "slug": "beauty-personal-care"
+      },
+      {
+        "_id": "6ae22fe252117f090b5b4c49",
+        "name": "Skincare",
+        "slug": "skincare"
+      }
+    ],
+    "tags": ["skincare", "the ordinary", "night cream"],
+    "price": 1354,
+    "mrp": 2820,
+    "discountPercent": 52,
+    "images": [
+      {
+        "url": "https://picsum.photos/seed/the-ordinary-j63-night-cream-ski-00200-0/800/800",
+        "alt": "The Ordinary J63 Night Cream image 1"
+      },
+      {
+        "url": "https://picsum.photos/seed/the-ordinary-j63-night-cream-ski-00200-1/800/800",
+        "alt": "The Ordinary J63 Night Cream image 2"
+      },
+      {
+        "url": "https://picsum.photos/seed/the-ordinary-j63-night-cream-ski-00200-2/800/800",
+        "alt": "The Ordinary J63 Night Cream image 3"
+      },
+      {
+        "url": "https://picsum.photos/seed/the-ordinary-j63-night-cream-ski-00200-3/800/800",
+        "alt": "The Ordinary J63 Night Cream image 4"
+      }
+    ],
+    "stock": 17,
+    "sku": "SKI-00200",
+    "specs": [
+      { "key": "Skin Type", "value": "Incredible" },
+      { "key": "Volume", "value": "Generic" },
+      { "key": "Key Ingredient", "value": "Practical" }
+    ],
+    "ratingAvg": 3.5,
+    "ratingCount": 4,
+    "soldCount": 19787,
+    "isFeatured": false,
+    "status": "active",
+    "seller": "6ae22fe252117f090b5b4b74",
+    "__v": 0,
+    "createdAt": "2026-10-28T17:24:50.860Z",
+    "updatedAt": "2026-10-28T17:24:51.055Z",
+    "deal": null
+  }
+}

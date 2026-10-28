@@ -1,0 +1,252 @@
+{
+  "success": true,
+  "data": [
+    {
+      "id": "6ae22fe252117f090b5b4cda",
+      "orderNumber": "SS-SEED-000003",
+      "userId": "6ae22fe252117f090b5b4b75",
+      "items": [
+        {
+          "productId": "6ae22fe252117f090b5b4c9e",
+          "sku": "TEC-00279",
+          "title": "Pragmatic M38 Cookbook",
+          "image": "https://picsum.photos/seed/pragmatic-m38-cookbook-tec-00279-0/800/800",
+          "unitPrice": 1324,
+          "mrp": 1540,
+          "qty": 1,
+          "lineTotal": 1324,
+          "deal": false
+        }
+      ],
+      "addressSnapshot": {
+        "fullName": "Casey Customer",
+        "phone": "9876543210",
+        "line1": "12, MG Road",
+        "landmark": "Near Metro Station",
+        "city": "Bengaluru",
+        "state": "Karnataka",
+        "pincode": "560001",
+        "type": "home"
+      },
+      "delivery": {
+        "method": "standard",
+        "estimatedFrom": "2026-10-28T17:24:50.912Z",
+        "estimatedTo": "2026-10-30T17:24:50.912Z"
+      },
+      "status": "shipped",
+      "statusHistory": [
+        { "status": "placed", "at": "2026-10-26T17:24:50.912Z", "note": null },
+        { "status": "packed", "at": "2026-10-27T17:24:50.912Z", "note": null },
+        { "status": "shipped", "at": "2026-10-28T17:24:50.912Z", "note": null }
+      ],
+      "pricing": {
+        "subtotal": 1324,
+        "discount": 0,
+        "shipping": 0,
+        "tax": 238,
+        "total": 1562
+      },
+      "coupon": null,
+      "paymentMethod": "cod",
+      "paymentStatus": "pending",
+      "cancelReason": null,
+      "deliveredAt": null,
+      "returnableUntil": null,
+      "returnRequest": null,
+      "createdAt": "2026-10-26T17:24:50.912Z"
+    },
+    {
+      "id": "6ae22fe252117f090b5b4cd9",
+      "orderNumber": "SS-SEED-000002",
+      "userId": "6ae22fe252117f090b5b4b75",
+      "items": [
+        {
+          "productId": "6ae22fe252117f090b5b4c42",
+          "sku": "FUR-00193",
+          "title": "Wakefit G73 Office Chair",
+          "image": "https://picsum.photos/seed/wakefit-g73-office-chair-fur-00193-0/800/800",
+          "unitPrice": 5580,
+          "mrp": 7750,
+          "qty": 2,
+          "lineTotal": 11160,
+          "deal": false
+        }
+      ],
+      "addressSnapshot": {
+        "fullName": "Casey Customer",
+        "phone": "9876543210",
+        "line1": "12, MG Road",
+        "landmark": "Near Metro Station",
+        "city": "Bengaluru",
+        "state": "Karnataka",
+        "pincode": "560001",
+        "type": "home"
+      },
+      "delivery": {
+        "method": "standard",
+        "estimatedFrom": "2026-10-27T17:24:50.912Z",
+        "estimatedTo": "2026-10-29T17:24:50.912Z"
+      },
+      "status": "delivered",
+      "statusHistory": [
+        { "status": "placed", "at": "2026-10-25T17:24:50.912Z", "note": null },
+        { "status": "packed", "at": "2026-10-26T17:24:50.912Z", "note": null },
+        { "status": "shipped", "at": "2026-10-27T17:24:50.912Z", "note": null },
+        {
+          "status": "out_for_delivery",
+          "at": "2026-10-28T17:24:50.912Z",
+          "note": null
+        },
+        {
+          "status": "delivered",
+          "at": "2026-10-29T17:24:50.912Z",
+          "note": null
+        }
+      ],
+      "pricing": {
+        "subtotal": 11160,
+        "discount": 0,
+        "shipping": 0,
+        "tax": 2009,
+        "total": 13169
+      },
+      "coupon": null,
+      "paymentMethod": "razorpay",
+      "paymentStatus": "paid",
+      "cancelReason": null,
+      "deliveredAt": "2026-10-29T17:24:50.912Z",
+      "returnableUntil": "2026-11-05T17:24:50.912Z",
+      "returnRequest": null,
+      "createdAt": "2026-10-25T17:24:50.912Z"
+    },
+    {
+      "id": "6ae22fe252117f090b5b4cdb",
+      "orderNumber": "SS-SEED-000004",
+      "userId": "6ae22fe252117f090b5b4b75",
+      "items": [
+        {
+          "productId": "6ae22fe252117f090b5b4c24",
+          "sku": "KIT-00164",
+          "title": "Bajaj Y56 Electric Kettle",
+          "image": "https://picsum.photos/seed/bajaj-y56-electric-kettle-kit-00164-0/800/800",
+          "unitPrice": 10716,
+          "mrp": 13230,
+          "qty": 2,
+          "lineTotal": 21432,
+          "deal": false
+        }
+      ],
+      "addressSnapshot": {
+        "fullName": "Casey Customer",
+        "phone": "9876543210",
+        "line1": "12, MG Road",
+        "landmark": "Near Metro Station",
+        "city": "Bengaluru",
+        "state": "Karnataka",
+        "pincode": "560001",
+        "type": "home"
+      },
+      "delivery": {
+        "method": "standard",
+        "estimatedFrom": "2026-10-22T17:24:50.912Z",
+        "estimatedTo": "2026-10-24T17:24:50.912Z"
+      },
+      "status": "cancelled",
+      "statusHistory": [
+        { "status": "placed", "at": "2026-10-20T17:24:50.912Z", "note": null },
+        {
+          "status": "cancelled",
+          "at": "2026-10-21T17:24:50.912Z",
+          "note": null
+        }
+      ],
+      "pricing": {
+        "subtotal": 21432,
+        "discount": 0,
+        "shipping": 0,
+        "tax": 3858,
+        "total": 25290
+      },
+      "coupon": null,
+      "paymentMethod": "cod",
+      "paymentStatus": "pending",
+      "cancelReason": "Ordered by mistake",
+      "deliveredAt": null,
+      "returnableUntil": null,
+      "returnRequest": null,
+      "createdAt": "2026-10-20T17:24:50.912Z"
+    },
+    {
+      "id": "6ae22fe252117f090b5b4cd8",
+      "orderNumber": "SS-SEED-000001",
+      "userId": "6ae22fe252117f090b5b4b75",
+      "items": [
+        {
+          "productId": "6ae22fe252117f090b5b4c1c",
+          "sku": "KIT-00156",
+          "title": "Butterfly G95 Air Fryer",
+          "image": "https://picsum.photos/seed/butterfly-g95-air-fryer-kit-00156-0/800/800",
+          "unitPrice": 15360,
+          "mrp": 15360,
+          "qty": 1,
+          "lineTotal": 15360,
+          "deal": false
+        }
+      ],
+      "addressSnapshot": {
+        "fullName": "Casey Customer",
+        "phone": "9876543210",
+        "line1": "12, MG Road",
+        "landmark": "Near Metro Station",
+        "city": "Bengaluru",
+        "state": "Karnataka",
+        "pincode": "560001",
+        "type": "home"
+      },
+      "delivery": {
+        "method": "standard",
+        "estimatedFrom": "2026-10-10T17:24:50.912Z",
+        "estimatedTo": "2026-10-12T17:24:50.912Z"
+      },
+      "status": "delivered",
+      "statusHistory": [
+        { "status": "placed", "at": "2026-10-08T17:24:50.912Z", "note": null },
+        { "status": "packed", "at": "2026-10-09T17:24:50.912Z", "note": null },
+        { "status": "shipped", "at": "2026-10-10T17:24:50.912Z", "note": null },
+        {
+          "status": "out_for_delivery",
+          "at": "2026-10-11T17:24:50.912Z",
+          "note": null
+        },
+        {
+          "status": "delivered",
+          "at": "2026-10-12T17:24:50.912Z",
+          "note": null
+        }
+      ],
+      "pricing": {
+        "subtotal": 15360,
+        "discount": 0,
+        "shipping": 0,
+        "tax": 2765,
+        "total": 18125
+      },
+      "coupon": null,
+      "paymentMethod": "cod",
+      "paymentStatus": "paid",
+      "cancelReason": null,
+      "deliveredAt": "2026-10-12T17:24:50.912Z",
+      "returnableUntil": "2026-10-19T17:24:50.912Z",
+      "returnRequest": null,
+      "createdAt": "2026-10-08T17:24:50.912Z"
+    }
+  ],
+  "meta": {
+    "page": 1,
+    "limit": 10,
+    "total": 4,
+    "totalPages": 1,
+    "hasNext": false,
+    "hasPrev": false
+  }
+}

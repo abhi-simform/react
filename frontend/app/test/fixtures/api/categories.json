@@ -1,0 +1,171 @@
+{
+  "success": true,
+  "data": [
+    {
+      "id": "6ae22fe252117f090b5b4b76",
+      "name": "Electronics",
+      "slug": "electronics",
+      "image": "https://picsum.photos/seed/cat-electronics/400/300",
+      "productCount": 88,
+      "children": [
+        {
+          "id": "6ae22fe252117f090b5b4ba5",
+          "name": "Headphones & Audio",
+          "slug": "headphones-audio",
+          "image": "https://picsum.photos/seed/cat-headphones-audio/400/300",
+          "productCount": 22,
+          "children": []
+        },
+        {
+          "id": "6ae22fe252117f090b5b4b8e",
+          "name": "Laptops",
+          "slug": "laptops",
+          "image": "https://picsum.photos/seed/cat-laptops/400/300",
+          "productCount": 22,
+          "children": []
+        },
+        {
+          "id": "6ae22fe252117f090b5b4b77",
+          "name": "Mobiles",
+          "slug": "mobiles",
+          "image": "https://picsum.photos/seed/cat-mobiles/400/300",
+          "productCount": 22,
+          "children": []
+        },
+        {
+          "id": "6ae22fe252117f090b5b4bbc",
+          "name": "Smartwatches",
+          "slug": "smartwatches",
+          "image": "https://picsum.photos/seed/cat-smartwatches/400/300",
+          "productCount": 22,
+          "children": []
+        }
+      ]
+    },
+    {
+      "id": "6ae22fe252117f090b5b4bd3",
+      "name": "Fashion",
+      "slug": "fashion",
+      "image": "https://picsum.photos/seed/cat-fashion/400/300",
+      "productCount": 66,
+      "children": [
+        {
+          "id": "6ae22fe252117f090b5b4c02",
+          "name": "Footwear",
+          "slug": "footwear",
+          "image": "https://picsum.photos/seed/cat-footwear/400/300",
+          "productCount": 22,
+          "children": []
+        },
+        {
+          "id": "6ae22fe252117f090b5b4bd4",
+          "name": "Men's Clothing",
+          "slug": "men-s-clothing",
+          "image": "https://picsum.photos/seed/cat-men-s-clothing/400/300",
+          "productCount": 22,
+          "children": []
+        },
+        {
+          "id": "6ae22fe252117f090b5b4beb",
+          "name": "Women's Clothing",
+          "slug": "women-s-clothing",
+          "image": "https://picsum.photos/seed/cat-women-s-clothing/400/300",
+          "productCount": 22,
+          "children": []
+        }
+      ]
+    },
+    {
+      "id": "6ae22fe252117f090b5b4c19",
+      "name": "Home & Kitchen",
+      "slug": "home-kitchen",
+      "image": "https://picsum.photos/seed/cat-home-kitchen/400/300",
+      "productCount": 44,
+      "children": [
+        {
+          "id": "6ae22fe252117f090b5b4c31",
+          "name": "Furniture",
+          "slug": "furniture",
+          "image": "https://picsum.photos/seed/cat-furniture/400/300",
+          "productCount": 22,
+          "children": []
+        },
+        {
+          "id": "6ae22fe252117f090b5b4c1a",
+          "name": "Kitchen Appliances",
+          "slug": "kitchen-appliances",
+          "image": "https://picsum.photos/seed/cat-kitchen-appliances/400/300",
+          "productCount": 22,
+          "children": []
+        }
+      ]
+    },
+    {
+      "id": "6ae22fe252117f090b5b4c48",
+      "name": "Beauty & Personal Care",
+      "slug": "beauty-personal-care",
+      "image": "https://picsum.photos/seed/cat-beauty-personal-care/400/300",
+      "productCount": 44,
+      "children": [
+        {
+          "id": "6ae22fe252117f090b5b4c60",
+          "name": "Grooming",
+          "slug": "grooming",
+          "image": "https://picsum.photos/seed/cat-grooming/400/300",
+          "productCount": 22,
+          "children": []
+        },
+        {
+          "id": "6ae22fe252117f090b5b4c49",
+          "name": "Skincare",
+          "slug": "skincare",
+          "image": "https://picsum.photos/seed/cat-skincare/400/300",
+          "productCount": 22,
+          "children": []
+        }
+      ]
+    },
+    {
+      "id": "6ae22fe252117f090b5b4c77",
+      "name": "Books",
+      "slug": "books",
+      "image": "https://picsum.photos/seed/cat-books/400/300",
+      "productCount": 44,
+      "children": [
+        {
+          "id": "6ae22fe252117f090b5b4c78",
+          "name": "Fiction",
+          "slug": "fiction",
+          "image": "https://picsum.photos/seed/cat-fiction/400/300",
+          "productCount": 22,
+          "children": []
+        },
+        {
+          "id": "6ae22fe252117f090b5b4c8f",
+          "name": "Technology & Programming",
+          "slug": "technology-programming",
+          "image": "https://picsum.photos/seed/cat-technology-programming/400/300",
+          "productCount": 22,
+          "children": []
+        }
+      ]
+    },
+    {
+      "id": "6ae22fe252117f090b5b4ca6",
+      "name": "Sports & Fitness",
+      "slug": "sports-fitness",
+      "image": "https://picsum.photos/seed/cat-sports-fitness/400/300",
+      "productCount": 22,
+      "children": [
+        {
+          "id": "6ae22fe252117f090b5b4ca7",
+          "name": "Gym & Fitness",
+          "slug": "gym-fitness",
+          "image": "https://picsum.photos/seed/cat-gym-fitness/400/300",
+          "productCount": 22,
+          "children": []
+        }
+      ]
+    }
+  ]
+}

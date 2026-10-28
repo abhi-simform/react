@@ -1,4 +1,5 @@
 import { Button as ButtonPrimitive } from "@base-ui/react/button"
+import { isValidElement } from "react"
 import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
 
@@ -45,10 +46,17 @@ function Button({
   size = "default",
   ...props
 }: ButtonPrimitive.Props & VariantProps<typeof buttonVariants>) {
+  // A button that RENDERS a router <Link> is a link: base-ui would stamp role="button" on the
+  // anchor, so a screen reader announced "View cart, button" for a navigation (12.2/12.9).
+  const rendersLink =
+    props.nativeButton === false &&
+    isValidElement<{ to?: unknown }>(props.render) &&
+    props.render.props.to !== undefined
   return (
     <ButtonPrimitive
       data-slot="button"
       className={cn(buttonVariants({ variant, size, className }))}
+      {...(rendersLink ? { role: "link" } : null)}
       {...props}
     />
   )
