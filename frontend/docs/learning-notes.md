@@ -290,3 +290,6 @@ Symptom: identical `GET /products?limit=3&sort=newest` requests keep firing and 
 
 ### Bug 2: missing cleanup on `resize`
 Symptom: every time the component is shown again the number of window `resize` listeners grows and old handlers keep calling `setState` on components that are gone. Cause: `addEventListener` in the effect with no `removeEventListener`. Fix: return a cleanup. Measured with counters (3 hide/show cycles on each version): added 16, removed 7, so 9 listeners alive; the fixed component accounts for exactly 1 (the mounted one), the other 8 are the broken version's leaks (4 mounts x 2 for StrictMode).
+
+### Bug 3: race on a slow category switch
+Symptom: click "mobiles" (made slow: 1.5 s) and then "laptops" (0.1 s): the UI says `selected laptops / showing mobiles: Google F14 Smartphone 5G`. Cause: no cleanup; the older response arrives last and overwrites the newer. Fix: `AbortController` in the effect cleanup, `AbortError` ignored: `selected laptops / showing laptops: Apple K21 Laptop`. (The artificial `sleep` is not abortable; the aborted request still starts after the delay but dies immediately with an already-aborted signal.)

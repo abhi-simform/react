@@ -7,6 +7,7 @@ import {
   bug1Stats,
 } from "@/scratch/bugs/Bug1InfiniteFetch"
 import { Bug2Demo, bug2Stats } from "@/scratch/bugs/Bug2ResizeListener"
+import { Bug3Broken, Bug3Fixed } from "@/scratch/bugs/Bug3CategoryRace"
 
 function Bug({
   title,
@@ -73,6 +74,10 @@ export default function ScratchBugs() {
           Count listeners
         </button>
         <output data-testid="bug2-out">{stats2}</output>
+      </Bug>
+      <Bug title="3. Race on a slow category switch">
+        <Bug3Broken />
+        <Bug3Fixed />
       </Bug>
     </div>
   )
