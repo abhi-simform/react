@@ -7,6 +7,8 @@ import { Category } from "../modules/categories/category.model.js"
 import { Product } from "../modules/products/product.model.js"
 import { User } from "../modules/users/user.model.js"
 import { RefreshToken } from "../modules/auth/refreshToken.model.js"
+import { Address } from "../modules/addresses/address.model.js"
+import { WishlistItem } from "../modules/wishlist/wishlist.model.js"
 import { slugify } from "../utils/slugify.js"
 import { CATALOG } from "./catalog.js"
 
@@ -31,6 +33,8 @@ async function main() {
     User.syncIndexes(),
     Category.syncIndexes(),
     RefreshToken.syncIndexes(),
+    Address.syncIndexes(),
+    WishlistItem.syncIndexes(),
   ])
 
   // Users
@@ -140,6 +144,40 @@ async function main() {
       await Product.insertMany(docs)
       total += docs.length
     }
+  }
+  // B2: the dev customer gets two addresses and three wishlisted products.
+  const customer = await User.findOne({ email: "customer@shopsphere.dev" })
+  if (customer) {
+    await Address.create([
+      {
+        user: customer._id,
+        fullName: "Casey Customer",
+        phone: "9876543210",
+        line1: "12, MG Road",
+        landmark: "Near Metro Station",
+        city: "Bengaluru",
+        state: "Karnataka",
+        pincode: "560001",
+        type: "home",
+        isDefault: true,
+      },
+      {
+        user: customer._id,
+        fullName: "Casey Customer",
+        phone: "9876543210",
+        line1: "4th Floor, Tech Park, Baner",
+        city: "Pune",
+        state: "Maharashtra",
+        pincode: "411045",
+        type: "work",
+      },
+    ])
+    const picks = await Product.find({ status: "active" })
+      .sort({ soldCount: -1 })
+      .limit(3)
+    await WishlistItem.insertMany(
+      picks.map((p) => ({ user: customer._id, product: p._id }))
+    )
   }
   logger.info(
     `Seeded ${total} products, ${await Category.countDocuments()} categories, 3 users`

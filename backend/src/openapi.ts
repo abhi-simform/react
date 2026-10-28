@@ -1,5 +1,10 @@
 import { z } from "zod"
 import { registerSchema, loginSchema } from "./modules/auth/auth.schema.js"
+import {
+  createAddressSchema,
+  updateAddressSchema,
+} from "./modules/addresses/address.schema.js"
+import { addWishlistSchema } from "./modules/wishlist/wishlist.schema.js"
 import { listBrandsSchema } from "./modules/categories/category.schema.js"
 import { listProductsSchema } from "./modules/products/product.schema.js"
 
@@ -118,6 +123,139 @@ export const openApiDocument = {
         summary: "Update profile",
         security: bearer,
         responses: { 200: { description: "User" } },
+      },
+    },
+    "/wishlist": {
+      get: {
+        tags: ["Wishlist"],
+        summary: "Wishlisted products (card shape, newest first) + page meta",
+        security: bearer,
+        parameters: [
+          { name: "page", in: "query", schema: { type: "integer", minimum: 1 } },
+          { name: "limit", in: "query", schema: { type: "integer", maximum: 60 } },
+        ],
+        responses: {
+          200: { description: "Product[] with wishlistedAt" },
+          401: { description: "Unauthorized" },
+        },
+      },
+      post: {
+        tags: ["Wishlist"],
+        summary: "Add a product. Idempotent: 201 first time, 200 if already there",
+        security: bearer,
+        requestBody: body(addWishlistSchema.body),
+        responses: {
+          201: { description: "{ productId }" },
+          200: { description: "Already wishlisted" },
+          404: { description: "NOT_FOUND (unknown or inactive product)" },
+          422: { description: "VALIDATION_ERROR" },
+        },
+      },
+    },
+    "/wishlist/ids": {
+      get: {
+        tags: ["Wishlist"],
+        summary: "Only the wishlisted product ids (cheap; paint all hearts)",
+        security: bearer,
+        responses: { 200: { description: "string[]" } },
+      },
+    },
+    "/wishlist/{productId}": {
+      delete: {
+        tags: ["Wishlist"],
+        summary: "Remove a product. Idempotent: 204 even if it was not wishlisted",
+        security: bearer,
+        parameters: [
+          { name: "productId", in: "path", required: true, schema: { type: "string" } },
+        ],
+        responses: {
+          204: { description: "No content" },
+          422: { description: "Invalid id" },
+        },
+      },
+    },
+    "/addresses": {
+      get: {
+        tags: ["Addresses"],
+        summary: "My addresses, default first",
+        security: bearer,
+        responses: {
+          200: { description: "Address[]" },
+          401: { description: "Unauthorized" },
+        },
+      },
+      post: {
+        tags: ["Addresses"],
+        summary:
+          "Create. First address is always default; isDefault:true demotes the old default",
+        security: bearer,
+        requestBody: body(createAddressSchema.body),
+        responses: {
+          201: { description: "Address" },
+          409: { description: "ADDRESS_LIMIT (max 10)" },
+          422: { description: "VALIDATION_ERROR (incl. unserviceable pincode)" },
+        },
+      },
+    },
+    "/addresses/{id}": {
+      patch: {
+        tags: ["Addresses"],
+        summary: "Partial update (the default flag has its own endpoint)",
+        security: bearer,
+        parameters: [
+          { name: "id", in: "path", required: true, schema: { type: "string" } },
+        ],
+        requestBody: body(updateAddressSchema.body),
+        responses: {
+          200: { description: "Address" },
+          404: { description: "NOT_FOUND (also for other users' addresses)" },
+          422: { description: "VALIDATION_ERROR" },
+        },
+      },
+      delete: {
+        tags: ["Addresses"],
+        summary:
+          "Delete. Deleting the default auto-promotes the newest remaining address",
+        security: bearer,
+        parameters: [
+          { name: "id", in: "path", required: true, schema: { type: "string" } },
+        ],
+        responses: {
+          200: { description: "{ deletedId, newDefaultId | null }" },
+          404: { description: "NOT_FOUND" },
+        },
+      },
+    },
+    "/addresses/{id}/default": {
+      post: {
+        tags: ["Addresses"],
+        summary: "Make this the default (atomically demotes the previous one)",
+        security: bearer,
+        parameters: [
+          { name: "id", in: "path", required: true, schema: { type: "string" } },
+        ],
+        responses: { 200: { description: "Address" }, 404: { description: "NOT_FOUND" } },
+      },
+    },
+    "/pincodes/{pincode}": {
+      get: {
+        tags: ["Delivery"],
+        summary: "Serviceability + delivery estimate for a 6-digit pincode (public)",
+        parameters: [
+          {
+            name: "pincode",
+            in: "path",
+            required: true,
+            schema: { type: "string", pattern: "^[1-9][0-9]{5}$" },
+          },
+        ],
+        responses: {
+          200: {
+            description:
+              "{ serviceable, zone, state, codAvailable, deliveryDays:{min,max}, estimatedDelivery:{from,to} } or { serviceable:false }",
+          },
+          422: { description: "VALIDATION_ERROR" },
+        },
       },
     },
     "/categories": {
