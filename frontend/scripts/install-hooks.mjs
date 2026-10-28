@@ -10,11 +10,16 @@ try {
   })
     .toString()
     .trim()
-  const prefix = execSync("git rev-parse --show-prefix", { stdio: ["ignore", "pipe", "ignore"] })
+  const prefix = execSync("git rev-parse --show-prefix", {
+    stdio: ["ignore", "pipe", "ignore"],
+  })
     .toString()
     .trim() // "frontend/"
   if (existsSync(".githooks/pre-commit")) {
-    execSync(`git config core.hooksPath ${prefix}.githooks`, { cwd: root, stdio: "ignore" })
+    execSync(`git config core.hooksPath ${prefix}.githooks`, {
+      cwd: root,
+      stdio: "ignore",
+    })
   }
 } catch {
   /* not a git checkout */

@@ -15,6 +15,7 @@ import { ToastProvider } from "@/features/toast"
 import { installGlobalErrorReporting } from "@/lib/globalErrors"
 import { pageTitle } from "@/lib/pageTitle"
 import { queryClient } from "@/lib/query-client"
+import { reportWebVitals } from "@/lib/vitals"
 
 import "./app.css"
 
@@ -44,6 +45,8 @@ export function Layout({ children }: { children: React.ReactNode }) {
 export default function App() {
   // Errors no boundary can catch (event handlers, timers, forgotten promises): reported once each.
   useEffect(() => installGlobalErrorReporting(), [])
+  // Field Web Vitals (13.1): once per page load, console in dev, a beacon to the API in production.
+  useEffect(() => reportWebVitals(), [])
   // Order = dependency order: theme first (toasts read it), auth before anything that needs the
   // user (wishlist). Each one is a separate, small context: no mega-context.
   return (
