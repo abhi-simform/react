@@ -6,6 +6,7 @@ import type { Route } from "./+types/root"
 import { RouteErrorView } from "@/components/common/RouteErrorView"
 import { AuthProvider, IdleWarning, SessionCacheSync } from "@/features/auth"
 import { CartSessionSync } from "@/features/cart"
+import { RealtimeSync } from "@/features/realtime"
 import { RecentlyViewedSync } from "@/features/recommendations"
 import { WishlistSessionSync } from "@/features/wishlist"
 import { ThemeProvider } from "@/features/theme"
@@ -50,6 +51,7 @@ export default function App() {
           <CartSessionSync />
           <WishlistSessionSync />
           <RecentlyViewedSync />
+          <RealtimeSync />
           <ToastProvider>
             <Outlet />
           </ToastProvider>

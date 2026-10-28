@@ -10,6 +10,7 @@ import { NotFoundError } from "@/lib/notFound"
 import { paths } from "@/lib/paths"
 
 import { PaymentPanel } from "@/features/payments"
+import { useSocketStatus } from "@/features/realtime"
 
 import { orderQueries, restartPendingPolling } from "../queries"
 import { OrderStatusBadge } from "./OrderStatusBadge"
@@ -21,7 +22,8 @@ import { PayAnotherWay } from "./PayAnotherWay"
  * already in the cache (`usePlaceOrder` writes it), so it renders without a request.
  */
 export function OrderSuccessPage({ orderId }: { orderId: string }) {
-  const q = useQuery(orderQueries.detail(orderId))
+  const connected = useSocketStatus() === "connected"
+  const q = useQuery(orderQueries.detail(orderId, { poll: !connected }))
   if (q.isPending)
     return (
       <div className="p-4">

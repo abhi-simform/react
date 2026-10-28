@@ -16,6 +16,7 @@ export {
   accessTokenExpiresAt,
   devBreakAccessToken,
   getAccessToken,
+  refreshSession,
 } from "./session"
 export { broadcastAuth } from "./authChannel"
 export type { AuthStatus, AuthUser, Role } from "./types"

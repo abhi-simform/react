@@ -1,9 +1,9 @@
-import { PlaceholderPage } from "@/components/common/PlaceholderPage"
+import { NotificationsPage } from "@/features/notifications"
 import { pageTitle } from "@/lib/pageTitle"
 import type { RouteHandle } from "@/types/route-handle"
 
 export default function AccountNotificationsRoute() {
-  return <PlaceholderPage title="Notifications" builtIn="11" />
+  return <NotificationsPage />
 }
 
 export function meta() {

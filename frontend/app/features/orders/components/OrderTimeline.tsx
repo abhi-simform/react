@@ -86,7 +86,8 @@ export function OrderTimeline({
           className={cn(
             "flex gap-2 rounded px-2 py-1",
             s.state === "upcoming" && "text-neutral-500",
-            s.state === "current" && "font-medium",
+            s.state === "current" &&
+              "animate-in font-medium duration-500 fade-in-0 slide-in-from-left-2 motion-reduce:animate-none",
             s.state === "current" &&
               s.status === "out_for_delivery" &&
               "bg-amber-100 text-amber-900"

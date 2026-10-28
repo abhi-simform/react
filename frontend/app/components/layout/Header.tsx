@@ -3,6 +3,8 @@ import { Link, NavLink } from "react-router"
 import { AccountMenu } from "@/features/auth"
 import { CompareTrayButton } from "@/features/compare"
 import { CartDrawer } from "@/features/cart"
+import { NotificationBell } from "@/features/notifications"
+import { ConnectionIndicator } from "@/features/realtime"
 import { SearchBox } from "@/features/search"
 import { ThemeToggle } from "@/features/theme"
 import { WishlistLink } from "@/features/wishlist"
@@ -49,6 +51,8 @@ export function Header() {
         )}
         <SearchBox />
         <AccountMenu />
+        <NotificationBell />
+        <ConnectionIndicator />
         <ThemeToggle />
         <WishlistLink />
         <CompareTrayButton />

@@ -4,6 +4,7 @@ import { Link } from "react-router"
 import { ErrorState } from "@/components/common/ErrorState"
 import { DetailSkeleton } from "@/components/common/Skeletons"
 import { PaymentPanel, paymentQueries } from "@/features/payments"
+import { useSocketStatus } from "@/features/realtime"
 import { toApiError } from "@/lib/api/errors"
 import { formatDate, formatRupees } from "@/lib/format"
 import { NotFoundError } from "@/lib/notFound"
@@ -30,7 +31,9 @@ import { ReturnStatus } from "./ReturnStatus"
  * the polling for live events.
  */
 export function OrderDetailPage({ orderId }: { orderId: string }) {
-  const q = useQuery(orderQueries.detail(orderId))
+  // Live events (11.9) replace polling while the socket is up; polling is the fallback.
+  const connected = useSocketStatus() === "connected"
+  const q = useQuery(orderQueries.detail(orderId, { poll: !connected }))
   if (q.isPending)
     return (
       <div className="p-4">
@@ -68,7 +71,9 @@ export function OrderDetailPage({ orderId }: { orderId: string }) {
         data-testid="order-live"
       >
         {live
-          ? `Live: checking for updates every ${seconds} seconds${q.isFetching ? " (updating...)" : ""}`
+          ? connected && o.status !== "pending_payment"
+            ? "Live: updates appear here as they happen."
+            : `${connected ? "Live" : "Reconnecting"}: checking for updates every ${seconds} seconds${q.isFetching ? " (updating...)" : ""}`
           : `Final status: ${statusLabel(o.status)}. No more updates expected.`}
       </p>
 

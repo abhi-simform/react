@@ -13,7 +13,9 @@ import { isTerminal } from "./status"
  * so `pending_payment` polls every 3 s, but only for PENDING_CAP_MS after this page first saw it
  * pending (after that "Check now" restarts it): a webhook-driven order must not be hammered
  * forever by a forgotten tab. Active orders (placed ... out for delivery) poll every 10 s until a
- * terminal status; 11.9 swaps that for sockets.
+ * terminal status, but only WHILE THE SOCKET IS DOWN (11.9): connected, `order:status` events patch
+ * the cache and polling would only duplicate them. A pending payment keeps polling either way: the
+ * money path should not depend on a socket being up.
  */
 export const PENDING_POLL_MS = 3000
 export const ACTIVE_POLL_MS = 10_000
@@ -24,14 +26,18 @@ const pendingSince = new Map<string, number>()
 export const restartPendingPolling = (orderId: string) =>
   pendingSince.delete(orderId)
 
-function pollInterval(orderId: string, status: OrderStatus): number | false {
+function pollInterval(
+  orderId: string,
+  status: OrderStatus,
+  poll: boolean
+): number | false {
   if (status === "pending_payment") {
     const since = pendingSince.get(orderId) ?? Date.now()
     pendingSince.set(orderId, since)
     return Date.now() - since > PENDING_CAP_MS ? false : PENDING_POLL_MS
   }
   pendingSince.delete(orderId)
-  return isTerminal(status) ? false : ACTIVE_POLL_MS
+  return isTerminal(status) || !poll ? false : ACTIVE_POLL_MS
 }
 
 export const orderQueries = {
@@ -51,12 +57,14 @@ export const orderQueries = {
    * (`refetchIntervalInBackground` defaults to false) and stops it when no component observes the
    * query any more (navigating away), so no interval can leak.
    */
-  detail: (id: string) =>
+  detail: (id: string, { poll = true }: { poll?: boolean } = {}) =>
     queryOptions({
       queryKey: orderKeys.detail(id),
       queryFn: ({ signal }) => getOrder(id, signal),
       staleTime: STALE.orders,
       refetchInterval: (query) =>
-        query.state.data ? pollInterval(id, query.state.data.status) : false,
+        query.state.data
+          ? pollInterval(id, query.state.data.status, poll)
+          : false,
     }),
 }
