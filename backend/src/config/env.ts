@@ -35,6 +35,16 @@ const schema = z.object({
     .default("http://localhost:4000/api/v1/auth/google/callback"),
   GOOGLE_MOCK: z.enum(["auto", "true", "false"]).default("auto"),
 
+  // Payments (B6). Without RAZORPAY_KEY_ID + RAZORPAY_KEY_SECRET the backend falls back to a built-in
+  // MOCK gateway outside production, so the whole pay flow runs locally with no account.
+  // Real test mode: see backend/docs/API-CONVENTIONS.md "Payments (B6)".
+  RAZORPAY_KEY_ID: z.string().optional(),
+  RAZORPAY_KEY_SECRET: z.string().optional(),
+  RAZORPAY_WEBHOOK_SECRET: z.string().optional(),
+  PAYMENT_MOCK: z.enum(["auto", "true", "false"]).default("auto"),
+  // The mock gateway delivers its "webhook" this long after the browser callback (0 in tests).
+  MOCK_WEBHOOK_DELAY_MS: z.coerce.number().int().min(0).default(1500),
+
   SMTP_HOST: z.string().default("localhost"),
   SMTP_PORT: z.coerce.number().int().default(1025),
   EMAIL_FROM: z.string().default("ShopSphere <no-reply@shopsphere.local>"),
@@ -70,3 +80,10 @@ export const googleConfigured = Boolean(env.GOOGLE_CLIENT_ID && env.GOOGLE_CLIEN
 export const googleMock =
   !isProd &&
   (env.GOOGLE_MOCK === "true" || (env.GOOGLE_MOCK === "auto" && !googleConfigured))
+
+/** Real Razorpay needs both API keys. */
+export const razorpayConfigured = Boolean(env.RAZORPAY_KEY_ID && env.RAZORPAY_KEY_SECRET)
+/** Mock gateway: never in production; "auto" = only while the Razorpay keys are absent. */
+export const paymentMock =
+  !isProd &&
+  (env.PAYMENT_MOCK === "true" || (env.PAYMENT_MOCK === "auto" && !razorpayConfigured))

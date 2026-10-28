@@ -35,7 +35,15 @@ export function createApp() {
       autoLogging: !isTest,
     })
   )
-  app.use(express.json({ limit: "1mb" }))
+  // The payment webhook signature covers the RAW bytes, so keep them for that one route.
+  app.use(
+    express.json({
+      limit: "1mb",
+      verify: (req: express.Request, _res, buf) => {
+        if (req.url.startsWith("/api/v1/payments/webhook")) req.rawBody = buf
+      },
+    })
+  )
   app.use(cookieParser())
   app.use(API_PREFIX, apiLimiter)
 

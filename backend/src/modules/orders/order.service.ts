@@ -1,7 +1,6 @@
 import { createHash, randomBytes } from "node:crypto"
 import mongoose, { Types, type ClientSession } from "mongoose"
 import { ApiError } from "../../utils/ApiError.js"
-import { sendEmail } from "../../utils/email.js"
 import { Address } from "../addresses/address.model.js"
 import { Cart } from "../cart/cart.model.js"
 import { priceCart } from "../cart/cart.service.js"
@@ -10,7 +9,8 @@ import { Deal } from "../deals/deal.model.js"
 import { COD_MAX_TOTAL, priceOrder } from "../pricing/pricing.js"
 import { addBusinessDays, checkPincode } from "../pincodes/pincode.service.js"
 import { Product } from "../products/product.model.js"
-import { User } from "../users/user.model.js"
+import { notifyPlaced } from "./order.mail.js"
+import { onOrderCancelled, onRefundDue } from "../payments/payment.service.js"
 import {
   CANCELLABLE,
   ORDER_STATUSES,
@@ -269,29 +269,6 @@ async function createOrder(
   return order
 }
 
-async function notifyPlaced(
-  userId: string,
-  order: {
-    orderNumber: string
-    status: string
-    pricing: { total: number }
-    items: { title: string; qty: number }[]
-  }
-) {
-  if (order.status !== "placed") return // online orders get their mail when payment succeeds (B6)
-  const user = await User.findById(userId).lean()
-  if (!user) return
-  const rows = order.items
-    .map((i) => `<li>${i.qty} x ${escapeHtml(i.title)}</li>`)
-    .join("")
-  await sendEmail(
-    user.email,
-    `Order ${order.orderNumber} confirmed`,
-    `<p>Hi ${escapeHtml(user.name)}, thanks for your order <b>${order.orderNumber}</b>.</p><ul>${rows}</ul><p>Total: Rs ${order.pricing.total} (cash on delivery).</p>`
-  )
-}
-const escapeHtml = (s: string) => s.replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`)
-
 // ---- read ------------------------------------------------------------------------------------
 
 export async function listOrders(
@@ -356,37 +333,42 @@ async function restock(
 
 /** Customer cancel: only before packing. Releases stock, the deal claim and the coupon use. */
 export async function cancelOrder(userId: string, id: string, reason?: string) {
-  return mongoose.connection.transaction(async (session) => {
-    const current = await Order.findOne({ _id: id, user: userId }).session(session)
-    if (!current) throw ApiError.notFound("Order not found")
-    if (!CANCELLABLE.includes(current.status))
-      throw invalidTransition(current.status, "cancelled")
-    const wasPaid = current.payment?.status === "paid"
-    // The status guard makes a double-click (or two tabs) cancel exactly once.
-    const order = await Order.findOneAndUpdate(
-      { _id: id, user: userId, status: { $in: CANCELLABLE } },
-      {
-        $set: {
-          status: "cancelled",
-          cancelledAt: new Date(),
-          cancelReason: reason,
-          ...(wasPaid ? { "payment.status": "refund_pending" } : {}),
-        },
-        $push: {
-          statusHistory: {
+  return mongoose.connection
+    .transaction(async (session) => {
+      const current = await Order.findOne({ _id: id, user: userId }).session(session)
+      if (!current) throw ApiError.notFound("Order not found")
+      if (!CANCELLABLE.includes(current.status))
+        throw invalidTransition(current.status, "cancelled")
+      const wasPaid = current.payment?.status === "paid"
+      // The status guard makes a double-click (or two tabs) cancel exactly once.
+      const order = await Order.findOneAndUpdate(
+        { _id: id, user: userId, status: { $in: CANCELLABLE } },
+        {
+          $set: {
             status: "cancelled",
-            at: new Date(),
-            note: reason ?? "Cancelled by customer",
+            cancelledAt: new Date(),
+            cancelReason: reason,
+            ...(wasPaid ? { "payment.status": "refund_pending" } : {}),
+          },
+          $push: {
+            statusHistory: {
+              status: "cancelled",
+              at: new Date(),
+              note: reason ?? "Cancelled by customer",
+            },
           },
         },
-      },
-      { session, returnDocument: "after" }
-    )
-    if (!order) throw invalidTransition(current.status, "cancelled")
-    await restock(order, session, true)
-    if (order.coupon?.code) await release(order.coupon.code, session)
-    return order
-  })
+        { session, returnDocument: "after" }
+      )
+      if (!order) throw invalidTransition(current.status, "cancelled")
+      await restock(order, session, true)
+      if (order.coupon?.code) await release(order.coupon.code, session)
+      return order
+    })
+    .then(async (order) => {
+      await onOrderCancelled(order) // B6: refund a captured payment / close the unpaid one
+      return (await Order.findById(order._id)) ?? order
+    })
 }
 
 /** Return request: delivered orders only, within RETURN_WINDOW_DAYS of delivery. */
@@ -431,60 +413,68 @@ export async function transitionOrder(
   to: OrderStatus,
   note?: string
 ) {
-  return mongoose.connection.transaction(async (session) => {
-    const current = await Order.findById(id).session(session)
-    if (!current) throw ApiError.notFound("Order not found")
-    if (!canTransition(current.status, to))
-      throw new ApiError(
-        409,
-        "INVALID_TRANSITION",
-        `Cannot move an order from ${current.status} to ${to}`,
-        { status: current.status, allowed: TRANSITIONS[current.status] }
-      )
-    const now = new Date()
-    const set: Record<string, unknown> = { status: to }
-    if (to === "delivered") {
-      set.deliveredAt = now
-      if (current.payment?.method === "cod") set["payment.status"] = "paid"
-      if (current.status === "return_requested") {
-        set["returnRequest.status"] = "rejected"
+  return mongoose.connection
+    .transaction(async (session) => {
+      const current = await Order.findById(id).session(session)
+      if (!current) throw ApiError.notFound("Order not found")
+      if (!canTransition(current.status, to))
+        throw new ApiError(
+          409,
+          "INVALID_TRANSITION",
+          `Cannot move an order from ${current.status} to ${to}`,
+          { status: current.status, allowed: TRANSITIONS[current.status] }
+        )
+      const now = new Date()
+      const set: Record<string, unknown> = { status: to }
+      if (to === "delivered") {
+        set.deliveredAt = now
+        if (current.payment?.method === "cod") set["payment.status"] = "paid"
+        if (current.status === "return_requested") {
+          set["returnRequest.status"] = "rejected"
+          set["returnRequest.resolvedAt"] = now
+        }
+      }
+      if (to === "returned") {
+        set["returnRequest.status"] = "approved"
         set["returnRequest.resolvedAt"] = now
       }
-    }
-    if (to === "returned") {
-      set["returnRequest.status"] = "approved"
-      set["returnRequest.resolvedAt"] = now
-    }
-    if (to === "refunded") {
-      set["returnRequest.status"] = "refunded"
-      set["payment.status"] = "refunded"
-    }
-    if (to === "cancelled") {
-      set.cancelledAt = now
-      set.cancelReason = note
-    }
-    const order = await Order.findOneAndUpdate(
-      { _id: id, status: current.status },
-      {
-        $set: set,
-        $push: {
-          statusHistory: { status: to, at: now, note, by: new Types.ObjectId(actorId) },
+      if (to === "refunded") {
+        set["returnRequest.status"] = "refunded"
+        // Online payments: the gateway refund (below) flips this to "refunded" when it settles.
+        set["payment.status"] =
+          current.payment?.method === "razorpay" ? "refund_pending" : "refunded"
+      }
+      if (to === "cancelled") {
+        set.cancelledAt = now
+        set.cancelReason = note
+      }
+      const order = await Order.findOneAndUpdate(
+        { _id: id, status: current.status },
+        {
+          $set: set,
+          $push: {
+            statusHistory: { status: to, at: now, note, by: new Types.ObjectId(actorId) },
+          },
         },
-      },
-      { session, returnDocument: "after" }
-    )
-    if (!order)
-      throw ApiError.conflict(
-        "The order changed while you were editing it",
-        "ORDER_CHANGED"
+        { session, returnDocument: "after" }
       )
-    if (to === "cancelled") {
-      await restock(order, session, true)
-      if (order.coupon?.code) await release(order.coupon.code, session)
-    }
-    if (to === "returned") await restock(order, session, false)
-    return order
-  })
+      if (!order)
+        throw ApiError.conflict(
+          "The order changed while you were editing it",
+          "ORDER_CHANGED"
+        )
+      if (to === "cancelled") {
+        await restock(order, session, true)
+        if (order.coupon?.code) await release(order.coupon.code, session)
+      }
+      if (to === "returned") await restock(order, session, false)
+      return order
+    })
+    .then(async (order) => {
+      if (to === "cancelled") await onOrderCancelled(order)
+      if (to === "refunded") await onRefundDue(order)
+      return (await Order.findById(order._id)) ?? order
+    })
 }
 
 export const ALL_STATUSES = ORDER_STATUSES

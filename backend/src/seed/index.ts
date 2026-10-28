@@ -13,6 +13,7 @@ import { Cart } from "../modules/cart/cart.model.js"
 import { Coupon } from "../modules/coupons/coupon.model.js"
 import { Deal } from "../modules/deals/deal.model.js"
 import { Banner } from "../modules/banners/banner.model.js"
+import { Payment, WebhookEvent } from "../modules/payments/payment.model.js"
 import { Order, type OrderStatus } from "../modules/orders/order.model.js"
 import { slugify } from "../utils/slugify.js"
 import { CATALOG } from "./catalog.js"
@@ -45,6 +46,8 @@ async function main() {
     Deal.syncIndexes(),
     Banner.syncIndexes(),
     Order.syncIndexes(),
+    Payment.syncIndexes(),
+    WebhookEvent.syncIndexes(),
   ])
 
   // Users
@@ -331,7 +334,7 @@ async function main() {
       { status: "cancelled", daysAgo: 8, pm: "cod" },
     ]
     if (addr && hist.length === 4) {
-      await Order.insertMany(
+      const seededOrders = await Order.insertMany(
         plan.map((o, n) => {
           const p = hist[n]!
           const qty = 1 + (n % 2)
@@ -401,6 +404,26 @@ async function main() {
             createdAt,
           }
         }),
+        { timestamps: false }
+      )
+      // B6: the online-paid historical order gets its payment record (history page, refunds).
+      await Payment.insertMany(
+        seededOrders
+          .filter((o) => o.payment?.method === "razorpay" && o.payment.status === "paid")
+          .map((o) => ({
+            order: o._id,
+            user: o.user,
+            orderNumber: o.orderNumber,
+            provider: "mock" as const,
+            providerOrderId: `order_seed_${o.orderNumber.slice(-6)}`,
+            providerPaymentId: `pay_seed_${o.orderNumber.slice(-6)}`,
+            amount: o.pricing.total,
+            status: "paid" as const,
+            method: "upi",
+            attempts: 0,
+            paidAt: o.createdAt,
+            createdAt: o.createdAt,
+          })),
         { timestamps: false }
       )
     }

@@ -118,7 +118,14 @@ const orderSchema = new Schema(
       // cod: pending -> paid (on delivery). razorpay (B6): pending -> paid | failed; refunded.
       status: {
         type: String,
-        enum: ["pending", "paid", "failed", "refund_pending", "refunded"],
+        enum: [
+          "pending",
+          "paid",
+          "failed",
+          "refund_pending",
+          "partially_refunded",
+          "refunded",
+        ],
         default: "pending",
       },
     },
@@ -133,6 +140,7 @@ const orderSchema = new Schema(
       requestedAt: Date,
       status: { type: String, enum: ["requested", "approved", "rejected", "refunded"] },
       resolvedAt: Date,
+      refundAmount: Number, // whole rupees due back for the returned items
     },
   },
   { timestamps: true }

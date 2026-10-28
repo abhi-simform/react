@@ -26,6 +26,14 @@ import {
   placeOrderSchema,
   returnOrderSchema,
 } from "./modules/orders/order.schema.js"
+import {
+  createPaymentOrderSchema,
+  listPaymentsSchema,
+  mockPaySchema,
+  refundSchema,
+  simulateWebhookSchema,
+  verifyPaymentSchema,
+} from "./modules/payments/payment.schema.js"
 import { addWishlistSchema } from "./modules/wishlist/wishlist.schema.js"
 import { listBrandsSchema } from "./modules/categories/category.schema.js"
 import { listProductsSchema } from "./modules/products/product.schema.js"
@@ -646,6 +654,114 @@ export const openApiDocument = {
         responses: {
           200: { description: "Order" },
           409: { description: "INVALID_TRANSITION { status, allowed }" },
+        },
+      },
+    },
+    "/payments/config": {
+      get: {
+        tags: ["Payments"],
+        summary:
+          "Which gateway is active: { configured, provider: razorpay|mock|null, keyId (public), mock }",
+        responses: { 200: { description: "Gateway config" } },
+      },
+    },
+    "/payments/create-order": {
+      post: {
+        tags: ["Payments"],
+        summary:
+          "Step 1 of paying a pending_payment order online: returns what checkout.js needs { providerOrderId, keyId, amount (paise), currency, prefill }. Idempotent: a retry gets the same provider order",
+        security: bearer,
+        requestBody: body(createPaymentOrderSchema.body),
+        responses: {
+          200: { description: "Checkout options" },
+          404: { description: "NOT_FOUND (also another user's order)" },
+          409: { description: "NOT_ONLINE_PAYMENT | ORDER_NOT_PAYABLE" },
+          503: { description: "PAYMENTS_NOT_CONFIGURED" },
+        },
+      },
+    },
+    "/payments/verify": {
+      post: {
+        tags: ["Payments"],
+        summary:
+          "Send the checkout handler's razorpay_* fields. The HMAC-SHA256 signature is verified with the secret; on success the order moves pending_payment > placed. Webhooks stay the source of truth: this call and the webhook are both idempotent",
+        security: bearer,
+        requestBody: body(verifyPaymentSchema.body),
+        responses: {
+          200: { description: "Order" },
+          400: { description: "SIGNATURE_MISMATCH | ORDER_MISMATCH" },
+          404: { description: "NOT_FOUND" },
+        },
+      },
+    },
+    "/payments/webhook": {
+      post: {
+        tags: ["Payments"],
+        summary:
+          "Razorpay webhook (public; authenticated by x-razorpay-signature = HMAC of the RAW body). payment.captured / order.paid > paid, payment.failed > failed, refund.processed / refund.failed. Duplicate deliveries (x-razorpay-event-id) are no-ops",
+        responses: {
+          200: { description: "{ duplicate: boolean }" },
+          400: { description: "INVALID_SIGNATURE" },
+        },
+      },
+    },
+    "/payments": {
+      get: {
+        tags: ["Payments"],
+        summary: "My payments (history with refunds). Filters: status, orderId",
+        security: bearer,
+        parameters: queryParams(listPaymentsSchema.query as z.ZodObject),
+        responses: { 200: { description: "Payment[] + page meta" } },
+      },
+    },
+    "/payments/mock/pay": {
+      post: {
+        tags: ["Payments"],
+        summary:
+          "Mock gateway only (non-production): what the Razorpay modal does. outcome success returns the signed handler payload; success_no_callback = the tab closed after paying (webhook only); failure = card declined",
+        security: bearer,
+        requestBody: body(mockPaySchema.body),
+        responses: {
+          200: { description: "{ ok, handler | error }" },
+          404: { description: "Mock not active" },
+        },
+      },
+    },
+    "/payments/dev/webhook": {
+      post: {
+        tags: ["Payments"],
+        summary:
+          "Non-production: fire a correctly SIGNED webhook for your order (works with real test keys when RAZORPAY_WEBHOOK_SECRET is set), since Razorpay cannot reach localhost",
+        security: bearer,
+        requestBody: body(simulateWebhookSchema.body),
+        responses: { 200: { description: "{ duplicate }" } },
+      },
+    },
+    "/admin/payments": {
+      get: {
+        tags: ["Admin"],
+        summary: "All payments (same filters)",
+        security: bearer,
+        parameters: queryParams(listPaymentsSchema.query as z.ZodObject),
+        responses: {
+          200: { description: "Payment[]" },
+          403: { description: "FORBIDDEN" },
+        },
+      },
+    },
+    "/admin/payments/{id}/refund": {
+      post: {
+        tags: ["Admin"],
+        summary:
+          "Refund (part of) a captured payment. Omit amount to refund everything left",
+        security: bearer,
+        parameters: [
+          { name: "id", in: "path", required: true, schema: { type: "string" } },
+        ],
+        requestBody: body(refundSchema.body),
+        responses: {
+          200: { description: "Payment" },
+          409: { description: "NOT_PAID | REFUND_EXCEEDS_PAYMENT { refundable }" },
         },
       },
     },
