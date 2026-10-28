@@ -1,3 +1,4 @@
+import { SectionBoundary } from "@/components/common/SectionBoundary"
 import { Link, NavLink } from "react-router"
 
 import { AccountMenu } from "@/features/auth"
@@ -29,7 +30,11 @@ export function Header() {
         <Link to={paths.home()} className="font-semibold">
           ShopSphere
         </Link>
-        {isDesktop && <MegaMenu />}
+        {isDesktop && (
+          <SectionBoundary label="the category menu">
+            <MegaMenu />
+          </SectionBoundary>
+        )}
       </div>
       <nav
         aria-label="Primary"
@@ -51,7 +56,9 @@ export function Header() {
         )}
         <SearchBox />
         <AccountMenu />
-        <NotificationBell />
+        <SectionBoundary label="notifications">
+          <NotificationBell />
+        </SectionBoundary>
         <ConnectionIndicator />
         <ThemeToggle />
         <WishlistLink />

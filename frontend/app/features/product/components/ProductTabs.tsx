@@ -1,3 +1,4 @@
+import { SectionBoundary } from "@/components/common/SectionBoundary"
 import { useSearchParams } from "react-router"
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -68,10 +69,14 @@ export function ProductTabs({ product }: { product: ProductDetailVM }) {
         </dl>
       </TabsContent>
       <TabsContent value="reviews">
-        <ReviewsSection product={{ id: product.id, slug: product.slug }} />
+        <SectionBoundary label="reviews" resetKeys={[product.id]}>
+          <ReviewsSection product={{ id: product.id, slug: product.slug }} />
+        </SectionBoundary>
       </TabsContent>
       <TabsContent value="qa">
-        <QaSection productId={product.id} />
+        <SectionBoundary label="questions and answers" resetKeys={[product.id]}>
+          <QaSection productId={product.id} />
+        </SectionBoundary>
       </TabsContent>
     </Tabs>
   )

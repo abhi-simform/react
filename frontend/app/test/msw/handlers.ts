@@ -212,6 +212,60 @@ export const handlers: RequestHandler[] = [
     return ok(created, { status: 201 })
   }),
 
+  // ---- reviews and questions (two real-shaped reviews, no questions)
+  http.get(`${API}/products/:id/reviews/summary`, () =>
+    ok({
+      average: 4,
+      count: 2,
+      histogram: { "1": 0, "2": 0, "3": 0, "4": 2, "5": 0 },
+      withPhotos: 0,
+    })
+  ),
+  http.get(`${API}/products/:id/reviews/eligibility`, () =>
+    ok({ canReview: true, reason: null, verifiedPurchase: false, review: null })
+  ),
+  http.get(`${API}/products/:id/reviews`, ({ params }) => {
+    const review = (n: number) => ({
+      id: `rev-${n}`,
+      productId: String(params.id),
+      author: `Reviewer ${n}`,
+      rating: 4,
+      title: `Pretty good ${n}`,
+      body: "Works as described.",
+      photos: [],
+      verifiedPurchase: true,
+      helpfulCount: n,
+      status: "published",
+      edited: false,
+      isMine: false,
+      myVote: false,
+      createdAt: "2026-08-04T17:36:06.964Z",
+      updatedAt: "2026-08-04T17:36:06.964Z",
+    })
+    return ok([review(1), review(2)], {
+      meta: {
+        page: 1,
+        limit: 5,
+        total: 2,
+        totalPages: 1,
+        hasNext: false,
+        hasPrev: false,
+      },
+    })
+  }),
+  http.get(`${API}/products/:id/questions`, () =>
+    ok([], {
+      meta: {
+        page: 1,
+        limit: 5,
+        total: 0,
+        totalPages: 1,
+        hasNext: false,
+        hasPrev: false,
+      },
+    })
+  ),
+
   // ---- delivery
   http.get(`${API}/pincodes/:pincode`, ({ params }) => {
     const pincode = String(params.pincode)

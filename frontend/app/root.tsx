@@ -1,5 +1,6 @@
 import { QueryClientProvider } from "@tanstack/react-query"
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools"
+import { useEffect } from "react"
 import { Links, Meta, Outlet, Scripts, ScrollRestoration } from "react-router"
 
 import type { Route } from "./+types/root"
@@ -11,6 +12,7 @@ import { RecentlyViewedSync } from "@/features/recommendations"
 import { WishlistSessionSync } from "@/features/wishlist"
 import { ThemeProvider } from "@/features/theme"
 import { ToastProvider } from "@/features/toast"
+import { installGlobalErrorReporting } from "@/lib/globalErrors"
 import { pageTitle } from "@/lib/pageTitle"
 import { queryClient } from "@/lib/query-client"
 
@@ -40,6 +42,8 @@ export function Layout({ children }: { children: React.ReactNode }) {
 }
 
 export default function App() {
+  // Errors no boundary can catch (event handlers, timers, forgotten promises): reported once each.
+  useEffect(() => installGlobalErrorReporting(), [])
   // Order = dependency order: theme first (toasts read it), auth before anything that needs the
   // user (wishlist). Each one is a separate, small context: no mega-context.
   return (
