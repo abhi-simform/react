@@ -8,6 +8,7 @@ coverage/
 .nitro/
 *.log
 .DS_Store
+.claude
 
 # env files (keep the examples)
 .env
