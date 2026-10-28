@@ -4,7 +4,8 @@ import assert from "node:assert/strict"
 
 import { loadHomeData } from "@/features/catalog/homeData"
 import { sleep, isAbortError, withTimeout } from "@/lib/async"
-import { getJson, HttpError } from "@/lib/api/getJson"
+import { getJson } from "@/lib/api/getJson"
+import { ApiError } from "@/lib/api/errors"
 
 const base = "http://localhost:4000/api/v1"
 
@@ -14,8 +15,9 @@ assert.equal(raw.ok, false)
 assert.equal(raw.status, 404)
 // ...getJson does
 await assert.rejects(getJson(`${base}/nope`), (e: unknown) => {
-  assert.ok(e instanceof HttpError)
+  assert.ok(e instanceof ApiError)
   assert.equal(e.status, 404)
+  assert.equal(e.code, "NOT_FOUND")
   assert.match(e.message, /^HTTP 404: /)
   return true
 })
