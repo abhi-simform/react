@@ -296,3 +296,8 @@ Symptom: click "mobiles" (made slow: 1.5 s) and then "laptops" (0.1 s): the UI s
 
 ### Bug 4: stale closure in an interval
 Symptom: a timer incrementing every 200 ms shows `1` and stays there (broken) while the fixed one kept counting (56 after ~11 s of the page being open). Cause: the effect runs once (`[]`), and `setSeconds(seconds + 1)` closes over the first render's `seconds = 0`, so it always sets 1. Fix: `setSeconds(s => s + 1)`: the new value depends only on the previous one, so the effect needs no dependency and the interval is created once.
+
+### Bug 5: `useEffect` that derives state, one frame of wrong UI
+Symptom: after each click on "+" the displayed total disagrees with `qty * price` for one committed frame (and there are two commits per click). Cause: `total` is stored state updated by an effect that runs after the commit in which `qty` changed. Measured with a no-deps effect that compares the committed total with `qty * price`: broken 13 commits / 3 wrong frames, fixed 10 commits / 0 wrong frames (the same numbers pattern as 4.1). Fix: `const total = qty * PRICE` in render; `react-hooks/set-state-in-effect` flags the broken version.
+
+The five fixes in one line each: (1) primitive deps instead of an object, (2) return a cleanup that mirrors the setup, (3) abort the previous request in cleanup, (4) functional update instead of closing over state, (5) derive during render, no state, no effect. Skipped stretch: the "Effect decision tree" page (the checkpoint answers contain the same decision logic).

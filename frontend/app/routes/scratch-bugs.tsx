@@ -9,6 +9,7 @@ import {
 import { Bug2Demo, bug2Stats } from "@/scratch/bugs/Bug2ResizeListener"
 import { Bug3Broken, Bug3Fixed } from "@/scratch/bugs/Bug3CategoryRace"
 import { Bug4Broken, Bug4Fixed } from "@/scratch/bugs/Bug4StaleInterval"
+import { Bug5Broken, Bug5Fixed } from "@/scratch/bugs/Bug5DerivedFlash"
 
 function Bug({
   title,
@@ -83,6 +84,10 @@ export default function ScratchBugs() {
       <Bug title="4. Stale closure in an interval">
         <Bug4Broken />
         <Bug4Fixed />
+      </Bug>
+      <Bug title="5. useEffect that derives state (flash of wrong UI)">
+        <Bug5Broken />
+        <Bug5Fixed />
       </Bug>
     </div>
   )
