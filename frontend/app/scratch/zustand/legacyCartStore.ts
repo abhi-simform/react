@@ -4,16 +4,29 @@ import { createJSONStorage, devtools, persist } from "zustand/middleware"
 
 import { env } from "@/lib/env"
 
-import { addLine, restoreLine, setLineQty, snapshotLine } from "./lines"
-import { computeTotals } from "./totals"
+/* eslint-disable no-restricted-imports --
+   deep imports on purpose: `scratch/22-cart-store.ts` runs this file under plain Node, which cannot
+   load the `.tsx` components the cart's public index re-exports. */
+import {
+  addLine,
+  restoreLine,
+  setLineQty,
+  snapshotLine,
+} from "@/features/cart/lines"
+import { computeTotals } from "@/features/cart/totals"
 import type {
   CartLineInput,
   CartTotals,
   GuestCartLine,
   RemovedLine,
-} from "./types"
+} from "@/features/cart/types"
+/* eslint-enable no-restricted-imports */
 
 /**
+ * RETIRED in 9.6 (kept as the Stage 8 reference and for the Zustand labs): the app no longer uses it.
+ * The cart lines are server state now (`features/cart/useCart.ts`); only the drawer flag lives in
+ * `features/cart/cartUiStore.ts`.
+ *
  * The guest cart + the cart drawer's UI flag (8.3): CLIENT state that several distant
  * components share (header badge, drawer, /cart page, product cards, PDP) and that must
  * survive a reload. Server data does not belong here: the logged-in cart arrives as a Query

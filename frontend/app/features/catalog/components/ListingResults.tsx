@@ -39,46 +39,46 @@ export function ListingResults({
           className="mb-2 h-0.5 w-full animate-pulse rounded bg-blue-500"
         />
       )}
-    <AsyncView
-      state={state}
-      loading={<ProductGridSkeleton count={PAGE_SIZE} view={filters.view} />}
-      empty={(data) => {
-        if (data.items.length > 0) return null
-        return filters.page > 1 ? (
-          <EmptyState
-            title={`Page ${filters.page} does not exist`}
-            action={
-              <Button variant="outline" onClick={() => onGoToPage(1)}>
-                Go to page 1
-              </Button>
-            }
-          />
-        ) : (
-          <EmptyState
-            title="No products match these filters"
-            description={
-              activeCount > 0
-                ? "Try removing a filter."
-                : "Nothing is listed here yet."
-            }
-            action={
-              activeCount > 0 ? (
-                <Button variant="outline" onClick={onClearAll}>
-                  Clear all filters
+      <AsyncView
+        state={state}
+        loading={<ProductGridSkeleton count={PAGE_SIZE} view={filters.view} />}
+        empty={(data) => {
+          if (data.items.length > 0) return null
+          return filters.page > 1 ? (
+            <EmptyState
+              title={`Page ${filters.page} does not exist`}
+              action={
+                <Button variant="outline" onClick={() => onGoToPage(1)}>
+                  Go to page 1
                 </Button>
-              ) : undefined
-            }
+              }
+            />
+          ) : (
+            <EmptyState
+              title="No products match these filters"
+              description={
+                activeCount > 0
+                  ? "Try removing a filter."
+                  : "Nothing is listed here yet."
+              }
+              action={
+                activeCount > 0 ? (
+                  <Button variant="outline" onClick={onClearAll}>
+                    Clear all filters
+                  </Button>
+                ) : undefined
+              }
+            />
+          )
+        }}
+      >
+        {(data) => (
+          <ProductGrid
+            products={data.items.map(toProductCardVM)}
+            view={filters.view}
           />
-        )
-      }}
-    >
-      {(data) => (
-        <ProductGrid
-          products={data.items.map(toProductCardVM)}
-          view={filters.view}
-        />
-      )}
-    </AsyncView>
+        )}
+      </AsyncView>
     </div>
   )
 }

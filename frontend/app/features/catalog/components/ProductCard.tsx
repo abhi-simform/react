@@ -3,10 +3,9 @@ import { Link } from "react-router"
 import { Price } from "@/components/common/Price"
 import { Rating } from "@/components/common/Rating"
 import { Button } from "@/components/ui/button"
-import { addToCart } from "@/features/cart"
+import { useAddToCart } from "@/features/cart"
 import { CompareToggle } from "@/features/compare"
 import { WishlistHeart } from "@/features/wishlist"
-import { toPaise } from "@/lib/money"
 import { paths } from "@/lib/paths"
 import { cn } from "@/lib/utils"
 
@@ -41,6 +40,7 @@ export function ProductCard({
   addToCartDisabled = false,
 }: ProductCardProps) {
   const outOfStock = !product.inStock
+  const addToCart = useAddToCart()
 
   return (
     <article className="relative flex h-full flex-col gap-2 rounded-lg border p-2 focus-within:ring-2">
@@ -128,16 +128,7 @@ export function ProductCard({
           onClick={() =>
             onAddToCart
               ? onAddToCart(product)
-              : addToCart({
-                  sku: product.sku,
-                  productId: product.id,
-                  slug: product.slug,
-                  name: product.name,
-                  imageUrl: product.image.url,
-                  unitPrice: toPaise(product.amount),
-                  mrp: toPaise(product.mrpAmount),
-                  stock: product.stock,
-                })
+              : void addToCart(product.id, product.name)
           }
         >
           Add to cart

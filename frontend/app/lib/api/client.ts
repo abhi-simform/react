@@ -45,6 +45,8 @@ export type ApiOptions<T> = {
   signal?: AbortSignal
   /** Validate `data` against this schema; `T` is inferred from it. */
   schema?: z.ZodType<T>
+  /** Extra request headers (e.g. the guest cart's `x-cart-token`). */
+  headers?: Record<string, string>
   /** Attach `Authorization: Bearer <token>` (and handle 401). */
   auth?: boolean
   timeoutMs?: number
@@ -79,7 +81,10 @@ async function send<T>(
   options: ApiOptions<T>
 ): Promise<{ status: number; body: unknown }> {
   const attempt = () => {
-    const headers: Record<string, string> = { Accept: "application/json" }
+    const headers: Record<string, string> = {
+      Accept: "application/json",
+      ...options.headers,
+    }
     let body: BodyInit | undefined
     if (options.body !== undefined) {
       if (isRawBody(options.body)) {

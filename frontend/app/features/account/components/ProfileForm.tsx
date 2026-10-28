@@ -46,11 +46,7 @@ export function ProfileForm() {
                 toast.success("Photo updated")
               }}
             />
-            <DetailsForm
-              key={data.id}
-              profile={data}
-              onSaved={setProfile}
-            />
+            <DetailsForm key={data.id} profile={data} onSaved={setProfile} />
           </>
         )}
       </AsyncView>

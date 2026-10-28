@@ -28,17 +28,46 @@ type Rail = {
 const RAILS: readonly Rail[] = [
   { id: "new", title: "New arrivals", sort: "newest" },
   { id: "top", title: "Top rated", sort: "rating" },
-  { id: "popular", title: "Popular right now", sort: "popularity", suspense: true },
-  { id: "electronics", title: "Electronics", sort: "popularity", category: "electronics" },
+  {
+    id: "popular",
+    title: "Popular right now",
+    sort: "popularity",
+    suspense: true,
+  },
+  {
+    id: "electronics",
+    title: "Electronics",
+    sort: "popularity",
+    category: "electronics",
+  },
   { id: "fashion", title: "Fashion", sort: "popularity", category: "fashion" },
-  { id: "home", title: "Home and kitchen", sort: "popularity", category: "home-kitchen" },
-  { id: "beauty", title: "Beauty", sort: "rating", category: "beauty-personal-care" },
+  {
+    id: "home",
+    title: "Home and kitchen",
+    sort: "popularity",
+    category: "home-kitchen",
+  },
+  {
+    id: "beauty",
+    title: "Beauty",
+    sort: "rating",
+    category: "beauty-personal-care",
+  },
   { id: "books", title: "Books", sort: "rating", category: "books" },
 ]
 
-function RailShell({ rail, children }: { rail: Rail; children: React.ReactNode }) {
+function RailShell({
+  rail,
+  children,
+}: {
+  rail: Rail
+  children: React.ReactNode
+}) {
   return (
-    <section aria-labelledby={`rail-${rail.id}`} className="flex flex-col gap-2">
+    <section
+      aria-labelledby={`rail-${rail.id}`}
+      className="flex flex-col gap-2"
+    >
       <div className="flex items-baseline justify-between">
         <h2 id={`rail-${rail.id}`} className="text-lg font-medium">
           {rail.title}
@@ -78,7 +107,13 @@ function ProductRail({ rail, forceFail }: { rail: Rail; forceFail: boolean }) {
  * is the nearest `<Suspense fallback>` and "error" is the nearest error boundary. Fewer lines in
  * the component, but the states moved to the CALLER and a failed rail needs the boundary's reset.
  */
-function SuspenseRailBody({ rail, forceFail }: { rail: Rail; forceFail: boolean }) {
+function SuspenseRailBody({
+  rail,
+  forceFail,
+}: {
+  rail: Rail
+  forceFail: boolean
+}) {
   const { data } = useSuspenseQuery(productQueries.rail(rail, forceFail))
   return data.length === 0 ? (
     <EmptyState title="Nothing here yet" />

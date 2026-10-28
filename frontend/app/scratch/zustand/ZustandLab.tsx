@@ -4,7 +4,7 @@
 import { memo, useEffect, useState } from "react"
 import { useShallow } from "zustand/react/shallow"
 
-import { useCartStore } from "@/features/cart"
+import { useCartStore } from "./legacyCartStore"
 
 import { BrokenSelector } from "./BrokenSelector"
 

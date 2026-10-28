@@ -119,7 +119,10 @@ export function useWishlist() {
   })
   const mutation = useMutation(setMembershipOptions(queryClient))
   const pendingIds = useMutationState({
-    filters: { mutationKey: [...wishlistKeys.all, "membership"], status: "pending" },
+    filters: {
+      mutationKey: [...wishlistKeys.all, "membership"],
+      status: "pending",
+    },
     select: (m) => (m.state.variables as SetMembership).productId,
   })
 

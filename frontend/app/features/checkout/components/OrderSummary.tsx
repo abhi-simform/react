@@ -41,7 +41,7 @@ export function OrderSummary({ lines }: { lines: readonly CartLine[] }) {
         </dd>
       </dl>
       <p className="mt-2 text-xs text-neutral-500">
-        Fixture cart ({lines.length} lines) until the cart API (Stage 9).
+        {lines.length} {lines.length === 1 ? "line" : "lines"} from your cart.
       </p>
     </>
   )

@@ -7,8 +7,7 @@ import { QuantityStepper } from "@/components/common/QuantityStepper"
 import { Button } from "@/components/ui/button"
 import type { ProductDetailVM } from "@/features/catalog"
 import { toPriceVM } from "@/lib/format"
-import { toPaise } from "@/lib/money"
-import { addToCart } from "@/features/cart"
+import { useAddToCart } from "@/features/cart"
 import { CompareToggle } from "@/features/compare"
 import { DeliveryCheck } from "@/features/delivery"
 import { WishlistHeart } from "@/features/wishlist"
@@ -32,6 +31,7 @@ export function ProductDetailView({
   // State: only the chosen attribute values. Everything below is derived.
   const [selection, setSelection] = useState<Selection>({})
   const [qty, setQty] = useState(1)
+  const addToCart = useAddToCart()
   const variant = findVariant(variants, selection)
   // A selected variant overrides the price: the same mapper builds the tag.
   const price = variant?.price ?? product.amount
@@ -83,19 +83,12 @@ export function ProductDetailView({
           disabled={!canBuy}
           onClick={() => {
             if (!variant) return
-            // Name carries the chosen options: two variants of one product are two cart lines.
+            // The server cart is keyed by PRODUCT (the API has no variants yet; the variant picker
+            // is still fixture data), so the chosen options only show in the toast.
             const options = Object.values(variant.attributes).join(", ")
-            addToCart(
-              {
-                sku: variant.sku,
-                productId: product.id,
-                slug: product.slug,
-                name: options ? `${product.name} (${options})` : product.name,
-                imageUrl: product.image.url,
-                unitPrice: toPaise(variant.price),
-                mrp: toPaise(variant.mrp),
-                stock: variant.stock,
-              },
+            void addToCart(
+              product.id,
+              options ? `${product.name} (${options})` : product.name,
               quantity
             )
           }}

@@ -5,16 +5,11 @@ export { CartDrawer } from "./components/CartDrawer"
 export type { CartLine, CartTotals, CouponRule, ShippingRules } from "./types"
 export { CouponBox } from "./components/CouponBox"
 export { validateCoupon, type CouponOutcome } from "./coupon"
-export {
-  CART_STORAGE_KEY,
-  useCartLineCount,
-  useCartStore,
-  useCartTotals,
-} from "./cartStore"
-export { addLine, restoreLine, setLineQty } from "./lines"
+export { addLine, restoreLine, setLineQty, snapshotLine } from "./lines"
 export { freeShippingProgress } from "./totals"
 export type { CartLineInput, GuestCartLine, RemovedLine } from "./types"
 export { CartPage } from "./components/CartPage"
-export { addToCart } from "./addToCart"
-export { selectLines, selectLineCount } from "./cartStore"
-export { clearCart, removeCartLine } from "./undo"
+export { CartSessionSync } from "./CartSessionSync"
+export { useAddToCart, useCart, useCartCount } from "./useCart"
+export type { CartLineView } from "./useCart"
+export { useCartUi } from "./cartUiStore"

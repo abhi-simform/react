@@ -6,12 +6,7 @@ import { ApiError } from "@/lib/api/errors"
 import { STALE } from "@/lib/query-client"
 import { brandKeys, categoryKeys, productKeys } from "@/lib/queryKeys"
 
-import {
-  getBrands,
-  getCategory,
-  getProduct,
-  getProducts,
-} from "./api"
+import { getBrands, getCategory, getProduct, getProducts } from "./api"
 import { categoryNodeSchema } from "./schemas"
 import type { ProductQuery } from "./types"
 import { priceHistogram } from "./utils"
@@ -65,7 +60,11 @@ export const productQueries = {
   /** A sample of a category for the price histogram (see `usePriceHistogram`). */
   histogram: (categorySlug: string | undefined) =>
     queryOptions({
-      queryKey: [...productKeys.all, "histogram", categorySlug ?? null] as const,
+      queryKey: [
+        ...productKeys.all,
+        "histogram",
+        categorySlug ?? null,
+      ] as const,
       queryFn: async ({ signal }) =>
         priceHistogram(
           (await getProducts({ category: categorySlug, limit: 60 }, signal))

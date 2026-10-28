@@ -52,7 +52,9 @@ declare module "@tanstack/react-query" {
  * knows how to explain, so it handles it itself.
  */
 export function isUnexpected(error: unknown): boolean {
-  return !(error instanceof ApiError) || error.status === 0 || error.status >= 500
+  return (
+    !(error instanceof ApiError) || error.status === 0 || error.status >= 500
+  )
 }
 
 /**

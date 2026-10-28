@@ -5,6 +5,7 @@ import { Links, Meta, Outlet, Scripts, ScrollRestoration } from "react-router"
 import type { Route } from "./+types/root"
 import { RouteErrorView } from "@/components/common/RouteErrorView"
 import { AuthProvider, SessionCacheSync } from "@/features/auth"
+import { CartSessionSync } from "@/features/cart"
 import { ThemeProvider } from "@/features/theme"
 import { ToastProvider } from "@/features/toast"
 import { pageTitle } from "@/lib/pageTitle"
@@ -43,6 +44,7 @@ export default function App() {
       <ThemeProvider>
         <AuthProvider>
           <SessionCacheSync />
+          <CartSessionSync />
           <ToastProvider>
             <Outlet />
           </ToastProvider>

@@ -22,4 +22,6 @@ export const searchQueries = {
  * automatic cancellation (the `signal` aborts when the key changes).
  */
 export const useSuggestions = (term: string) =>
-  toAsyncState(useQuery({ ...searchQueries.suggestions(term), enabled: term !== "" }))
+  toAsyncState(
+    useQuery({ ...searchQueries.suggestions(term), enabled: term !== "" })
+  )

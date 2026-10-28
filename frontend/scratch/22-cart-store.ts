@@ -3,7 +3,7 @@
 // (zustand logs "storage is currently unavailable" in Node: there is no localStorage. Expected.)
 import assert from "node:assert/strict"
 
-import { useCartStore } from "@/features/cart/cartStore"
+import { useCartStore } from "@/scratch/zustand/legacyCartStore"
 import { addLine, restoreLine, setLineQty } from "@/features/cart/lines"
 import { freeShippingProgress } from "@/features/cart/totals"
 import type { CartLineInput } from "@/features/cart/types"
