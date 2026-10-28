@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 // 8.3/8.5: cart line logic (add increments, stock clamp, undo keeps position) and the stores.
 // (zustand logs "storage is currently unavailable" in Node: there is no localStorage. Expected.)
 import assert from "node:assert/strict"

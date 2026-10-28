@@ -54,11 +54,11 @@ test), `fixtures/`, `journeys/` (whole user flows), `bug-hunt/` (Stage 12.7). Tw
 `unit` (pure logic, light setup) and `dom` (renders or uses the fake network).
 
 **End-to-end.** Needs MongoDB (`docker compose up -d`), Mailpit (port 8025) and the dependencies installed;
-`npx playwright install chromium` once. `npm run e2e` starts the API and the Vite dev server if they are not
+`npx playwright install chromium` once. `npm run e2e` starts the API and a production build of the app (`npm run build && npm start` on port 5173) if they are not
 running, resets and seeds the database (`npm run db:reset` in `backend/`), and runs the specs headless
 on one worker. A failed test leaves a trace: `npx playwright show-trace e2e/.results/<test>/trace.zip`.
-The API's login rate limiter (30 per 15 minutes, in memory) is not reset by a DB reset: if you run the
-suite several times in a row, restart the API in between (`reuseExistingServer` is off in CI).
+Rate limits are per IP and the suite comes from one address, so each test sends its own
+`X-Forwarded-For` (see `e2e/support/fixtures.ts`).
 
 **Pre-commit.** `npm install` points git at `.githooks/pre-commit` (see `scripts/install-hooks.mjs`), which
 runs `lint-staged`: Prettier and ESLint on the staged `.ts/.tsx` files; a lint error blocks the commit.

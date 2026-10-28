@@ -19,7 +19,7 @@ export default defineConfig({
         extends: true,
         test: {
           name: "unit",
-          environment: "jsdom",
+          environment: "node",
           include: ["app/**/*.test.ts"],
           exclude: ["app/test/msw/**", "app/test/network/**"],
           setupFiles: ["./app/test/setup.unit.ts"],
