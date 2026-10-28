@@ -158,11 +158,17 @@ function Carousel({ banners }: { banners: Banner[] }) {
                   aria-label={`Go to slide ${i + 1}`}
                   aria-current={i === active ? "true" : undefined}
                   onClick={() => goTo(i)}
-                  className={cn(
-                    "size-3 rounded-full border",
-                    i === active ? "bg-neutral-800" : "bg-transparent"
-                  )}
-                />
+                  // 24 px target (WCAG 2.2 target size); the dot itself stays small
+                  className="flex size-6 items-center justify-center"
+                >
+                  <span
+                    aria-hidden
+                    className={cn(
+                      "size-3 rounded-full border border-neutral-800",
+                      i === active ? "bg-neutral-800" : "bg-transparent"
+                    )}
+                  />
+                </button>
               </li>
             ))}
           </ul>

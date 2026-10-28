@@ -88,6 +88,7 @@ export function DeliveryStep() {
                   <td key={w.id} className="px-2 text-center">
                     <input
                       type="radio"
+                      className="size-6" // 24 px target (WCAG 2.2)
                       value={slotValue(isoDay(day), w.id)}
                       aria-label={`${formatDate(day, { weekday: "long", year: undefined })}, ${w.label}`}
                       {...register("slot")}

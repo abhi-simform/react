@@ -1,5 +1,6 @@
 import { Popover } from "@base-ui/react/popover"
 import { useQuery } from "@tanstack/react-query"
+import { Bell as BellIcon } from "lucide-react"
 import { useState } from "react"
 import { Link } from "react-router"
 
@@ -48,7 +49,7 @@ function Bell() {
           }
           className="relative rounded border px-2 py-1 text-sm"
         >
-          <span aria-hidden>Bell</span>
+          <BellIcon aria-hidden className="size-4" />
           {count > 0 && (
             <span
               data-testid="bell-badge"

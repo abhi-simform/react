@@ -134,10 +134,17 @@ export function ReviewStep() {
   const row = (label: string, value: string, step: string) => (
     <div className="flex items-baseline justify-between gap-4 border-b py-1 text-sm">
       <dt className="font-medium">{label}</dt>
-      <dd className="flex-1">{value}</dd>
-      <Link to={`/checkout/${step}`} className="underline">
-        Change
-      </Link>
+      {/* a <div> inside <dl> may hold ONLY dt/dd: the link lives in the <dd> */}
+      <dd className="flex flex-1 items-baseline justify-between gap-4">
+        <span>{value}</span>
+        <Link
+          to={`/checkout/${step}`}
+          className="underline"
+          aria-label={`Change ${label.toLowerCase()}`}
+        >
+          Change
+        </Link>
+      </dd>
     </div>
   )
 

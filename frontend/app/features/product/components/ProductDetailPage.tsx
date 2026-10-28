@@ -35,7 +35,7 @@ function RelatedProducts({
         {related.data.map((p) => (
           <li key={p._id}>
             <Link
-              className="underline"
+              className="inline-block min-h-6 py-0.5 underline"
               to={paths.product(p.slug) + (keepBugFlag ? "?bug-no-key" : "")}
             >
               {p.name}

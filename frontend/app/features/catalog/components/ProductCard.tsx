@@ -78,9 +78,7 @@ export function ProductCard({
         />
       </div>
 
-      <div
-        className={cn("flex flex-1 flex-col gap-1", outOfStock && "opacity-60")}
-      >
+      <div className="flex flex-1 flex-col gap-1">
         <p className="text-xs text-neutral-500">{product.brand}</p>
         <h3 className="line-clamp-2 text-sm font-medium">
           <Link
