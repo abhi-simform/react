@@ -7,6 +7,7 @@ import { QuantityStepper } from "@/components/common/QuantityStepper"
 import { Button } from "@/components/ui/button"
 import type { ProductDetailVM } from "@/features/catalog"
 import { toPriceVM } from "@/lib/format"
+import { DeliveryCheck } from "@/features/delivery"
 import { WishlistHeart } from "@/features/wishlist"
 import type { Variant } from "@/types/domain"
 
@@ -81,6 +82,7 @@ export function ProductDetailView({
         >
           Add to cart
         </Button>
+        <DeliveryCheck />
         {/* Same shared Set as the cards and the header count (no request of its own). */}
         <div className="flex items-center gap-2 text-sm">
           <WishlistHeart

@@ -1,7 +1,18 @@
 import { Loader2 } from "lucide-react"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { useEffect } from "react"
-import { Controller, useForm, type DefaultValues } from "react-hook-form"
+import { useEffect, useState } from "react"
+import {
+  Controller,
+  useForm,
+  useWatch,
+  type Control,
+  type DefaultValues,
+  type UseFormClearErrors,
+  type UseFormGetFieldState,
+  type UseFormGetValues,
+  type UseFormSetError,
+  type UseFormSetValue,
+} from "react-hook-form"
 
 import { Button } from "@/components/ui/button"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
@@ -25,6 +36,7 @@ import type { ApiError } from "@/lib/api/errors"
 
 import { FormError } from "@/components/form/FormError"
 import { FormField } from "@/components/form/FormField"
+import { lookupArea, PincodeStatus, usePincodeCheck } from "@/features/delivery"
 import { useSingleFlight } from "@/hooks/useSingleFlight"
 import { applyApiError } from "@/lib/forms/applyApiError"
 import { INDIA_STATES, isIndiaState } from "@/lib/indiaStates"
@@ -133,11 +145,22 @@ function AddressForm({
     setError,
     reset,
     control,
+    clearErrors,
+    setValue,
+    getValues,
+    getFieldState,
     formState: { errors, isSubmitting },
   } = useForm<AddressFormInput, unknown, AddressFormOutput>({
     resolver: zodResolver(addressFormSchema),
     defaultValues: existing ? fromAddress(existing) : EMPTY,
+    // First validation when a field loses focus (not while the user is still typing a
+    // pincode), then on every change until valid.
+    mode: "onBlur",
   })
+
+  // The pincode check lives in a child (so typing a pincode does not re-render this form);
+  // it reports "busy" so the submit button waits for the answer (here the answer IS required).
+  const [checkingPincode, setCheckingPincode] = useState(false)
 
   // `defaultValues` are read ONCE. When the same form instance is pointed at a different
   // address (or "new"), reset() replaces values, clears errors and the dirty state.
@@ -233,11 +256,29 @@ function AddressForm({
           )}
         </FormField>
       </div>
-      {text("pincode", "Pincode", {
-        inputMode: "numeric",
-        maxLength: 6,
-        autoComplete: "postal-code",
-      })}
+      <FormField label="Pincode" error={errors.pincode?.message}>
+        {(c) => (
+          <>
+            <input
+              className="rounded border p-1"
+              inputMode="numeric"
+              maxLength={6}
+              autoComplete="postal-code"
+              {...c}
+              {...register("pincode")}
+            />
+            <PincodeWatch
+              control={control}
+              setError={setError}
+              clearErrors={clearErrors}
+              setValue={setValue}
+              getValues={getValues}
+              getFieldState={getFieldState}
+              onBusyChange={setCheckingPincode}
+            />
+          </>
+        )}
+      </FormField>
       <Controller
         control={control}
         name="type"
@@ -281,7 +322,10 @@ function AddressForm({
         <Button type="button" variant="outline" onClick={onClose}>
           Cancel
         </Button>
-        <Button type="submit" disabled={pending || isSubmitting}>
+        <Button
+          type="submit"
+          disabled={pending || isSubmitting || checkingPincode}
+        >
           {(pending || isSubmitting) && (
             <Loader2 aria-hidden className="animate-spin" />
           )}
@@ -290,4 +334,71 @@ function AddressForm({
       </DialogFooter>
     </form>
   )
+}
+
+type WatchProps = {
+  control: Control<AddressFormInput, unknown, AddressFormOutput>
+  setError: UseFormSetError<AddressFormInput>
+  clearErrors: UseFormClearErrors<AddressFormInput>
+  setValue: UseFormSetValue<AddressFormInput>
+  getValues: UseFormGetValues<AddressFormInput>
+  getFieldState: UseFormGetFieldState<AddressFormInput>
+  onBusyChange: (busy: boolean) => void
+}
+
+/**
+ * 7.6: advisory pincode validation next to the field. Format is the schema's job (instant,
+ * local); this adds "do we deliver there?" with a debounced, abortable request and:
+ * - unserviceable -> `setError("pincode", { type: "serviceability" })` (cleared by the next
+ *   valid answer or by any re-validation),
+ * - serviceable -> clears that error and pre-fills EMPTY city/state from the local prefix stub,
+ * - the server re-checks on save (`POST /addresses` answers 422 for an unserviceable pincode).
+ */
+function PincodeWatch({
+  control,
+  setError,
+  clearErrors,
+  setValue,
+  getValues,
+  getFieldState,
+  onBusyChange,
+}: WatchProps) {
+  const pincode = useWatch({ control, name: "pincode" }) ?? ""
+  const check = usePincodeCheck(pincode)
+  const busy = check.status === "checking"
+
+  useEffect(() => onBusyChange(busy), [busy, onBusyChange])
+
+  useEffect(() => {
+    // A "we do not deliver" error belongs to ONE pincode: drop it as soon as the value changes.
+    if (
+      check.status !== "unserviceable" &&
+      getFieldState("pincode").error?.type === "serviceability"
+    )
+      clearErrors("pincode")
+    if (check.status === "unserviceable") {
+      setError("pincode", {
+        type: "serviceability",
+        message: "We do not deliver to this pincode yet",
+      })
+    } else if (check.status === "serviceable") {
+      const area = lookupArea(pincode.trim())
+      if (area) {
+        if (!getValues("city"))
+          setValue("city", area.city, { shouldValidate: true })
+        if (!getValues("state"))
+          setValue("state", area.state, { shouldValidate: true })
+      }
+    }
+  }, [
+    check.status,
+    pincode,
+    setError,
+    clearErrors,
+    setValue,
+    getValues,
+    getFieldState,
+  ])
+
+  return <PincodeStatus state={check} fieldShowsError />
 }

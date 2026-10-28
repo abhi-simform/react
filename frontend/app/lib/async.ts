@@ -2,6 +2,22 @@ export function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms))
 }
 
+/** `sleep` that rejects with the signal's reason (an AbortError) as soon as it aborts. Fake latency for stubs. */
+export function abortable(ms: number, signal?: AbortSignal): Promise<void> {
+  return new Promise((resolve, reject) => {
+    if (signal?.aborted) return reject(signal.reason)
+    const timer = setTimeout(resolve, ms)
+    signal?.addEventListener(
+      "abort",
+      () => {
+        clearTimeout(timer)
+        reject(signal.reason)
+      },
+      { once: true }
+    )
+  })
+}
+
 /**
  * Run an abortable operation with a deadline. After `ms` the signal aborts
  * (a fetch then rejects with an AbortError). The race makes sure we also
