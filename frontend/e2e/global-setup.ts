@@ -4,9 +4,8 @@ import path from "node:path"
 import { chromium, type FullConfig } from "@playwright/test"
 
 /**
- * Deterministic data (12.6): wipe and seed the dev database before the suite. Then warm the Vite
- * dev server: its FIRST page load optimises dependencies and reloads the page, which takes longer
- * than an assertion timeout and made whichever test ran first fail.
+ * Deterministic data (12.6): wipe and seed the dev database before the suite, then touch the main
+ * pages once so the first test does not pay for cold caches.
  */
 export default async function globalSetup(config: FullConfig) {
   if (!process.env.E2E_SKIP_RESET) {

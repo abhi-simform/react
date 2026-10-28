@@ -27,6 +27,7 @@ export const getOrders = (
       search: filter.search,
     },
     schema: orderSchema,
+    mapsData: true, // orderSchema renames id -> _id: it must run in production too
     signal,
   })
 
@@ -34,6 +35,7 @@ export const getOrder = (id: string, signal?: AbortSignal): Promise<Order> =>
   api(`/orders/${encodeURIComponent(id)}`, {
     auth: true,
     schema: orderSchema,
+    mapsData: true, // orderSchema renames id -> _id: it must run in production too
     signal,
   })
 
@@ -51,6 +53,7 @@ export const placeOrder = (
     headers: { "Idempotency-Key": idempotencyKey },
     body: input,
     schema: orderSchema,
+    mapsData: true, // orderSchema renames id -> _id: it must run in production too
   })
 
 /** Cancel (only `pending_payment` / `placed`): the server rejects anything else with 409 INVALID_TRANSITION. */
@@ -60,6 +63,7 @@ export const cancelOrder = (id: string, reason?: string): Promise<Order> =>
     auth: true,
     body: reason ? { reason } : {},
     schema: orderSchema,
+    mapsData: true, // orderSchema renames id -> _id: it must run in production too
   })
 
 export type ReturnPayload = {
@@ -79,6 +83,7 @@ export const requestReturn = (
     auth: true,
     body: payload,
     schema: orderSchema,
+    mapsData: true, // orderSchema renames id -> _id: it must run in production too
   })
 
 /** The invoice PDF as a Blob (needs the Authorization header, so not a plain link). */

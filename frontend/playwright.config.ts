@@ -37,10 +37,14 @@ export default defineConfig({
       timeout: 60_000,
     },
     {
-      command: "npm run dev -- --port 5173 --strictPort",
+      // A PRODUCTION build, not `vite dev`: the dev server optimises dependencies on first use
+      // and RELOADS the page mid-test (flaky), and the build is what users get. The Vite env
+      // (VITE_API_URL) is read from .env.local at build time.
+      command: "npm run build && npm start",
+      env: { PORT: "5173" },
       url: "http://localhost:5173",
       reuseExistingServer: !CI,
-      timeout: 60_000,
+      timeout: 180_000,
     },
   ],
   projects: [

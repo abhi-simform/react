@@ -50,6 +50,12 @@ export type ApiOptions<T> = {
   signal?: AbortSignal
   /** Validate `data` against this schema; `T` is inferred from it. */
   schema?: z.ZodType<T>
+  /**
+   * The schema TRANSFORMS the response (renames `id` -> `_id`, fills defaults), so it is part of
+   * the data flow, not just a check: it runs in production too. (Without this, validation is
+   * development-only, and a mapped field silently does not exist in a production build.)
+   */
+  mapsData?: boolean
   /** Extra request headers (e.g. the guest cart's `x-cart-token`). */
   headers?: Record<string, string>
   /** Attach `Authorization: Bearer <token>` (and handle 401). */
@@ -181,7 +187,7 @@ export async function api<T = void>(
   const { status, body } = await send(path, options)
   if (status === 204) return undefined as T
 
-  if (options.schema && VALIDATE) {
+  if (options.schema && (VALIDATE || options.mapsData)) {
     const result = apiEnvelopeSchema(options.schema).safeParse(body)
     if (!result.success) throw contractError(path, result.error)
     return result.data.data
@@ -202,7 +208,7 @@ export async function apiPaginatedWithMeta<T, M extends PageMeta>(
   const { metaSchema, schema } = options
   const { body } = await send(path, options)
 
-  if (schema && VALIDATE) {
+  if (schema && (VALIDATE || options.mapsData)) {
     const result = paginatedWithMetaSchema(schema, metaSchema).safeParse(body)
     if (!result.success) throw contractError(path, result.error)
     return { items: result.data.data, meta: result.data.meta }
@@ -224,7 +230,7 @@ export async function apiWithMeta<T, M>(
 ): Promise<{ data: T; meta: M }> {
   const { metaSchema, schema } = options
   const { body } = await send(path, options)
-  if (schema && VALIDATE) {
+  if (schema && (VALIDATE || options.mapsData)) {
     const result = apiEnvelopeSchema(schema)
       .extend({ meta: metaSchema })
       .safeParse(body)
