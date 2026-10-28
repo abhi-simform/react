@@ -1,0 +1,22 @@
+# Stage 12 checkpoint: model answers
+
+**1. Why does RTL prefer `getByRole`, and what does a hard-to-query element tell you?**
+`getByRole` finds elements the way assistive technology and users do: by what they ARE (role) and what they are CALLED (accessible name), not by tag, class or test id. A test written that way breaks only when the behaviour users rely on changes, and it doubles as an accessibility check (no role or name = a screen reader cannot find it either). When an element is hard to query by role/label, the markup is usually wrong: a `div` with a click handler instead of a button, an input without a label, ten buttons all named "Increase quantity". In this stage exactly that happened in the cart drawer, and the component, not the test, was fixed.
+
+**2. How does MSW differ from mocking `fetch` with `vi.fn()`, and why does it give better tests?**
+`vi.fn()` replaces the function the component calls, so the real client code (URL building, headers, the 401 refresh, envelope parsing, Zod validation, Query's retry and cache) is skipped and the test asserts against my idea of what `fetch` returns. MSW intercepts at the network boundary: the real `fetch`, API client and Query code run unchanged and only the server is fake, so the test covers the integration and the handlers read like the contract (the same ones can be reused in the browser). Per-test `server.use(...)` models failures (500, 409, network error, a once-only failure then success) and `onUnhandledRequest: "error"` (plus a recorder that fails the test) makes any unplanned request loud.
+
+**3. What belongs in unit vs integration vs e2e for the checkout?**
+Unit: the money and rules that are pure: totals/coupon/shipping maths, the step schemas, `firstIncompleteStep`, the stepper reducer, `withDelivery`, COD limit (fast, exhaustive, `it.each`). Integration (RTL + MSW, routed app): the flow's wiring: guard redirect and `?from`, per-step validation and focus, Back keeps data, the place-order mutation and its error mapping, rollbacks. E2E (Playwright, real API/DB): a few paths that prove the pieces fit in a real browser: browse -> cart -> log in -> COD checkout -> the order is listed, plus payment states and the phone layout. The pyramid: many unit, some integration, few e2e.
+
+**4. Why not automate the real Razorpay iframe in CI, and what do you test instead?**
+It is third-party UI on another origin: it changes without notice, redirects to banks, asks for OTPs, is protected against bots, needs live-ish credentials and makes tests slow and flaky, and a test of Razorpay's page proves nothing about my code. I test MY side of the contract: the API's mock gateway or `page.route` interception of `create-order`, `verify` and the mock "modal" drive every UI state (error starting, dismissed, declined, verify mismatch, success decided by the server), and the signature check itself is a backend test. One real test-card payment is done by hand per release.
+
+**5. How do fake timers make `useCountdown` testable?**
+The hook is a function of the clock (`end - now`, re-evaluated on a shared `setInterval`). With `vi.useFakeTimers()` and `vi.setSystemTime()` the test controls both `Date.now()` and the interval: `advanceTimersByTime(1000)` ticks exactly once, jumping the system time simulates a sleeping tab, the server offset is just a number, and `getTimerCount()`/`activeNowTimers()` prove the interval is cleared at expiry and on unmount, all instantly and deterministically, with no real waiting.
+
+**6. Name three things axe cannot detect.**
+(1) Whether the reading and focus ORDER make sense, and whether focus moves somewhere sensible after an action (route change, closing a dialog). (2) Whether alt text, link text, labels and error messages are actually meaningful and helpful (axe only checks they exist). (3) Whether a custom widget really works with a keyboard and a screen reader (arrow keys in a combobox, live-region announcements, focus trapping). Also: cognitive load, plain language, motion that is too distracting, and anything that needs a real screen reader or a human.
+
+**7. What does an error boundary not catch?**
+Errors in event handlers, errors in asynchronous code (promises, `setTimeout`, fetch callbacks), errors during server-side rendering, and errors thrown in the boundary itself. Those need `try/catch`, Query's `onError`/`throwOnError`, and the global `window.onerror` / `unhandledrejection` listeners that report to `lib/report.ts`.

@@ -29,23 +29,23 @@ import { Button } from "@/components/ui/button"
 - Where is price formatting? `lib/format.ts` (`formatRupees`, `formatCurrency`); the `Price` component is `components/common/Price.tsx`.
 - Talking to the backend (Stage 6): components never call `fetch`. `lib/api/client.ts` exports `api<T>()` (envelope, `ApiError`, timeout + abort, bearer token via `configureApi`); each feature has an `api.ts` (`catalog/api.ts`, `wishlist/api.ts`, `account/addresses.api.ts`). Server state is read with `hooks/useFetch` (temporary: Stage 9 replaces it), and every async view goes through `components/common/AsyncView` (skeleton / empty / error / success). API data becomes view models in `features/catalog/mappers.ts` before it reaches a component. Pain points are logged in `docs/pain-journal.md`.
 - Auth (Stage 10): real login/register/Google/verify/reset against the API. The access token lives in memory (`features/auth/session.ts`), the refresh token in an httpOnly cookie; the refresh is single-flight (shared promise + Web Lock) and `api()` retries a 401 once. Guards (`RequireAuth`, `PublicOnly`, `RequireRole`) read `useAuth()`; the return path travels in `?from=` and is validated by `safeRedirect`. There is no dev login any more: sign in with the seeded accounts through the normal form (`customer@shopsphere.dev`, `seller@...`, `admin@...`, password in `backend/docs/API-CONVENTIONS.md`). Token model and diagrams: `docs/auth-token-model.md`; checklist: `docs/security.md`. Dev-only: `/dev/auth` (single-flight lab), `VITE_IDLE_MINUTES` to shorten the idle sign-out. Google works with the backend's built-in mock until real credentials are added (see `backend/docs/API-CONVENTIONS.md`).
-- `app/scratch/` and `/dev/*` are throwaway labs from earlier stages (dev builds only); `scratch/*.ts` are node-run checks (`npm run check:scratch`).
-- Checks: `npm run typecheck`, `npm run lint`, `npm run check:scratch`, `npm run build`.
+- `app/scratch/` and `/dev/*` are throwaway labs from earlier stages (dev builds only); `scratch/` now only keeps the type-level checks (`type-tests*.ts`) and the circular-import demo: the old node-run assertion scripts became real tests in Stage 12.
+- Checks: `npm run check` (format, lint, typecheck, tests, build). See "Quality gates and tests" below.
 - Forms (Stage 7): every form is React Hook Form + a Zod schema (`zodResolver`; `useForm<z.input, unknown, z.output>` when the schema transforms or coerces). Schemas sit next to the feature (`features/auth/schemas.ts`, `features/account/schemas.ts`, ...), shared field rules in `lib/fields.ts` and `lib/imageFiles.ts`. UI pieces: `components/form/FormField` (label, hint, error, ARIA) and `FormError`; server errors are mapped with `lib/forms/applyApiError.ts`; double submits are blocked by `hooks/useSingleFlight`. Multi-step checkout = one `FormProvider` in the `/checkout` layout with a `sessionStorage` draft (`features/checkout`); pincode checks live in `features/delivery`; images (dropzone, previews, XHR upload with progress) in `features/uploads`.
 - Server state (Stage 9): TanStack Query owns everything the server owns (`lib/query-client.ts`, key factories in `lib/queryKeys.ts`, `queryOptions` in each feature's `queries.ts`, freshness in `docs/query-policy.md`). The cart is server state behind `features/cart/useCart.ts` (guest = `x-cart-token`, user = JWT); Zustand keeps only UI flags (`cartUiStore.ts`). Retrospective: `docs/migration-retro.md`.
 - State (Stage 8, partly superseded by Stage 9: the cart lines are no longer in Zustand): where each piece of state lives is in `docs/state-audit.md`. Context only for low-frequency values (`features/auth` AuthProvider, `features/theme` ThemeProvider, `features/toast` ToastProvider); the guest cart and the compare list are Zustand stores with `persist` (`features/cart/cartStore.ts`, `features/compare/compareStore.ts`; `skipHydration` + `components/common/StoresSync` so SSR-safe). Components select slices (`useCartStore(s => s.lines.length)`); totals are derived (`useCartTotals`). Undo toasts: `features/toast/undoToast.ts`.
 
 ## Quality gates and tests (Stage 12)
 
-| Command | What it does |
-| ------- | ------------ |
-| `npm test` | Vitest, all unit/component/integration tests (about 8 s). `npm run test:watch`, `npm run test:coverage` (v8; the pure-logic folders are listed in `vitest.config.ts`) |
-| `npm run lint` | ESLint (`typescript-eslint`, `react-hooks`, `jsx-a11y`), warnings fail |
-| `npm run typecheck` | `react-router typegen && tsc` |
-| `npm run format:check` / `npm run format` | Prettier |
-| `npm run build` | production build |
-| **`npm run check`** | format:check + lint + typecheck + test + build: what CI runs; fails on any error |
-| `npm run e2e` | Playwright against the REAL stack (see below). `npm run e2e:ui`, `npm run e2e:report` |
+| Command                                   | What it does                                                                                                                                                          |
+| ----------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `npm test`                                | Vitest, all unit/component/integration tests (about 8 s). `npm run test:watch`, `npm run test:coverage` (v8; the pure-logic folders are listed in `vitest.config.ts`) |
+| `npm run lint`                            | ESLint (`typescript-eslint`, `react-hooks`, `jsx-a11y`), warnings fail                                                                                                |
+| `npm run typecheck`                       | `react-router typegen && tsc`                                                                                                                                         |
+| `npm run format:check` / `npm run format` | Prettier                                                                                                                                                              |
+| `npm run build`                           | production build                                                                                                                                                      |
+| **`npm run check`**                       | format:check + lint + typecheck + test + build: what CI runs; fails on any error                                                                                      |
+| `npm run e2e`                             | Playwright against the REAL stack (see below). `npm run e2e:ui`, `npm run e2e:report`                                                                                 |
 
 **Tests, where things live.** `*.test.ts(x)` sit next to the code they test. `app/test/` holds the shared
 helpers: `render.tsx` (`renderWithProviders` for one component, `renderApp` for the whole routed app),

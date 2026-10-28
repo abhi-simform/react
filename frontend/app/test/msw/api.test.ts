@@ -126,6 +126,72 @@ describe("api client against the fake backend", () => {
   })
 })
 
+describe("request building (from the old scratch/15 checks)", () => {
+  it("repeated query keys, skipped undefined/null, JSON body with its header", async () => {
+    let seen: { url: string; type: string | null; body: unknown } | undefined
+    server.use(
+      http.post(`${API}/echo`, async ({ request }) => {
+        seen = {
+          url: request.url,
+          type: request.headers.get("content-type"),
+          body: await request.json(),
+        }
+        return ok({ fine: true })
+      })
+    )
+    await api("/echo", {
+      method: "POST",
+      query: { a: [1, 2], b: undefined, c: null, d: "x y" },
+      body: { n: 1 },
+    })
+    expect(new URL(seen!.url).search).toBe("?a=1&a=2&d=x+y")
+    expect(seen!.type).toBe("application/json")
+    expect(seen!.body).toEqual({ n: 1 })
+  })
+
+  it("FormData is sent untouched (the browser sets the multipart boundary)", async () => {
+    let type: string | null = null
+    server.use(
+      http.post(`${API}/upload`, ({ request }) => {
+        type = request.headers.get("content-type")
+        return ok({ fine: true })
+      })
+    )
+    const form = new FormData()
+    form.append("file", new Blob(["x"]), "a.txt")
+    await api("/upload", { method: "POST", body: form })
+    expect(type).toMatch(/^multipart\/form-data; boundary=/)
+  })
+
+  it("a 204 resolves to undefined", async () => {
+    server.use(
+      http.delete(`${API}/gone`, () => new HttpResponse(null, { status: 204 }))
+    )
+    await expect(api("/gone", { method: "DELETE" })).resolves.toBeUndefined()
+  })
+
+  it("auth: true sends the bearer token; a call without it does not", async () => {
+    await loginWithPassword({
+      email: "customer@shopsphere.dev",
+      password: "Password123",
+    })
+    const headers: (string | null)[] = []
+    server.use(
+      http.get(
+        `${API}/who`,
+        ({ request }) => (
+          headers.push(request.headers.get("authorization")),
+          ok({})
+        )
+      )
+    )
+    await api("/who", { auth: true })
+    await api("/who")
+    expect(headers[0]).toMatch(/^Bearer /)
+    expect(headers[1]).toBeNull()
+  })
+})
+
 describe("single-flight token refresh", () => {
   it("three parallel 401s share exactly ONE refresh, then each retries once", async () => {
     await loginWithPassword({

@@ -882,3 +882,64 @@ Backend B1 was built first (separate `backend B1:` commits): `GET /categories` n
 - PDP: `OffersPanel` (the live coupons from a new public `GET /coupons/offers`, with Copy; no bank offers exist in this API, so none are shown), `ShareButton` (Web Share, else clipboard + toast, AbortError ignored), the buy box is `md:sticky`, and `StickyBuyBar` for phones: `sticky bottom-0` inside the page grid (it takes its own space and ends with the grid, so it never permanently covers content or the footer), hidden while a text field has focus (the pincode box, a review, a question), "Add to cart" and "Buy now" (add, then go to checkout) share one `add()` with the desktop button. Measured at 375x812: bar `position: sticky`, bottom edge at the viewport bottom, no horizontal overflow (`scrollWidth` 375); focusing a text field hid it. Delivery check, compare toggle, breadcrumbs, tabs, reviews, Q&A and the rails were already in place.
 - Account: `/account` is now a real overview (recent orders, unread notifications, default address) composed in the route (account -> orders would be an import cycle), `/account/notifications` has the preferences, profile (RHF + avatar upload), addresses and payments were already done.
 - Not done: Embla (own scroll-snap carousel instead), a mega-menu rewrite (the Stage 3/9 one reads `GET /categories` already), Slow 4G throttling by tool (no DevTools throttling here: only the request log and the lazy mounting were checked).
+
+## 12.1 Vitest setup and pure-function tests
+
+- `vitest.config.ts` is separate from `vite.config.ts` (the React Router plugin does SSR typegen and has no business in a test run): only the `@` alias, `jsdom`, `globals`, `css: false`. Two projects: `unit` (pure logic, light setup) and `dom` (renders or touches the fake network, loads MSW and the fixture DB). That split took the whole run from 10.3 s to about 8 s: the fixture database (308 products parsed by Zod) was the slow part of every file. Vite 8 needs Vitest 5 (4 does not resolve); MSW 3 has a different API, so `msw@2` as the plan says.
+- Table-driven (`it.each`): totals and coupon edges, free-shipping boundary (499 vs 499.01), `canCancel`/`canReturn`/`isTerminal` for every status, filters parsing garbage, `safeRedirect` attacks, schema valid/invalid tables, the stepper reducer including "same object when nothing changes".
+- The ported scratch scripts (`app/test/ported/`) keep every old assertion as a real test; the ones that needed the live API became MSW tests (12.4).
+- Wrote the tests first, saw them fail, then fixed the code. Real bugs found this way: `splitDuration(NaN)` printed `NaN:NaN:NaN`; `clampToStock(NaN)` leaked NaN; `compareBy` returned NaN for an unparseable date (corrupting `sort`); `z.email().trim()` validated the padded string so `" me@x.com "` failed. More in `docs/debug-log.md`.
+- Coverage (v8) of the pure-logic modules listed in the config: about 97% statements / 95% branches.
+
+## 12.2 Component tests
+
+- `renderWithProviders(ui, { route, path, routes, signedIn })`: fresh `QueryClient` per test (`retry: false`), real Theme/Auth/Toast providers, a memory router; it returns `user` (user-event), the client and `location()`. It is async on purpose: `act` lets the auth bootstrap settle, so no act warnings. jsdom has no layout, so `setViewport(1280)` makes `(min-width)` queries match (otherwise the phone layout renders and the filter sidebar is behind a sheet).
+- Lookups are `getByRole` / `getByLabelText` almost everywhere; no `container.querySelector`, no class assertions.
+- A test exposed a real a11y bug: in the cart drawer every line's stepper was "Increase quantity" (several matches); the name now carries the product. Another: `Button` rendering a `<Link>` was `role="button"`.
+
+## 12.3 Hooks and timers
+
+- All timer tests use fake timers (`vi.useFakeTimers`, `advanceTimersByTime`, `getTimerCount() === 0` after unmount, `setSystemTime` for "the tab slept"). Real bug found: `useNow`'s shared store kept a stale `now` after its last subscriber left, so a countdown mounted later flashed the old time; the store is now dropped when it empties.
+- `useRazorpay`/`loadRazorpay`: the loader's single-flight promise is module state, so each test gets a fresh module (`vi.resetModules` + dynamic import); one script tag across callers, a failed load removes the tag and can retry.
+
+## 12.4 MSW
+
+- The fake API (`app/test/msw`) is built from responses CAPTURED from the real backend (`fixtures/api/*.json`), and every response still goes through the app's Zod schemas (dev validation), so a drifting fixture fails a test. Stateful where it matters (cart per owner: guest by `x-cart-token`, user by bearer; wishlist; orders; addresses).
+- `onUnhandledRequest: "error"` only rejects the request, and the app can swallow that (a query shows an error state). So setup also RECORDS each unhandled request and fails the test in `afterEach`, naming the URL; the one test of the safety net takes the record on purpose.
+- Failure paths: 500 with Retry succeeding the second time (a handler that answers once), `HttpResponse.error()` (network), 409 INVALID_TRANSITION, 422 per field, 401 + refresh. The single-flight refresh test: three parallel 401s, exactly one `/auth/refresh`, six hits on the protected endpoint (3 rejected + 3 retried).
+- jsdom realm trap: `instanceof DOMException` / `instanceof Error` is false for errors made by Node's fetch/AbortSignal, so a timeout looked like a network error. `getJson` and `isAbortError` now check `error.name`.
+
+## 12.5 Integration journeys
+
+- `renderApp` mounts the REAL shell, guards and route modules (`test/appRoutes.tsx` mirrors `routes.ts`, and passes `params` as the framework would) with the same providers and sync components as `root.tsx` (no socket, no devtools). Five journeys: search -> brand -> price -> sort with URL/results/chips agreeing; PDP variant -> qty -> add -> badge -> drawer; guest `/checkout` -> login with `?from` -> checkout; the multi-step form (per-step errors, Back keeps data); cancel with confirm, optimistic "Cancelled", rollback on 409 and 500.
+- 20 consecutive runs of the journeys folder: 20 green. No sleeps: every wait is `findBy*`/`waitFor` on visible output (the price box commits after its 500 ms debounce, so that one journey is about 1 s).
+- Finding: the seeded cart has a deliberately changed price, so checkout sends the shopper back to the cart. Tests start from a clean cart (`tidyCart`).
+
+## 12.6 Playwright
+
+- Config: `webServer` for the API and Vite, `globalSetup` runs `npm run db:reset`, one worker (shared DB and one seeded customer; the auth limiter is 30 per 15 min), `trace: retain-on-failure` locally and `on-first-retry` in CI. Page objects: `LoginPage`, `ShopPage` (clear cart, add cheapest, fill checkout). Mailpit helper reads the verify link from `http://localhost:8025/api/v1`.
+- **storageState deviation:** the API rotates the refresh cookie and revokes the session on replay (Stage 10 reuse detection), so one saved cookie reused by many tests signs the second one out. The `signedIn` fixture logs in through the API once per test context instead; the login UI is tested once.
+- Razorpay: the real iframe is not automated. The API runs its mock gateway; the specs intercept `create-order` (500 -> explained error), `verify` (mismatch) and drive the mock "modal" (dismiss, declined card, retry succeeds, server decides "paid"). The real test-card payment is a manual checklist: `docs/payments-manual-test.md`.
+- Gotchas met: Playwright's traces written under the Vite root made the dev server RELOAD the page mid-test (ignored in `vite.config.ts`); a controlled checkbox needs `click()` + URL assertion, not `check()`; the sr-only swatch radios are clicked through their visible labels; the iPhone profile runs on Chromium (only Chromium is installed), which is enough for the drawer and sticky-bar layout.
+
+## 12.7 Debugging drills
+
+- See `docs/debug-log.md`: eight Broken/Fixed pairs (stale closure, key, deps, unhandled 4xx, race, leak, layout shift, cache key), each with a regression test whose broken version must FAIL (`it.fails`); the three DevTools drills as procedures; a measured CDP leak check (20 rounds: listeners 409 -> 435, nodes 4686 -> 3600).
+- Honest limit: the bugs were written by the same author, so this was not a blind hunt, and no human-driven DevTools session was recorded.
+
+## 12.8 Error boundaries
+
+- `SectionBoundary` = `react-error-boundary` + `QueryErrorResetBoundary` + `resetKeys` + `reportError`, around reviews, Q&A, rails, the mega-menu and the bell. Fallback: `role="alert"`, a real "Try again" button. `RailErrorBoundary` is now an alias of it (the hand-written class is gone).
+- Boundaries catch RENDER errors only. `installGlobalErrorReporting` (`lib/globalErrors.ts`, installed in `App` with cleanup, so StrictMode leaves one pair) reports `window.onerror` and `unhandledrejection` once each (a WeakSet of seen errors; AbortError ignored).
+- Dev-only "Crash this widget (label)" switch inside each boundary throws during render (a throw in the click handler would not reach a boundary). Integration test: crash reviews on the PDP, the buy box still works, Try again restores it.
+
+## 12.9 Accessibility audit
+
+- See `docs/a11y-audit.md`. axe in a real browser found 7 issues the component tests could not (target size, contrast under `opacity`, `<dl>` structure, label-in-name); token contrast checks found two theme colours below AA (`--muted-foreground`, `--ring`). Reflow at 320 px found one overflowing toolbar.
+- Not done: a VoiceOver pass (no screen reader available here).
+
+## 12.10 Quality gates
+
+- `npm run check` = format:check + lint (warnings fail) + typecheck + test + build, about 28 s. Proved to fail on a deliberate lint error, type error and failing test; a commit with a lint error is blocked by `.githooks/pre-commit` (lint-staged). I did not use husky's CLI: `scripts/install-hooks.mjs` (the `prepare` script) points `core.hooksPath` at the committed `.githooks`, because the git root is the parent of `frontend/` (husky assumes it is the package folder). `prepare` ends in `|| true` so the Docker `npm ci --omit=dev` stage (which has no `scripts/`) does not break.
+- `eslint-plugin-jsx-a11y` 6.10 declares `eslint <= 9` as a peer but runs fine on ESLint 10 (it linted the whole app); `.npmrc` sets `legacy-peer-deps=true` for that reason.
+- jsx-a11y found 8 things: 3 real (redundant "photo" words in alt text) and 5 patterns that are right but look wrong to a static rule (Escape on a wrapper, arrow keys on a carousel group, combobox options clicked by pointer while DOM focus stays in the input, Switch inside a label); those carry a one-line `eslint-disable-next-line` with the reason, or a `controlComponents` option for the Switch.
