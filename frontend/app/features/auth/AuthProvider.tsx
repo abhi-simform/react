@@ -51,29 +51,18 @@ type AuthValue = {
 
 const AuthContext = createContext<AuthValue | null>(null)
 
-const STORAGE_KEY = "shopsphere.devUser"
+/**
+ * Only a HINT is persisted ("a session probably exists, ask the API"), never the user: the
+ * user is server data, and a stored copy would go stale (role changed, account deleted) and
+ * could be edited by hand (8.4 migration; this key used to hold the whole user object under
+ * `shopsphere.devUser`, which is simply ignored now).
+ */
+const STORAGE_KEY = "shopsphere.hasSession"
+const isHint = (v: unknown): v is boolean => typeof v === "boolean"
 
-function isAuthUser(value: unknown): value is AuthUser {
-  return (
-    typeof value === "object" &&
-    value !== null &&
-    "id" in value &&
-    typeof value.id === "string" &&
-    "role" in value &&
-    (value.role === "customer" ||
-      value.role === "seller" ||
-      value.role === "admin") &&
-    "name" in value &&
-    typeof value.name === "string" &&
-    "email" in value &&
-    typeof value.email === "string"
-  )
-}
-
-function hasRememberedUser(): boolean {
+function hasSessionHint(): boolean {
   try {
-    const raw = window.localStorage.getItem(STORAGE_KEY)
-    return raw !== null && isAuthUser(JSON.parse(raw))
+    return window.localStorage.getItem(STORAGE_KEY) === "true"
   } catch {
     return false
   }
@@ -82,10 +71,10 @@ function hasRememberedUser(): boolean {
 type Session = { status: AuthStatus; user: AuthUser | null }
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [, setRemembered, forget] = useLocalStorage<AuthUser | null>(
+  const [, setHint, forget] = useLocalStorage<boolean>(
     STORAGE_KEY,
-    null,
-    (v): v is AuthUser | null => v === null || isAuthUser(v)
+    false,
+    isHint
   )
   // "loading" until we know: the restore below asks the API, which takes time.
   const [session, setSession] = useState<Session>({
@@ -95,9 +84,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     let cancelled = false
-    const restore = hasRememberedUser()
-      ? refreshSession()
-      : Promise.resolve(null)
+    const restore = hasSessionHint() ? refreshSession() : Promise.resolve(null)
     restore
       .then((user) => {
         if (cancelled) return
@@ -132,17 +119,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const login = useCallback(
     async (role: Role = "customer") => {
       const user = await loginAsDevRole(role)
-      setRemembered(user)
+      setHint(true)
       setSession({ status: "authenticated", user })
     },
-    [setRemembered]
+    [setHint]
   )
   const adoptUser = useCallback(
     (user: AuthUser) => {
-      setRemembered(user)
+      setHint(true)
       setSession({ status: "authenticated", user })
     },
-    [setRemembered]
+    [setHint]
   )
   const signIn = useCallback(
     async (credentials: { email: string; password: string }) => {
