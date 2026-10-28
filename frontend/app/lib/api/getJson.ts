@@ -3,6 +3,12 @@ import { isApiError } from "./envelope"
 
 export const DEFAULT_TIMEOUT_MS = 10_000
 
+/** By NAME, not `instanceof DOMException`: the error may come from another realm (found by a jsdom test: a timeout was reported as a network error). */
+const errorName = (err: unknown): string | undefined =>
+  typeof err === "object" && err !== null
+    ? (err as { name?: string }).name
+    : undefined
+
 type Init = RequestInit & { timeoutMs?: number }
 
 /**
@@ -29,12 +35,12 @@ export async function getJson(
     response = await fetch(url, { ...init, signal: combined })
     // Not JSON (an HTML 502 from a proxy, a 204): `undefined`, decided below.
     body = await response.json().catch((err: unknown) => {
-      if (err instanceof DOMException && err.name === "AbortError") throw err
+      if (errorName(err) === "AbortError") throw err
       return undefined
     })
   } catch (err) {
     if (signal?.aborted) throw err // the caller gave up: not an error to report
-    if (err instanceof DOMException && err.name === "TimeoutError") {
+    if (errorName(err) === "TimeoutError") {
       throw new ApiError({
         status: 0,
         code: "TIMEOUT",

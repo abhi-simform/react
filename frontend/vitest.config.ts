@@ -7,14 +7,38 @@ import { defineConfig } from "vitest/config"
 export default defineConfig({
   resolve: { alias: { "@": path.resolve(import.meta.dirname, "app") } },
   test: {
-    environment: "jsdom",
-    env: { VITE_API_URL: "http://localhost:4000/api/v1" },
     globals: true,
     css: false,
-    setupFiles: ["./app/test/setup.ts"],
-    include: ["app/**/*.test.{ts,tsx}"],
-    exclude: ["e2e/**", "node_modules/**"],
     restoreMocks: true,
+    exclude: ["e2e/**", "node_modules/**"],
+    env: { VITE_API_URL: "http://localhost:4000/api/v1" },
+    // Two projects (12.1/12.4): pure-logic tests get a light jsdom setup; everything that renders,
+    // or talks to the fake network, also loads MSW + the fixture database (the slow part).
+    projects: [
+      {
+        extends: true,
+        test: {
+          name: "unit",
+          environment: "jsdom",
+          include: ["app/**/*.test.ts"],
+          exclude: ["app/test/msw/**", "app/test/network/**"],
+          setupFiles: ["./app/test/setup.unit.ts"],
+        },
+      },
+      {
+        extends: true,
+        test: {
+          name: "dom",
+          environment: "jsdom",
+          include: [
+            "app/**/*.test.tsx",
+            "app/test/msw/**/*.test.ts",
+            "app/test/network/**/*.test.ts",
+          ],
+          setupFiles: ["./app/test/setup.ts"],
+        },
+      },
+    ],
     coverage: {
       provider: "v8",
       reporter: ["text-summary", "text", "html"],

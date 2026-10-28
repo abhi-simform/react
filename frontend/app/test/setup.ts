@@ -1,13 +1,11 @@
 import "@testing-library/jest-dom/vitest"
 
 import { cleanup } from "@testing-library/react"
-import { afterAll, afterEach, beforeAll, expect } from "vitest"
-import * as axeMatchers from "vitest-axe/matchers"
+import { afterAll, afterEach, beforeAll } from "vitest"
 
+import { clearAccessToken } from "@/features/auth/session"
 import { resetDb } from "@/test/msw/db"
 import { server } from "@/test/msw/server"
-
-expect.extend(axeMatchers)
 
 // jsdom has no layout engine or IntersectionObserver: the minimum the app needs.
 if (!("IntersectionObserver" in globalThis)) {
@@ -48,6 +46,7 @@ afterEach(() => {
   cleanup()
   server.resetHandlers()
   resetDb()
+  clearAccessToken()
   localStorage.clear()
   sessionStorage.clear()
 })
