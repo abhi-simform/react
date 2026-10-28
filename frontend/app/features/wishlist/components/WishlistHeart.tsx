@@ -5,6 +5,7 @@ import { useAuth } from "@/features/auth"
 import { paths } from "@/lib/paths"
 import { cn } from "@/lib/utils"
 
+import { rememberWishlistIntent } from "../pendingIntent"
 import { useWishlist } from "../useWishlist"
 
 type Props = {
@@ -28,9 +29,8 @@ export function WishlistHeart({ productId, productName, className }: Props) {
 
   function onClick() {
     if (authStatus === "anonymous") {
-      navigate(paths.login(), {
-        state: { from: location.pathname + location.search },
-      })
+      rememberWishlistIntent(productId) // applied after login (WishlistSessionSync)
+      navigate(paths.login(location.pathname + location.search))
       return
     }
     if (!inert) toggle(productId, productName)
