@@ -258,6 +258,38 @@ export const openApiDocument = {
         },
       },
     },
+    "/uploads/images": {
+      post: {
+        tags: ["Uploads"],
+        summary:
+          "Upload one image (multipart field `file`). JPEG/PNG/WebP by magic bytes, max UPLOAD_MAX_BYTES (2 MB)",
+        security: bearer,
+        requestBody: {
+          required: true,
+          content: {
+            "multipart/form-data": {
+              schema: {
+                type: "object",
+                required: ["file"],
+                properties: { file: { type: "string", format: "binary" } },
+              },
+            },
+          },
+        },
+        responses: {
+          201: {
+            description: "{ key, url, contentType, bytes }; `url` is absolute and public",
+          },
+          401: { description: "UNAUTHORIZED" },
+          413: { description: "FILE_TOO_LARGE" },
+          415: {
+            description: "UNSUPPORTED_FILE_TYPE (checked on the bytes, not the name)",
+          },
+          422: { description: "VALIDATION_ERROR (no file / more than one file)" },
+          429: { description: "UPLOAD_RATE_LIMITED" },
+        },
+      },
+    },
     "/categories": {
       get: {
         tags: ["Catalog"],

@@ -134,4 +134,16 @@ All wishlist and address endpoints need `Authorization: Bearer <accessToken>` (4
 
 Address shape: `{ id, fullName, phone, line1, line2|null, landmark|null, city, state, pincode, type, isDefault, createdAt, updatedAt }`.
 
+### Image upload (B7, upload slice)
+
+`POST /uploads/images` (Bearer). `multipart/form-data` with exactly one file in the field **`file`**. Do not set `Content-Type` yourself in the browser (the boundary is added automatically).
+
+- `201` -> `{ key, url, contentType, bytes }`. `url` is an absolute, public, immutable URL (store it, e.g. `PATCH /users/me { avatarUrl }`).
+- Accepted: JPEG, PNG, WebP, decided from the **file's first bytes**, not the file name or the declared type. Max `UPLOAD_MAX_BYTES` (2 MB default).
+- Errors: `401 UNAUTHORIZED`, `413 FILE_TOO_LARGE`, `415 UNSUPPORTED_FILE_TYPE`, `422 VALIDATION_ERROR` (`details[0].path === "file"`: no file, or more than one), `429 UPLOAD_RATE_LIMITED` (30/min).
+- Files are written to `UPLOAD_DIR` (default `backend/uploads/`, git-ignored) under a generated name `<userId>-<uuid>.<ext>` and served from `GET /uploads/<name>` (outside `/api/v1`, `nosniff`, cached 7 days).
+- Storage sits behind the `ImageStorage` interface (`modules/uploads/storage.ts`, one method `save`). Cloudinary/S3 = a second class returning the provider's URL; no route or test changes. Needs from the owner at that point: `CLOUDINARY_URL` (or key/secret) and the adapter class (not built: out of scope without credentials).
+- One file per request on purpose: the client uploads images one at a time, gets per-file progress/cancel/retry, and puts the returned URLs in the form payload.
+- Reviews, Q&A and moderation (the rest of B7) are NOT built yet; they arrive in Stage 11.
+
 New endpoints are appended here as each backend phase lands (see `BACKEND-ROADMAP.md`).
