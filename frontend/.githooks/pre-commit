@@ -1,0 +1,4 @@
+#!/bin/sh
+# Stage 12.10: format + lint ONLY the staged TypeScript files, block the commit on errors.
+# (Bypass in an emergency with `git commit --no-verify`; CI runs `npm run check` anyway.)
+cd "$(git rev-parse --show-toplevel)/frontend" && npx lint-staged

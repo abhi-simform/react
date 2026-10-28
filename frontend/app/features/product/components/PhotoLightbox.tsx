@@ -39,7 +39,7 @@ export function PhotoLightbox({
           {open && (
             <img
               src={safeImageSrc(open) ?? undefined}
-              alt={`${label} photo`}
+              alt={label}
               className="max-h-[70vh] w-full object-contain"
             />
           )}

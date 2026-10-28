@@ -58,6 +58,7 @@ const RhfForm = memo(function RhfForm({ mode }: { mode: Mode }) {
     defaultValues: { name: "", email: "", bio: "" },
   })
   // `watch("name")` at the ROOT subscribes the whole form component to that field.
+  // eslint-disable-next-line react-hooks/incompatible-library -- the lab shows exactly this cost
   const rootWatched = mode === "watch" ? watch("name") : undefined
   return (
     <form className="grid gap-1" onSubmit={(e) => e.preventDefault()}>

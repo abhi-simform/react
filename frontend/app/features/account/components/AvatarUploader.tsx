@@ -57,7 +57,7 @@ export function AvatarUploader({
       {safeImageSrc(currentUrl) ? (
         <img
           src={safeImageSrc(currentUrl) ?? undefined}
-          alt={`${name}'s current photo`}
+          alt={`${name}, current profile`}
           className="size-24 rounded-full border object-cover"
         />
       ) : (

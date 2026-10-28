@@ -49,6 +49,9 @@ export function Gallery({
   }
 
   return (
+    // ArrowLeft/ArrowRight move between images (APG carousel); the keys bubble up from the
+    // focused thumbnail/buttons, the group itself is not a tab stop.
+    // eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions
     <div
       role="group"
       aria-roledescription="carousel"

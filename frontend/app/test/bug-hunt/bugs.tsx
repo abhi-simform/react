@@ -16,7 +16,6 @@ import { api } from "@/lib/api/client"
 export function BrokenTicker() {
   const [count, setCount] = useState(0)
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     const id = setInterval(() => setCount(count + 1), 1000) // `count` is 0 forever in this closure
     return () => clearInterval(id)
     // eslint-disable-next-line react-hooks/exhaustive-deps

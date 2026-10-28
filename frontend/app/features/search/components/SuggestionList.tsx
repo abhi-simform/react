@@ -40,6 +40,9 @@ export function SuggestionList({
               {g.label}
             </li>
             {g.options.map((o) => (
+              // Combobox pattern: DOM focus stays in the INPUT (arrow keys + Enter, handled in
+              // SearchBox, drive `aria-activedescendant`); the click is for pointer and touch.
+              // eslint-disable-next-line jsx-a11y/click-events-have-key-events
               <li
                 key={o.id}
                 id={`${listId}-opt-${o.id}`}

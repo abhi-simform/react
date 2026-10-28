@@ -13,6 +13,9 @@ export function MegaMenu() {
   const tree = useCategoryTree()
 
   return (
+    // Escape bubbles up from the button/links inside (the disclosure's close key); the div
+    // itself is not interactive, so the static-element rule does not apply.
+    // eslint-disable-next-line jsx-a11y/no-static-element-interactions
     <div
       ref={ref}
       className="relative"

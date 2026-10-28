@@ -1,6 +1,7 @@
 import { readdirSync } from "node:fs"
 
 import js from "@eslint/js"
+import jsxA11y from "eslint-plugin-jsx-a11y"
 import reactHooks from "eslint-plugin-react-hooks"
 import globals from "globals"
 import tseslint from "typescript-eslint"
@@ -39,6 +40,18 @@ export default tseslint.config(
   js.configs.recommended,
   tseslint.configs.recommended,
   reactHooks.configs.flat.recommended,
+  // 12.10: accessibility rules at lint time (names, roles, keyboard handlers, alt text...).
+  { ...jsxA11y.flatConfigs.recommended, files: ["app/**/*.{ts,tsx}"] },
+  {
+    files: ["app/**/*.{ts,tsx}"],
+    rules: {
+      // base-ui's Switch and our QuantityInput ARE the control (they render the input/button).
+      "jsx-a11y/label-has-associated-control": [
+        "error",
+        { controlComponents: ["Switch", "QuantityInput"], assert: "either" },
+      ],
+    },
+  },
   {
     files: ["app/**/*.{ts,tsx}"],
     languageOptions: { globals: globals.browser },
