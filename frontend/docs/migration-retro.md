@@ -37,8 +37,9 @@ hand-written effects on purpose (that is what they demonstrate).
 Honest net: the whole `frontend/app` (excluding scratch) grew by ~2,200 lines in this stage
 (`git diff --stat stage-08-state-context`: 3,388 insertions, 1,210 deletions in 77 files), because
 Stage 9 also ADDED features (server cart, orders, reviews, similar products, prefetching, key
-factories, the policy). Hand-written fetching code specifically went down: roughly 700 lines of
-fetching/caching/race bookkeeping were replaced by about 250 of query options and adapters. The
+factories, the policy). Hand-written fetching code specifically went down (see the table: `useFetch`, the
+infinite-list reducer, the suggestion cache, the id loader, the category promise cache), but I did
+not total it precisely. The
 bigger win is not the count but what the lines have to get right: races, dedupe and staleness are
 now the library's problem.
 
@@ -75,9 +76,10 @@ shown as if it were real (guarded by `isPlaceholder`).
 
 ## 5. Pain journal
 
-See `pain-journal.md`: 23 entries, each with a resolution: 17 solved, 3 partly, 4 still painful
-(scroll restoration of infinite lists, the refresh-token single-flight, 401 handling in the fetch
-wrapper, and the facets copy), the last three belong to Stage 10/13.
+See `pain-journal.md`: 23 entries, each with a resolution: 18 solved, 2 partly solved (two
+wishlist endpoints for one fact; per-rail skeleton heights), 3 still painful (scroll restoration of
+infinite lists, the refresh-token single-flight, 401 handling in the fetch wrapper). The last two
+belong to Stage 10, the first to Stage 13 or the persisted-cache stretch.
 
 ## 6. Not done / not measured
 
