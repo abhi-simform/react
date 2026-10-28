@@ -1,6 +1,7 @@
 import { HealthBadge } from "@/components/common/HealthBadge"
 import { RecentlyViewedRail } from "@/features/product/components/RecentlyViewedRail"
 import { FlashSaleStrip } from "@/features/deals/components/FlashSaleStrip"
+import { pageTitle } from "@/lib/pageTitle"
 
 export default function Home() {
   return (
@@ -11,4 +12,14 @@ export default function Home() {
       <RecentlyViewedRail />
     </div>
   )
+}
+
+export function meta() {
+  return [
+    { title: pageTitle() },
+    {
+      name: "description",
+      content: "Shop electronics, fashion, home and more",
+    },
+  ]
 }

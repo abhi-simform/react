@@ -2,6 +2,8 @@ import { useNavigate } from "react-router"
 
 import { Button } from "@/components/ui/button"
 import { paths } from "@/lib/paths"
+import { pageTitle } from "@/lib/pageTitle"
+import type { RouteHandle } from "@/types/route-handle"
 
 export default function CheckoutReviewRoute() {
   const navigate = useNavigate()
@@ -23,3 +25,9 @@ export default function CheckoutReviewRoute() {
     </div>
   )
 }
+
+export function meta() {
+  return [{ title: pageTitle("Checkout: review") }]
+}
+
+export const handle = { breadcrumb: "Review" } satisfies RouteHandle

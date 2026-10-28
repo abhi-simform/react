@@ -1,6 +1,8 @@
 import { Link, useSearchParams } from "react-router"
 
 import { ErrorState } from "@/components/common/ErrorState"
+import { Breadcrumbs } from "@/components/layout/Breadcrumbs"
+import { useDocumentTitle } from "@/hooks/useDocumentTitle"
 import { NotFoundError } from "@/lib/notFound"
 import { paths } from "@/lib/paths"
 
@@ -46,6 +48,8 @@ export function ProductDetailPage({ slug }: { slug: string }) {
   const [searchParams] = useSearchParams()
   const withoutKey = searchParams.has("bug-no-key")
   const state = useProduct(slug)
+  // Generic title from the route's `meta` until the product is known, then its name.
+  useDocumentTitle(state.status === "success" ? state.data.name : "Product")
 
   if (state.status === "idle" || state.status === "loading") {
     return (
@@ -67,18 +71,34 @@ export function ProductDetailPage({ slug }: { slug: string }) {
 
   const product = state.data
   return (
-    <div className="mx-auto max-w-5xl p-4">
-      {/* key = identity: a new slug is a new component, so all state resets. */}
-      <ProductDetailView
-        key={withoutKey ? undefined : product.slug}
-        product={product}
-        variants={variantsFixture(product)}
+    <div className="mx-auto max-w-5xl">
+      {/* Home > Electronics > Mobiles > Apple > iPhone 15 (real category path from the API). */}
+      <Breadcrumbs
+        trail={[
+          ...product.categoryPath.map((c) => ({
+            label: c.name,
+            to: paths.category(c.slug),
+          })),
+          {
+            label: product.brand,
+            to: paths.category(product.category.slug, { brand: product.brand }),
+          },
+          { label: product.name },
+        ]}
       />
-      <RelatedProducts
-        categorySlug={product.category.slug}
-        slug={product.slug}
-        keepBugFlag={withoutKey}
-      />
+      <div className="p-4">
+        {/* key = identity: a new slug is a new component, so all state resets. */}
+        <ProductDetailView
+          key={withoutKey ? undefined : product.slug}
+          product={product}
+          variants={variantsFixture(product)}
+        />
+        <RelatedProducts
+          categorySlug={product.category.slug}
+          slug={product.slug}
+          keepBugFlag={withoutKey}
+        />
+      </div>
     </div>
   )
 }

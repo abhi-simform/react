@@ -2,6 +2,8 @@ import { Navigate, useSearchParams } from "react-router"
 
 import { ProductListingPage } from "@/features/catalog/components/ProductListingPage"
 import { paths } from "@/lib/paths"
+import { pageTitle } from "@/lib/pageTitle"
+import type { RouteHandle } from "@/types/route-handle"
 
 export default function ProductsRoute() {
   const [searchParams] = useSearchParams()
@@ -22,3 +24,12 @@ export default function ProductsRoute() {
   }
   return <ProductListingPage />
 }
+
+export function meta() {
+  return [
+    { title: pageTitle("Products") },
+    { name: "description", content: "Browse and filter all products" },
+  ]
+}
+
+export const handle = { breadcrumb: "Products" } satisfies RouteHandle

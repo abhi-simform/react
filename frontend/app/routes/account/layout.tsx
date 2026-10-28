@@ -10,6 +10,9 @@ import type { Route } from "./+types/layout"
  * The sidebar lives in the PARENT route, so navigating between /account/* pages
  * only swaps the <Outlet/>: the sidebar is not remounted and keeps its state.
  */
+import { pageTitle } from "@/lib/pageTitle"
+import type { RouteHandle } from "@/types/route-handle"
+
 export default function AccountLayout() {
   // Dev-only proof: this counter survives navigation between account pages.
   const [visits, setVisits] = useState(0)
@@ -47,3 +50,9 @@ export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
     </div>
   )
 }
+
+export function meta() {
+  return [{ title: pageTitle("Account") }]
+}
+
+export const handle = { breadcrumb: "Account" } satisfies RouteHandle

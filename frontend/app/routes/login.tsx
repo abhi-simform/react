@@ -5,6 +5,9 @@ import { Button } from "@/components/ui/button"
 import { getReturnTo, useAuth, type Role } from "@/features/auth"
 
 /** Stub login (real forms arrive in Stage 7/10): pick a role, land where you were going. */
+import { pageTitle } from "@/lib/pageTitle"
+import type { RouteHandle } from "@/types/route-handle"
+
 export default function LoginRoute() {
   const { login } = useAuth()
   const navigate = useNavigate()
@@ -42,3 +45,9 @@ export default function LoginRoute() {
     </form>
   )
 }
+
+export function meta() {
+  return [{ title: pageTitle("Log in") }]
+}
+
+export const handle = { breadcrumb: "Log in" } satisfies RouteHandle

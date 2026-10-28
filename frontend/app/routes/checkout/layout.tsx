@@ -9,6 +9,9 @@ const STEPS = [
 ] as const
 
 /** The current step is DERIVED from the url: no state to keep in sync with it. */
+import { pageTitle } from "@/lib/pageTitle"
+import type { RouteHandle } from "@/types/route-handle"
+
 export default function CheckoutLayout() {
   const { pathname } = useLocation()
   const current = STEPS.findIndex((s) => pathname.endsWith(`/${s.slug}`))
@@ -61,3 +64,9 @@ export default function CheckoutLayout() {
     </div>
   )
 }
+
+export function meta() {
+  return [{ title: pageTitle("Checkout") }]
+}
+
+export const handle = { breadcrumb: "Checkout" } satisfies RouteHandle

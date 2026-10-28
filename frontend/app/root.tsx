@@ -3,8 +3,14 @@ import { Links, Meta, Outlet, Scripts, ScrollRestoration } from "react-router"
 import type { Route } from "./+types/root"
 import { RouteErrorView } from "@/components/common/RouteErrorView"
 import { AuthProvider } from "@/features/auth"
+import { pageTitle } from "@/lib/pageTitle"
 
 import "./app.css"
+
+/** Fallback title for any route that exports no `meta` of its own (the leaf route's meta wins). */
+export function meta() {
+  return [{ title: pageTitle() }]
+}
 
 export function Layout({ children }: { children: React.ReactNode }) {
   return (

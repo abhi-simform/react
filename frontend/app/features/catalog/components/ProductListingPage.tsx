@@ -13,6 +13,8 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet"
+import { Breadcrumbs } from "@/components/layout/Breadcrumbs"
+import { useDocumentTitle } from "@/hooks/useDocumentTitle"
 import { useMediaQuery } from "@/hooks/useMediaQuery"
 import { assertNever } from "@/lib/assert"
 import { NotFoundError } from "@/lib/notFound"
@@ -69,6 +71,13 @@ export function ProductListingPage({
       : "All products"
 
   const meta = state.status === "success" ? state.data.meta : undefined
+  useDocumentTitle(
+    categorySlug
+      ? (categoryName ?? "Category")
+      : filters.search
+        ? `Search: ${filters.search}`
+        : "Products"
+  )
 
   function removeCategory() {
     const rest = new URLSearchParams(searchParams)
@@ -130,76 +139,91 @@ export function ProductListingPage({
   )
 
   return (
-    <div className="p-4">
-      <h1 className="mb-3 text-xl font-medium">{title}</h1>
-      <div className="flex gap-6">
-        {isDesktop && (
-          <aside aria-label="Filters" className="w-60 shrink-0">
-            {sidebar}
-          </aside>
-        )}
-        <div className="min-w-0 flex-1">
-          <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
-            <div className="flex items-center gap-3">
-              {!isDesktop && (
-                <Sheet>
-                  <SheetTrigger render={<Button variant="outline" size="sm" />}>
-                    <SlidersHorizontal aria-hidden className="size-4" />
-                    Filters{activeCount > 0 ? ` (${activeCount})` : ""}
-                  </SheetTrigger>
-                  <SheetContent side="left" className="overflow-y-auto">
-                    <SheetHeader>
-                      <SheetTitle>Filters</SheetTitle>
-                    </SheetHeader>
-                    <div className="p-4">{sidebar}</div>
-                    <div className="p-4">
-                      <SheetClose render={<Button className="w-full" />}>
-                        Show {meta ? meta.total : ""} results
-                      </SheetClose>
-                    </div>
-                  </SheetContent>
-                </Sheet>
-              )}
-              <p role="status" aria-live="polite" className="text-sm">
-                {meta
-                  ? `${meta.total.toLocaleString("en-IN")} products`
-                  : "Loading..."}
-              </p>
-            </div>
-            <div className="flex items-center gap-3">
-              <SortSelect
-                value={filters.sort}
-                onChange={(s) => setFilter("sort", s)}
-              />
-              <Button
-                variant="outline"
-                size="sm"
-                aria-pressed={filters.view === "list"}
-                onClick={() =>
-                  setFilter("view", filters.view === "grid" ? "list" : "grid")
-                }
-              >
-                {filters.view === "grid" ? "List view" : "Grid view"}
-              </Button>
-            </div>
-          </div>
-          <ActiveFilterChips
-            filters={filters}
-            categoryName={categoryName}
-            onRemoveCategory={categorySlug ? removeCategory : undefined}
-            onToggleBrand={api.toggleBrand}
-            onSetPriceRange={(min, max) => api.setPriceRange(min, max)}
-            onSetFilter={setFilter}
-            onClearAll={api.clearAll}
-          />
-          {body()}
-          {meta && (
-            <Pagination
-              page={meta.page}
-              totalPages={meta.totalPages}
-              onPageChange={(p) => setFilter("page", p)}
-            />
+    <div>
+      {category.status === "success" && category.data && (
+        <Breadcrumbs
+          trail={[
+            ...category.data.ancestors.map((a) => ({
+              label: a.name,
+              to: paths.category(a.slug),
+            })),
+            { label: category.data.name },
+          ]}
+        />
+      )}
+      <div className="p-4">
+        <h1 className="mb-3 text-xl font-medium">{title}</h1>
+        <div className="flex gap-6">
+          {isDesktop && (
+            <aside aria-label="Filters" className="w-60 shrink-0">
+              {sidebar}
+            </aside>
           )}
+          <div className="min-w-0 flex-1">
+            <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
+              <div className="flex items-center gap-3">
+                {!isDesktop && (
+                  <Sheet>
+                    <SheetTrigger
+                      render={<Button variant="outline" size="sm" />}
+                    >
+                      <SlidersHorizontal aria-hidden className="size-4" />
+                      Filters{activeCount > 0 ? ` (${activeCount})` : ""}
+                    </SheetTrigger>
+                    <SheetContent side="left" className="overflow-y-auto">
+                      <SheetHeader>
+                        <SheetTitle>Filters</SheetTitle>
+                      </SheetHeader>
+                      <div className="p-4">{sidebar}</div>
+                      <div className="p-4">
+                        <SheetClose render={<Button className="w-full" />}>
+                          Show {meta ? meta.total : ""} results
+                        </SheetClose>
+                      </div>
+                    </SheetContent>
+                  </Sheet>
+                )}
+                <p role="status" aria-live="polite" className="text-sm">
+                  {meta
+                    ? `${meta.total.toLocaleString("en-IN")} products`
+                    : "Loading..."}
+                </p>
+              </div>
+              <div className="flex items-center gap-3">
+                <SortSelect
+                  value={filters.sort}
+                  onChange={(s) => setFilter("sort", s)}
+                />
+                <Button
+                  variant="outline"
+                  size="sm"
+                  aria-pressed={filters.view === "list"}
+                  onClick={() =>
+                    setFilter("view", filters.view === "grid" ? "list" : "grid")
+                  }
+                >
+                  {filters.view === "grid" ? "List view" : "Grid view"}
+                </Button>
+              </div>
+            </div>
+            <ActiveFilterChips
+              filters={filters}
+              categoryName={categoryName}
+              onRemoveCategory={categorySlug ? removeCategory : undefined}
+              onToggleBrand={api.toggleBrand}
+              onSetPriceRange={(min, max) => api.setPriceRange(min, max)}
+              onSetFilter={setFilter}
+              onClearAll={api.clearAll}
+            />
+            {body()}
+            {meta && (
+              <Pagination
+                page={meta.page}
+                totalPages={meta.totalPages}
+                onPageChange={(p) => setFilter("page", p)}
+              />
+            )}
+          </div>
         </div>
       </div>
     </div>

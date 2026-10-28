@@ -1,11 +1,14 @@
 import { useRef } from "react"
-import { Outlet } from "react-router"
+import { Outlet, useMatches } from "react-router"
 
 import { RouteErrorView } from "@/components/common/RouteErrorView"
+import { Breadcrumbs } from "@/components/layout/Breadcrumbs"
 import { Footer } from "@/components/layout/Footer"
 import { Header } from "@/components/layout/Header"
 import { DevAuthPanel } from "@/features/auth"
 import { useRouteFocus } from "@/hooks/useRouteFocus"
+
+import { getBreadcrumb } from "@/types/route-handle"
 
 import type { Route } from "./+types/shell"
 
@@ -14,6 +17,9 @@ export default function ShellLayout() {
   const mainRef = useRef<HTMLElement>(null)
   const liveRef = useRef<HTMLDivElement>(null)
   useRouteFocus(mainRef, liveRef)
+  // Show the trail when any matched route declares a `handle.breadcrumb`.
+  // (Pages with data-driven crumbs have no handle and render <Breadcrumbs trail/> themselves.)
+  const hasStaticCrumbs = useMatches().some((m) => getBreadcrumb(m.handle))
 
   return (
     <div className="flex min-h-svh flex-col">
@@ -32,6 +38,7 @@ export default function ShellLayout() {
         tabIndex={-1}
         className="flex-1 focus:outline-none"
       >
+        {hasStaticCrumbs && <Breadcrumbs />}
         <Outlet />
       </main>
       <Footer />
