@@ -52,5 +52,6 @@ export const paths = {
     page: "profile" | "addresses" | "security" | "notifications" | "payments"
   ) => `/account/${page}`,
   seller: () => "/seller",
+  sellerNewProduct: () => "/seller/products/new",
   dev: (lab?: string) => (lab ? `/dev/${lab}` : "/dev"),
 } as const

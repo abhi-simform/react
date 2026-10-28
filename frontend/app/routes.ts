@@ -58,7 +58,8 @@ export default [
 
     // RequireRole: needs a session AND the seller role (403 page otherwise).
     layout("routes/guards/require-seller.tsx", [
-      route("seller", "routes/seller.tsx"),
+      route("seller", "routes/seller/index.tsx"),
+      route("seller/products/new", "routes/seller/new-product.tsx"),
     ]),
 
     // Earlier-stage labs, grouped under /dev (kept; see 5.10 in the notes).
