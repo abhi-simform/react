@@ -1,4 +1,5 @@
 import { HealthBadge } from "@/components/common/HealthBadge"
+import { RecentlyViewedRail } from "@/features/product/components/RecentlyViewedRail"
 import { FlashSaleStrip } from "@/features/deals/components/FlashSaleStrip"
 
 export default function Home() {
@@ -7,6 +8,7 @@ export default function Home() {
       <h1 className="text-xl font-medium">ShopSphere</h1>
       <HealthBadge />
       <FlashSaleStrip />
+      <RecentlyViewedRail />
     </div>
   )
 }

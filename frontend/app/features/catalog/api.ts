@@ -18,7 +18,11 @@ export const getProducts = (
 ): Promise<Paginated<Product>> =>
   getProductsByQuery(toQueryString(query), signal)
 
-export const getProduct = (slug: string): Promise<ProductDetail> =>
-  request(`/products/${encodeURIComponent(slug)}`, {
+export const getProduct = (
+  idOrSlug: string,
+  signal?: AbortSignal
+): Promise<ProductDetail> =>
+  request(`/products/${encodeURIComponent(idOrSlug)}`, {
     schema: productDetailSchema,
+    signal,
   })

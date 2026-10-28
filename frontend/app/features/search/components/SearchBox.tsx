@@ -2,6 +2,7 @@ import { useId, useRef, useState } from "react"
 
 import { useDebounce } from "@/hooks/useDebounce"
 import { useFocusShortcut } from "@/hooks/useFocusShortcut"
+import { useOnClickOutside } from "@/hooks/useOnClickOutside"
 
 import { useSuggestions } from "../hooks/useSuggestions"
 
@@ -20,6 +21,8 @@ export function SearchBox() {
   const [open, setOpen] = useState(false)
   const [active, setActive] = useState(-1) // highlighted option index, -1 = none
   const inputRef = useRef<HTMLInputElement>(null)
+  const formRef = useRef<HTMLFormElement>(null)
+  useOnClickOutside(formRef, () => setOpen(false))
   useFocusShortcut(inputRef) // "/" focuses the search box
 
   const trimmed = term.trim()
@@ -59,6 +62,9 @@ export function SearchBox() {
         event.preventDefault()
         if (items.length) setActive((a) => (a <= 0 ? items.length - 1 : a - 1))
         break
+      case "Tab":
+        setOpen(false) // keyboard users leaving the field close it too
+        break
       case "Escape":
         // First Escape closes the list, the second clears the text.
         if (isOpen) setOpen(false)
@@ -69,16 +75,12 @@ export function SearchBox() {
 
   return (
     <form
+      ref={formRef}
       role="search"
       className="relative"
       onSubmit={(e) => {
         e.preventDefault()
         if (trimmed) choose(active)
-      }}
-      // Focus leaving the whole widget closes the list (4.7 swaps this for
-      // useOnClickOutside).
-      onBlur={(e) => {
-        if (!e.currentTarget.contains(e.relatedTarget)) setOpen(false)
       }}
     >
       <label htmlFor={`${listId}-input`} className="sr-only">
