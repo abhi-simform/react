@@ -131,3 +131,14 @@ Contracts: `backend/docs/API-CONVENTIONS.md` ("Payments (B6)", "Reviews, ratings
 - `Content-Disposition` is exposed through CORS (backend change), so `fetch` can read the invoice filename.
 - Reviews and Q&A (verified with curl): `GET /products/:id/reviews?sort&rating&photos&page` (public; Bearer adds `myVote/isMine`), `/reviews/summary`, `/reviews/eligibility`, `POST /products/:id/reviews` (`409 ALREADY_REVIEWED`, `422` photos from another user), `PUT/DELETE /reviews/:id/helpful` (idempotent), `GET/POST /products/:id/questions`, `GET/POST /questions/:id/answers`, `PUT/DELETE /questions|answers/:id/upvote`. Product ids here are the Mongo `_id`, not the slug.
 - A review body is plain text; the API returns `<script>` verbatim, so escaping is the UI's job.
+
+## Stage 11 additions (B8 discovery, B9 notifications and realtime), verified with curl, a Node socket client and in the browser
+
+Contracts: `backend/docs/API-CONVENTIONS.md` ("Search suggestions, recently viewed, recommendations, compare (B8)", "Notifications and realtime (B9, completed)"). What the frontend relies on:
+
+- `GET /search/suggest?q=` -> `{ products[], categories[], brands[], correction }` (q 2-60 chars, else 422). `correction` is only set when nothing matched.
+- Rails return product list rows (+ `deal`); `also-bought` and `for-you` carry their own `meta` (`source`, `personalised/basedOn`), which is why `apiWithMeta` exists. `POST /me/recently-viewed` takes `{ items: [{ productId, viewedAt? }] }` (202) and is also the merge for the guest list.
+- Notifications: `GET /notifications` (meta has `unreadCount`), `/unread-count`, `POST /:id/read` (idempotent, returns the new count), `POST /read-all`, `DELETE /:id`, `GET/PATCH /preferences`. Admin: `POST /admin/notifications/broadcast`.
+- Socket.io on the API's port: `auth: { token }` in the handshake (a callback on the client), refusal codes `UNAUTHORIZED | INVALID_TOKEN | TOKEN_EXPIRED` in `err.data.code`; the server disconnects a socket when its token expires (`auth:expired`, `io server disconnect`: Socket.io does NOT reconnect those by itself). Events: `ready`, `notification:new {notification, unreadCount}`, `order:status {orderId, status, entry{status,at,note}, ...}`, `order:payment`. Events are not replayed: refetch after a reconnect.
+- `GET /coupons/offers` (public) feeds the product page's Offers panel; `GET /banners?placement=hero` feeds the home carousel.
+- Dev data: the customer has 6 recently viewed products and a notification history (4 unread); the order moves from the admin API (`POST /admin/orders/:id/status`) show up live.
