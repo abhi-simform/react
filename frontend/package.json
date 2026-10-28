@@ -7,7 +7,8 @@
     "dev": "react-router dev",
     "start": "react-router-serve ./build/server/index.js",
     "typecheck": "react-router typegen && tsc",
-    "format": "prettier --write \"**/*.{ts,tsx}\""
+    "format": "prettier --write \"**/*.{ts,tsx}\"",
+    "check:scratch": "node scratch/01-immutability.ts && node scratch/02-filters.ts && node scratch/03-totals-histogram.ts && node scratch/04-sort.ts && node scratch/05-defensive.ts && node scratch/07-format.ts && node --import ./scratch/register-alias.mjs scratch/06-async.ts"
   },
   "dependencies": {
     "@base-ui/react": "^1.8.0",

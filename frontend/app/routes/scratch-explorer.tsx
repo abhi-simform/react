@@ -4,16 +4,20 @@ import { useState } from "react"
 import {
   brandCounts,
   filterProducts,
+  loadHomeData,
   filterWithFacets,
   priceHistogram,
   sortProducts,
+  type HomeData,
+  type Product,
+  type ProductFilters,
   type SortKey,
-} from "@/features/catalog/utils"
-import type { Product, ProductFilters } from "@/features/catalog/types"
-import { loadHomeData, type HomeData } from "@/features/catalog/homeData"
+} from "@/features/catalog"
 import { getJson } from "@/lib/api/getJson"
 import { isAbortError, withTimeout } from "@/lib/async"
 import { env } from "@/lib/env"
+import { formatCurrency } from "@/lib/format"
+import { toPaise } from "@/lib/money"
 import snapshot from "@/test/fixtures/products.json"
 
 const products = snapshot.data as Product[]
@@ -255,8 +259,8 @@ export default function ScratchExplorer() {
         <ul className="grid gap-1 text-sm">
           {items.map((p) => (
             <li key={p._id}>
-              {p.name} · {p.brand} · ₹{p.price} · {p.ratingAvg}★ · stock{" "}
-              {p.stock} · {p.discountPercent}% off
+              {p.name} · {p.brand} · {formatCurrency(toPaise(p.price))} ·{" "}
+              {p.ratingAvg}★ · stock {p.stock} · {p.discountPercent}% off
             </li>
           ))}
         </ul>
