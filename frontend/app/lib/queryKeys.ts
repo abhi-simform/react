@@ -14,6 +14,10 @@ export const productKeys = {
   list: (filters: Filters) => [...productKeys.lists(), filters] as const,
   details: () => [...productKeys.all, "detail"] as const,
   detail: (slug: string) => [...productKeys.details(), slug] as const,
+  /** Infinite ("load more") lists: the filters WITHOUT `page`, a different cache shape from `list`. */
+  infinites: () => [...productKeys.all, "infinite"] as const,
+  infinite: (filters: Filters) =>
+    [...productKeys.infinites(), filters] as const,
 }
 
 export const categoryKeys = {
@@ -57,13 +61,23 @@ export const orderKeys = {
 
 export const reviewKeys = {
   all: ["reviews"] as const,
-  list: (productId: string) => [...reviewKeys.all, "list", productId] as const,
+  list: (productId: string, options: Filters = {}) =>
+    [...reviewKeys.all, "list", productId, options] as const,
+  /** Everything about one product's reviews (the prefix `addReview` invalidates). */
+  forProduct: (productId: string) =>
+    [...reviewKeys.all, "list", productId] as const,
 }
 
 export const questionKeys = {
   all: ["questions"] as const,
-  list: (productId: string) =>
-    [...questionKeys.all, "list", productId] as const,
+  list: (productId: string, options: Filters = {}) =>
+    [...questionKeys.all, "list", productId, options] as const,
+}
+
+export const relatedKeys = {
+  all: ["related"] as const,
+  list: (categorySlug: string, excludeSlug: string) =>
+    [...relatedKeys.all, categorySlug, excludeSlug] as const,
 }
 
 export const similarKeys = {

@@ -1,4 +1,8 @@
-import { queryOptions, type QueryClient } from "@tanstack/react-query"
+import {
+  infiniteQueryOptions,
+  queryOptions,
+  type QueryClient,
+} from "@tanstack/react-query"
 import { z } from "zod"
 
 import { api } from "@/lib/api/client"
@@ -20,6 +24,28 @@ export const productQueries = {
     queryOptions({
       queryKey: productKeys.list(filters),
       queryFn: ({ signal }) => getProducts(filters, signal),
+      staleTime: STALE.catalog,
+    }),
+  /**
+   * "Load more" feed (9.8): pages accumulate under ONE key (the filters without `page`). Page 1
+   * asks for facets, later pages skip those extra aggregations. `getNextPageParam` returns
+   * `undefined` on the last page, which makes `hasNextPage` false.
+   */
+  infinite: (filters: Omit<ProductQuery, "page">) =>
+    infiniteQueryOptions({
+      queryKey: productKeys.infinite(filters),
+      initialPageParam: 1,
+      queryFn: ({ pageParam, signal }) =>
+        getProducts(
+          {
+            ...filters,
+            page: pageParam,
+            facets: pageParam === 1 ? filters.facets : undefined,
+          },
+          signal
+        ),
+      getNextPageParam: (last) =>
+        last.meta.hasNext ? last.meta.page + 1 : undefined,
       staleTime: STALE.catalog,
     }),
   detail: (slug: string) =>

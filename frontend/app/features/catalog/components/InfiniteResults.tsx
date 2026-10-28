@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button"
 
 import { PAGE_SIZE, type ListingFilters } from "../filters"
 import type { useInfiniteProducts } from "../hooks/useInfiniteProducts"
-import { LoadMoreSentinel } from "./LoadMoreSentinel"
+import { LoadMoreSentinel } from "@/components/common/LoadMoreSentinel"
 import { toProductCardVM } from "../mappers"
 import { ProductGrid } from "./ProductGrid"
 
