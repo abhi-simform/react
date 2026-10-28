@@ -54,6 +54,9 @@ function subscribe(
       if (store.onVisible)
         document.removeEventListener("visibilitychange", store.onVisible)
       store.onVisible = undefined
+      // Forget the store: its `now` is about to go stale, and a counter mounted later must
+      // start from the CURRENT time (found by a test: it flashed the old value for a second).
+      if (stores.get(tickMs) === store) stores.delete(tickMs)
     }
   }
 
