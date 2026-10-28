@@ -287,3 +287,6 @@ Each bug keeps its broken version and its fix side by side (`BugNBroken` / `BugN
 
 ### Bug 1: infinite fetch loop
 Symptom: identical `GET /products?limit=3&sort=newest` requests keep firing and the page never settles (the demo has a safety cap of 15; the real bug has none): "Count requests" showed 15 for the broken one. Cause: `const params = { limit: 3, sort: "newest" }` is created in render and used as the dependency; each response calls `setNames`, which re-renders, creates a new object (new identity) and re-runs the effect. Fix: depend on the primitives (`[limit, sort]`): the fixed one made 2 requests (StrictMode's double mount in dev) and stopped. The linter warns about exactly this (`exhaustive-deps`: "makes the dependencies change on every render"); the broken file suppresses it with a reason.
+
+### Bug 2: missing cleanup on `resize`
+Symptom: every time the component is shown again the number of window `resize` listeners grows and old handlers keep calling `setState` on components that are gone. Cause: `addEventListener` in the effect with no `removeEventListener`. Fix: return a cleanup. Measured with counters (3 hide/show cycles on each version): added 16, removed 7, so 9 listeners alive; the fixed component accounts for exactly 1 (the mounted one), the other 8 are the broken version's leaks (4 mounts x 2 for StrictMode).

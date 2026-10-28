@@ -6,6 +6,7 @@ import {
   Bug1Fixed,
   bug1Stats,
 } from "@/scratch/bugs/Bug1InfiniteFetch"
+import { Bug2Demo, bug2Stats } from "@/scratch/bugs/Bug2ResizeListener"
 
 function Bug({
   title,
@@ -59,6 +60,19 @@ export default function ScratchBugs() {
         </div>
         {showBug1 === "broken" && <Bug1Broken />}
         {showBug1 === "fixed" && <Bug1Fixed />}
+      </Bug>
+      <Bug title="2. Missing cleanup on resize">
+        <Bug2Demo fixed={false} />
+        <Bug2Demo fixed />
+        <button
+          className="w-fit border p-1 text-sm"
+          onClick={() =>
+            setStats2(`added ${bug2Stats.added}, removed ${bug2Stats.removed}`)
+          }
+        >
+          Count listeners
+        </button>
+        <output data-testid="bug2-out">{stats2}</output>
       </Bug>
     </div>
   )
