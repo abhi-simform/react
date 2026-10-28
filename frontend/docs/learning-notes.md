@@ -100,3 +100,13 @@ What TypeScript / the real data revealed versus the plan's table:
 - `products.json satisfies Product[]` fails with `Type 'string' is not assignable to type 'ProductStatus'`: JSON modules widen literals. Understood, not hidden: `app/test/fixtures/products.ts` is a typed loader that narrows `status` with a small runtime check (Zod takes over in 2.6). Everything else in the 308-product fixture already matched.
 - `type` vs `interface`: I use `type` everywhere (unions, mapped/utility types, intersections all work with it; interfaces mostly matter for declaration merging and `extends` chains). Either is fine as long as the codebase is consistent.
 - Rename: the cart layer's coupon rule is now `CouponRule` (paise) to avoid clashing with the domain `Coupon` (rupees, as stored/served).
+
+## 2.2 Unions, narrowing, discriminated unions, exhaustiveness
+
+- `lib/asyncState.ts`: `AsyncState<T>` (idle | loading | success{data} | error{error}) and `renderState`, whose `default: return assertNever(state)` forces every member to be handled. `lib/assert.ts` has `assertNever(x: never): never`. A minimal `ApiError` class lives in `lib/api/errors.ts` (the plan introduces it in Stage 6, but `AsyncState` needs something to hold).
+- `features/orders/status.ts`: `statusLabel`, `statusColor`, `canCancel`, `canReturn`, each a `switch` over `OrderStatus` ending in `assertNever`. `features/orders/payment.ts`: `PaymentMethod` discriminated by `type`, `describePayment` (inside `case "razorpay"` the `razorpayOrderId` field is accessible; outside it would not compile).
+- Exhaustiveness experiment: I added `"refunded"` to `OrderStatus` in `types/domain.ts` and ran `npm run typecheck`. It listed exactly the four switches to update, nothing else:
+  `status.ts(27) / (49) / (68) / (87): TS2345 Argument of type '"refunded"' is not assignable to parameter of type 'never'.`
+  I then handled `refunded` in all four (label "Refunded", tone neutral, cannot cancel, cannot return) and kept it in the union, so the final code includes it.
+- Impossible state: with `{ isLoading: boolean; isError: boolean; data?: T }`, `{ isLoading: true, isError: true, data: [1] }` is a valid value (`scratch/08-unions.ts` shows it), and every consumer has to guess which flag wins. With `AsyncState` the same literal fails to compile (`@ts-expect-error` in the scratch file proves it), because `data` only exists on `"success"` and `status` is exactly one value.
+- `scratch/08-unions.ts` also asserts `canCancel("delivered") === false` with `console.assert`.

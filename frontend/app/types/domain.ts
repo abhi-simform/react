@@ -135,6 +135,7 @@ export type OrderStatus =
   | "cancelled"
   | "return_requested"
   | "returned"
+  | "refunded"
 
 /** planned (B5): snapshot of the product at purchase time. */
 export type OrderItem = {
