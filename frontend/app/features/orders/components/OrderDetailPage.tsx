@@ -57,6 +57,16 @@ export function OrderDetailPage({ orderId }: { orderId: string }) {
           ? `Live: checking for updates every 5 seconds${q.isFetching ? " (updating...)" : ""}`
           : `Final status: ${statusLabel(o.status)}. No more updates expected.`}
       </p>
+      <p className="mb-3 text-sm">
+        {o.paymentMethod === "cod"
+          ? `Cash on delivery: pay ${formatRupees(o.pricing.total)} when it arrives.`
+          : o.status === "pending_payment"
+            ? "Waiting for your payment."
+            : "Paid online."}{" "}
+        {o.delivery?.estimatedFrom && o.delivery.estimatedTo
+          ? `Estimated delivery ${formatDate(o.delivery.estimatedFrom)} to ${formatDate(o.delivery.estimatedTo)}.`
+          : ""}
+      </p>
       <section aria-labelledby="history" className="mb-4">
         <h2 id="history" className="font-medium">
           Status history
@@ -87,6 +97,12 @@ export function OrderDetailPage({ orderId }: { orderId: string }) {
       <dl className="grid max-w-xs grid-cols-[1fr_auto] gap-x-4 text-sm">
         <dt>Subtotal</dt>
         <dd>{formatRupees(o.pricing.subtotal)}</dd>
+        {o.pricing.discount > 0 && (
+          <>
+            <dt>Discount{o.coupon ? ` (${o.coupon.code})` : ""}</dt>
+            <dd>-{formatRupees(o.pricing.discount)}</dd>
+          </>
+        )}
         <dt>Shipping</dt>
         <dd>
           {o.pricing.shipping === 0 ? "Free" : formatRupees(o.pricing.shipping)}

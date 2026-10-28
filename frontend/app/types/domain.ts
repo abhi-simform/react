@@ -40,7 +40,7 @@ export type Address = {
   city: string
   state: string
   pincode: string
-  type: "home" | "work"
+  type: "home" | "work" | "other"
   isDefault: boolean
 }
 
@@ -102,7 +102,7 @@ export type OrderStatus =
   | "returned"
   | "refunded"
 
-/** planned (B5): snapshot of the product at purchase time. */
+/** B5: snapshot of the product at purchase time (whole rupees). */
 export type OrderItem = {
   sku: string
   productId: Id
@@ -111,9 +111,15 @@ export type OrderItem = {
   unitPrice: Money
   qty: number
   lineTotal: Money
+  /** Sold at a deal price. */
+  deal?: boolean
 }
 
-/** planned (B5) */
+/**
+ * B5: from `GET /orders`, `GET /orders/:id` (mapped from the API's `id` to `_id` in
+ * `features/orders/schemas.ts`; all money in whole rupees). The optional fields are the ones the
+ * Stage 9 stub did not have.
+ */
 export type Order = {
   _id: Id
   orderNumber: string
@@ -130,6 +136,15 @@ export type Order = {
     total: Money
   }
   paymentMethod: "razorpay" | "cod"
+  paymentStatus?: string
+  coupon?: { code: string; discount: Money }
+  delivery?: {
+    method: "standard" | "express"
+    slot?: string
+    estimatedFrom?: ISODateString
+    estimatedTo?: ISODateString
+  }
+  cancelReason?: string
   createdAt: ISODateString
 }
 

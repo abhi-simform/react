@@ -15,3 +15,4 @@ export {
 } from "./stepperContext"
 export { stepperReducer, initialStepperState } from "./stepperReducer"
 export type { StepperAction, StepperState } from "./stepperReducer"
+export { markOrderPlaced, orderJustPlaced } from "./placed"

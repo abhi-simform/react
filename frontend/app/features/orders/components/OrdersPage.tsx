@@ -1,6 +1,6 @@
 import { useInfiniteQuery } from "@tanstack/react-query"
 import { useState } from "react"
-import { Link, useNavigate, useSearchParams } from "react-router"
+import { Link, useSearchParams } from "react-router"
 
 import { EmptyState } from "@/components/common/EmptyState"
 import { ErrorState } from "@/components/common/ErrorState"
@@ -12,7 +12,6 @@ import { formatDate, formatRupees } from "@/lib/format"
 import { paths } from "@/lib/paths"
 import type { OrderStatus } from "@/types/domain"
 
-import { startSimulatedOrder } from "../orders.api"
 import { orderQueries } from "../queries"
 import { statusLabel } from "../status"
 import { OrderStatusBadge } from "./OrderStatusBadge"
@@ -32,7 +31,6 @@ const asStatus = (v: string | null): OrderStatus | undefined =>
  * so a filtered list is linkable and Back works. The filter object is the query key.
  */
 export function OrdersPage() {
-  const navigate = useNavigate()
   const [params, setParams] = useSearchParams()
   const status = asStatus(params.get("status"))
   const q = params.get("q") ?? ""
@@ -61,23 +59,7 @@ export function OrdersPage() {
     <div className="mx-auto max-w-3xl p-4">
       <div className="mb-3 flex items-center justify-between">
         <h1 className="text-xl font-medium">Your orders</h1>
-        {import.meta.env.DEV && (
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => {
-              const id = startSimulatedOrder()
-              void navigate(paths.order(id))
-            }}
-          >
-            Dev: place a simulated order
-          </Button>
-        )}
       </div>
-      <p className="mb-2 text-xs text-neutral-600">
-        Orders are a stub until the orders backend (B5): same shapes, in-memory
-        data.
-      </p>
       <form
         role="search"
         className="mb-2 flex gap-2"
