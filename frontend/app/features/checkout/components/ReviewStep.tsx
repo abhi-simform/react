@@ -3,8 +3,8 @@ import { Link, useNavigate } from "react-router"
 
 import { Button } from "@/components/ui/button"
 import { useAuth } from "@/features/auth"
-import { useFetch } from "@/hooks/useFetch"
-import { getAddresses } from "@/features/account"
+import { useQuery } from "@tanstack/react-query"
+import { addressQueries } from "@/features/account"
 import { paths } from "@/lib/paths"
 
 import { clearDraft } from "../draft"
@@ -17,11 +17,8 @@ export function ReviewStep() {
   const { user } = useAuth()
   const navigate = useNavigate()
   const values = getValues()
-  const addresses = useFetch((signal) => getAddresses(signal), [])
-  const address =
-    addresses.status === "success"
-      ? addresses.data.find((a) => a.id === values.addressId)
-      : undefined
+  const addresses = useQuery(addressQueries.list())
+  const address = addresses.data?.find((a) => a.id === values.addressId)
 
   function simulatePlaced() {
     // What a real "order placed" does: the draft is finished business. The success page is

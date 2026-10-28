@@ -11,10 +11,13 @@ import { toast } from "sonner"
 
 import { useAuth } from "@/features/auth"
 import { undoableToast } from "@/features/toast"
-import { useFetch } from "@/hooks/useFetch"
+import { useQuery, useQueryClient } from "@tanstack/react-query"
 import { toApiError, type ApiError } from "@/lib/api/errors"
 
-import { addToWishlist, getWishlistIds, removeFromWishlist } from "./api"
+import { wishlistKeys } from "@/lib/queryKeys"
+
+import { addToWishlist, removeFromWishlist } from "./api"
+import { wishlistQueries } from "./queries"
 
 /**
  * The shared source for every heart (card, PDP, header count, /wishlist page).
@@ -48,16 +51,17 @@ export function WishlistProvider({ children }: { children: React.ReactNode }) {
 
   // The READ part is the generic `useFetch` (6.8). Its dependency is the user id: a
   // different user is a different request, so the previous user's hearts are never shown.
-  const fetched = useFetch(
-    async (signal) => new Set(await getWishlistIds(signal)),
-    [userId],
-    { enabled: userId !== null }
-  )
+  const queryClient = useQueryClient()
+  const fetched = useQuery({
+    ...wishlistQueries.ids(),
+    select: (list) => new Set(list),
+    enabled: userId !== null,
+  })
   const [pending, setPending] = useState<ReadonlySet<string>>(new Set())
   const busy = useRef(new Set<string>()) // synchronous guard (see useAddresses)
 
   const ids = fetched.status === "success" ? fetched.data : undefined
-  const error = fetched.status === "error" ? fetched.error : null
+  const error = fetched.status === "error" ? toApiError(fetched.error) : null
   const status: WishlistStatus = !userId
     ? "anonymous"
     : fetched.status === "success"
@@ -65,7 +69,10 @@ export function WishlistProvider({ children }: { children: React.ReactNode }) {
       : fetched.status === "error"
         ? "error"
         : "loading"
-  const setIds = fetched.setData
+  const setIds = (update: (previous: Set<string>) => Set<string>) =>
+    queryClient.setQueryData<string[]>(wishlistKeys.ids(), (list = []) => [
+      ...update(new Set(list)),
+    ])
 
   // Undo needs to call `setMembership` again, which it cannot reference while defining it:
   // the latest version is kept in a ref (written in an effect, read in the toast's click).
@@ -119,7 +126,8 @@ export function WishlistProvider({ children }: { children: React.ReactNode }) {
         })
       }
     },
-    [userId, ids, setIds]
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- setIds only uses the stable queryClient
+    [userId, ids]
   )
 
   useEffect(() => {

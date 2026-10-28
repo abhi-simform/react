@@ -7,7 +7,6 @@ import { toQueryString } from "@/lib/api/query"
 import {
   brandSchema,
   categoryDetailSchema,
-  categoryNodeSchema,
   productDetailSchema,
   productListMetaSchema,
   productSchema,
@@ -15,7 +14,6 @@ import {
 import type {
   Brand,
   CategoryDetail,
-  CategoryNode,
   Product,
   ProductDetail,
   ProductListMeta,
@@ -65,16 +63,3 @@ export const getBrands = (
     schema: z.array(brandSchema),
     signal,
   })
-
-// The tree is tiny and identical for the header menu, the filter sidebar and the 404
-// page, so share ONE request. (Stage 9's TanStack Query replaces this hand-made cache.)
-let treePromise: Promise<CategoryNode[]> | undefined
-export function getCategoryTree(): Promise<CategoryNode[]> {
-  treePromise ??= api("/categories", {
-    schema: z.array(categoryNodeSchema),
-  }).catch((error: unknown) => {
-    treePromise = undefined // do not cache failures
-    throw error
-  })
-  return treePromise
-}

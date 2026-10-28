@@ -1,16 +1,19 @@
 import { useReducer, useRef } from "react"
 
 import { toApiError, type ApiError } from "@/lib/api/errors"
-import { useFetch } from "@/hooks/useFetch"
+import { useQuery, useQueryClient } from "@tanstack/react-query"
+
+import { addressKeys } from "@/lib/queryKeys"
+import { toAsyncState } from "@/lib/queryState"
 
 import {
   createAddress,
   deleteAddress,
-  getAddresses,
   setDefaultAddress,
   updateAddress,
 } from "../addresses.api"
-import type { AddressInput } from "../schemas"
+import { addressQueries } from "../queries"
+import type { Address, AddressInput } from "../schemas"
 
 export type AddressOp = "create" | "update" | "remove" | "default"
 /** Pending marker for the "Add address" action (no row exists yet). */
@@ -61,7 +64,16 @@ function reducer(state: State, action: Action): State {
  * round trip. Failures never touch the local list, so there is no rollback to get wrong.
  */
 export function useAddresses() {
-  const list = useFetch((signal) => getAddresses(signal), [])
+  const queryClient = useQueryClient()
+  const query = useQuery(addressQueries.list())
+  const list = {
+    ...toAsyncState(query),
+    reload: () => void queryClient.invalidateQueries({ queryKey: addressKeys.all }),
+    setData: (update: (previous: Address[]) => Address[]) =>
+      queryClient.setQueryData<Address[]>(addressKeys.list(), (old) =>
+        old ? update(old) : old
+      ),
+  }
   const [state, dispatch] = useReducer(reducer, { pending: {}, rowErrors: {} })
   // A ref, not state: two clicks in the same tick both see the OLD state, but they
   // see the same ref. This is what really prevents a double POST.

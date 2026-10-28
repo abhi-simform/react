@@ -4,7 +4,7 @@ import { Links, Meta, Outlet, Scripts, ScrollRestoration } from "react-router"
 
 import type { Route } from "./+types/root"
 import { RouteErrorView } from "@/components/common/RouteErrorView"
-import { AuthProvider } from "@/features/auth"
+import { AuthProvider, SessionCacheSync } from "@/features/auth"
 import { ThemeProvider } from "@/features/theme"
 import { ToastProvider } from "@/features/toast"
 import { WishlistProvider } from "@/features/wishlist"
@@ -43,6 +43,7 @@ export default function App() {
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
         <AuthProvider>
+          <SessionCacheSync />
           <ToastProvider>
             <WishlistProvider>
               <Outlet />

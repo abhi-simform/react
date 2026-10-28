@@ -10,18 +10,21 @@ import { Button } from "@/components/ui/button"
 import {
   AddressFormDialog,
   createAddress,
-  getAddresses,
+  addressQueries,
   type Address,
   type AddressInput,
 } from "@/features/account"
-import { useFetch } from "@/hooks/useFetch"
+import { useQuery, useQueryClient } from "@tanstack/react-query"
 import { toApiError, type ApiError } from "@/lib/api/errors"
+import { addressKeys } from "@/lib/queryKeys"
+import { toAsyncState } from "@/lib/queryState"
 
 import type { CheckoutInput } from "../schemas"
 
 /** Step 1: pick a saved address or add a new one (the same dialog and API as /account/addresses). */
 export function AddressStep() {
-  const list = useFetch((signal) => getAddresses(signal), [])
+  const queryClient = useQueryClient()
+  const list = toAsyncState(useQuery(addressQueries.list()))
   const {
     register,
     setValue,
@@ -42,7 +45,7 @@ export function AddressStep() {
   async function saveNew(input: AddressInput): Promise<ApiError | null> {
     try {
       const created = await createAddress(input)
-      list.reload()
+      await queryClient.invalidateQueries({ queryKey: addressKeys.all })
       select(created)
       toast.success("Address added")
       return null

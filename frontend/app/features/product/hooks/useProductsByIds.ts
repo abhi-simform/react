@@ -1,42 +1,21 @@
-import { useEffect, useState } from "react"
+import { useQueries } from "@tanstack/react-query"
 
-import { getProduct, type ProductDetail } from "@/features/catalog"
-import { isAbortError } from "@/lib/async"
-
-type Settled = { key: string; products: ProductDetail[] }
+import { productQueries, type ProductDetail } from "@/features/catalog"
 
 /**
- * Loads products for a list of ids (the API accepts an id or slug at
- * `/products/:idOrSlug`; there is no batch endpoint yet, so one request per
- * id). Failed ids are skipped. `null` = still loading.
+ * Products for a list of ids (the API accepts an id or slug at `/products/:idOrSlug`; there
+ * is no batch endpoint, so one query per id, run in PARALLEL by `useQueries` and each cached
+ * under its own key). Failed ids are skipped. `null` = still loading.
+ * (Replaces the effect + `Promise.allSettled` + abort bookkeeping version.)
  */
 export function useProductsByIds(
   ids: readonly string[]
 ): ProductDetail[] | null {
-  const key = ids.join(",")
-  const [settled, setSettled] = useState<Settled | null>(null)
-
-  useEffect(() => {
-    if (!key) return
-    const controller = new AbortController()
-    Promise.allSettled(
-      key.split(",").map((id) => getProduct(id, controller.signal))
-    )
-      .then((results) => {
-        if (controller.signal.aborted) return
-        setSettled({
-          key,
-          products: results.flatMap((r) =>
-            r.status === "fulfilled" ? [r.value] : []
-          ),
-        })
-      })
-      .catch((err: unknown) => {
-        if (!isAbortError(err)) console.error(err)
-      })
-    return () => controller.abort()
-  }, [key])
-
-  if (!key) return []
-  return settled?.key === key ? settled.products : null
+  return useQueries({
+    queries: ids.map((id) => productQueries.detail(id)),
+    combine: (results) => {
+      if (results.some((r) => r.isPending)) return null
+      return results.flatMap((r) => (r.data ? [r.data] : []))
+    },
+  })
 }

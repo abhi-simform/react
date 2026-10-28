@@ -7,24 +7,30 @@ import { FormError } from "@/components/form/FormError"
 import { FormField } from "@/components/form/FormField"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Button } from "@/components/ui/button"
-import { useFetch } from "@/hooks/useFetch"
+import { useQuery, useQueryClient } from "@tanstack/react-query"
+
+import { profileKeys } from "@/lib/queryKeys"
+import { toAsyncState } from "@/lib/queryState"
 import { useSingleFlight } from "@/hooks/useSingleFlight"
 import { toApiError } from "@/lib/api/errors"
 import { applyApiError } from "@/lib/forms/applyApiError"
 
 import {
-  getProfile,
   profileFormSchema,
   updateProfile,
   type Profile,
   type ProfileFormInput,
   type ProfileFormOutput,
 } from "../profile.api"
+import { profileQueries } from "../queries"
 import { AvatarUploader } from "./AvatarUploader"
 
 /** /account/profile (7.8): name and phone through RHF + Zod, and the avatar uploader. */
 export function ProfileForm() {
-  const profile = useFetch((signal) => getProfile(signal), [])
+  const queryClient = useQueryClient()
+  const profile = toAsyncState(useQuery(profileQueries.me()))
+  const setProfile = (saved: Profile) =>
+    queryClient.setQueryData(profileKeys.me(), saved)
   return (
     <div className="flex max-w-md flex-col gap-4">
       <h1 className="text-xl font-medium">Profile</h1>
@@ -36,14 +42,14 @@ export function ProfileForm() {
               name={data.name}
               onUploaded={async (url) => {
                 const saved = await updateProfile({ avatarUrl: url })
-                profile.setData(() => saved)
+                setProfile(saved)
                 toast.success("Photo updated")
               }}
             />
             <DetailsForm
               key={data.id}
               profile={data}
-              onSaved={(saved) => profile.setData(() => saved)}
+              onSaved={setProfile}
             />
           </>
         )}
