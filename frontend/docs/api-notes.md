@@ -121,3 +121,11 @@ New backend phases `backend B4:` (coupons, deals, server time, banners) and `bac
 - Orders: `POST /orders` needs `Idempotency-Key`; body `{addressId, paymentMethod, deliveryMethod, deliverySlot, expectedTotal}`. Errors the UI distinguishes: `409 INSUFFICIENT_STOCK {items[]}`, `409 PRICE_CHANGED {expectedTotal, actualTotal}`, `422 COUPON_INVALID`, `422 COD_NOT_AVAILABLE` (remote pincode or total above Rs 50,000), `422 PINCODE_UNSERVICEABLE`, `422 CART_EMPTY`, `422 IDEMPOTENCY_KEY_REUSED`. A replay returns `200` + `Idempotent-Replayed: true`. Orders: `id` (mapped to `_id` in `orders/schemas.ts`), money in rupees, `GET /orders` pages with `limit`.
 - Express delivery is a flat Rs 99 that REPLACES the shipping charge (the Stage 7 summary added it on top; fixed in `checkout/totals.ts`).
 - Dev data: the customer's 4 seeded orders are `SS-SEED-00000N`; coupons `SAVE10`, `FLAT100`, `WELCOME50`, `TECH15`, `OLD50` (expired), `LASTONE` (1 use). Admin for staff calls: `admin@shopsphere.dev`.
+
+## Stage 11 additions (B6 payments, B7 reviews, B9 returns), verified with curl and in the browser
+
+Contracts: `backend/docs/API-CONVENTIONS.md` ("Payments (B6)", "Reviews, ratings and Q&A (B7)", "Returns (B9)"). What the frontend relies on:
+
+- `POST /payments/create-order {orderId}` -> `{ keyId, providerOrderId, amount (PAISE), currency, prefill, mock }`; idempotent per order. `POST /payments/verify` takes Razorpay's own field names. `GET /payments?orderId=` is the history and the source of the failure reason after a reload. `POST /payments/mock/pay` exists only for the mock gateway.
+- Order shape gained `deliveredAt`, `returnableUntil` (null once the 7 day window passed) and a rich `returnRequest` (`status`, `items`, `photos`, `pickupAddress`, `refundAmount`, `history`). `paymentStatus` walks `pending|paid|failed|refund_pending|partially_refunded|refunded`.
+- `Content-Disposition` is exposed through CORS (backend change), so `fetch` can read the invoice filename.

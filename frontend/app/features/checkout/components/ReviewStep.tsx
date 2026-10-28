@@ -182,7 +182,9 @@ export function ReviewStep() {
       <CouponBox />
       <p className="text-sm font-medium">
         Total to pay: {formatCurrency(totals.total)}
-        {values.payment === "cod" ? " (cash on delivery)" : ""}
+        {values.payment === "cod"
+          ? " (cash on delivery)"
+          : " (pay online on the next screen)"}
       </p>
       {error && (
         <p
@@ -199,7 +201,11 @@ export function ReviewStep() {
           disabled={place.isPending || lines.length === 0}
           onClick={() => void submit()}
         >
-          {place.isPending ? "Placing order..." : "Place order"}
+          {place.isPending
+            ? "Placing order..."
+            : values.payment === "cod"
+              ? "Place order"
+              : "Place order and continue to payment"}
         </Button>
       </div>
     </div>

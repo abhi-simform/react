@@ -15,3 +15,8 @@ export { orderQueries } from "./queries"
 export { OrderSuccessPage } from "./components/OrderSuccessPage"
 export { usePlaceOrder } from "./usePlaceOrder"
 export type { PlaceOrderInput } from "./schemas"
+export {
+  ACTIVE_POLL_MS,
+  PENDING_POLL_MS,
+  restartPendingPolling,
+} from "./queries"

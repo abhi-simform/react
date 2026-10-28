@@ -77,6 +77,7 @@ export default [
       route("forms", "routes/dev/forms.tsx"),
       route("state", "routes/dev/state.tsx"),
       route("auth", "routes/dev/auth.tsx"),
+      route("razorpay", "routes/dev/razorpay.tsx"),
     ]),
 
     route("*", "routes/not-found.tsx"),

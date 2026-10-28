@@ -9,7 +9,9 @@ import { formatDate, formatRupees } from "@/lib/format"
 import { NotFoundError } from "@/lib/notFound"
 import { paths } from "@/lib/paths"
 
-import { orderQueries } from "../queries"
+import { PaymentPanel } from "@/features/payments"
+
+import { orderQueries, restartPendingPolling } from "../queries"
 import { OrderStatusBadge } from "./OrderStatusBadge"
 
 /**
@@ -39,22 +41,28 @@ export function OrderSuccessPage({ orderId }: { orderId: string }) {
   return (
     <div className="mx-auto flex max-w-xl flex-col gap-3 p-4">
       <h1 className="text-xl font-medium" data-testid="order-success">
-        {awaitingPayment ? "Order created" : "Thank you, your order is placed"}
+        {awaitingPayment
+          ? "Order created: payment pending"
+          : "Thank you, your order is placed"}
       </h1>
       <p>
         Order number: <strong>{o.orderNumber}</strong>{" "}
         <OrderStatusBadge status={o.status} />
       </p>
       {awaitingPayment ? (
-        <p role="status" className="rounded bg-amber-100 p-2 text-sm">
-          Your items are reserved but the payment is not complete yet. Online
-          payment arrives with the payment step (11.4).
-        </p>
+        <PaymentPanel
+          order={o}
+          onCheckNow={() => restartPendingPolling(o._id)}
+        />
       ) : o.paymentMethod === "cod" ? (
         <p className="text-sm">
           Pay {formatRupees(o.pricing.total)} in cash when it arrives.
         </p>
-      ) : null}
+      ) : (
+        <p className="text-sm" data-testid="paid-note">
+          Payment received: {formatRupees(o.pricing.total)} paid online.
+        </p>
+      )}
       {o.delivery?.estimatedFrom && o.delivery.estimatedTo && (
         <p className="text-sm">
           Estimated delivery: {formatDate(o.delivery.estimatedFrom)} to{" "}

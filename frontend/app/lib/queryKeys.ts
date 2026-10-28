@@ -76,6 +76,12 @@ export const orderKeys = {
   detail: (id: string) => [...orderKeys.details(), id] as const,
 }
 
+export const paymentKeys = {
+  all: ["payments"] as const,
+  lists: () => [...paymentKeys.all, "list"] as const,
+  list: (filters: Filters) => [...paymentKeys.lists(), filters] as const,
+}
+
 export const reviewKeys = {
   all: ["reviews"] as const,
   list: (productId: string, options: Filters = {}) =>

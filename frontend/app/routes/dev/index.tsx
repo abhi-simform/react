@@ -14,6 +14,10 @@ const LABS = [
   ["forms", "7.1 form re-render counts"],
   ["state", "8.1-8.3 state ownership, context and store labs"],
   ["auth", "10.3 single-flight refresh: six parallel requests"],
+  [
+    "razorpay",
+    "11.4 checkout.js loader: one script tag however often it is opened",
+  ],
 ] as const
 
 export default function DevIndexRoute() {
