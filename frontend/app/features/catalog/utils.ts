@@ -141,10 +141,18 @@ export function compareBy<T>(
     for (const { get, dir = "asc" } of selectors) {
       const x = get(a)
       const y = get(b)
-      const result =
-        typeof x === "string" && typeof y === "string"
-          ? collator.compare(x, y)
-          : Number(x) - Number(y)
+      if (typeof x === "string" && typeof y === "string") {
+        const result = collator.compare(x, y)
+        if (result !== 0) return dir === "asc" ? result : -result
+        continue
+      }
+      const nx = Number(x)
+      const ny = Number(y)
+      // NaN (an unparseable date) goes last whatever the direction.
+      if (Number.isNaN(nx) !== Number.isNaN(ny))
+        return Number.isNaN(nx) ? 1 : -1
+      if (Number.isNaN(nx)) continue // both NaN: equal, let the next selector decide
+      const result = nx - ny
       if (result !== 0) return dir === "asc" ? result : -result
     }
     return 0

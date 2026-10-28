@@ -32,6 +32,8 @@ export type QtyResult = {
 
 /** Pure clamp: at most the stock. (A min of 1 is the caller's business: 0 means remove.) */
 export function clampToStock(qty: number, stock: number): number {
+  // NaN (an emptied number input, a missing stock) must not leak through Math.min/max.
+  if (!Number.isFinite(qty) || !Number.isFinite(stock)) return 0
   return Math.min(Math.max(0, Math.floor(qty)), Math.max(0, stock))
 }
 

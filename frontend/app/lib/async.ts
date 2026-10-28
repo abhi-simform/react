@@ -42,5 +42,10 @@ export async function withTimeout<T>(
 }
 
 export function isAbortError(error: unknown): boolean {
-  return error instanceof Error && error.name === "AbortError"
+  // Duck-typed: a DOMException from another realm (jsdom, an iframe) is not `instanceof Error` here.
+  return (
+    typeof error === "object" &&
+    error !== null &&
+    (error as { name?: unknown }).name === "AbortError"
+  )
 }

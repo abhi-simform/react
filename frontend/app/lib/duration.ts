@@ -7,7 +7,8 @@ export type Duration = {
 
 /** Split milliseconds into display parts. Seconds round UP: "00:00:01" lasts until the end, 00:00:00 only means "over". */
 export function splitDuration(ms: number): Duration {
-  const total = Math.max(0, Math.ceil(ms / 1000))
+  // NaN (a bad `endsAt`) and Infinity count as "over": never print NaN:NaN:NaN.
+  const total = Number.isFinite(ms) ? Math.max(0, Math.ceil(ms / 1000)) : 0
   return {
     days: Math.floor(total / 86_400),
     hours: Math.floor((total % 86_400) / 3600),

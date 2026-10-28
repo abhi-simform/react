@@ -3,7 +3,13 @@ import { z } from "zod"
 // One source of truth for the auth forms (7.2). The backend enforces the same password
 // rules (`backend/src/modules/auth/auth.schema.ts`), so a client pass is a server pass.
 
-const email = z.email({ error: "Enter a valid email" }).trim().toLowerCase()
+// Trim and lower-case BEFORE validating: z.email().trim() checked the padded string first,
+// so a pasted " me@x.com " failed with "Enter a valid email" (found by a test, 12.1).
+const email = z
+  .string()
+  .trim()
+  .toLowerCase()
+  .pipe(z.email({ error: "Enter a valid email" }))
 
 export const passwordField = z
   .string()
