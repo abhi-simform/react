@@ -1,6 +1,6 @@
 import { DevThrowButton } from "@/components/common/DevThrowButton"
 import { ProfileForm } from "@/features/account"
-import { pageTitle } from "@/lib/pageTitle"
+import { noindexMeta } from "@/lib/seo"
 import type { RouteHandle } from "@/types/route-handle"
 
 export default function AccountProfileRoute() {
@@ -15,7 +15,7 @@ export default function AccountProfileRoute() {
 }
 
 export function meta() {
-  return [{ title: pageTitle("Profile") }]
+  return noindexMeta("Profile")
 }
 
 export const handle = { breadcrumb: "Profile" } satisfies RouteHandle

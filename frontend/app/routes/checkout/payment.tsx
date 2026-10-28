@@ -1,5 +1,5 @@
 import { PaymentStep, StepNav } from "@/features/checkout"
-import { pageTitle } from "@/lib/pageTitle"
+import { noindexMeta } from "@/lib/seo"
 import type { RouteHandle } from "@/types/route-handle"
 
 export default function CheckoutPaymentRoute() {
@@ -12,7 +12,7 @@ export default function CheckoutPaymentRoute() {
 }
 
 export function meta() {
-  return [{ title: pageTitle("Checkout: payment") }]
+  return noindexMeta("Checkout: payment")
 }
 
 export const handle = { breadcrumb: "Payment" } satisfies RouteHandle

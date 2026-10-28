@@ -1,5 +1,5 @@
 import { LoginForm } from "@/features/auth"
-import { pageTitle } from "@/lib/pageTitle"
+import { noindexMeta } from "@/lib/seo"
 import type { RouteHandle } from "@/types/route-handle"
 
 export default function LoginRoute() {
@@ -7,7 +7,7 @@ export default function LoginRoute() {
 }
 
 export function meta() {
-  return [{ title: pageTitle("Log in") }]
+  return noindexMeta("Log in")
 }
 
 export const handle = { breadcrumb: "Log in" } satisfies RouteHandle

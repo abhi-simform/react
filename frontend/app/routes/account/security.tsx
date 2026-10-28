@@ -1,5 +1,5 @@
 import { SecurityPage } from "@/features/account"
-import { pageTitle } from "@/lib/pageTitle"
+import { noindexMeta } from "@/lib/seo"
 import type { RouteHandle } from "@/types/route-handle"
 
 export default function AccountSecurityRoute() {
@@ -7,7 +7,7 @@ export default function AccountSecurityRoute() {
 }
 
 export function meta() {
-  return [{ title: pageTitle("Security") }]
+  return noindexMeta("Security")
 }
 
 export const handle = { breadcrumb: "Security" } satisfies RouteHandle

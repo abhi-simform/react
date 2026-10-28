@@ -7,7 +7,7 @@ import { ListSkeleton } from "@/components/common/Skeletons"
 import { useCart } from "@/features/cart"
 import { CheckoutShell, orderJustPlaced } from "@/features/checkout"
 import { paths } from "@/lib/paths"
-import { pageTitle } from "@/lib/pageTitle"
+import { noindexMeta } from "@/lib/seo"
 import type { RouteHandle } from "@/types/route-handle"
 
 /** Sends the shopper to the cart with a reason (toast once), replacing this history entry. */
@@ -56,7 +56,7 @@ export default function CheckoutLayout() {
 }
 
 export function meta() {
-  return [{ title: pageTitle("Checkout") }]
+  return noindexMeta("Checkout")
 }
 
 export const handle = { breadcrumb: "Checkout" } satisfies RouteHandle

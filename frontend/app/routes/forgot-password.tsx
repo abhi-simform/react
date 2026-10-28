@@ -1,5 +1,5 @@
 import { ForgotPasswordForm } from "@/features/auth"
-import { pageTitle } from "@/lib/pageTitle"
+import { noindexMeta } from "@/lib/seo"
 import type { RouteHandle } from "@/types/route-handle"
 
 export default function ForgotPasswordRoute() {
@@ -7,7 +7,7 @@ export default function ForgotPasswordRoute() {
 }
 
 export function meta() {
-  return [{ title: pageTitle("Forgot password") }]
+  return noindexMeta("Forgot password")
 }
 
 export const handle = { breadcrumb: "Forgot password" } satisfies RouteHandle

@@ -1,5 +1,5 @@
 import { AddressStep, StepNav } from "@/features/checkout"
-import { pageTitle } from "@/lib/pageTitle"
+import { noindexMeta } from "@/lib/seo"
 import type { RouteHandle } from "@/types/route-handle"
 
 export default function CheckoutAddressRoute() {
@@ -12,7 +12,7 @@ export default function CheckoutAddressRoute() {
 }
 
 export function meta() {
-  return [{ title: pageTitle("Checkout: address") }]
+  return noindexMeta("Checkout: address")
 }
 
 export const handle = { breadcrumb: "Address" } satisfies RouteHandle

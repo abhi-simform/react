@@ -1,5 +1,5 @@
 import { AddressBook } from "@/features/account"
-import { pageTitle } from "@/lib/pageTitle"
+import { noindexMeta } from "@/lib/seo"
 import type { RouteHandle } from "@/types/route-handle"
 
 export default function AccountAddressesRoute() {
@@ -7,7 +7,7 @@ export default function AccountAddressesRoute() {
 }
 
 export function meta() {
-  return [{ title: pageTitle("Addresses") }]
+  return noindexMeta("Addresses")
 }
 
 export const handle = { breadcrumb: "Addresses" } satisfies RouteHandle

@@ -7,7 +7,7 @@ import { EmptyState } from "@/components/common/EmptyState"
 import { ProductGridSkeleton } from "@/components/common/Skeletons"
 import { ProductGrid, toProductCardVM } from "@/features/catalog"
 import { useWishlist, useWishlistProducts } from "@/features/wishlist"
-import { pageTitle } from "@/lib/pageTitle"
+import { noindexMeta } from "@/lib/seo"
 import { paths } from "@/lib/paths"
 import type { RouteHandle } from "@/types/route-handle"
 
@@ -54,7 +54,7 @@ export default function WishlistRoute() {
 }
 
 export function meta() {
-  return [{ title: pageTitle("Wishlist") }]
+  return noindexMeta("Wishlist")
 }
 
 export const handle = { breadcrumb: "Wishlist" } satisfies RouteHandle

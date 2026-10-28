@@ -1,5 +1,5 @@
 import { RegisterForm } from "@/features/auth"
-import { pageTitle } from "@/lib/pageTitle"
+import { noindexMeta } from "@/lib/seo"
 import type { RouteHandle } from "@/types/route-handle"
 
 export default function RegisterRoute() {
@@ -7,7 +7,7 @@ export default function RegisterRoute() {
 }
 
 export function meta() {
-  return [{ title: pageTitle("Create account") }]
+  return noindexMeta("Create account")
 }
 
 export const handle = { breadcrumb: "Create account" } satisfies RouteHandle

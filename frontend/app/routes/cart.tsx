@@ -1,5 +1,5 @@
 import { CartPage } from "@/features/cart"
-import { pageTitle } from "@/lib/pageTitle"
+import { noindexMeta } from "@/lib/seo"
 import type { RouteHandle } from "@/types/route-handle"
 
 export default function CartRoute() {
@@ -7,7 +7,7 @@ export default function CartRoute() {
 }
 
 export function meta() {
-  return [{ title: pageTitle("Cart") }]
+  return noindexMeta("Cart")
 }
 
 export const handle = { breadcrumb: "Cart" } satisfies RouteHandle

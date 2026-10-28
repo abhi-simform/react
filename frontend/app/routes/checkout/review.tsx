@@ -1,5 +1,5 @@
 import { ReviewStep, StepNav } from "@/features/checkout"
-import { pageTitle } from "@/lib/pageTitle"
+import { noindexMeta } from "@/lib/seo"
 import type { RouteHandle } from "@/types/route-handle"
 
 export default function CheckoutReviewRoute() {
@@ -12,7 +12,7 @@ export default function CheckoutReviewRoute() {
 }
 
 export function meta() {
-  return [{ title: pageTitle("Checkout: review") }]
+  return noindexMeta("Checkout: review")
 }
 
 export const handle = { breadcrumb: "Review" } satisfies RouteHandle

@@ -1,7 +1,7 @@
 import { PlaceholderPage } from "@/components/common/PlaceholderPage"
 
 import type { Route } from "./+types/policy"
-import { pageTitle } from "@/lib/pageTitle"
+import { canonicalUrl, pageMeta } from "@/lib/seo"
 import type { RouteHandle } from "@/types/route-handle"
 
 export default function PolicyRoute({ params }: Route.ComponentProps) {
@@ -14,8 +14,15 @@ export default function PolicyRoute({ params }: Route.ComponentProps) {
   )
 }
 
-export function meta() {
-  return [{ title: pageTitle("Policy") }]
+export function meta({ params }: Route.MetaArgs) {
+  const name = params.slug
+    .replace(/-/g, " ")
+    .replace(/\b\w/g, (c) => c.toUpperCase())
+  return pageMeta({
+    title: `${name} policy`,
+    description: `ShopSphere ${name.toLowerCase()} policy.`,
+    canonical: canonicalUrl(`/policies/${params.slug}`),
+  })
 }
 
 export const handle = { breadcrumb: "Policy" } satisfies RouteHandle

@@ -15,7 +15,7 @@ import { ThemeProvider, themeInitScript } from "@/features/theme"
 import { ToastProvider } from "@/features/toast"
 import { env } from "@/lib/env"
 import { installGlobalErrorReporting } from "@/lib/globalErrors"
-import { pageTitle } from "@/lib/pageTitle"
+import { canonicalUrl, pageMeta } from "@/lib/seo"
 import { queryClient } from "@/lib/query-client"
 import { reportWebVitals } from "@/lib/vitals"
 
@@ -52,7 +52,11 @@ export function links() {
 
 /** Fallback title for any route that exports no `meta` of its own (the leaf route's meta wins). */
 export function meta() {
-  return [{ title: pageTitle() }]
+  return pageMeta({
+    description:
+      "ShopSphere: shop electronics, fashion, home, beauty and more.",
+    canonical: canonicalUrl("/"),
+  })
 }
 
 export function Layout({ children }: { children: React.ReactNode }) {

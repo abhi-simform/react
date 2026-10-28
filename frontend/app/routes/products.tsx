@@ -2,7 +2,8 @@ import { Navigate, useSearchParams } from "react-router"
 
 import { ProductListingPage } from "@/features/catalog"
 import { paths } from "@/lib/paths"
-import { pageTitle } from "@/lib/pageTitle"
+import { canonicalUrl, pageMeta } from "@/lib/seo"
+import type { Route } from "./+types/products"
 import type { RouteHandle } from "@/types/route-handle"
 
 export default function ProductsRoute() {
@@ -25,11 +26,20 @@ export default function ProductsRoute() {
   return <ProductListingPage />
 }
 
-export function meta() {
-  return [
-    { title: pageTitle("Products") },
-    { name: "description", content: "Browse and filter all products" },
-  ]
+export function meta({ location }: Route.MetaArgs) {
+  const params = new URLSearchParams(location.search)
+  const search = params.get("search")
+  return pageMeta({
+    title: search ? `Search: ${search}` : "Products",
+    description: search
+      ? `Search results for ${search} on ShopSphere.`
+      : "Browse and filter every product on ShopSphere: electronics, fashion, home, beauty, books and more.",
+    // Filters and sort orders are not pages of their own: they all canonicalise to the plain listing
+    // (`page` is the one parameter that is a real, different page).
+    canonical: canonicalUrl("/products", location.search, ["page"]),
+    // Internal search results are thin, endless pages: keep them out of the index.
+    noindex: Boolean(search),
+  })
 }
 
 export const handle = { breadcrumb: "Products" } satisfies RouteHandle

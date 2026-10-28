@@ -17,6 +17,7 @@
     "e2e:report": "playwright show-report",
     "analyze": "ANALYZE=1 react-router build && node scripts/perf/deps.mjs --check",
     "perf:budget": "node scripts/perf/js-budget.mjs --check",
+    "sitemap": "node scripts/generate-sitemap.mjs",
     "format:check": "prettier --check \"**/*.{ts,tsx}\"",
     "check": "npm run format:check && npm run lint && npm run typecheck && npm test && npm run build",
     "prepare": "node scripts/install-hooks.mjs || true"

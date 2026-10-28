@@ -1,3 +1,4 @@
+import { ProductSeo } from "./ProductSeo"
 import { DetailSkeleton } from "@/components/common/Skeletons"
 import { Link, useSearchParams } from "react-router"
 
@@ -83,6 +84,8 @@ export function ProductDetailPage({ slug }: { slug: string }) {
   const view = toProductDetailVM(product)
   return (
     <div className="mx-auto max-w-5xl">
+      {/* Full metadata only once the real detail (with its description) is here, not for the list placeholder. */}
+      {!state.isPlaceholder && <ProductSeo product={product} />}
       {/* Home > Electronics > Mobiles > Apple > iPhone 15 (real category path from the API). */}
       <Breadcrumbs
         trail={[

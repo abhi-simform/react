@@ -1,5 +1,5 @@
 import { OrdersPage } from "@/features/orders"
-import { pageTitle } from "@/lib/pageTitle"
+import { noindexMeta } from "@/lib/seo"
 import type { RouteHandle } from "@/types/route-handle"
 
 export default function OrdersRoute() {
@@ -7,7 +7,7 @@ export default function OrdersRoute() {
 }
 
 export function meta() {
-  return [{ title: pageTitle("Your orders") }]
+  return noindexMeta("Your orders")
 }
 
 export const handle = { breadcrumb: "Orders" } satisfies RouteHandle

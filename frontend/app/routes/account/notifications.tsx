@@ -1,5 +1,5 @@
 import { NotificationsPage } from "@/features/notifications"
-import { pageTitle } from "@/lib/pageTitle"
+import { noindexMeta } from "@/lib/seo"
 import type { RouteHandle } from "@/types/route-handle"
 
 export default function AccountNotificationsRoute() {
@@ -7,7 +7,7 @@ export default function AccountNotificationsRoute() {
 }
 
 export function meta() {
-  return [{ title: pageTitle("Notifications") }]
+  return noindexMeta("Notifications")
 }
 
 export const handle = { breadcrumb: "Notifications" } satisfies RouteHandle

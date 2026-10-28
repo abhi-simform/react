@@ -1017,3 +1017,12 @@ Backend B1 was built first (separate `backend B1:` commits): `GET /categories` n
 - React Compiler trap: a component that calls `formatRupees(x)` is memoised on `x` only, so it would NOT update when the module-level locale changes (a zero-argument impure read is cached forever). That is why the locale change re-mounts the content, and why `ChargedInInr` takes `ready` from the context instead of calling `displayCurrency()`.
 - Not done: translating every string (only header, cart, buy box and checkout steps were extracted, as the plan says), Hindi plural/gender edge cases beyond what is in the files, a real translator pass (the Hindi was written by me), and pluralising/relative-time strings that are built in the backend (`listedOn`/`updatedAgo` are formatted client-side with the locale).
 - The e2e suite caught a real bug in my first version: the page content was re-mounted when the display rates ARRIVED (a normal async init, not a user action), which re-ran the one-shot "verify email" flow after the token had been stripped from the URL ("This page needs the link from your email"). A re-mount key must change only on a deliberate user action (plus once for the rare returning non-INR visitor).
+
+## 13.9 SEO and social metadata in an SPA
+
+- Two audiences: crawlers that run JavaScript (Googlebot: sees everything the page renders) and crawlers that do not (link-preview bots, many SEO checkers: only the raw HTML). The e2e test fetches `/` and `/p/<slug>` with a plain HTTP request to show the difference: prerendered routes have the tags in the file, the product page does not.
+- React Router's `meta` descriptors cover `title`, `meta`, `script:ld+json` and `{ tagName: "link" }` (canonical). For data-dependent pages React 19 hoists `<title>/<meta>/<link>` rendered by the component into `<head>`; the route's `meta` must then return `[]` so there is no second `<title>`.
+- Canonical URL = one URL per content: no tracking parameters, no filters; `page` is the only parameter that is a different page. Internal search results are `noindex`.
+- `prerender` + `ssr: false` works in RR 8: static HTML for chosen routes, a fallback page for the rest. It reminded me that "client only" code runs in Node at build: module-level `localStorage` reads need guards.
+- Structured data: `aggregateRating` with zero reviews is invalid; use the live deal price in `offers.price`; the currency is the shop's (INR), not the display currency.
+- Lighthouse "SEO" fails on a `noindex` page by definition; that is the signal the tag works.

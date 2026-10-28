@@ -1,5 +1,5 @@
 import { ProductForm } from "@/features/seller"
-import { pageTitle } from "@/lib/pageTitle"
+import { noindexMeta } from "@/lib/seo"
 import type { RouteHandle } from "@/types/route-handle"
 
 export default function SellerNewProductRoute() {
@@ -7,7 +7,7 @@ export default function SellerNewProductRoute() {
 }
 
 export function meta() {
-  return [{ title: pageTitle("New product") }]
+  return noindexMeta("New product")
 }
 
 export const handle = { breadcrumb: "New product" } satisfies RouteHandle

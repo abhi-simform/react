@@ -7,7 +7,7 @@ import { notificationQueries } from "@/features/notifications"
 import { OrderStatusBadge, orderQueries } from "@/features/orders"
 import { toApiError } from "@/lib/api/errors"
 import { formatDate, formatRupees } from "@/lib/format"
-import { pageTitle } from "@/lib/pageTitle"
+import { noindexMeta } from "@/lib/seo"
 import { paths } from "@/lib/paths"
 
 /**
@@ -166,5 +166,5 @@ function DefaultAddress() {
 }
 
 export function meta() {
-  return [{ title: pageTitle("Account") }]
+  return noindexMeta("Account")
 }

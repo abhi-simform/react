@@ -1,5 +1,5 @@
 import { PaymentsPage } from "@/features/payments"
-import { pageTitle } from "@/lib/pageTitle"
+import { noindexMeta } from "@/lib/seo"
 import type { RouteHandle } from "@/types/route-handle"
 
 export default function AccountPaymentsRoute() {
@@ -7,7 +7,7 @@ export default function AccountPaymentsRoute() {
 }
 
 export function meta() {
-  return [{ title: pageTitle("Payment history") }]
+  return noindexMeta("Payment history")
 }
 
 export const handle = { breadcrumb: "Payments" } satisfies RouteHandle

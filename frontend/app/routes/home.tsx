@@ -10,7 +10,7 @@ import {
   RecentlyViewedRail,
   TrendingRail,
 } from "@/features/recommendations"
-import { pageTitle } from "@/lib/pageTitle"
+import { canonicalUrl, pageMeta, siteUrl } from "@/lib/seo"
 
 /**
  * Composition only (11.10): every section is a self-contained feature component with its own
@@ -41,11 +41,24 @@ export default function Home() {
 }
 
 export function meta() {
-  return [
-    { title: pageTitle() },
-    {
-      name: "description",
-      content: "Shop electronics, fashion, home and more",
-    },
-  ]
+  const description =
+    "Shop electronics, fashion, home, beauty and more at ShopSphere: great prices, fast delivery and easy returns."
+  return pageMeta({
+    description,
+    canonical: canonicalUrl("/"),
+    jsonLd: [
+      {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        name: "ShopSphere",
+        url: siteUrl(),
+        // Lets a search engine offer a site-search box under the result.
+        potentialAction: {
+          "@type": "SearchAction",
+          target: `${siteUrl()}/products?search={search_term_string}`,
+          "query-input": "required name=search_term_string",
+        },
+      },
+    ],
+  })
 }

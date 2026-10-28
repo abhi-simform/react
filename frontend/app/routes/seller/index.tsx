@@ -2,7 +2,7 @@ import { Link } from "react-router"
 
 import { PlaceholderPage } from "@/components/common/PlaceholderPage"
 import { paths } from "@/lib/paths"
-import { pageTitle } from "@/lib/pageTitle"
+import { noindexMeta } from "@/lib/seo"
 import type { RouteHandle } from "@/types/route-handle"
 
 export default function SellerRoute() {
@@ -19,7 +19,7 @@ export default function SellerRoute() {
 }
 
 export function meta() {
-  return [{ title: pageTitle("Seller area") }]
+  return noindexMeta("Seller area")
 }
 
 export const handle = { breadcrumb: "Seller area" } satisfies RouteHandle

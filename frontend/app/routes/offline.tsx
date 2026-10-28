@@ -1,5 +1,5 @@
 import { PlaceholderPage } from "@/components/common/PlaceholderPage"
-import { pageTitle } from "@/lib/pageTitle"
+import { noindexMeta } from "@/lib/seo"
 import type { RouteHandle } from "@/types/route-handle"
 
 export default function OfflineRoute() {
@@ -7,7 +7,7 @@ export default function OfflineRoute() {
 }
 
 export function meta() {
-  return [{ title: pageTitle("Offline") }]
+  return noindexMeta("Offline")
 }
 
 export const handle = { breadcrumb: "Offline" } satisfies RouteHandle

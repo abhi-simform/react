@@ -8,7 +8,7 @@ import {
 } from "@/features/compare"
 import { useProductsByIds } from "@/features/product"
 import { usePersistHydrated } from "@/lib/persistSync"
-import { pageTitle } from "@/lib/pageTitle"
+import { noindexMeta } from "@/lib/seo"
 import { paths } from "@/lib/paths"
 import type { RouteHandle } from "@/types/route-handle"
 
@@ -53,7 +53,7 @@ export default function CompareRoute() {
 }
 
 export function meta() {
-  return [{ title: pageTitle("Compare products") }]
+  return noindexMeta("Compare products")
 }
 
 export const handle = { breadcrumb: "Compare" } satisfies RouteHandle
