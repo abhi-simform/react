@@ -84,15 +84,35 @@ Response: `data` = array, `meta` = `PageMeta`. Stable ordering is guaranteed acr
 
 ## 6. Endpoints available now (B0)
 
-| Method    | Path                                                                | Auth   | Purpose                                  |
-| --------- | ------------------------------------------------------------------- | ------ | ---------------------------------------- |
-| GET       | `/health`                                                           | –      | liveness + DB                            |
-| POST      | `/auth/register` `/auth/login` `/auth/refresh` `/auth/logout`       | –      | session lifecycle                        |
-| POST      | `/auth/verify-email` `/auth/forgot-password` `/auth/reset-password` | –      | email flows (see Mailpit :8025)          |
-| POST      | `/auth/resend-verification` `/auth/change-password`                 | Bearer |                                          |
-| GET/PATCH | `/users/me`                                                         | Bearer | profile                                  |
-| GET       | `/categories`                                                       | –      | nested tree                              |
-| GET       | `/products`                                                         | –      | list / search / filter / sort / paginate |
-| GET       | `/products/:idOrSlug`                                               | –      | detail (with category breadcrumb path)   |
+| Method    | Path                                                                | Auth   | Purpose                                   |
+| --------- | ------------------------------------------------------------------- | ------ | ----------------------------------------- |
+| GET       | `/health`                                                           | –      | liveness + DB                             |
+| POST      | `/auth/register` `/auth/login` `/auth/refresh` `/auth/logout`       | –      | session lifecycle                         |
+| POST      | `/auth/verify-email` `/auth/forgot-password` `/auth/reset-password` | –      | email flows (see Mailpit :8025)           |
+| POST      | `/auth/resend-verification` `/auth/change-password`                 | Bearer |                                           |
+| GET/PATCH | `/users/me`                                                         | Bearer | profile                                   |
+| GET       | `/categories`                                                       | –      | nested tree, `productCount` per node      |
+| GET       | `/categories/:slug`                                                 | –      | detail + breadcrumb `ancestors`, children |
+| GET       | `/brands?category=slug`                                             | –      | brands with counts                        |
+| GET       | `/products`                                                         | –      | list / search / filter / sort / paginate  |
+| GET       | `/products/:idOrSlug`                                               | –      | detail (with category breadcrumb path)    |
+
+### Catalog (B1)
+
+- `GET /categories` -> `[{ id, name, slug, image, productCount, children: [...] }]`. `productCount` counts active products in the node **and all descendants**.
+- `GET /categories/:slug` -> `{ id, name, slug, image, parent, ancestors: [{id,name,slug}] (root first, use for breadcrumbs), children: [{id,name,slug,image,productCount}], productCount }`. Unknown or inactive slug: 404.
+- `GET /brands` (optional `?category=slug`, subtree) -> `[{ name, count }]` sorted by name. Unknown category: `[]`.
+- `GET /products?facets=true` adds `meta.facets` (opt-in, it costs four extra aggregations):
+
+```jsonc
+"facets": {
+  "brands": [{ "value": "Apple", "count": 12 }],      // sorted by count desc
+  "price": { "min": 499, "max": 129999 },
+  "rating": [{ "value": 4, "count": 80 }, ...],        // "4 stars & up" for 4,3,2,1
+  "inStock": { "count": 150 }
+}
+```
+
+Facets are **disjunctive**: each one is computed with every active filter EXCEPT its own, so after ticking Apple the Samsung count still shows how many Samsung products match the other filters (search, category, price, rating, stock). Otherwise ticking one brand would zero every other brand and the user could never widen the OR. `price` ignores `minPrice/maxPrice` so the slider keeps its full range.
 
 New endpoints are appended here as each backend phase lands (see `BACKEND-ROADMAP.md`).

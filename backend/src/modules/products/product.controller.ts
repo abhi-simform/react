@@ -7,8 +7,11 @@ import type { getProductSchema, listProductsSchema } from "./product.schema.js"
 
 export const list: RequestHandler = async (req, res) => {
   const { query } = valid<typeof listProductsSchema>(req)
-  const { items, total } = await service.listProducts(query)
-  ok(res, items, pageMeta(query.page, query.limit, total))
+  const { items, total, facets } = await service.listProducts(query)
+  ok(res, items, {
+    ...pageMeta(query.page, query.limit, total),
+    ...(facets ? { facets } : {}),
+  })
 }
 
 export const getOne: RequestHandler = async (req, res) => {

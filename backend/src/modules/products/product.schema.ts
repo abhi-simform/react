@@ -31,6 +31,7 @@ export const listProductsSchema = {
       minDiscount: z.coerce.number().min(0).max(100).optional(),
       inStock: bool.optional(),
       featured: bool.optional(),
+      facets: bool.optional(), // ?facets=true adds meta.facets (counts for the filter sidebar)
       sort: z.enum(SORTS).default("relevance"),
       page: z.coerce.number().int().min(1).default(1),
       limit: z.coerce.number().int().min(1).max(60).default(20),

@@ -1,5 +1,6 @@
 import { z } from "zod"
 import { registerSchema, loginSchema } from "./modules/auth/auth.schema.js"
+import { listBrandsSchema } from "./modules/categories/category.schema.js"
 import { listProductsSchema } from "./modules/products/product.schema.js"
 
 // OpenAPI doc served at /api/docs. Request schemas are derived from the SAME Zod schemas used
@@ -19,6 +20,7 @@ const queryParams = (schema: z.ZodObject) =>
   }))
 
 const bearer = [{ bearerAuth: [] }]
+const brandQuery = listBrandsSchema.query as z.ZodObject
 const productQuery = listProductsSchema.query as z.ZodObject
 
 export const openApiDocument = {
@@ -121,8 +123,31 @@ export const openApiDocument = {
     "/categories": {
       get: {
         tags: ["Catalog"],
-        summary: "Category tree",
-        responses: { 200: { description: "Category[] with children" } },
+        summary: "Category tree (each node has productCount for its whole subtree)",
+        responses: { 200: { description: "CategoryNode[] with children" } },
+      },
+    },
+    "/categories/{slug}": {
+      get: {
+        tags: ["Catalog"],
+        summary:
+          "Category detail: breadcrumb ancestors (root -> parent), children, productCount",
+        parameters: [
+          { name: "slug", in: "path", required: true, schema: { type: "string" } },
+        ],
+        responses: {
+          200: { description: "Category" },
+          404: { description: "NOT_FOUND" },
+        },
+      },
+    },
+    "/brands": {
+      get: {
+        tags: ["Catalog"],
+        summary:
+          "Brands with active-product counts, optionally within a category subtree",
+        parameters: queryParams(brandQuery),
+        responses: { 200: { description: "{ name, count }[] sorted by name" } },
       },
     },
     "/products": {
@@ -132,7 +157,8 @@ export const openApiDocument = {
         parameters: queryParams(productQuery),
         responses: {
           200: {
-            description: "Product[] + meta(page,limit,total,totalPages,hasNext,hasPrev)",
+            description:
+              "Product[] + meta(page,limit,total,totalPages,hasNext,hasPrev). With facets=true, meta.facets = { brands:[{value,count}], price:{min,max}, rating:[{value,count}], inStock:{count} }; each facet ignores its own filter (disjunctive).",
           },
         },
       },
