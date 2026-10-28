@@ -1,0 +1,66 @@
+# API notes (6.1): verified with real requests
+
+Base `http://localhost:4000/api/v1`. Every row below was exercised with `curl -i` against the running backend (seeded DB, dev customer), not copied from Swagger. "Auth" = needs `Authorization: Bearer <accessToken>`.
+
+Envelope: success `{ success: true, data, meta? }`, failure `{ success: false, error: { code, message, details? } }`. Pagination `meta` sits NEXT to `data` (not inside it): `{ page, limit, total, totalPages, hasNext, hasPrev }`, and `totalPages = max(1, ceil(total / limit))` (e.g. 308 products, `limit=60` gives 6 pages; an empty result still reports `totalPages: 1`).
+
+## Endpoints
+
+| Method | Path | Auth | Query / body | Success | Errors seen |
+| --- | --- | --- | --- | --- | --- |
+| GET | `/health` | no | none | 200 `{status, db, uptime, time}` | none |
+| POST | `/auth/register` | no | `{name, email, password}` | 201 `{user, accessToken}` + `refreshToken` cookie | 409 `EMAIL_TAKEN`, 422 |
+| POST | `/auth/login` | no | `{email, password}` | 200 `{user, accessToken}` + cookie (`HttpOnly`, `Path=/api/v1/auth`, 30 days) | 401 `INVALID_CREDENTIALS`, 422 (`details` per field), 400 `BAD_REQUEST` "Malformed JSON body", 429 `AUTH_RATE_LIMITED` |
+| POST | `/auth/refresh` | cookie | none | 200 `{user, accessToken}`, cookie rotated | 401 `NO_REFRESH_TOKEN` (no cookie), `INVALID_REFRESH_TOKEN`, `REFRESH_REUSE` |
+| POST | `/auth/logout` | cookie | none | 204 (no body) | none |
+| POST | `/auth/verify-email` | no | `{token}` (>= 10 chars) | 200 | 422 |
+| POST | `/auth/forgot-password` | no | `{email}` | 200 always, same message for unknown emails (no account enumeration) | 422 |
+| POST | `/auth/reset-password` | no | `{token, password}` | 200 | 422, 400 invalid/expired token |
+| POST | `/auth/resend-verification` | yes | none | 200 | 401 `INVALID_TOKEN` / `UNAUTHORIZED` |
+| POST | `/auth/change-password` | yes | `{currentPassword, newPassword}` | 200 | 422 |
+| GET | `/users/me` | yes | none | 200 user (`id`, not `_id`) | 401 |
+| PATCH | `/users/me` | yes | `{name?, phone?, avatarUrl?}` | 200 user | 401, 422 |
+| GET | `/categories` | no | none | 200 tree with `productCount` | none |
+| GET | `/categories/:slug` | no | none | 200 `{..., ancestors, children}` | 404 `NOT_FOUND` |
+| GET | `/brands` | no | `?category=slug` | 200 `[{name, count}]` | none (unknown category gives `[]`) |
+| GET | `/products` | no | `page limit(<=60) sort search category brand(csv) minPrice maxPrice minRating inStock facets` | 200 `data[]` + `meta` (+ `meta.facets`) | 422 `limit=500` ("Too big"), 422 `minPrice=abc` |
+| GET | `/products/:idOrSlug` | no | none | 200 detail (`description`, `specs`, expanded `categoryPath`) | 404 `NOT_FOUND` |
+| GET | `/wishlist/ids` | yes | none | 200 `string[]` newest first | 401 |
+| GET | `/wishlist` | yes | `page limit` | 200 product cards + `wishlistedAt` + `meta` | 401 |
+| POST | `/wishlist` | yes | `{productId}` | 201 first time, **200 when already there** (idempotent) `{productId}` | 401, 404 unknown product, 422 bad id |
+| DELETE | `/wishlist/:productId` | yes | none | 204 **every time**, even the second | 401, 422 bad id |
+| GET | `/addresses` | yes | none | 200 `Address[]`, default first | 401 |
+| POST | `/addresses` | yes | `fullName phone line1 line2? landmark? city state pincode type? isDefault?` | 201 address | 401, 409 `ADDRESS_LIMIT`, 422 (bad fields; unserviceable pincode `193101` gives `details[0].path === "pincode"`) |
+| PATCH | `/addresses/:id` | yes | any subset | 200 address | 401, 404, 422 (empty body too) |
+| POST | `/addresses/:id/default` | yes | none | 200 address | 401, 404 |
+| DELETE | `/addresses/:id` | yes | none | 200 `{deletedId, newDefaultId}` (default is auto-promoted) | 401, 404 (second delete), 422 bad id |
+| GET | `/pincodes/:pincode` | no | none | 200 `{serviceable, zone, codAvailable, deliveryDays, estimatedDelivery}` or `{serviceable:false}` | 422 (`12`, `012345`) |
+
+Admin-only routes do not exist yet, so **403 cannot be reproduced** with the current API (`authorize("admin")` is in the middleware but unused). It will appear with B1 admin endpoints / B11.
+
+## Error classes reproduced (exact envelopes)
+
+| Case | How | Status | Body |
+| --- | --- | --- | --- |
+| No token | `GET /users/me` | 401 | `{"success":false,"error":{"code":"UNAUTHORIZED","message":"Authentication required"}}` |
+| Garbage token | `Authorization: Bearer garbage` | 401 | `{"code":"INVALID_TOKEN","message":"Invalid token"}`. An EXPIRED one gives `TOKEN_EXPIRED` (the only 401 that means "refresh and retry") |
+| Unknown id | `GET /products/nope-slug` | 404 | `{"code":"NOT_FOUND","message":"Product not found"}` |
+| Unknown route | `GET /products/zzz/extra` | 404 | `{"code":"NOT_FOUND","message":"Route not found: GET /api/v1/products/zzz/extra"}` (same code as a missing resource: you cannot tell them apart by `code`) |
+| Bad query | `GET /products?limit=500` | 422 | `{"code":"VALIDATION_ERROR","message":"Validation failed","details":[{"in":"query","path":"limit","message":"Too big: expected number to be <=60"}]}` |
+| Bad body | login `{"email":"x"}` | 422 | `details` has one entry per field: `{in:"body", path:"email", message:"Invalid email address"}` and `{path:"password", ...}` |
+| Bad JSON | `-d 'not json'` | 400 | `{"code":"BAD_REQUEST","message":"Malformed JSON body"}` (note: 400, not 422) |
+| Wrong password | login | 401 | `{"code":"INVALID_CREDENTIALS","message":"Invalid email or password"}` |
+| Missing cookie | `POST /auth/refresh` | 401 | `{"code":"NO_REFRESH_TOKEN","message":"Missing refresh token"}` |
+| Someone else's / missing address | `DELETE /addresses/aaaaaaaaaaaaaaaaaaaaaaaa` | 404 | `{"code":"NOT_FOUND","message":"Address not found"}` |
+| Malformed id | `DELETE /addresses/xyz` | 422 | `details: [{in:"params", path:"id", message:"Invalid id"}]` |
+| Rate limited | 32 wrong logins in a row | 401 x17, then **429** | `{"code":"AUTH_RATE_LIMITED","message":"Too many requests, slow down."}` with `Retry-After: 779` (seconds). Auth routes: 30 per 15 min per IP; everything else 300 per minute (`RateLimit` headers on each response) |
+
+Observations: the 429 arrived after about 17 attempts in my run because the earlier probing calls to other `/auth/*` routes share the same counter. Rate limiting is in memory, so restarting the backend resets it (I did, and reseeded). A 409 is returned for `EMAIL_TAKEN` and `ADDRESS_LIMIT`: state conflicts the user can fix (see Checkpoint 4 in `checkpoints/stage-06.md`).
+
+## Idempotency
+
+`DELETE /wishlist/:productId` twice: 204 and 204. The end state ("product not in the wishlist") is the same however many times it is sent, so a retry after a timeout, a double click or a service worker replay cannot hurt: that is idempotency (same request N times == once, in terms of server state). `POST /wishlist` is idempotent too (201, then 200, one row: a unique index `(user, product)` plus an upsert). `POST /addresses` is NOT idempotent (two clicks, two addresses; the UI must guard). `DELETE /addresses/:id` is idempotent in state but answers 404 the second time.
+
+## Conditional requests (stretch)
+
+The server sends a weak `ETag` on every JSON response but no `Cache-Control`. `GET /products?limit=1` then the same with `If-None-Match: <etag>` gives `304 Not Modified` with an empty body. What it buys: bandwidth (no body), not server work (Express computes the full response, hits MongoDB, then hashes it to compare). Browsers revalidate like this automatically only if the response was cacheable; with no `Cache-Control`, they apply heuristics, so do not rely on it. TanStack Query (Stage 9) is the real answer for the client side.
