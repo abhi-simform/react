@@ -17,14 +17,14 @@ import {
   type NotificationCategory,
   type NotificationFilter,
 } from "../schemas"
-import { NotificationRow } from "./NotificationRow"
+import { VirtualNotificationList } from "./VirtualNotificationList"
 import { PreferencesForm } from "./PreferencesForm"
 
 const isCategory = (v: string | null): v is NotificationCategory =>
   CATEGORIES.some((c) => c === v)
 
 /**
- * `/account/notifications`: the full history (infinite, "Load more"), filters in the URL
+ * `/account/notifications`: the full history (infinite and VIRTUALISED: see VirtualNotificationList), filters in the URL
  * (`?unread=1&category=orders`), mark read / delete, and the preference switches below.
  */
 export function NotificationsPage() {
@@ -118,38 +118,47 @@ export function NotificationsPage() {
           />
         ) : (
           <>
-            <ul aria-label="Notifications" className="rounded border">
-              {items.map((n) => (
-                <NotificationRow
-                  key={n.id}
-                  notification={n}
-                  onOpen={(x) => {
-                    if (!x.read) markRead.mutate(x.id)
-                  }}
-                  actions={
-                    <div className="flex shrink-0 flex-col items-end gap-1 text-xs">
-                      {!n.read && (
-                        <button
-                          type="button"
-                          className="underline"
-                          onClick={() => markRead.mutate(n.id)}
-                        >
-                          Mark read
-                        </button>
-                      )}
-                      <button
-                        type="button"
-                        className="underline"
-                        aria-label={`Delete: ${n.title}`}
-                        onClick={() => remove.mutate(n.id)}
-                      >
-                        Delete
-                      </button>
-                    </div>
-                  }
-                />
-              ))}
-            </ul>
+            <p
+              role="status"
+              data-testid="notification-count"
+              className="mb-1 text-xs text-neutral-600"
+            >
+              Loaded {items.length.toLocaleString("en-IN")} of{" "}
+              {(q.data?.pages[0]?.meta.total ?? items.length).toLocaleString(
+                "en-IN"
+              )}
+            </p>
+            <VirtualNotificationList
+              items={items}
+              total={q.data?.pages[0]?.meta.total ?? items.length}
+              hasNextPage={q.hasNextPage}
+              isFetchingNextPage={q.isFetchingNextPage}
+              fetchNextPage={() => void q.fetchNextPage()}
+              onOpen={(x) => {
+                if (!x.read) markRead.mutate(x.id)
+              }}
+              renderActions={(n) => (
+                <div className="flex shrink-0 flex-col items-end gap-1 text-xs">
+                  {!n.read && (
+                    <button
+                      type="button"
+                      className="underline"
+                      onClick={() => markRead.mutate(n.id)}
+                    >
+                      Mark read
+                    </button>
+                  )}
+                  <button
+                    type="button"
+                    className="underline"
+                    aria-label={`Delete: ${n.title}`}
+                    onClick={() => remove.mutate(n.id)}
+                  >
+                    Delete
+                  </button>
+                </div>
+              )}
+            />
             {q.hasNextPage && (
               <Button
                 className="mt-3"

@@ -1,5 +1,5 @@
 import { ShoppingCart } from "lucide-react"
-import { Suspense, useState } from "react"
+import { Suspense, useEffect, useState } from "react"
 
 import { Button } from "@/components/ui/button"
 import { lazyNamed } from "@/lib/lazyNamed"
@@ -25,6 +25,16 @@ export function CartDrawer() {
   const [wanted, setWanted] = useState(false)
   // Adjusting state while rendering, guarded: "has it ever been opened?" is derived from props/state.
   if (open && !wanted) setWanted(true)
+  // The sheet closes itself on Escape, but only once its chunk has loaded. A keypress during the download
+  // (slow network, or Playwright) would otherwise be lost and the drawer would pop open afterwards.
+  useEffect(() => {
+    if (!open) return
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") useCartUi.getState().setDrawerOpen(false)
+    }
+    document.addEventListener("keydown", onKey)
+    return () => document.removeEventListener("keydown", onKey)
+  }, [open])
   return (
     <>
       <CartButton />

@@ -35,6 +35,15 @@ if (!window.matchMedia) {
       dispatchEvent: () => false,
     }) as MediaQueryList
 }
+// jsdom has no layout engine and no ResizeObserver: a no-op stub is enough for components that only
+// OBSERVE (the virtualised lists render from their `estimateSize` guesses; real sizes are for the browser).
+if (typeof globalThis.ResizeObserver === "undefined") {
+  globalThis.ResizeObserver = class {
+    observe() {}
+    unobserve() {}
+    disconnect() {}
+  }
+}
 Element.prototype.scrollIntoView ??= () => {}
 Element.prototype.scrollTo ??= () => {}
 Element.prototype.scrollBy ??= () => {}

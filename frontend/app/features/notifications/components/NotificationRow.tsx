@@ -15,10 +15,13 @@ export function NotificationRow({
   notification: n,
   onOpen,
   actions,
+  liProps,
 }: {
   notification: AppNotification
   onOpen: (n: AppNotification) => void
   actions?: React.ReactNode
+  /** The virtual list positions, measures and numbers the row (13.4). */
+  liProps?: React.ComponentProps<"li"> & { "data-index"?: number }
 }) {
   const href = safeSitePath(n.link)
   const title = (
@@ -28,6 +31,7 @@ export function NotificationRow({
     <li
       data-testid="notification"
       data-read={n.read}
+      {...liProps}
       className="flex items-start gap-2 border-b px-2 py-2 text-sm last:border-b-0"
     >
       <span

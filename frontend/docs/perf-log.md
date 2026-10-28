@@ -160,3 +160,43 @@ engine.io-client                         29         7
 
 - **No dependency over 50 kB gzip without a justification**: `react-dom` (~60 kB measured on the wire in `entry.client`; the estimator over-counts) and `@base-ui/react` (74 kB estimated across the whole app, but it is spread over ~10 components and per-route chunks; no page downloads it all) are recorded in `scripts/perf/deps.mjs` with the reason, and `npm run analyze` fails for any new package over 50 kB that is not listed.
 - Other notes: `zod` (~27 kB) is on the critical path because every API response is validated (Stage 9 decision; `zod/mini` would save ~half but means rewriting every schema); `cn` (shadcn's class merger, ~9 kB) ships its tables/engine; `sonner` ~8 kB.
+
+## 13.4 Virtualizing long lists
+
+`@tanstack/react-virtual`, `useWindowVirtualizer` (the PAGE is the scroller). Two lists: the notifications history (the seed now gives the dev customer 2,016 notifications; 1 in 7 has a long body, so row heights differ) and the "Load more" product feed. Production build, CPU 4x, `scripts/perf/interaction.mjs`.
+
+### Notifications page, whole history loaded (2,016 rows), scrolled top to bottom and back, then one "Mark read" click
+
+| | Plain list (before) | Virtual list (after) |
+| --- | --- | --- |
+| Rows in the DOM | **2,016** | **16** |
+| DOM nodes | **18,318** | **314** |
+| JS heap | 28 MB | 11 MB |
+| Long tasks during the run | 2 (137-161 ms total, longest 77-86 ms) | **0** |
+| Scroll frames (avg / p95 / frames over 50 ms) | 16.5 / 17 / 0 ms | 16.6 / 17 / 0 ms |
+| INP of the click | 16 ms (below the 16 ms reporting floor of the Event Timing API in both runs) | no interaction over the floor |
+| CLS | 0 | 0 |
+
+Honest reading: **scrolling was never slow** here, even with 18,000 nodes: scrolling an already-rendered page is a compositor job, and a laptop at 4x CPU throttle still keeps 60 fps. What the plain list costs is everything around scrolling: **58x more DOM, 2.5x the heap, two long tasks on a state change (the whole list re-renders), a slower first paint and style recalculation of anything that touches the page.** The plan's "scroll FPS at 4x" criterion is therefore met by both; the DOM-count criterion is the one virtualization changes (2,016 -> 16, constant while scrolling: checked by the e2e-style script, which loads all 2,016 and counts rows).
+
+### Product feed ("Load more" mode, `/products?mode=more`)
+
+| | Plain grid (before) | Virtual grid (after) |
+| --- | --- | --- |
+| 308 cards loaded: DOM nodes before touching anything | ~9,300 | **1,574** |
+| Scrolling 25 x 700 px with the feed auto-loading pages: cards in DOM / DOM nodes | 228 / 7,017 | **40 / 1,716** |
+| Long tasks while scrolling at 4x | 2-3 (104-162 ms) | **0** |
+| **CLS while scrolling** | **0.70** | **0.0002** |
+| Typing in the quick filter with 308 loaded (INP @4x / @6x) | 40-48 / 64-104 ms (after 13.2) | **24 / 24-32 ms** |
+
+The 0.70 CLS was the "Load more" button and the "you've seen it all" line (visible, 400 px early because of the sentinel) being pushed down every time a page of cards was appended. With virtualization the container's height is an estimate that is corrected as rows are measured; the button is far below the viewport while that happens, so nothing visible moves.
+
+Details that matter:
+
+- **Dynamic heights:** `estimateSize` is only a guess (notification 76 px, card row 400 px / 180 px in list view); `measureElement` on every rendered row (plus `data-index`) stores the real height. Nothing jumps once a row has been seen; a row you scroll back to is already measured.
+- **Window virtualizer needs `scrollMargin`** (where the list starts in the document): `useScrollMargin` measures it with `getBoundingClientRect() + scrollY` and a ResizeObserver (`offsetTop` is wrong inside positioned ancestors).
+- **Grid = virtualise ROWS** (a row has `columns` cards, the row is what is measured). Columns come from the same media queries as the CSS grid (2/3/4/5), so the JS split and the CSS agree.
+- **Infinite loading:** the notifications list loads the next page (50, the API maximum) when the last rendered row is within 6 of the end of the loaded rows; the "Load more" button remains as the keyboard/no-JS-observer path. The product feed keeps its sentinel + button.
+- **Accessibility trade-offs (written down on purpose):** only rendered rows exist, so (1) the browser's **find-in-page (Ctrl+F) cannot find** text in unrendered rows, (2) **Tab** only reaches rendered rows and keyboard focus on a row is lost if it scrolls far enough to be unmounted, (3) a `#anchor` to a row that is not rendered cannot scroll to it. Mitigations used: `aria-setsize` / `aria-posinset` on each item so a screen reader announces "item 1,204 of 2,016"; the "Loaded N of M" status line; the Load-more button; filters to narrow the list (unread / category).
+- **When NOT to virtualize:** short lists (under ~100 simple rows: the DOM is fine and you keep find-in-page, tab order, text selection across rows, SSR/print); lists where users need Ctrl+F or whole-list selection (a policy page, a receipt, an order's item list); any list whose rows are expensive only to RENDER (fix that first); and anywhere the added scroll-position bookkeeping would cost more than it saves. The cart, an order's lines, the review list per page (pagination), and the 12-card listing page stay plain.
+- jsdom has no layout and no `ResizeObserver`: the test setup got a no-op `ResizeObserver`, and the virtual list tests give rows a height through `offsetHeight` (what TanStack Virtual reads), asserting "a window of rows, numbered against the full total".

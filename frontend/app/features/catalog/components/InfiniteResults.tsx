@@ -12,7 +12,7 @@ import { LoadMoreSentinel } from "@/components/common/LoadMoreSentinel"
 import { toProductCardVM } from "../mappers"
 import { filterLoaded } from "../utils"
 import { PerfProfiler } from "@/components/common/PerfProfiler"
-import { ProductGrid } from "./ProductGrid"
+import { VirtualProductGrid } from "./VirtualProductGrid"
 
 type Props = {
   list: ReturnType<typeof useInfiniteProducts>
@@ -76,7 +76,7 @@ export function InfiniteResults({
         className={pending ? "opacity-60 transition-opacity" : undefined}
       >
         <PerfProfiler id="grid">
-          <ProductGrid products={shown} view={filters.view} />
+          <VirtualProductGrid products={shown} view={filters.view} />
         </PerfProfiler>
       </div>
       <div

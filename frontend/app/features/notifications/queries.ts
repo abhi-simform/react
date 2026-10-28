@@ -7,7 +7,8 @@ import { getNotifications, getPrefs, getUnreadCount } from "./notifications.api"
 import type { NotificationFilter } from "./schemas"
 
 export const LATEST = 10
-export const PAGE = 20
+// The API allows up to 50 per page: the history is long and virtualised (13.4), fewer round trips.
+export const PAGE = 50
 
 /**
  * Freshness: socket events keep these current (`setQueryData`/invalidate in `RealtimeSync`), so

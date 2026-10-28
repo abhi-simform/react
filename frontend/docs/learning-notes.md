@@ -972,3 +972,11 @@ Backend B1 was built first (separate `backend B1:` commits): `GET /categories` n
 - Prefetch on intent (`onPointerEnter`/`onFocus` calling the same `import()`; `<Link prefetch="intent">` for routes) is what makes lazy loading free at the moment of use.
 - `sideEffects: false` shrinks the bundle by dropping unused barrel exports but explodes the chunk count (106 files); on a slow simulated network that hurt more than the bytes helped. Fewer, bigger chunks vs fewer bytes is a real trade-off: measure on a throttled profile.
 - A facade for a lazily loaded client (`getSocket()` returns a stable object that queues `on()` calls until the real socket exists) lets every call site stay synchronous.
+
+## 13.4 Virtualization
+
+- Virtualization fixed what I measured, not what I expected: scrolling 18,000 nodes was still 60 fps (compositor), but the page cost 58x the DOM, 2.5x the heap, two long tasks on a state change, and the feed's "Load more" button caused CLS 0.70 as pages were appended. After: 16 rows / 314 nodes; CLS 0.0002.
+- Window virtualizer = the page is the scroll container; it needs `scrollMargin` = the list's distance from the top of the document. Dynamic heights: `estimateSize` guess + `measureElement` ref + `data-index`. For a grid, virtualize rows, not cards.
+- `aria-setsize` / `aria-posinset` keep the list's real size known to a screen reader. Costs: Ctrl+F only finds rendered rows, Tab only reaches rendered rows, unrendered anchors do not work. Do not virtualize short lists.
+- TanStack Virtual reads `offsetHeight` (not `getBoundingClientRect`) in `measureElement`; jsdom returns 0 for it, which makes every row "fit" (159 of 300 rows rendered) until a test provides a height.
+- Found by the e2e suite on a production build (memory drill): opening the cart and pressing Escape immediately did nothing, because the lazy `CartSheet` chunk had not loaded yet (nothing to receive the key), and the drawer then opened by itself and hid the page behind its modal. Fix: `CartDrawer` listens for Escape while the store says "open", independent of the chunk. Lesson: lazy loading turns "instant" UI into "eventually" UI; every close/cancel path must work during the download.

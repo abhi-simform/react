@@ -2,7 +2,7 @@
 //
 //   node scripts/perf/interaction.mjs <scenario> [--cpu 4] [--base http://localhost:5173] [--cards 500]
 //
-// Scenarios: typing (type into the min-price box), scroll (scroll the listing), slider (drag the price-ceiling
+// Scenarios: notifications (the 2,000-row history: DOM size and scroll smoothness), typing (type into the min-price box), scroll (scroll the listing), slider (drag the price-ceiling
 // slider with the keyboard), filter (type in the quick filter while ~N cards are on screen).
 // It reports what Lighthouse cannot: INP (the worst interaction: the time from input to the next paint),
 // long tasks (>50 ms of main thread, i.e. jank) and, in a dev server, the React Profiler's commit counts
@@ -29,7 +29,12 @@ const context = await browser.newContext({
 })
 const page = await context.newPage()
 await page.addInitScript(() => {
-  const m = (window.__m = { events: [], longtasks: [], shifts: 0 })
+  const m = (window.__m = {
+    events: [],
+    longtasks: [],
+    shifts: 0,
+    culprits: [],
+  })
   new PerformanceObserver((list) => {
     for (const e of list.getEntries())
       m.events.push({
@@ -54,30 +59,102 @@ async function throttle(rate) {
   await cdp.send("Emulation.setCPUThrottlingRate", { rate })
 }
 
+// How many products are LOADED (not necessarily in the DOM: the feed is virtualised): the list items carry
+// aria-setsize = the number of items in the whole list.
+const loadedCount = () =>
+  page.evaluate(() =>
+    Number(
+      document
+        .querySelector("main [role=listitem]")
+        ?.getAttribute("aria-setsize") ??
+        document.querySelectorAll("main article").length
+    )
+  )
+
 async function loadCards(n) {
-  // "Load more" mode: pages of 12 are appended until n cards are on screen.
+  // "Load more" mode: pages of 12 are appended until n cards are loaded (or there are no more).
   await page.goto(`${base}/products?mode=more`)
-  const items = page.locator("main article")
-  await items.first().waitFor()
-  while ((await items.count()) < n) {
-    const before = await items.count()
+  await page.locator("main article").first().waitFor()
+  for (let guard = 0; guard < 120; guard++) {
+    const before = await loadedCount()
+    if (before >= n) break
     const more = page.getByRole("button", { name: "Load more" })
     if (!(await more.isVisible().catch(() => false))) {
-      await page.waitForTimeout(300) // the sentinel may be loading the next page by itself
-      if ((await items.count()) === before && !(await more.isVisible())) break
+      // Virtual feed: the button is far below. Scroll to the end so the sentinel loads the next page.
+      await page.evaluate(() =>
+        window.scrollTo(0, document.documentElement.scrollHeight)
+      )
+      await page.waitForTimeout(250)
+      if (
+        (await loadedCount()) === before &&
+        !(await more.isVisible().catch(() => false))
+      )
+        break
       continue
     }
-    await more.click()
-    await page.waitForFunction(
-      ([sel, b]) => document.querySelectorAll(sel).length > b,
-      ["main article", before]
-    )
+    await more.click({ timeout: 2000 }).catch(() => undefined)
+    await page
+      .waitForFunction(
+        (b) =>
+          Number(
+            document
+              .querySelector("main [role=listitem]")
+              ?.getAttribute("aria-setsize") ??
+              document.querySelectorAll("main article").length
+          ) > b,
+        before,
+        { timeout: 5000 }
+      )
+      .catch(() => undefined)
   }
-  return items.count()
+  await page.evaluate(() => window.scrollTo(0, 0))
+  return loadedCount()
 }
 
 let shown = 0
-if (scenario === "typing") {
+if (scenario === "notifications" || scenario === "feed") {
+  // Signed in the way the e2e suite does it: log in through the API in this context, then hint the app.
+  const login = await context.request.post(
+    base.replace(":5173", ":4000") + "/api/v1/auth/login",
+    {
+      data: { email: "customer@shopsphere.dev", password: "Password123" },
+    }
+  )
+  if (!login.ok()) throw new Error("login failed " + login.status())
+  await context.addInitScript(() =>
+    localStorage.setItem("shopsphere.hasSession", "true")
+  )
+}
+if (scenario === "notifications") {
+  await page.goto(`${base}/account/notifications`)
+  await page.locator("[data-testid=notification]").first().waitFor()
+  // Pull the whole history in: "Load more" while the button exists, otherwise scroll down (the virtual list
+  // loads the next page when its last rows come into view). Stops when "Loaded N of N" says everything is here.
+  for (let i = 0; i < 400; i++) {
+    const [loaded, total] = (
+      (await page.getByTestId("notification-count").textContent()) ?? ""
+    )
+      .replaceAll(",", "")
+      .match(/\d+/g)
+      .map(Number)
+    shown = total
+    if (loaded >= total) break
+    const more = page.getByRole("button", { name: "Load more" })
+    // (A virtual list keeps moving while rows are measured, so a click can fail the stability check: scroll instead.)
+    const clicked = (await more.isVisible().catch(() => false))
+      ? await more.click({ timeout: 800 }).then(
+          () => true,
+          () => false
+        )
+      : false
+    if (!clicked)
+      await page.evaluate(() =>
+        window.scrollTo(0, document.documentElement.scrollHeight)
+      )
+    await page.waitForTimeout(clicked ? 40 : 150)
+  }
+  await page.evaluate(() => window.scrollTo(0, 0))
+} else if (scenario === "typing") {
   await page.goto(`${base}/products`)
   await page.locator("main article").first().waitFor()
 } else if (scenario === "scroll") {
@@ -86,6 +163,9 @@ if (scenario === "typing") {
 } else if (scenario === "slider" || scenario === "filter") {
   shown = await loadCards(cards)
 }
+const domNodesBefore = await page.evaluate(
+  () => document.getElementsByTagName("*").length
+)
 await page.waitForTimeout(500)
 await throttle(cpu)
 await page.evaluate(() => {
@@ -125,6 +205,33 @@ if (scenario === "typing") {
   }
   await page.mouse.up()
   await page.waitForTimeout(1500)
+} else if (scenario === "notifications") {
+  // Scroll top to bottom and back in 60 wheel ticks while sampling every animation frame.
+  await page.evaluate(() => {
+    window.__frames = []
+    let last = performance.now()
+    const tick = (now) => {
+      window.__frames.push(now - last)
+      last = now
+      window.__raf = requestAnimationFrame(tick)
+    }
+    window.__raf = requestAnimationFrame(tick)
+  })
+  await page.evaluate(() => window.scrollTo(0, 0))
+  for (let i = 0; i < 60; i++) {
+    await page.mouse.wheel(0, 900)
+    await page.waitForTimeout(30)
+  }
+  for (let i = 0; i < 60; i++) {
+    await page.mouse.wheel(0, -900)
+    await page.waitForTimeout(30)
+  }
+  await page.evaluate(() => cancelAnimationFrame(window.__raf))
+  // One state change with the whole history loaded: mark the first unread row as read (the list re-renders).
+  await page.evaluate(() => window.scrollTo(0, 0))
+  await page.waitForTimeout(300)
+  await page.getByRole("button", { name: "Mark read" }).first().click()
+  await page.waitForTimeout(600)
 } else if (scenario === "filter") {
   // The client-side quick filter over the loaded cards: every keystroke re-filters and re-renders them.
   const box = page.getByLabel("Filter loaded products")
@@ -138,9 +245,21 @@ const m = await page.evaluate(() => ({
   events: window.__m.events,
   longtasks: window.__m.longtasks,
   shifts: window.__m.shifts,
+  culprits: (window.__m.culprits ?? [])
+    .sort((a, b) => b.value - a.value)
+    .slice(0, 3),
   perf: window.__perf ? { ...window.__perf, reset: undefined } : null,
   nodes: document.getElementsByTagName("*").length,
   cards: document.querySelectorAll("main article").length,
+  loaded: Number(
+    document
+      .querySelector("main [role=listitem]")
+      ?.getAttribute("aria-setsize") ??
+      document.querySelectorAll("main article").length
+  ),
+  heapMB: Math.round((performance.memory?.usedJSHeapSize ?? 0) / 1048576),
+  rows: document.querySelectorAll("[data-testid=notification]").length,
+  frames: window.__frames ?? null,
 }))
 // INP = the worst interaction (fewer than 50 interactions: the highest one). An interaction's duration is
 // the longest of its events (keydown / keyup / input ...).
@@ -154,8 +273,26 @@ console.log(
     {
       scenario,
       cpuThrottle: cpu,
-      cardsLoadedBeforeInteraction: shown || m.cards,
-      cardsOnScreenAfter: m.cards,
+      notificationRowsInDom: m.rows,
+      heapMB: m.heapMB,
+      frames: m.frames
+        ? {
+            count: m.frames.length,
+            avgMs: Number(
+              (m.frames.reduce((a, b) => a + b, 0) / m.frames.length).toFixed(1)
+            ),
+            p95Ms: Math.round(
+              [...m.frames].sort((a, b) => a - b)[
+                Math.floor(m.frames.length * 0.95)
+              ]
+            ),
+            over50ms: m.frames.filter((f) => f > 50).length,
+          }
+        : undefined,
+      cardsLoadedBeforeInteraction: shown || m.loaded,
+      cardsInDomAfter: m.cards,
+      cardsLoadedAfter: m.loaded,
+      domNodesBeforeInteraction: domNodesBefore,
       domNodes: m.nodes,
       interactions: durations.length,
       inpMs: Math.round(durations[0] ?? 0),
@@ -166,6 +303,7 @@ console.log(
       longTaskTotalMs: Math.round(lt.reduce((a, b) => a + b, 0)),
       longestTaskMs: Math.round(lt[0] ?? 0),
       cls: Number(m.shifts.toFixed(4)),
+      shiftCulprits: m.culprits.map((c) => `${c.value.toFixed(3)} ${c.node}`),
       profiler: m.perf,
       productListRequests: productRequests,
       scenarioMs: elapsed,
