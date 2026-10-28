@@ -13,6 +13,7 @@ export default [
     route("scratch/effects", "routes/scratch-effects.tsx"),
     route("scratch/rules", "routes/scratch-rules.tsx"),
     route("scratch/refs", "routes/scratch-refs.tsx"),
+    route("scratch/countdown", "routes/scratch-countdown.tsx"),
     route("scratch/grid", "routes/scratch-grid.tsx"),
     route("p/:productSlug", "routes/product-detail.tsx"),
   ]),

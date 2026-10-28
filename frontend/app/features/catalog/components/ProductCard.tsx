@@ -19,6 +19,8 @@ type ProductCardProps = {
   children?: React.ReactNode
   onAddToCart?: (product: ProductCardProduct) => void
   onNotifyMe?: (product: ProductCardProduct) => void
+  /** E.g. the flash sale ended: the button stays but cannot be used. */
+  addToCartDisabled?: boolean
 }
 
 /**
@@ -33,6 +35,7 @@ export function ProductCard({
   children,
   onAddToCart,
   onNotifyMe,
+  addToCartDisabled = false,
 }: ProductCardProps) {
   const [liked, setLiked] = useState(false)
   const outOfStock = product.stock <= 0
@@ -107,6 +110,7 @@ export function ProductCard({
         <Button
           size="sm"
           className="relative z-10"
+          disabled={addToCartDisabled}
           onClick={() => onAddToCart?.(product)}
         >
           Add to cart
