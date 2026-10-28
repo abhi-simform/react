@@ -9,6 +9,7 @@ import { Deal } from "../deals/deal.model.js"
 import { COD_MAX_TOTAL, priceOrder } from "../pricing/pricing.js"
 import { addBusinessDays, checkPincode } from "../pincodes/pincode.service.js"
 import { Product } from "../products/product.model.js"
+import { isOwnUpload } from "../uploads/ownership.js"
 import { notifyPlaced } from "./order.mail.js"
 import { onOrderCancelled, onRefundDue } from "../payments/payment.service.js"
 import {
@@ -371,11 +372,21 @@ export async function cancelOrder(userId: string, id: string, reason?: string) {
     })
 }
 
-/** Return request: delivered orders only, within RETURN_WINDOW_DAYS of delivery. */
+/**
+ * Return request: delivered orders only, within RETURN_WINDOW_DAYS of delivery. The shopper picks
+ * items and quantities (never more than bought), a reason, optional photos (their own uploads) and
+ * a pickup address. The refund amount is computed here, from what was actually paid for those items.
+ */
 export async function requestReturn(
   userId: string,
   id: string,
-  input: { reason: string; note?: string }
+  input: {
+    reason: string
+    note?: string
+    items?: { productId: string; qty: number }[]
+    photos: string[]
+    pickupAddressId?: string
+  }
 ) {
   const current = await getOwnedOrder(userId, id)
   if (current.status !== "delivered") throw invalidTransition(current.status, "returned")
@@ -386,15 +397,91 @@ export async function requestReturn(
       "RETURN_WINDOW_CLOSED",
       `Returns are accepted within ${RETURN_WINDOW_DAYS} days of delivery`
     )
+
+  const issues: { in: string; path: string; message: string }[] = []
+  const chosen =
+    input.items ??
+    current.items.map((i) => ({ productId: String(i.product), qty: i.qty }))
+  const seen = new Set<string>()
+  const items = chosen.flatMap((c, n) => {
+    const line = current.items.find((i) => String(i.product) === c.productId)
+    if (!line) {
+      issues.push({
+        in: "body",
+        path: `items.${n}.productId`,
+        message: "That product is not in this order",
+      })
+      return []
+    }
+    if (seen.has(c.productId))
+      issues.push({
+        in: "body",
+        path: `items.${n}.productId`,
+        message: "Each product can appear once",
+      })
+    seen.add(c.productId)
+    if (c.qty > line.qty)
+      issues.push({
+        in: "body",
+        path: `items.${n}.qty`,
+        message: `You bought ${line.qty}, cannot return ${c.qty}`,
+      })
+    return [
+      { product: line.product, title: line.title, qty: c.qty, unitPrice: line.unitPrice },
+    ]
+  })
+  const badPhoto = input.photos.findIndex((u) => !isOwnUpload(u, userId))
+  if (badPhoto >= 0)
+    issues.push({
+      in: "body",
+      path: `photos.${badPhoto}`,
+      message: "Photos must be images you uploaded with POST /uploads/images",
+    })
+  if (issues.length)
+    throw new ApiError(422, "VALIDATION_ERROR", "Validation failed", issues)
+
+  let pickup = current.addressSnapshot
+  if (input.pickupAddressId) {
+    const a = await Address.findOne({ _id: input.pickupAddressId, user: userId })
+    if (!a) throw ApiError.notFound("Pickup address not found")
+    pickup = {
+      fullName: a.fullName,
+      phone: a.phone,
+      line1: a.line1,
+      line2: a.line2,
+      landmark: a.landmark,
+      city: a.city,
+      state: a.state,
+      pincode: a.pincode,
+      type: a.type,
+    }
+  }
+  // Refund = the returned items' share of (subtotal - discount + tax); shipping is not refunded.
+  const returnedSubtotal = items.reduce((n, i) => n + i.unitPrice * i.qty, 0)
+  const p = current.pricing
+  const refundAmount = Math.round(
+    (returnedSubtotal / Math.max(1, p.subtotal)) * (p.subtotal - p.discount + p.tax)
+  )
+  const now = new Date()
   const order = await Order.findOneAndUpdate(
     { _id: id, user: userId, status: "delivered" },
     {
       $set: {
         status: "return_requested",
-        returnRequest: { ...input, requestedAt: new Date(), status: "requested" },
+        returnRequest: {
+          reason: input.reason,
+          note: input.note,
+          requestedAt: now,
+          status: "requested",
+          items,
+          photos: input.photos,
+          pickupAddress: pickup,
+          refundAmount,
+          history: [{ status: "requested", at: now, note: input.reason }],
+        },
       },
       $push: {
-        statusHistory: { status: "return_requested", at: new Date(), note: input.reason },
+        statusHistory: { status: "return_requested", at: now, note: input.reason },
       },
     },
     { returnDocument: "after" }
@@ -402,6 +489,35 @@ export async function requestReturn(
   if (!order) throw invalidTransition(current.status, "returned")
   return order
 }
+
+// ---- returns queue (admin) -------------------------------------------------------------------
+
+export async function listReturns(q: { page: number; limit: number; status?: string }) {
+  const filter: Record<string, unknown> = {
+    "returnRequest.status": q.status ?? { $exists: true },
+  }
+  const [items, total] = await Promise.all([
+    Order.find(filter)
+      .sort({ "returnRequest.requestedAt": -1, _id: -1 })
+      .skip((q.page - 1) * q.limit)
+      .limit(q.limit)
+      .lean(),
+    Order.countDocuments(filter),
+  ])
+  return { items, total }
+}
+
+/** Approve (-> returned, goods restocked) or reject (-> back to delivered). */
+export const decideReturn = (
+  actorId: string,
+  id: string,
+  decision: "approve" | "reject",
+  note?: string
+) => transitionOrder(actorId, id, decision === "approve" ? "returned" : "delivered", note)
+
+/** Money back: returned -> refunded. Online payments are refunded through the gateway (B6). */
+export const refundReturn = (actorId: string, id: string, note?: string) =>
+  transitionOrder(actorId, id, "refunded", note)
 
 /**
  * Staff status change (admin; sellers/webhooks join in B9/B11). Every move must be allowed by
@@ -426,20 +542,25 @@ export async function transitionOrder(
         )
       const now = new Date()
       const set: Record<string, unknown> = { status: to }
+      let returnEvent: { status: string; at: Date; note?: string } | null = null
       if (to === "delivered") {
-        set.deliveredAt = now
+        // A rejected return must not restart the return window.
+        if (current.status !== "return_requested") set.deliveredAt = now
         if (current.payment?.method === "cod") set["payment.status"] = "paid"
         if (current.status === "return_requested") {
           set["returnRequest.status"] = "rejected"
           set["returnRequest.resolvedAt"] = now
+          returnEvent = { status: "rejected", at: now, note }
         }
       }
       if (to === "returned") {
         set["returnRequest.status"] = "approved"
         set["returnRequest.resolvedAt"] = now
+        returnEvent = { status: "approved", at: now, note }
       }
       if (to === "refunded") {
         set["returnRequest.status"] = "refunded"
+        returnEvent = { status: "refunded", at: now, note }
         // Online payments: the gateway refund (below) flips this to "refunded" when it settles.
         set["payment.status"] =
           current.payment?.method === "razorpay" ? "refund_pending" : "refunded"
@@ -454,6 +575,7 @@ export async function transitionOrder(
           $set: set,
           $push: {
             statusHistory: { status: to, at: now, note, by: new Types.ObjectId(actorId) },
+            ...(returnEvent ? { "returnRequest.history": returnEvent } : {}),
           },
         },
         { session, returnDocument: "after" }
@@ -467,7 +589,13 @@ export async function transitionOrder(
         await restock(order, session, true)
         if (order.coupon?.code) await release(order.coupon.code, session)
       }
-      if (to === "returned") await restock(order, session, false)
+      if (to === "returned") {
+        // Only what actually came back (a partial return restocks just those units).
+        const back = order.returnRequest?.items?.length
+          ? order.returnRequest.items.map((i) => ({ product: i.product!, qty: i.qty! }))
+          : order.items
+        await restock({ items: back }, session, false)
+      }
       return order
     })
     .then(async (order) => {

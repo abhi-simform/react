@@ -43,6 +43,9 @@ export const canTransition = (from: OrderStatus, to: OrderStatus) =>
 export const CANCELLABLE: readonly OrderStatus[] = ["pending_payment", "placed"]
 export const RETURN_WINDOW_DAYS = 7
 
+export const RETURN_STATUSES = ["requested", "approved", "rejected", "refunded"] as const
+export type ReturnStatus = (typeof RETURN_STATUSES)[number]
+
 const itemSchema = new Schema(
   {
     product: { type: Types.ObjectId, ref: "Product", required: true },
@@ -138,9 +141,24 @@ const orderSchema = new Schema(
       reason: String,
       note: String,
       requestedAt: Date,
-      status: { type: String, enum: ["requested", "approved", "rejected", "refunded"] },
+      status: { type: String, enum: RETURN_STATUSES },
       resolvedAt: Date,
       refundAmount: Number, // whole rupees due back for the returned items
+      items: {
+        type: [
+          new Schema(
+            { product: Types.ObjectId, title: String, qty: Number, unitPrice: Number },
+            { _id: false }
+          ),
+        ],
+        default: undefined,
+      },
+      photos: { type: [String], default: undefined },
+      pickupAddress: addressSnapshotSchema,
+      history: {
+        type: [new Schema({ status: String, at: Date, note: String }, { _id: false })],
+        default: undefined,
+      },
     },
   },
   { timestamps: true }
@@ -197,7 +215,34 @@ export function toPublicOrder(
     paymentMethod: o.payment?.method,
     paymentStatus: o.payment?.status,
     cancelReason: o.cancelReason ?? null,
-    returnRequest: o.returnRequest?.status ? o.returnRequest : null,
+    deliveredAt: o.deliveredAt ?? null,
+    returnableUntil:
+      o.status === "delivered" && o.deliveredAt
+        ? new Date(o.deliveredAt.getTime() + RETURN_WINDOW_DAYS * 86_400_000)
+        : null,
+    returnRequest: o.returnRequest?.status
+      ? {
+          status: o.returnRequest.status,
+          reason: o.returnRequest.reason,
+          note: o.returnRequest.note ?? null,
+          requestedAt: o.returnRequest.requestedAt,
+          resolvedAt: o.returnRequest.resolvedAt ?? null,
+          refundAmount: o.returnRequest.refundAmount ?? null,
+          items: (o.returnRequest.items ?? []).map((i) => ({
+            productId: String(i.product),
+            title: i.title,
+            qty: i.qty,
+            unitPrice: i.unitPrice,
+          })),
+          photos: o.returnRequest.photos ?? [],
+          pickupAddress: o.returnRequest.pickupAddress ?? null,
+          history: (o.returnRequest.history ?? []).map((h) => ({
+            status: h.status,
+            at: h.at,
+            note: h.note ?? null,
+          })),
+        }
+      : null,
     createdAt: o.createdAt,
     updatedAt: o.updatedAt,
   }

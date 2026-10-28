@@ -13,7 +13,11 @@ import { adminBannerRoutes, bannerRoutes } from "./modules/banners/banner.routes
 import { adminCouponRoutes, couponRoutes } from "./modules/coupons/coupon.routes.js"
 import { adminDealRoutes, dealRoutes } from "./modules/deals/deal.routes.js"
 import { timeRoutes } from "./modules/health/time.routes.js"
-import { adminOrderRoutes, orderRoutes } from "./modules/orders/order.routes.js"
+import {
+  adminOrderRoutes,
+  adminReturnRoutes,
+  orderRoutes,
+} from "./modules/orders/order.routes.js"
 import { adminPaymentRoutes, paymentRoutes } from "./modules/payments/payment.routes.js"
 import {
   adminReviewRoutes,
@@ -48,6 +52,7 @@ routes.use("/admin/deals", adminDealRoutes)
 routes.use("/admin/banners", adminBannerRoutes)
 routes.use("/orders", orderRoutes)
 routes.use("/admin/orders", adminOrderRoutes)
+routes.use("/admin/returns", adminReturnRoutes)
 routes.use("/payments", paymentRoutes)
 routes.use("/admin/payments", adminPaymentRoutes)
 routes.use("/reviews", reviewRoutes)

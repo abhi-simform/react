@@ -267,7 +267,7 @@ Money is whole rupees. `Order` = `{ id, orderNumber ("SS-YYYYMMDD-XXXXXX"), user
 - `409 PRICE_CHANGED` `{expectedTotal, actualTotal}` when `expectedTotal` is sent and differs, or when a deal sold out/ended in between
 - `422 COUPON_INVALID` (the coupon stopped applying), `422 CART_EMPTY`, `422 PINCODE_UNSERVICEABLE`, `422 COD_NOT_AVAILABLE` (remote pincodes, or total above Rs 50,000)
 - Pricing: shipping Rs 40 (free strictly above Rs 499 after discount; express is a flat Rs 99), tax 18% exclusive.
-- Cancel / staff-cancel give back stock, the deal claim and the coupon use; `returned` restocks the goods. `return_requested -> returned -> refunded` is driven by `/admin/orders/:id/status` (refund money movement arrives with B6).
+- Cancel / staff-cancel give back stock, the deal claim and the coupon use; `returned` restocks the goods. `return_requested -> returned -> refunded` is driven by `/admin/orders/:id/status` or the returns queue below; online refunds move money through the B6 gateway.
 - Order email: COD orders send a confirmation to Mailpit (http://localhost:8025) after commit; online orders will after payment (B6).
 - Seed: the dev customer has 4 historical orders (2 delivered, 1 shipped, 1 cancelled) numbered `SS-SEED-00000N`.
 - Not built here: tracking events and notifications (B9), expiry of unpaid `pending_payment` orders (B12 job), seller view of orders (B11).
@@ -347,3 +347,24 @@ Rules worth knowing:
 - **Review text is plain text.** The API stores and returns it verbatim (`<script>` stays `<script>`); the UI must render it as text (React does by default) and never with `dangerouslySetInnerHTML`.
 - Reviewer names are masked (`First L.`) because reviews are public.
 - Seed: dev customer reviewed their first delivered product and has voted helpful on a few reviews; their second delivered product is unreviewed (for the "write a review" demo). ~40 popular products carry questions and answers (some by the seller, badge `seller`).
+
+### Returns (B9, returns slice)
+
+`POST /orders/:id/return` is richer now: `{ reason, note?, items?: [{productId, qty}], photos?: [url] (max 4, your own uploads), pickupAddressId? }`. Omitting `items` returns everything. Quantities above what was bought are `422` (`details[].path = "items.N.qty"`), as are photos that are not the caller's own uploads (`photos.N`). The order becomes `return_requested` and carries:
+
+```jsonc
+"returnRequest": { "status": "requested|approved|rejected|refunded", "reason", "note", "requestedAt", "resolvedAt",
+  "refundAmount": 1180,            // whole rupees: the returned items' share of (subtotal - discount + tax); shipping is not refunded
+  "items": [{ "productId", "title", "qty", "unitPrice" }], "photos": [], "pickupAddress": { ... },
+  "history": [{ "status", "at", "note" }] }  // the return timeline
+```
+
+Orders also expose `deliveredAt` and `returnableUntil` (set while `delivered`, null once the 7-day window has passed or the status moved on). A rejected return puts the order back to `delivered` WITHOUT restarting the window.
+
+| Method | Path                                                               | Notes                                                                                                                                                                                                                                                                                       |
+| ------ | ------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| GET    | `/admin/returns?status&page&limit`                                 | Admin queue of orders with a return request, newest request first.                                                                                                                                                                                                                          |
+| POST   | `/admin/returns/:id/decision` `{decision: approve\|reject, note?}` | approve: `return_requested -> returned`, only the returned units go back to stock. reject: back to `delivered`.                                                                                                                                                                             |
+| POST   | `/admin/returns/:id/refund` `{note?}`                              | `returned -> refunded`. Razorpay orders: a gateway refund for `refundAmount` (instant on the mock, `refund_pending` until the webhook on real Razorpay; the order's `paymentStatus` then becomes `partially_refunded` or `refunded`). COD: marked refunded (money is returned out of band). |
+
+Notifications and live updates for returns arrive with the rest of B9 (Stage 11.9). The seed has no pending return: the dev customer's recent delivered order (3 days ago) is inside the window, the older one (20 days) is outside it.

@@ -8,6 +8,9 @@ import { toPublicOrder } from "./order.model.js"
 import * as service from "./order.service.js"
 import {
   idempotencyKeySchema,
+  type adminReturnDecisionSchema,
+  type adminReturnRefundSchema,
+  type adminReturnsSchema,
   type adminStatusSchema,
   type cancelOrderSchema,
   type listOrdersSchema,
@@ -80,4 +83,25 @@ export const adminStatus: RequestHandler = async (req, res) => {
       await service.transitionOrder(uid(req), params.id, body.status, body.note)
     )
   )
+}
+
+export const adminReturns: RequestHandler = async (req, res) => {
+  const { query } = valid<typeof adminReturnsSchema>(req)
+  const { items, total } = await service.listReturns(query)
+  ok(res, items.map(toPublicOrder), pageMeta(query.page, query.limit, total))
+}
+
+export const adminReturnDecision: RequestHandler = async (req, res) => {
+  const { params, body } = valid<typeof adminReturnDecisionSchema>(req)
+  ok(
+    res,
+    toPublicOrder(
+      await service.decideReturn(uid(req), params.id, body.decision, body.note)
+    )
+  )
+}
+
+export const adminReturnRefund: RequestHandler = async (req, res) => {
+  const { params, body } = valid<typeof adminReturnRefundSchema>(req)
+  ok(res, toPublicOrder(await service.refundReturn(uid(req), params.id, body.note)))
 }

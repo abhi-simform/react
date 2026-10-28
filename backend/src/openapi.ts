@@ -20,6 +20,9 @@ import { applyCouponSchema, createCouponSchema } from "./modules/coupons/coupon.
 import { createDealSchema, listDealsSchema } from "./modules/deals/deal.schema.js"
 import { createBannerSchema } from "./modules/banners/banner.routes.js"
 import {
+  adminReturnDecisionSchema,
+  adminReturnRefundSchema,
+  adminReturnsSchema,
   adminStatusSchema,
   cancelOrderSchema,
   listOrdersSchema,
@@ -604,7 +607,8 @@ export const openApiDocument = {
     "/orders/{id}/return": {
       post: {
         tags: ["Orders"],
-        summary: "Request a return (delivered orders, within 7 days of delivery)",
+        summary:
+          "Request a return (delivered orders, within 7 days of delivery): reason, optional items+qty (default all, never more than bought), photos (own uploads, max 4), pickupAddressId. The refund amount is computed server-side. 422 details paths: items.N.qty, items.N.productId, photos.N",
         security: bearer,
         parameters: [
           { name: "id", in: "path", required: true, schema: { type: "string" } },
@@ -1036,6 +1040,51 @@ export const openApiDocument = {
         ],
         requestBody: body(RS.moderateSchema.body),
         responses: { 200: { description: "{ id, kind, status }" } },
+      },
+    },
+    "/admin/returns": {
+      get: {
+        tags: ["Admin"],
+        summary:
+          "Returns queue (orders with a return request). Filter: status requested|approved|rejected|refunded",
+        security: bearer,
+        parameters: queryParams(adminReturnsSchema.query as z.ZodObject),
+        responses: {
+          200: { description: "Order[] (returnRequest populated)" },
+          403: { description: "FORBIDDEN" },
+        },
+      },
+    },
+    "/admin/returns/{id}/decision": {
+      post: {
+        tags: ["Admin"],
+        summary:
+          "Approve (order -> returned, returned items restocked) or reject (order -> delivered)",
+        security: bearer,
+        parameters: [
+          { name: "id", in: "path", required: true, schema: { type: "string" } },
+        ],
+        requestBody: body(adminReturnDecisionSchema.body),
+        responses: {
+          200: { description: "Order" },
+          409: { description: "INVALID_TRANSITION" },
+        },
+      },
+    },
+    "/admin/returns/{id}/refund": {
+      post: {
+        tags: ["Admin"],
+        summary:
+          "Refund an approved return (order -> refunded). Online payments are refunded through the gateway for the returned items' share",
+        security: bearer,
+        parameters: [
+          { name: "id", in: "path", required: true, schema: { type: "string" } },
+        ],
+        requestBody: body(adminReturnRefundSchema.body),
+        responses: {
+          200: { description: "Order" },
+          409: { description: "INVALID_TRANSITION" },
+        },
       },
     },
     "/cart/merge": {

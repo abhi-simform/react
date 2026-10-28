@@ -52,7 +52,36 @@ export const returnOrderSchema = {
   body: z.object({
     reason: z.enum(RETURN_REASONS),
     note: z.string().trim().max(500).optional(),
+    /** Which items and how many. Omitted = everything in the order. */
+    items: z
+      .array(z.object({ productId: objectId, qty: z.number().int().min(1).max(99) }))
+      .min(1)
+      .max(20)
+      .optional(),
+    /** Photos of the problem: your own uploads from POST /uploads/images. */
+    photos: z.array(z.url().max(300)).max(4, "At most 4 photos").default([]),
+    /** Defaults to the delivery address. */
+    pickupAddressId: objectId.optional(),
   }),
+}
+
+export const adminReturnsSchema = {
+  query: z.object({
+    page: z.coerce.number().int().min(1).default(1),
+    limit: z.coerce.number().int().min(1).max(50).default(20),
+    status: z.enum(["requested", "approved", "rejected", "refunded"]).optional(),
+  }),
+}
+export const adminReturnDecisionSchema = {
+  params: z.object({ id: objectId }),
+  body: z.object({
+    decision: z.enum(["approve", "reject"]),
+    note: z.string().trim().max(300).optional(),
+  }),
+}
+export const adminReturnRefundSchema = {
+  params: z.object({ id: objectId }),
+  body: z.object({ note: z.string().trim().max(300).optional() }).default({}),
 }
 
 export const adminStatusSchema = {
