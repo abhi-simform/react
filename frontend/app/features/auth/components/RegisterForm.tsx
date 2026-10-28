@@ -11,7 +11,7 @@ import { toApiError } from "@/lib/api/errors"
 import { applyApiError } from "@/lib/forms/applyApiError"
 import { paths } from "@/lib/paths"
 
-import { useAuth } from "../AuthContext"
+import { useAuth } from "../AuthProvider"
 import { getReturnTo } from "../returnTo"
 import { registerSchema, type RegisterValues } from "../schemas"
 

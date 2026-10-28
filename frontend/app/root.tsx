@@ -2,8 +2,9 @@ import { Links, Meta, Outlet, Scripts, ScrollRestoration } from "react-router"
 
 import type { Route } from "./+types/root"
 import { RouteErrorView } from "@/components/common/RouteErrorView"
-import { Toaster } from "@/components/ui/sonner"
 import { AuthProvider } from "@/features/auth"
+import { ThemeProvider } from "@/features/theme"
+import { ToastProvider } from "@/features/toast"
 import { WishlistProvider } from "@/features/wishlist"
 import { pageTitle } from "@/lib/pageTitle"
 
@@ -33,14 +34,18 @@ export function Layout({ children }: { children: React.ReactNode }) {
 }
 
 export default function App() {
+  // Order = dependency order: theme first (toasts read it), auth before anything that needs the
+  // user (wishlist). Each one is a separate, small context: no mega-context.
   return (
-    <AuthProvider>
-      <WishlistProvider>
-        <Outlet />
-      </WishlistProvider>
-      {/* Toasts (sonner): role="status" live region, used for action feedback. */}
-      <Toaster position="bottom-right" />
-    </AuthProvider>
+    <ThemeProvider>
+      <AuthProvider>
+        <ToastProvider>
+          <WishlistProvider>
+            <Outlet />
+          </WishlistProvider>
+        </ToastProvider>
+      </AuthProvider>
+    </ThemeProvider>
   )
 }
 

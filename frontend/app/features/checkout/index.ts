@@ -8,6 +8,10 @@ export { StepNav } from "./components/StepNav"
 export { CHECKOUT_STEPS, firstIncompleteStep, stepIndexFromPath } from "./steps"
 export { checkoutSchema, STEP_SCHEMAS } from "./schemas"
 export type { CheckoutInput, CheckoutValues } from "./schemas"
-export { StepperProvider, useStepper, useStepperDispatch } from "./stepperContext"
+export {
+  StepperProvider,
+  useStepper,
+  useStepperDispatch,
+} from "./stepperContext"
 export { stepperReducer, initialStepperState } from "./stepperReducer"
 export type { StepperAction, StepperState } from "./stepperReducer"

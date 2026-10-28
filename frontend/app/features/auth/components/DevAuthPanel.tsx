@@ -1,6 +1,6 @@
 import { toast } from "sonner"
 
-import { useAuth } from "../AuthContext"
+import { useAuth } from "../AuthProvider"
 import type { Role } from "../types"
 
 /** Dev-only: sign in as a seeded account (REAL token from the API) without a form. Not shipped in production builds. */

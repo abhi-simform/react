@@ -21,11 +21,17 @@ import {
 import type { AuthStatus, AuthUser, Role } from "./types"
 
 /**
- * STUB (Stage 5.6, real token since 6.3): the user shape and the guards are the
- * final ones, but the source is still the dev accounts (see `session.ts`).
- * localStorage only remembers "someone was signed in" so a refresh knows to ask
- * the API for a new access token; the token itself is never persisted.
- * Stage 8 moves this into a real context and Stage 10 swaps the login source.
+ * The auth context (8.2). STILL A STUB at the source: the user comes from the seeded dev
+ * accounts and the real `/auth/login` (see `session.ts`); Stage 10 swaps the login source
+ * (Google, real registration flow) without changing this shape. The status is
+ * "loading" | "authenticated" | "anonymous"; "loading" matters, because a guard that treats
+ * "not known yet" as "anonymous" bounces a signed-in user to /login on every refresh.
+ *
+ * Context is a DELIVERY mechanism, not a state manager: the state lives here (`useState`),
+ * the context only carries it to descendants. The value is memoized, so a re-render of the
+ * parent does not re-render every consumer; the actions are `useCallback`s for the same reason.
+ * localStorage only remembers "someone was signed in" so a refresh knows to ask the API for a
+ * new access token; the token itself is never persisted.
  */
 type AuthValue = {
   status: AuthStatus

@@ -1,5 +1,5 @@
 // Public API of the auth feature.
-export { AuthProvider, useAuth } from "./AuthContext"
+export { AuthProvider, useAuth } from "./AuthProvider"
 export { getReturnTo } from "./returnTo"
 export { PublicOnly, RequireAuth, RequireRole } from "./components/guards"
 export { LoginForm } from "./components/LoginForm"

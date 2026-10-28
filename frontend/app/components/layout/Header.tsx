@@ -1,9 +1,9 @@
-import { Moon } from "lucide-react"
 import { Link, NavLink } from "react-router"
 
 import { CompareTrayButton } from "@/features/compare"
 import { CartDrawer } from "@/features/cart"
 import { SearchBox } from "@/features/search"
+import { ThemeToggle } from "@/features/theme"
 import { WishlistLink } from "@/features/wishlist"
 import { useMediaQuery } from "@/hooks/useMediaQuery"
 import { paths } from "@/lib/paths"
@@ -51,14 +51,7 @@ export function Header() {
         <NavLink to={paths.account()} className={navClass}>
           Account
         </NavLink>
-        <button
-          type="button"
-          aria-label="Theme (placeholder, Stage 13)"
-          disabled
-          className="rounded border p-1"
-        >
-          <Moon aria-hidden className="size-4" />
-        </button>
+        <ThemeToggle />
         <WishlistLink />
         <CompareTrayButton />
         <CartDrawer />

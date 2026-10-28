@@ -2,7 +2,7 @@ import { Navigate, Outlet, useLocation } from "react-router"
 
 import { paths } from "@/lib/paths"
 
-import { useAuth } from "../AuthContext"
+import { useAuth } from "../AuthProvider"
 import { getReturnTo } from "../returnTo"
 import type { Role } from "../types"
 
