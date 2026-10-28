@@ -20,3 +20,10 @@ One sentence per file:
 ### Typo in `routes.ts`
 
 I registered `route("hello", "routes/helo.tsx")` (typo) and Vite returned HTTP 500 with `ENOENT: no such file or directory, open '.../app/routes/helo.tsx'` from `compileRouteFile`: the route config is read at startup and every referenced module must exist. Fixing the path made `/hello` render `Hello ShopSphere` (HTTP 200); I then deleted the temporary route.
+
+## 0.3 Alias, Prettier, strict TS
+
+- Switched `~/*` to `@/*` in `tsconfig.json` and all `components.json` aliases; no `~/` imports remain.
+- The scaffold's `button.tsx` imported `cn` from the `"cn"` npm package directly. Changed to `@/lib/utils` so there is one place to import `cn` from. `npx shadcn@latest add card` generated `card.tsx` importing from the `cn` package again (the registry template), so I fixed that import by hand and removed the card since nothing uses it yet. Any new shadcn component needs that same one-line fix.
+- `npm run format` sorts Tailwind classes (checked: `p-4 flex text-sm m-2` became `m-2 flex p-4 text-sm`).
+- A deliberate `const n: number = "x"` fails `npm run typecheck` with TS2322; removed.
