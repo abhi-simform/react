@@ -18,7 +18,9 @@ type Settled<T> =
  */
 export function useAsyncResource<T>(
   key: string,
-  fetcher: (signal: AbortSignal) => Promise<T>
+  fetcher: (signal: AbortSignal) => Promise<T>,
+  /** `false` = do not request (the other half of a mode switch): the state stays "idle". */
+  enabled = true
 ): AsyncState<T> & { reload: () => void } {
   const [reloadKey, setReloadKey] = useState(0)
   const [settled, setSettled] = useState<Settled<T> | null>(null)
@@ -26,6 +28,7 @@ export function useAsyncResource<T>(
   const run = useEffectEvent((signal: AbortSignal) => fetcher(signal))
 
   useEffect(() => {
+    if (!enabled) return
     const controller = new AbortController()
     run(controller.signal)
       .then((data) => setSettled({ key: requestKey, status: "success", data }))
@@ -34,10 +37,11 @@ export function useAsyncResource<T>(
         setSettled({ key: requestKey, status: "error", error: toApiError(err) })
       })
     return () => controller.abort()
-  }, [requestKey])
+  }, [requestKey, enabled])
 
   const reload = () => setReloadKey((k) => k + 1)
 
+  if (!enabled) return { status: "idle", reload }
   if (settled?.key !== requestKey) return { status: "loading", reload }
   return settled.status === "success"
     ? { status: "success", data: settled.data, reload }

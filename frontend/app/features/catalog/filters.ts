@@ -9,6 +9,8 @@ import type { ProductQuery, ProductSort } from "./types"
  * (Named `ListingFilters` because `ProductFilters` is the Stage 1 predicate type.)
  */
 export type ListingView = "grid" | "list"
+/** `pages` = classic pagination (default, URL-addressable); `more` = "load more" / infinite scroll (6.6). */
+export type ListingMode = "pages" | "more"
 
 export type ListingFilters = {
   search?: string
@@ -20,6 +22,7 @@ export type ListingFilters = {
   sort: ProductSort
   page: number
   view: ListingView
+  mode: ListingMode
 }
 
 /** Values the URL omits. The user's saved preference can override sort and view (stretch). */
@@ -56,6 +59,7 @@ function filtersSchema(defaults: ListingDefaults) {
     sort: productSortSchema.catch(defaults.sort),
     page: z.coerce.number().int().min(1).max(10_000).catch(1),
     view: z.enum(["grid", "list"]).catch(defaults.view),
+    mode: z.enum(["pages", "more"]).catch("pages"),
   })
 }
 
@@ -73,6 +77,7 @@ export function parseFilters(
     sort: searchParams.get("sort") ?? undefined,
     page: searchParams.get("page") ?? undefined,
     view: searchParams.get("view") ?? undefined,
+    mode: searchParams.get("mode") ?? undefined,
   })
   // A reversed range would 422 at the API: repair it instead of failing.
   const [minPrice, maxPrice] =
@@ -91,6 +96,7 @@ export function parseFilters(
     sort: parsed.sort,
     page: parsed.page,
     view: parsed.view,
+    mode: parsed.mode,
   }
 }
 
@@ -112,6 +118,7 @@ export function toSearchParams(
   if (filters.sort !== defaults.sort) params.set("sort", filters.sort)
   if (filters.page !== 1) params.set("page", String(filters.page))
   if (filters.view !== defaults.view) params.set("view", filters.view)
+  if (filters.mode === "more") params.set("mode", "more")
   return params
 }
 

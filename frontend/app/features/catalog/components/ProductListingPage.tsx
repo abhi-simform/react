@@ -11,12 +11,14 @@ import { paths } from "@/lib/paths"
 import { toProductQuery } from "../filters"
 import { useCategory } from "../hooks/useCategories"
 import { useProductFilters } from "../hooks/useProductFilters"
+import { useInfiniteProducts } from "../hooks/useInfiniteProducts"
 import { useProducts } from "../hooks/useProducts"
 import type { Facets } from "../types"
 import { ActiveFilterChips } from "./ActiveFilterChips"
 import { FilterSidebar } from "./FilterSidebar"
 import { Pagination } from "./Pagination"
 import { FiltersSheet } from "./FiltersSheet"
+import { InfiniteResults } from "./InfiniteResults"
 import { ListingResults } from "./ListingResults"
 import { SortSelect } from "./SortSelect"
 
@@ -31,7 +33,11 @@ export function ProductListingPage({
 }) {
   const api = useProductFilters()
   const { filters, setFilter, activeCount } = api
-  const state = useProducts(toProductQuery(filters, categorySlug))
+  // Two ways to browse the same result set; only the active one makes requests.
+  const moreMode = filters.mode === "more"
+  const query = toProductQuery(filters, categorySlug)
+  const state = useProducts(query, !moreMode)
+  const infinite = useInfiniteProducts(query, moreMode)
   const category = useCategory(categorySlug)
   const isDesktop = useMediaQuery("(min-width: 1024px)")
   const navigate = useNavigate()
@@ -39,14 +45,13 @@ export function ProductListingPage({
 
   // Keep the last facets while the next request is in flight so the sidebar does not blank out.
   // (Adjusting state during render, guarded by a condition, is the sanctioned "derive from props" escape hatch.)
+  const latestFacets = moreMode
+    ? infinite.facets
+    : state.status === "success"
+      ? state.data.meta.facets
+      : undefined
   const [facets, setFacets] = useState<Facets>()
-  if (
-    state.status === "success" &&
-    state.data.meta.facets &&
-    state.data.meta.facets !== facets
-  ) {
-    setFacets(state.data.meta.facets)
-  }
+  if (latestFacets && latestFacets !== facets) setFacets(latestFacets)
 
   const categoryName =
     category.status === "success" ? category.data?.name : undefined
@@ -57,6 +62,11 @@ export function ProductListingPage({
       : "All products"
 
   const meta = state.status === "success" ? state.data.meta : undefined
+  const total = moreMode
+    ? infinite.status === "loading-first" || infinite.status === "error-first"
+      ? undefined
+      : infinite.total
+    : meta?.total
   useDocumentTitle(
     categorySlug
       ? (categoryName ?? "Category")
@@ -107,13 +117,13 @@ export function ProductListingPage({
             <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
               <div className="flex items-center gap-3">
                 {!isDesktop && (
-                  <FiltersSheet activeCount={activeCount} total={meta?.total}>
+                  <FiltersSheet activeCount={activeCount} total={total}>
                     {sidebar}
                   </FiltersSheet>
                 )}
                 <p role="status" aria-live="polite" className="text-sm">
-                  {meta
-                    ? `${meta.total.toLocaleString("en-IN")} products`
+                  {total !== undefined
+                    ? `${total.toLocaleString("en-IN")} products`
                     : "Loading..."}
                 </p>
               </div>
@@ -132,6 +142,14 @@ export function ProductListingPage({
                 >
                   {filters.view === "grid" ? "List view" : "Grid view"}
                 </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  aria-pressed={moreMode}
+                  onClick={() => setFilter("mode", moreMode ? "pages" : "more")}
+                >
+                  {moreMode ? "Use pages" : "Load more mode"}
+                </Button>
               </div>
             </div>
             <ActiveFilterChips
@@ -143,14 +161,23 @@ export function ProductListingPage({
               onSetFilter={setFilter}
               onClearAll={api.clearAll}
             />
-            <ListingResults
-              state={state}
-              filters={filters}
-              activeCount={activeCount}
-              onGoToPage={(page) => setFilter("page", page)}
-              onClearAll={api.clearAll}
-            />
-            {meta && (
+            {moreMode ? (
+              <InfiniteResults
+                list={infinite}
+                filters={filters}
+                activeCount={activeCount}
+                onClearAll={api.clearAll}
+              />
+            ) : (
+              <ListingResults
+                state={state}
+                filters={filters}
+                activeCount={activeCount}
+                onGoToPage={(page) => setFilter("page", page)}
+                onClearAll={api.clearAll}
+              />
+            )}
+            {!moreMode && meta && (
               <Pagination
                 page={meta.page}
                 totalPages={meta.totalPages}

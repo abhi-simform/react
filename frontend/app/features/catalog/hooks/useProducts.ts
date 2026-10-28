@@ -12,10 +12,13 @@ import type { Product, ProductListMeta, ProductQuery } from "../types"
  * would re-run the effect on every render (new object each time).
  */
 export function useProducts(
-  params: ProductQuery
+  params: ProductQuery,
+  enabled = true
 ): AsyncState<Paginated<Product, ProductListMeta>> & { reload: () => void } {
   const queryString = toQueryString(params)
-  return useAsyncResource(queryString, (signal) =>
-    getProductsByQuery(queryString, signal)
+  return useAsyncResource(
+    queryString,
+    (signal) => getProductsByQuery(queryString, signal),
+    enabled
   )
 }
