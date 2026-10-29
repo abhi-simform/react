@@ -1,4 +1,4 @@
-import { z } from "zod"
+import { z } from "@/lib/zod"
 
 /** One row of `GET /deals`. Money is whole rupees; `remaining = stockLimit - claimed`. */
 export const dealSchema = z.object({

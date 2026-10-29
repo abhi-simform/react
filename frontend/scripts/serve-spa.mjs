@@ -66,7 +66,9 @@ function headersFor(urlPath) {
 }
 
 function resolveFile(urlPath) {
-  const clean = path.normalize(decodeURIComponent(urlPath)).replace(/^(\.\.[/\\])+/, "")
+  const clean = path
+    .normalize(decodeURIComponent(urlPath))
+    .replace(/^(\.\.[/\\])+/, "")
   const target = path.join(root, clean)
   if (!target.startsWith(root)) return null
   for (const candidate of [target, path.join(target, "index.html")])
@@ -93,7 +95,9 @@ createServer((req, res) => {
   }
   if (file.endsWith(SHELL) && !headers["Cache-Control"])
     headers["Cache-Control"] = "no-cache"
-  const gzip = COMPRESSIBLE.test(type) && /\bgzip\b/.test(req.headers["accept-encoding"] ?? "")
+  const gzip =
+    COMPRESSIBLE.test(type) &&
+    /\bgzip\b/.test(req.headers["accept-encoding"] ?? "")
   if (gzip) headers["Content-Encoding"] = "gzip"
   res.writeHead(200, headers)
   if (req.method === "HEAD") return void res.end()
@@ -101,5 +105,7 @@ createServer((req, res) => {
   if (gzip) pipeline(stream, createGzip(), res, () => undefined)
   else pipeline(stream, res, () => undefined)
 }).listen(port, () => {
-  console.log(`serving ${root} on http://localhost:${port} (SPA fallback: ${SHELL})`)
+  console.log(
+    `serving ${root} on http://localhost:${port} (SPA fallback: ${SHELL})`
+  )
 })

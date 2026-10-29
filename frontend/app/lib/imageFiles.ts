@@ -1,5 +1,5 @@
 // Image `File` rules shared by forms (review photos, avatar, seller images) and the dropzone.
-import { z } from "zod"
+import { z } from "@/lib/zod"
 
 export const MAX_IMAGE_BYTES = 2 * 1024 * 1024
 export const MAX_IMAGES = 5

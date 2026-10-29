@@ -1,4 +1,4 @@
-import { z } from "zod"
+import { z } from "@/lib/zod"
 
 /**
  * Products the service worker has cached (13.10): every product DETAIL response the shopper has opened

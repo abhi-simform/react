@@ -1,4 +1,4 @@
-import { z } from "zod"
+import { z } from "@/lib/zod"
 
 /** Meta of the rail endpoints (not page meta). */
 export const alsoBoughtMetaSchema = z.object({

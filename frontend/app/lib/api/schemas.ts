@@ -1,4 +1,4 @@
-import { z } from "zod"
+import { z } from "@/lib/zod"
 
 export const pageMetaSchema = z.object({
   page: z.number().int().min(1),

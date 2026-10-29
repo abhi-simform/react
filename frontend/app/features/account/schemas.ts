@@ -1,4 +1,4 @@
-import { z } from "zod"
+import { z } from "@/lib/zod"
 
 import { phoneField, pincodeField } from "@/lib/fields"
 import { INDIA_STATES } from "@/lib/indiaStates"

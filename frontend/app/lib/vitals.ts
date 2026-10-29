@@ -1,6 +1,7 @@
 import { onCLS, onFCP, onINP, onLCP, onTTFB, type Metric } from "web-vitals"
 
 import { env } from "@/lib/env"
+import { recordVital } from "@/lib/observability"
 
 /**
  * Field data (13.1): the Core Web Vitals of REAL page views. `web-vitals` wraps the browser's
@@ -59,6 +60,7 @@ function currentEnv(): Env {
 
 function send(metric: Metric) {
   const payload = toVitalsPayload(metric, currentEnv())
+  recordVital(payload) // 14.6: also a Sentry breadcrumb + metric (a no-op without a DSN)
   if (env.DEV) {
     console.info(
       `[vitals] ${payload.name} ${payload.value}${payload.name === "CLS" ? "" : " ms"} (${payload.rating}) ${payload.path}`

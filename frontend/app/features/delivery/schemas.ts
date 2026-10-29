@@ -1,4 +1,4 @@
-import { z } from "zod"
+import { z } from "@/lib/zod"
 
 /** `GET /pincodes/:pincode` (B2). Two shapes, told apart by `serviceable`. */
 export const pincodeCheckSchema = z.discriminatedUnion("serviceable", [

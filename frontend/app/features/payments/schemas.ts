@@ -1,4 +1,4 @@
-import { z } from "zod"
+import { z } from "@/lib/zod"
 
 /** `GET /payments/config` */
 export const paymentConfigSchema = z.object({

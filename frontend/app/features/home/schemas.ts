@@ -1,4 +1,4 @@
-import { z } from "zod"
+import { z } from "@/lib/zod"
 
 /** `GET /banners?placement=hero` (B4). `linkUrl` is a same-site path chosen by an admin. */
 export const bannerSchema = z.object({

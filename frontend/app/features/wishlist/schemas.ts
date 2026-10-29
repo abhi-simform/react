@@ -1,4 +1,4 @@
-import { z } from "zod"
+import { z } from "@/lib/zod"
 
 /**
  * `GET /wishlist` item: the product CARD shape plus when it was added. Declared here

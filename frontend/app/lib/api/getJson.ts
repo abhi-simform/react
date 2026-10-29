@@ -56,18 +56,21 @@ export async function getJson(
   }
 
   if (!response.ok) {
+    const requestId = response.headers.get("x-request-id") ?? undefined
     if (isApiError(body)) {
       throw new ApiError({
         status: response.status,
         code: body.error.code,
         message: `HTTP ${response.status}: ${body.error.message}`,
         details: body.error.details,
+        requestId,
       })
     }
     throw new ApiError({
       status: response.status,
       code: "HTTP_ERROR",
       message: `HTTP ${response.status}: ${response.statusText || "Server error"}`,
+      requestId,
     })
   }
   return { status: response.status, body }

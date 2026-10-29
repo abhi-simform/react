@@ -1,4 +1,4 @@
-import { z } from "zod"
+import { z } from "@/lib/zod"
 
 /** `GET /products/:id/reviews` row (B7). */
 export const reviewSchema = z.object({

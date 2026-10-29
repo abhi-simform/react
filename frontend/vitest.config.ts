@@ -5,6 +5,8 @@ import { defineConfig } from "vitest/config"
 // Stage 12.1: a dedicated config. The React Router plugin (SSR build, route
 // typegen) has no business in a test run, so tests only get the `@` alias.
 export default defineConfig({
+  // The Sentry SDK is imported behind this flag (lib/observability.ts); tests mock the module and decide by `env.SENTRY_DSN`.
+  define: { __SENTRY_ENABLED__: true },
   resolve: { alias: { "@": path.resolve(import.meta.dirname, "app") } },
   test: {
     globals: true,

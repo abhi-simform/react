@@ -1,4 +1,4 @@
-import { z } from "zod"
+import { z } from "@/lib/zod"
 
 import { api, apiWithMeta } from "@/lib/api/client"
 import { productSchema, type Product } from "@/features/catalog"

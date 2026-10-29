@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto"
-import { readFileSync } from "node:fs"
+import { existsSync, readFileSync } from "node:fs"
 
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
@@ -54,9 +54,18 @@ describe("themeInitScript (no flash of the wrong theme)", () => {
     })
     expect(() => new Function(themeInitScript)()).not.toThrow()
   })
-  it("its CSP hash is the one pinned in public/_headers", () => {
-    const hash = createHash("sha256").update(themeInitScript).digest("base64")
-    const headers = readFileSync("public/_headers", "utf8")
-    expect(headers).toContain(`'sha256-${hash}'`)
+  it("its CSP hash comes from the build (14.1), not from a pasted value that can go stale", () => {
+    // public/_headers holds a placeholder; scripts/build-headers.mjs hashes every inline script of the built HTML.
+    expect(readFileSync("public/_headers", "utf8")).toContain(
+      "__SCRIPT_HASHES__"
+    )
+    // And the build's own output (when one exists) lists this script's hash.
+    const built = existsSync("build/client/_headers")
+      ? readFileSync("build/client/_headers", "utf8")
+      : null
+    if (built) {
+      const hash = createHash("sha256").update(themeInitScript).digest("base64")
+      expect(built).toContain(`'sha256-${hash}'`)
+    }
   })
 })

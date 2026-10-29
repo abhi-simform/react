@@ -34,7 +34,11 @@ export function SectionBoundary({ children, label, resetKeys }: Props) {
         <ErrorBoundary
           resetKeys={resetKeys ? [...resetKeys] : undefined}
           onReset={reset}
-          onError={(error) => reportError(error, `boundary:${label}`)}
+          onError={(error, info) =>
+            reportError(error, `boundary:${label}`, {
+              componentStack: info.componentStack,
+            })
+          }
           fallbackRender={({ resetErrorBoundary }) => (
             <div
               role="alert"

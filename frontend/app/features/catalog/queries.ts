@@ -3,7 +3,7 @@ import {
   queryOptions,
   type QueryClient,
 } from "@tanstack/react-query"
-import { z } from "zod"
+import { z } from "@/lib/zod"
 
 import { api } from "@/lib/api/client"
 import { ApiError } from "@/lib/api/errors"

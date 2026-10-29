@@ -1,4 +1,4 @@
-import { z } from "zod"
+import { z } from "@/lib/zod"
 
 import { api, apiPaginated } from "@/lib/api/client"
 import type { Paginated } from "@/lib/api/envelope"

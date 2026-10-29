@@ -1,4 +1,4 @@
-import { z } from "zod"
+import { z } from "@/lib/zod"
 
 // Field rules shared by every form schema. They mirror the backend's
 // (`backend/src/modules/addresses/address.schema.ts`): the server stays authoritative,

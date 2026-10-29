@@ -1,4 +1,4 @@
-import { z } from "zod"
+import { z } from "@/lib/zod"
 
 /** Coupon box (7.2). The code is normalised (trim + upper-case) before the server sees it. */
 export const couponSchema = z.object({

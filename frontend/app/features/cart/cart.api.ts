@@ -1,7 +1,7 @@
 import { api } from "@/lib/api/client"
 
 import { getGuestToken, peekGuestToken } from "./cartToken"
-import { z } from "zod"
+import { z } from "@/lib/zod"
 
 import {
   availableCouponSchema,

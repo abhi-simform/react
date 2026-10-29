@@ -1,4 +1,4 @@
-import { z } from "zod"
+import { z } from "@/lib/zod"
 
 import { api, configureApi } from "@/lib/api/client"
 import { ApiError } from "@/lib/api/errors"

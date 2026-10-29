@@ -1,6 +1,7 @@
 import { useEffect } from "react"
 import { Link, isRouteErrorResponse } from "react-router"
 
+import { ApiError } from "@/lib/api/errors"
 import { NotFoundError } from "@/lib/notFound"
 import { paths } from "@/lib/paths"
 import { reportError } from "@/lib/report"
@@ -51,6 +52,12 @@ export function RouteErrorView({ error }: { error: unknown }) {
       <p className="my-2 text-sm">
         We hit an unexpected problem. Trying again usually helps.
       </p>
+      {error instanceof ApiError && error.requestId && (
+        // 14.6: the id support (or you, in the backend log) can search for: the same value is on the Sentry event.
+        <p className="text-xs text-muted-foreground">
+          Reference: <code>{error.requestId}</code>
+        </p>
+      )}
       {detail && (
         <p className="text-sm text-destructive">Dev detail: {detail}</p>
       )}

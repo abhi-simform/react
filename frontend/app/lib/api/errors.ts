@@ -6,18 +6,25 @@ export class ApiError extends Error {
   readonly status: number
   readonly code: string
   readonly details?: unknown
+  /**
+   * The API's `x-request-id` of the failed response (14.6). The same id is in the backend's log line for that
+   * request, so a Sentry event (tag `request_id`) leads straight to the server side of the story.
+   */
+  readonly requestId?: string
 
   constructor(init: {
     status: number
     code: string
     message: string
     details?: unknown
+    requestId?: string
   }) {
     super(init.message)
     this.name = "ApiError"
     this.status = init.status
     this.code = init.code
     this.details = init.details
+    this.requestId = init.requestId
   }
 
   /** The request never got an answer (server down, offline, DNS, CORS failure). */

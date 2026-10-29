@@ -16,6 +16,7 @@ Disallow: /verify-email
 Disallow: /auth/
 Disallow: /offline
 Disallow: /dev
+Disallow: /debug
 # Internal search results are thin duplicates of the listing.
 Disallow: /*?search=
 

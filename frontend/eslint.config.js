@@ -18,6 +18,15 @@ const internalsRule = (ownFeature) => ({
   "no-restricted-imports": [
     "error",
     {
+      // 14.1: Zod must come from `@/lib/zod` (it sets `jitless` before any schema exists; see that file).
+      paths: [
+        {
+          name: "zod",
+          allowTypeImports: true,
+          message:
+            'Import `z` from "@/lib/zod": it disables the eval probe that the production CSP blocks.',
+        },
+      ],
       patterns: [
         {
           group: [

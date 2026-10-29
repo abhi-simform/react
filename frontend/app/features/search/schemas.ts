@@ -1,4 +1,4 @@
-import { z } from "zod"
+import { z } from "@/lib/zod"
 
 /** `GET /search/suggest` (B8). Only what the dropdown needs: no full product rows. */
 export const suggestionsSchema = z.object({

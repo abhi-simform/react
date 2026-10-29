@@ -1,5 +1,5 @@
 import type { QueryClient } from "@tanstack/react-query"
-import { z } from "zod"
+import { z } from "@/lib/zod"
 
 import { orderKeys } from "@/lib/queryKeys"
 import type { Order } from "@/types/domain"

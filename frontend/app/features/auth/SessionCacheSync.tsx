@@ -11,6 +11,8 @@ import {
   wishlistKeys,
 } from "@/lib/queryKeys"
 
+import { setReportUser } from "@/lib/observability"
+
 import { useAuth } from "./AuthProvider"
 
 /** Query families that belong to ONE signed-in user: they must never outlive the session. */
@@ -36,6 +38,11 @@ export function SessionCacheSync() {
   const queryClient = useQueryClient()
   const userId = status === "loading" ? undefined : (user?.id ?? null)
   const previous = useRef<string | null | undefined>(undefined)
+
+  // 14.6: error reports carry the user's ID and nothing else (no e-mail, no name).
+  useEffect(() => {
+    if (userId !== undefined) setReportUser(userId)
+  }, [userId])
 
   useEffect(() => {
     if (userId === undefined) return

@@ -1,4 +1,4 @@
-import { z } from "zod"
+import { z } from "@/lib/zod"
 
 // One source of truth for the auth forms (7.2). The backend enforces the same password
 // rules (`backend/src/modules/auth/auth.schema.ts`), so a client pass is a server pass.

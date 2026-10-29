@@ -18,6 +18,7 @@ import { env } from "@/lib/env"
 import { installGlobalErrorReporting } from "@/lib/globalErrors"
 import { canonicalUrl, pageMeta } from "@/lib/seo"
 import { queryClient } from "@/lib/query-client"
+import { initObservability } from "@/lib/observability"
 import { reportWebVitals } from "@/lib/vitals"
 
 import interLatin from "../node_modules/@fontsource-variable/inter/files/inter-latin-wght-normal.woff2?url"
@@ -101,6 +102,13 @@ export default function App() {
   useEffect(() => installGlobalErrorReporting(), [])
   // Field Web Vitals (13.1): once per page load, console in dev, a beacon to the API in production.
   useEffect(() => reportWebVitals(), [])
+  // Error tracking (14.6): a no-op unless the build has a Sentry DSN; loaded after the page has loaded.
+  useEffect(() => {
+    const start = () => void initObservability()
+    if (document.readyState === "complete") start()
+    else window.addEventListener("load", start, { once: true })
+    return () => window.removeEventListener("load", start)
+  }, [])
   // Order = dependency order: theme first (toasts read it), auth before anything that needs the
   // user (wishlist). Each one is a separate, small context: no mega-context.
   return (

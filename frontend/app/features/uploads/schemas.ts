@@ -1,4 +1,4 @@
-import { z } from "zod"
+import { z } from "@/lib/zod"
 
 import { ACCEPTED_IMAGE_TYPES } from "@/lib/imageFiles"
 
