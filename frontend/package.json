@@ -22,6 +22,7 @@
     "headers:vercel": "node scripts/build-headers.mjs --vercel",
     "check:bundle-secrets": "node scripts/check-bundle-secrets.mjs",
     "verify:sentry": "node scripts/verify-sentry.mjs",
+    "check:console": "node scripts/console-check.mjs",
     "format:check": "prettier --check \"**/*.{ts,tsx}\"",
     "check": "npm run format:check && npm run lint && npm run typecheck && npm test && npm run build",
     "prepare": "node scripts/install-hooks.mjs || true"
