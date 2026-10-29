@@ -62,7 +62,15 @@ beforeEach(async () => {
 })
 
 const admin = (id: string, status: string) =>
-  request(app).post(`${A}/admin/orders/${id}/status`).set(auth(adminTok)).send({ status })
+  request(app)
+    .post(`${A}/admin/orders/${id}/status`)
+    .set(auth(adminTok))
+    .send({
+      status,
+      ...(status === "shipped"
+        ? { shipment: { carrier: "Delhivery", trackingId: "TRK123456" } }
+        : {}),
+    })
 
 /** Place an order for 2 phones + 1 novel and deliver it. */
 async function deliveredOrder(s: Shopper, paymentMethod: "cod" | "razorpay" = "cod") {

@@ -22,6 +22,9 @@ import { applyCouponSchema, createCouponSchema } from "./modules/coupons/coupon.
 import { createDealSchema, listDealsSchema } from "./modules/deals/deal.schema.js"
 import { createBannerSchema } from "./modules/banners/banner.routes.js"
 import {
+  addNoteSchema,
+  adminExportOrdersSchema,
+  adminListOrdersSchema,
   adminReturnDecisionSchema,
   adminReturnRefundSchema,
   adminReturnsSchema,
@@ -667,17 +670,21 @@ export const openApiDocument = {
     "/admin/orders": {
       get: {
         tags: ["Admin"],
-        summary: "All orders (same filters as /orders)",
+        summary:
+          "All orders with the customer: status, paymentMethod, search (order number / customer name / email), from..to (India days), sort createdAt|total",
         security: bearer,
-        parameters: queryParams(listOrdersSchema.query as z.ZodObject),
-        responses: { 200: { description: "Order[]" }, 403: { description: "FORBIDDEN" } },
+        parameters: queryParams(adminListOrdersSchema.query as z.ZodObject),
+        responses: {
+          200: { description: "AdminOrder[] + page meta" },
+          403: { description: "FORBIDDEN" },
+        },
       },
     },
     "/admin/orders/{id}/status": {
       post: {
         tags: ["Admin"],
         summary:
-          "Move an order along the state machine (placed > packed > shipped > out_for_delivery > delivered; return_requested > returned > refunded)",
+          "Move an order along the state machine (placed > packed > shipped > out_for_delivery > delivered; return_requested > returned > refunded). Shipping needs shipment { carrier, trackingId }; cancelling needs a note (reason). Audited with before/after status",
         security: bearer,
         parameters: [
           { name: "id", in: "path", required: true, schema: { type: "string" } },
@@ -686,6 +693,77 @@ export const openApiDocument = {
         responses: {
           200: { description: "Order" },
           409: { description: "INVALID_TRANSITION { status, allowed }" },
+          422: { description: "VALIDATION_ERROR (shipment.carrier / note)" },
+        },
+      },
+    },
+    "/admin/orders/export.csv": {
+      get: {
+        tags: ["Admin"],
+        summary:
+          "CSV of the current filtered orders view (max 5000 rows; formula-looking cells are escaped)",
+        security: bearer,
+        parameters: queryParams(adminExportOrdersSchema.query as z.ZodObject),
+        responses: {
+          200: { description: "text/csv" },
+          403: { description: "FORBIDDEN" },
+        },
+      },
+    },
+    "/admin/orders/{id}": {
+      get: {
+        tags: ["Admin"],
+        summary:
+          "One order with the customer, its payment (refunds, refundable) and staff notes",
+        security: bearer,
+        parameters: [
+          { name: "id", in: "path", required: true, schema: { type: "string" } },
+        ],
+        responses: {
+          200: { description: "AdminOrderDetail" },
+          404: { description: "NOT_FOUND" },
+        },
+      },
+    },
+    "/admin/orders/{id}/notes": {
+      post: {
+        tags: ["Admin"],
+        summary: "Add an internal staff note (never shown to the customer)",
+        security: bearer,
+        parameters: [
+          { name: "id", in: "path", required: true, schema: { type: "string" } },
+        ],
+        requestBody: body(addNoteSchema.body),
+        responses: {
+          201: { description: "AdminOrderDetail" },
+          404: { description: "NOT_FOUND" },
+        },
+      },
+    },
+    "/seller/orders": {
+      get: {
+        tags: ["Sellers"],
+        summary:
+          "Orders containing the caller's products (unpaid ones hidden), only their lines: { items, yourTotal, units, address, shipment }. No pricing, no customer identity",
+        security: bearer,
+        parameters: queryParams(listOrdersSchema.query as z.ZodObject),
+        responses: {
+          200: { description: "SellerOrder[] + page meta" },
+          403: { description: "FORBIDDEN" },
+        },
+      },
+    },
+    "/seller/orders/{id}": {
+      get: {
+        tags: ["Sellers"],
+        summary: "One of your orders; an order without a line of yours is 404",
+        security: bearer,
+        parameters: [
+          { name: "id", in: "path", required: true, schema: { type: "string" } },
+        ],
+        responses: {
+          200: { description: "SellerOrder" },
+          404: { description: "NOT_FOUND" },
         },
       },
     },
@@ -785,10 +863,16 @@ export const openApiDocument = {
       post: {
         tags: ["Admin"],
         summary:
-          "Refund (part of) a captured payment. Omit amount to refund everything left",
+          "Refund (part of) a captured payment. Omit amount to refund everything left. Send an Idempotency-Key header (8-100 url-safe chars): a retry with the same key replays the first refund (Idempotent-Replayed: true) instead of refunding again; the same key with another amount is 422 IDEMPOTENCY_KEY_REUSED. Audited",
         security: bearer,
         parameters: [
           { name: "id", in: "path", required: true, schema: { type: "string" } },
+          {
+            name: "Idempotency-Key",
+            in: "header",
+            required: false,
+            schema: { type: "string" },
+          },
         ],
         requestBody: body(refundSchema.body),
         responses: {

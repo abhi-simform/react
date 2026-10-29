@@ -49,3 +49,8 @@ export const refundSchema = {
     })
     .default({ reason: "Refund by staff" }),
 }
+
+/** `Idempotency-Key` for admin refunds: one id per click-intent (the admin UI sends a UUID per dialog). */
+export const refundKeySchema = z
+  .string()
+  .regex(/^[A-Za-z0-9_-]{8,100}$/, "Idempotency-Key must be 8-100 url-safe characters")

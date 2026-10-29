@@ -87,7 +87,12 @@ const adminStatus = (id: string, status: string) =>
   request(app)
     .post(`${A}/admin/orders/${id}/status`)
     .set(auth(adminU.token))
-    .send({ status })
+    .send({
+      status,
+      ...(status === "shipped"
+        ? { shipment: { carrier: "Delhivery", trackingId: "TRK123456" } }
+        : {}),
+    })
 
 async function waitFor<T>(
   fn: () => Promise<T> | T,

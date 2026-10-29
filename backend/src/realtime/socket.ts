@@ -19,6 +19,8 @@ import type { AccessPayload } from "../middleware/auth.js"
 let io: Server | null = null
 
 export const userRoom = (userId: string) => `user:${userId}`
+/** Admin sockets also join this room: the "new orders" indicator listens to it. */
+export const STAFF_ROOM = "staff"
 
 export function initRealtime(httpServer: HttpServer) {
   io = new Server(httpServer, {
@@ -56,6 +58,7 @@ export function initRealtime(httpServer: HttpServer) {
   io.on("connection", (socket) => {
     const userId = socket.data.userId as string
     void socket.join(userRoom(userId))
+    if (socket.data.role === "admin") void socket.join(STAFF_ROOM)
     socket.emit("ready", { userId, serverTime: new Date().toISOString() })
     logger.debug({ userId, sid: socket.id }, "socket connected")
 
@@ -76,6 +79,11 @@ export function initRealtime(httpServer: HttpServer) {
 /** No-op when realtime is not running (unit tests that never start a server). */
 export function emitToUser(userId: string, event: string, payload: unknown) {
   io?.to(userRoom(userId)).emit(event, payload)
+}
+
+/** Admins only (the room is joined by role in the handshake, never by a client request). */
+export function emitToStaff(event: string, payload: unknown) {
+  io?.to(STAFF_ROOM).emit(event, payload)
 }
 
 export async function closeRealtime() {

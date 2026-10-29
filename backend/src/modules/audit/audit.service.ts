@@ -76,7 +76,7 @@ export const auditStaffWrites: RequestHandler = (req, res, next) => {
   if (["GET", "HEAD", "OPTIONS"].includes(req.method)) return next()
   const originalUrl = req.originalUrl.split("?")[0]!
   res.on("finish", () => {
-    if (res.statusCode >= 400 || !req.user) return
+    if (res.statusCode >= 400 || !req.user || res.locals.auditSkip) return
     const targets = originalUrl.match(OBJECT_ID) ?? []
     void recordAudit({
       actor: req.user.id,

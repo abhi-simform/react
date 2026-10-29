@@ -20,6 +20,8 @@ const refundSchema = new Schema(
     amount: { type: Number, required: true, min: 1 }, // whole rupees
     status: { type: String, enum: ["pending", "processed", "failed"], required: true },
     reason: String,
+    // The Idempotency-Key of the admin request that created this refund: a retry with the same key replays it.
+    idempotencyKey: String,
     createdAt: { type: Date, default: () => new Date() },
     processedAt: Date,
   },

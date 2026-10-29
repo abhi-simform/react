@@ -532,7 +532,8 @@ export async function transitionOrder(
   actorId: string,
   id: string,
   to: OrderStatus,
-  note?: string
+  note?: string,
+  shipment?: { carrier: string; trackingId: string }
 ) {
   let from: string = to
   return mongoose.connection
@@ -572,6 +573,12 @@ export async function transitionOrder(
         set["payment.status"] =
           current.payment?.method === "razorpay" ? "refund_pending" : "refunded"
       }
+      if (to === "shipped" && shipment)
+        set.shipment = {
+          carrier: shipment.carrier,
+          trackingId: shipment.trackingId,
+          shippedAt: now,
+        }
       if (to === "cancelled") {
         set.cancelledAt = now
         set.cancelReason = note

@@ -2,6 +2,7 @@ import { Router, type Request } from "express"
 import { valid, validate } from "../../middleware/validate.js"
 import { pageMeta } from "../../utils/pagination.js"
 import { created, ok } from "../../utils/response.js"
+import { auditChange } from "../audit/audit.service.js"
 import * as service from "./product.admin.service.js"
 import {
   bulkProductsSchema,
@@ -51,7 +52,21 @@ export function staffProductRoutes(scope: service.Actor["scope"]) {
   })
   r.patch("/:id", validate(updateProductSchema), async (req, res) => {
     const { params, body } = valid<typeof updateProductSchema>(req)
-    ok(res, await service.updateProduct(actorOf(req, scope), params.id, body))
+    const actor = actorOf(req, scope)
+    const before = (await service.getProduct(actor, params.id)) as Record<string, unknown>
+    const after = await service.updateProduct(actor, params.id, body)
+    const plain = JSON.parse(JSON.stringify(after)) as Record<string, unknown>
+    auditChange(res, before, plain, [
+      "name",
+      "brand",
+      "price",
+      "mrp",
+      "stock",
+      "status",
+      "sku",
+      "isFeatured",
+    ])
+    ok(res, after)
   })
   r.delete("/:id", validate(productIdSchema), async (req, res) => {
     const { params } = valid<typeof productIdSchema>(req)

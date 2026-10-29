@@ -336,7 +336,7 @@ export async function processWebhook(
  */
 export async function refundOrder(
   orderId: string,
-  opts: { amount?: number; reason?: string } = {}
+  opts: { amount?: number; reason?: string; idempotencyKey?: string } = {}
 ) {
   const gateway = gatewayOrThrow()
   const payment = await Payment.findOne({ order: orderId })
@@ -363,6 +363,7 @@ export async function refundOrder(
           amount,
           status: "pending",
           reason: opts.reason,
+          idempotencyKey: opts.idempotencyKey,
         },
       },
     },

@@ -3,6 +3,7 @@ import { z } from "zod"
 import { authenticate, authorize } from "../../middleware/auth.js"
 import { publicCache } from "../../middleware/httpCache.js"
 import { valid, validate } from "../../middleware/validate.js"
+import { auditChange } from "../audit/audit.service.js"
 import { ApiError } from "../../utils/ApiError.js"
 import { ok } from "../../utils/response.js"
 import { BANNER_PLACEMENTS, Banner } from "./banner.model.js"
@@ -76,13 +77,27 @@ adminBannerRoutes.post("/", validate(createBannerSchema), async (req, res) => {
 })
 adminBannerRoutes.patch("/:id", validate(updateBannerSchema), async (req, res) => {
   const { params, body } = valid<typeof updateBannerSchema>(req)
+  const before = await Banner.findById(params.id).lean()
   const b = await Banner.findByIdAndUpdate(
     params.id,
     { $set: body },
     { returnDocument: "after" }
   )
   if (!b) throw ApiError.notFound("Banner not found")
-  ok(res, b)
+  ok(
+    res,
+    auditChange(res, before, b.toObject(), [
+      "title",
+      "subtitle",
+      "imageUrl",
+      "linkUrl",
+      "placement",
+      "sortOrder",
+      "startsAt",
+      "endsAt",
+      "isActive",
+    ])
+  )
 })
 adminBannerRoutes.delete("/:id", async (req, res) => {
   await Banner.deleteOne({ _id: String(req.params.id) })

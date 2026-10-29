@@ -1,4 +1,4 @@
-import { emitToUser } from "../../realtime/socket.js"
+import { emitToStaff, emitToUser } from "../../realtime/socket.js"
 import { notify } from "../notifications/notification.service.js"
 import {
   orderTemplate,
@@ -35,6 +35,19 @@ export async function onOrderStatusChanged(order: OrderLike, from: string | null
       ? { status: last.status, at: last.at, note: last.note ?? null }
       : { status: order.status, at: new Date(), note: null },
   })
+  // Staff: the admin portal's live "new orders" indicator and list refresh.
+  emitToStaff("order:status", {
+    orderId: String(order._id),
+    orderNumber: order.orderNumber,
+    status: order.status,
+    from,
+  })
+  if (order.status === "placed" && (from === null || from === "pending_payment"))
+    emitToStaff("order:new", {
+      orderId: String(order._id),
+      orderNumber: order.orderNumber,
+      total: order.pricing.total,
+    })
   const t = orderTemplate(
     {
       id: String(order._id),

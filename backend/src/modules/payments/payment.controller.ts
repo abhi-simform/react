@@ -3,16 +3,18 @@ import { valid } from "../../middleware/validate.js"
 import { ApiError } from "../../utils/ApiError.js"
 import { pageMeta } from "../../utils/pagination.js"
 import { ok } from "../../utils/response.js"
+import { auditChange } from "../audit/audit.service.js"
 import { toPublicOrder } from "../orders/order.model.js"
 import { toPublicPayment, Payment } from "./payment.model.js"
 import * as service from "./payment.service.js"
-import type {
-  createPaymentOrderSchema,
-  listPaymentsSchema,
-  mockPaySchema,
-  refundSchema,
-  simulateWebhookSchema,
-  verifyPaymentSchema,
+import {
+  refundKeySchema,
+  type createPaymentOrderSchema,
+  type listPaymentsSchema,
+  type mockPaySchema,
+  type refundSchema,
+  type simulateWebhookSchema,
+  type verifyPaymentSchema,
 } from "./payment.schema.js"
 
 const uid = (req: Parameters<RequestHandler>[0]) => req.user!.id
@@ -67,7 +69,36 @@ export const adminList: RequestHandler = async (req, res) => {
 
 export const adminRefund: RequestHandler = async (req, res) => {
   const { params, body } = valid<typeof refundSchema>(req)
+  const rawKey = req.headers["idempotency-key"]
+  let key: string | undefined
+  if (rawKey !== undefined) {
+    const parsed = refundKeySchema.safeParse(rawKey)
+    if (!parsed.success)
+      throw new ApiError(
+        400,
+        "IDEMPOTENCY_KEY_INVALID",
+        "Idempotency-Key must be 8-100 url-safe characters (e.g. a UUID)"
+      )
+    key = parsed.data
+  }
   const payment = await Payment.findById(params.id)
   if (!payment) throw ApiError.notFound("Payment not found")
-  ok(res, toPublicPayment(await service.refundOrder(String(payment.order), body)))
+  const prior = key ? payment.refunds.find((r) => r.idempotencyKey === key) : undefined
+  if (prior) {
+    // Same key, different request = a client bug, not a retry.
+    if (body.amount !== undefined && body.amount !== prior.amount)
+      throw new ApiError(
+        422,
+        "IDEMPOTENCY_KEY_REUSED",
+        "This Idempotency-Key was already used for a different refund amount"
+      )
+    res.setHeader("Idempotent-Replayed", "true")
+    res.locals.auditSkip = true // a replay changed nothing: no second audit row
+    return ok(res, toPublicPayment(payment))
+  }
+  const before = toPublicPayment(payment)
+  const after = toPublicPayment(
+    await service.refundOrder(String(payment.order), { ...body, idempotencyKey: key })
+  )
+  ok(res, auditChange(res, before, after, ["refundedAmount"]))
 }

@@ -86,8 +86,52 @@ export const adminReturnRefundSchema = {
 
 export const adminStatusSchema = {
   params: z.object({ id: objectId }),
-  body: z.object({
-    status: z.enum(ORDER_STATUSES),
-    note: z.string().trim().max(300).optional(),
+  body: z
+    .object({
+      status: z.enum(ORDER_STATUSES),
+      note: z.string().trim().max(300).optional(),
+      /** Required when shipping: who carries it and the tracking number the customer will see. */
+      shipment: z
+        .object({
+          carrier: z.string().trim().min(2).max(60),
+          trackingId: z.string().trim().min(3).max(60),
+        })
+        .optional(),
+    })
+    .superRefine((b, ctx) => {
+      if (b.status === "shipped" && !b.shipment)
+        ctx.addIssue({
+          code: "custom",
+          path: ["shipment", "carrier"],
+          message: "Carrier and tracking id are required to ship an order",
+        })
+      if (b.status === "cancelled" && !(b.note && b.note.length >= 3))
+        ctx.addIssue({
+          code: "custom",
+          path: ["note"],
+          message: "Give a reason for cancelling (at least 3 characters)",
+        })
+    }),
+}
+
+/** The admin list: the customer list's filters plus date range, payment method and sort. */
+export const adminListOrdersSchema = {
+  query: z.object({
+    page: z.coerce.number().int().min(1).default(1),
+    limit: z.coerce.number().int().min(1).max(100).default(20),
+    status: z.enum(ORDER_STATUSES).optional(),
+    search: z.string().trim().min(1).max(40).optional(), // order number, customer name or email
+    paymentMethod: z.enum(["cod", "razorpay"]).optional(),
+    from: z.iso.date().optional(),
+    to: z.iso.date().optional(),
+    sort: z.enum(["createdAt", "total"]).default("createdAt"),
+    order: z.enum(["asc", "desc"]).default("desc"),
   }),
+}
+export const adminExportOrdersSchema = {
+  query: adminListOrdersSchema.query.omit({ page: true, limit: true }),
+}
+export const addNoteSchema = {
+  params: z.object({ id: objectId }),
+  body: z.object({ text: z.string().trim().min(1).max(500) }),
 }

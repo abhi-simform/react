@@ -127,7 +127,10 @@ export const removeQa =
   }
 export const adminQuestions: RequestHandler = async (req, res) => {
   const { query } = valid<typeof S.adminListQuestionsSchema>(req)
-  const { items, total } = await qa.adminListQuestions(query)
+  const { items, total } = await qa.adminListQuestions({
+    ...query,
+    unanswered: query.unanswered === "true",
+  })
   ok(res, items, pageMeta(query.page, query.limit, total))
 }
 export const moderateQa =

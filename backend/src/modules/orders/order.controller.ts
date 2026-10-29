@@ -3,11 +3,17 @@ import { valid } from "../../middleware/validate.js"
 import { ApiError } from "../../utils/ApiError.js"
 import { pageMeta } from "../../utils/pagination.js"
 import { ok } from "../../utils/response.js"
+import { auditChange } from "../audit/audit.service.js"
+import * as adminService from "./order.admin.service.js"
+import { Order } from "./order.model.js"
 import { streamInvoice } from "./invoice.js"
 import { toPublicOrder } from "./order.model.js"
 import * as service from "./order.service.js"
 import {
   idempotencyKeySchema,
+  type addNoteSchema,
+  type adminExportOrdersSchema,
+  type adminListOrdersSchema,
   type adminReturnDecisionSchema,
   type adminReturnRefundSchema,
   type adminReturnsSchema,
@@ -70,25 +76,67 @@ export const invoice: RequestHandler = async (req, res) => {
 
 // ---- admin ----
 export const adminList: RequestHandler = async (req, res) => {
-  const { query } = valid<typeof listOrdersSchema>(req)
-  const { items, total } = await service.listOrders(null, query)
-  ok(res, items.map(toPublicOrder), pageMeta(query.page, query.limit, total))
+  const { query } = valid<typeof adminListOrdersSchema>(req)
+  const { items, total } = await adminService.adminListOrders(query)
+  ok(res, items, pageMeta(query.page, query.limit, total))
+}
+
+export const adminExport: RequestHandler = async (req, res) => {
+  const { query } = valid<typeof adminExportOrdersSchema>(req)
+  res
+    .type("text/csv")
+    .set("Content-Disposition", 'attachment; filename="orders.csv"')
+    .send(await adminService.exportOrdersCsv(query))
+}
+
+export const adminGet: RequestHandler = async (req, res) => {
+  const { params } = valid<typeof orderIdSchema>(req)
+  ok(res, await adminService.adminGetOrder(params.id))
+}
+
+export const adminNote: RequestHandler = async (req, res) => {
+  const { params, body } = valid<typeof addNoteSchema>(req)
+  ok(
+    res,
+    await adminService.addNote({ id: uid(req) }, params.id, body.text),
+    undefined,
+    201
+  )
 }
 
 export const adminStatus: RequestHandler = async (req, res) => {
   const { params, body } = valid<typeof adminStatusSchema>(req)
-  ok(
-    res,
-    toPublicOrder(
-      await service.transitionOrder(uid(req), params.id, body.status, body.note)
-    )
+  const before = await Order.findById(params.id).select("status shipment").lean()
+  const order = await service.transitionOrder(
+    uid(req),
+    params.id,
+    body.status,
+    body.note,
+    body.shipment
   )
+  const pub = toPublicOrder(order)
+  auditChange(
+    res,
+    before ? { status: before.status } : null,
+    {
+      status: pub.status,
+      shipment: pub.shipment
+        ? `${pub.shipment.carrier} ${pub.shipment.trackingId}`
+        : null,
+    },
+    ["status", "shipment"]
+  )
+  ok(res, pub)
 }
 
 export const adminReturns: RequestHandler = async (req, res) => {
   const { query } = valid<typeof adminReturnsSchema>(req)
   const { items, total } = await service.listReturns(query)
-  ok(res, items.map(toPublicOrder), pageMeta(query.page, query.limit, total))
+  ok(
+    res,
+    await adminService.toAdminOrders(items),
+    pageMeta(query.page, query.limit, total)
+  )
 }
 
 export const adminReturnDecision: RequestHandler = async (req, res) => {

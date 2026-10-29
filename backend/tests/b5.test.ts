@@ -368,7 +368,15 @@ describe("read, cancel, return, invoice", () => {
     const admin = await adminToken()
     const o = await placed(s)
     const move = (status: string, t = admin) =>
-      request(app).post(`${A}/admin/orders/${o.id}/status`).set(auth(t)).send({ status })
+      request(app)
+        .post(`${A}/admin/orders/${o.id}/status`)
+        .set(auth(t))
+        .send({
+          status,
+          ...(status === "shipped"
+            ? { shipment: { carrier: "Delhivery", trackingId: "TRK123456" } }
+            : {}),
+        })
     expect((await move("delivered")).status).toBe(409)
     expect((await move("packed", s.token)).status).toBe(403)
     for (const st of ["packed", "shipped", "out_for_delivery", "delivered"])

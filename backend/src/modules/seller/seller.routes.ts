@@ -2,6 +2,7 @@ import { Router } from "express"
 import { authenticate, authorize } from "../../middleware/auth.js"
 import { ok } from "../../utils/response.js"
 import { staffProductRoutes } from "../products/product.admin.routes.js"
+import { sellerOrderRoutes } from "../orders/order.routes.js"
 import { analyticsRoutes } from "../analytics/analytics.routes.js"
 import { Product } from "../products/product.model.js"
 
@@ -17,3 +18,4 @@ sellerRoutes.get("/me", async (req, res) => {
 sellerRoutes.use("/products", staffProductRoutes("own"))
 // Seller analytics: the same aggregations, only over the caller's own products and order lines.
 sellerRoutes.use("/analytics", analyticsRoutes("own"))
+sellerRoutes.use("/orders", sellerOrderRoutes)

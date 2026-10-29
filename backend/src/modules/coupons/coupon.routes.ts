@@ -7,6 +7,7 @@ import { cartOwner } from "../cart/cart.identity.js"
 import { Cart } from "../cart/cart.model.js"
 import { priceCart } from "../cart/cart.service.js"
 import { Types } from "mongoose"
+import { auditChange } from "../audit/audit.service.js"
 import { Coupon } from "./coupon.model.js"
 import { couponMessage, evaluateCoupon, listAvailable } from "./coupon.service.js"
 import { createCouponSchema, updateCouponSchema } from "./coupon.schema.js"
@@ -86,11 +87,27 @@ adminCouponRoutes.post("/", validate(createCouponSchema), async (req, res) => {
 })
 adminCouponRoutes.patch("/:id", validate(updateCouponSchema), async (req, res) => {
   const { params, body } = valid<typeof updateCouponSchema>(req)
+  const before = await Coupon.findById(params.id).lean()
   const c = await Coupon.findByIdAndUpdate(
     params.id,
     { $set: body },
     { returnDocument: "after" }
   )
   if (!c) throw ApiError.notFound("Coupon not found")
-  ok(res, c)
+  ok(
+    res,
+    auditChange(res, before, c.toObject(), [
+      "code",
+      "type",
+      "value",
+      "maxDiscount",
+      "minOrder",
+      "firstOrderOnly",
+      "startsAt",
+      "expiresAt",
+      "usageLimit",
+      "perUserLimit",
+      "isActive",
+    ])
+  )
 })

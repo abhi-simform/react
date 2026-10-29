@@ -204,10 +204,11 @@ export async function adminListQuestions(q: {
   page: number
   limit: number
   status?: string
+  unanswered?: boolean
 }) {
-  const filter: { status?: "published" | "hidden" } = q.status
-    ? { status: q.status as "published" | "hidden" }
-    : {}
+  const filter: { status?: "published" | "hidden"; answerCount?: number } = {}
+  if (q.status) filter.status = q.status as "published" | "hidden"
+  if (q.unanswered) filter.answerCount = 0
   const [items, total] = await Promise.all([
     Question.find(filter)
       .sort({ createdAt: -1, _id: -1 })
@@ -216,7 +217,31 @@ export async function adminListQuestions(q: {
       .lean(),
     Question.countDocuments(filter),
   ])
-  return { items: items.map((i) => toPublicQuestion(i, [])), total }
+  // The moderation queue needs the product's name and EVERY answer (hidden ones too, to unhide).
+  const [products, answers] = await Promise.all([
+    Product.find({ _id: { $in: items.map((i) => i.product) } })
+      .select("name slug")
+      .lean(),
+    Answer.find({ question: { $in: items.map((i) => i._id) } })
+      .sort({ createdAt: 1 })
+      .lean(),
+  ])
+  const byProduct = new Map(products.map((p) => [String(p._id), p]))
+  return {
+    items: items.map((i) => ({
+      ...toPublicQuestion(
+        i,
+        answers
+          .filter((a) => String(a.question) === String(i._id))
+          .map((a) => ({ ...toPublicAnswer(a), status: a.status }))
+      ),
+      product: {
+        name: byProduct.get(String(i.product))?.name ?? "(deleted product)",
+        slug: byProduct.get(String(i.product))?.slug ?? null,
+      },
+    })),
+    total,
+  }
 }
 
 export async function moderateQa(kind: Kind, id: string, status: "published" | "hidden") {

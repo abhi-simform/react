@@ -134,6 +134,27 @@ const orderSchema = new Schema(
     },
     idempotencyKey: { type: String },
     requestHash: String, // same key + different request = client bug (422)
+    // Set when the order moves to "shipped" (the admin's ship dialog).
+    shipment: {
+      carrier: String,
+      trackingId: String,
+      shippedAt: Date,
+    },
+    // Internal notes by staff: never shown to the customer (toPublicOrder leaves them out).
+    staffNotes: {
+      type: [
+        new Schema(
+          {
+            text: { type: String, required: true },
+            by: { type: Types.ObjectId, ref: "User" },
+            byName: String,
+            at: { type: Date, default: () => new Date() },
+          },
+          { _id: false }
+        ),
+      ],
+      default: undefined,
+    },
     cancelReason: String,
     cancelledAt: Date,
     deliveredAt: Date,
@@ -215,6 +236,13 @@ export function toPublicOrder(
       : null,
     paymentMethod: o.payment?.method,
     paymentStatus: o.payment?.status,
+    shipment: o.shipment?.carrier
+      ? {
+          carrier: o.shipment.carrier,
+          trackingId: o.shipment.trackingId ?? null,
+          shippedAt: o.shipment.shippedAt ?? null,
+        }
+      : null,
     cancelReason: o.cancelReason ?? null,
     deliveredAt: o.deliveredAt ?? null,
     returnableUntil:
