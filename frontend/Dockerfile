@@ -36,7 +36,7 @@ RUN --mount=type=secret,id=sentry_token \
     SENTRY_ORG=$SENTRY_ORG SENTRY_PROJECT=$SENTRY_PROJECT npm run build
 
 # ---- 2. runtime: nginx (unprivileged: uid 101, port 8080, can bind without root) + static files ----
-FROM nginxinc/nginx-unprivileged:1.29-alpine
+FROM nginxinc/nginx-unprivileged:1.29-alpine-slim
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 COPY --from=build /app/build/nginx-headers.conf /etc/nginx/security-headers.conf
 COPY --from=build /app/build/client /usr/share/nginx/html

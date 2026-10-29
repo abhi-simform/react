@@ -114,7 +114,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Build the static image
-        run: docker build -t shopsphere-frontend --build-arg VITE_API_URL=$VITE_API_URL --build-arg VITE_RELEASE=$VITE_RELEASE frontend
+        run: docker build -t shopsphere-frontend --build-arg "VITE_API_URL=$VITE_API_URL" --build-arg "VITE_RELEASE=$VITE_RELEASE" frontend
       - name: Image must be small and must serve deep links
         run: |
           size=$(docker image inspect shopsphere-frontend --format '{{.Size}}')
