@@ -11,9 +11,11 @@ import type { QueryClient } from "@tanstack/react-query"
 import { Toaster } from "sonner"
 
 import appCss from "../styles.css?url"
+import type * as authModule from "@/lib/auth/session"
 
 export type RouterContext = {
   queryClient: QueryClient
+  auth: typeof authModule
 }
 
 // Breadcrumb label per route (read with useMatches() in the shell).
