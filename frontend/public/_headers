@@ -1,9 +1,11 @@
 # Response headers for the static SPA host (Netlify / Cloudflare Pages / Render static sites read this file).
-# `react-router-serve` (npm start) ignores it: it is the contract for production hosting (Stage 14).
-# Replace http://localhost:4000 with the real API origin per environment.
+# `npm start` (scripts/serve-spa.mjs) reads it too; nginx gets the same security headers from build/nginx-headers.conf.
+# 14.2: the double-underscore placeholders in the CSP (hashes of the inline scripts, API origin, its ws:// twin, Sentry ingest origin) are filled in by `scripts/build-headers.mjs` (run by `npm run build`)
+# from VITE_API_URL / VITE_SENTRY_DSN, so the policy always matches the API this build talks to. The same script writes
+# build/nginx-headers.conf for the Docker image, so the CSP has ONE source.
 
 /*
-  Content-Security-Policy: default-src 'self'; script-src 'self' 'sha256-CW3gZXNq0CKGzvGdQIMbdSa4Q6WHDVuAPVNBS38fuuo=' https://checkout.razorpay.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self'; connect-src 'self' http://localhost:4000 ws://localhost:4000 https://api.razorpay.com https://lumberjack.razorpay.com; frame-src https://api.razorpay.com https://checkout.razorpay.com; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'
+  Content-Security-Policy: default-src 'self'; script-src 'self' __SCRIPT_HASHES__ https://checkout.razorpay.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self'; connect-src 'self' __API_HTTP__ __API_WS__ __SENTRY_ORIGIN__ https://api.razorpay.com https://lumberjack.razorpay.com; frame-src https://api.razorpay.com https://checkout.razorpay.com; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'
   X-Content-Type-Options: nosniff
   Referrer-Policy: strict-origin-when-cross-origin
   Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=(self "https://checkout.razorpay.com")

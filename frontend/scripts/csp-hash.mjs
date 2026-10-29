@@ -1,4 +1,5 @@
-// Prints the CSP hash of the inline theme script (13.7). Paste it into public/_headers when the script changes:
+// Prints the CSP hash of the inline theme script (13.7). Since 14.1 the build computes the hashes of ALL inline scripts
+// itself (scripts/build-headers.mjs); this is only a debugging aid:
 //   node scripts/csp-hash.mjs
 import { createHash } from "node:crypto"
 import { readFileSync } from "node:fs"

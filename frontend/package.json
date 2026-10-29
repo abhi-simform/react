@@ -3,9 +3,10 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "react-router build && node scripts/build-sw.mjs",
+    "build": "react-router build && node scripts/build-headers.mjs && node scripts/build-sw.mjs",
     "dev": "react-router dev",
-    "start": "react-router-serve ./build/server/index.js",
+    "start": "node scripts/serve-spa.mjs",
+    "preview": "npm run build && npm start",
     "typecheck": "react-router typegen && tsc",
     "format": "prettier --write \"**/*.{ts,tsx}\"",
     "lint": "eslint app e2e --max-warnings=0",
@@ -18,6 +19,8 @@
     "analyze": "ANALYZE=1 react-router build && node scripts/perf/deps.mjs --check",
     "perf:budget": "node scripts/perf/js-budget.mjs --check",
     "sitemap": "node scripts/generate-sitemap.mjs",
+    "headers:vercel": "node scripts/build-headers.mjs --vercel",
+    "check:bundle-secrets": "node scripts/check-bundle-secrets.mjs",
     "format:check": "prettier --check \"**/*.{ts,tsx}\"",
     "check": "npm run format:check && npm run lint && npm run typecheck && npm test && npm run build",
     "prepare": "node scripts/install-hooks.mjs || true"

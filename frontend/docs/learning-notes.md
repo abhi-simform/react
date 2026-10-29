@@ -1042,3 +1042,23 @@ Backend B1 was built first (separate `backend B1:` commits): `GET /categories` n
 - Measure the benefit from the browser, not from curl: 15 of 32 API GETs never left the machine (-31% bytes).
 - A lazy chunk adds a hidden waterfall (chunk, render, request): start the request earlier (`prefetchQuery`) in the eager wrapper.
 - Playwright traps: `context.route` disables the HTTP cache and hides service-worker traffic; use plain tests for cache/SW behaviour.
+
+## 14.1 Dev vs production build
+
+What changed: `npm start` is now `node scripts/serve-spa.mjs` (a ~100 line static server for `build/client`: SPA fallback, `_headers` honoured, gzip) and `npm run preview` = build + start. The scaffold's `start` was `react-router-serve ./build/server/index.js`, which is the runtime of an SSR build; in SPA mode `build/server` only exists to produce the prerendered HTML, and nothing should run it in production. `npm run build` now also runs `scripts/build-headers.mjs`.
+
+Measured on `/products` (browser `performance` entries, same machine):
+
+| | dev (`react-router dev`) | prod (`build` + `start`) |
+| --- | --- | --- |
+| script requests | 152 | 51 |
+| JavaScript transferred | 5.3 MB (unbundled, unminified modules) | 1.0 MB raw, 326 kB gzip |
+| file names | `/app/routes/home.tsx?import`, `/node_modules/.vite/deps/...` | `/assets/home-Dk3x.js` (content hash) |
+
+Five differences I could point at: (1) bundling and minification (above); (2) hashed file names + `immutable` caching (dev serves everything `no-cache`); (3) **StrictMode** double-invokes render and effects in dev only: an effect that logs once in prod logs twice in dev, which is why the idempotent installers (`installGlobalErrorReporting`, `reportWebVitals`) exist; (4) error messages: React's dev build throws readable messages and warnings (key warnings, hydration diffs), the prod build throws minified error codes ("Minified React error #418"), and `RouteErrorView` hides messages/stacks from users in prod by design; (5) `import.meta.env.DEV` is a compile-time constant, so `if (env.DEV)` blocks (dev vitals logging, Query devtools, API response validation with Zod, the Dev panels) are **removed** from the bundle, and `console.*` behaviour differs because the code that logs is gone. Also: dev has HMR and an optimiser that can answer `504 Outdated Optimize Dep` right after `npm install` (it made the e2e suite flaky before it ran against a build; I saw it again today when the lockfile changed).
+
+**A bug that only exists in prod, found while doing this task**: the production headers file (`public/_headers`, written in 13.7) had a Content-Security-Policy that allowed ONE inline script (the theme script) by hash. Nothing ever served that file (`react-router-serve` ignores it, and the dev server sends no CSP), so it was never enforced. Serving the build with the headers applied gave a **blank page**: React Router's own inline scripts (route context, stream bootstrap) were blocked, and the 57 e2e tests failed with "heading not found". The fix: `build-headers.mjs` hashes every inline `<script>` in the built HTML files and fills `script-src` at build time (and the CSP `connect-src` follows `VITE_API_URL`). Lesson: a security header you have never served is a hypothesis. (This is also why the e2e suite now runs against the real static server with the real headers.)
+
+SPA fallback reproduced: `python3 -m http.server` over `build/client`: `/` 200, `/p/anything` **404**, `/cart` **404** (the file does not exist; the server does not know the router owns the URL). `serve-spa.mjs` answers 200 with `__spa-fallback.html` for any extension-less path, and a real 404 for a missing `/assets/x.js` (an HTML answer there would be parsed as JavaScript after a deploy removed an old chunk: a classic "Unexpected token <" bug). Why `__spa-fallback.html` and not `index.html`: `index.html` is the PRERENDERED home page (13.9); serving it for `/p/x` would flash the home content before React replaces it.
+
+`npm run build` is part of `npm run check` (acceptance); deep links and refresh were checked on `/`, `/p/<slug>`, `/cart`, `/orders` (guard redirect), `/checkout/review`, an unknown URL (the 404 page, status 200 from the static host: a static host cannot know the route is unknown, noted in the runbook).
