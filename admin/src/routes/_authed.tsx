@@ -29,12 +29,14 @@ export const Route = createFileRoute("/_authed")({
 })
 
 type NavItem = {
-  to: "/"
+  to: "/" | "/products" | "/users"
   label: string
   permission: Permission
 }
 const NAV: NavItem[] = [
   { to: "/", label: "Dashboard", permission: "dashboard:view" },
+  { to: "/products", label: "Products", permission: "products:read" },
+  { to: "/users", label: "Users", permission: "users:manage" },
 ]
 
 function Shell() {
@@ -57,7 +59,7 @@ function Shell() {
             <li key={i.to}>
               <Link
                 to={i.to}
-                activeOptions={{ exact: true }}
+                activeOptions={{ exact: i.to === "/" }}
                 className="block rounded px-2 py-1 hover:bg-muted [&.active]:bg-muted [&.active]:font-medium"
               >
                 {i.label}

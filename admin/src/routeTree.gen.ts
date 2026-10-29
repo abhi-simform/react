@@ -13,6 +13,11 @@ import { Route as AuthedRouteImport } from './routes/_authed'
 import { Route as ForbiddenRouteImport } from './routes/forbidden'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as AuthedIndexRouteImport } from './routes/_authed/index'
+import { Route as AuthedProductsRouteRouteImport } from './routes/_authed/products/route'
+import { Route as AuthedUsersRouteImport } from './routes/_authed/users'
+import { Route as AuthedProductsIndexRouteImport } from './routes/_authed/products/index'
+import { Route as AuthedProductsProductIdRouteImport } from './routes/_authed/products/$productId'
+import { Route as AuthedProductsNewRouteImport } from './routes/_authed/products/new'
 
 const AuthedRoute = AuthedRouteImport.update({
   id: '/_authed',
@@ -33,30 +38,94 @@ const AuthedIndexRoute = AuthedIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AuthedRoute,
 } as any)
+const AuthedProductsRouteRoute = AuthedProductsRouteRouteImport.update({
+  id: '/products',
+  path: '/products',
+  getParentRoute: () => AuthedRoute,
+} as any)
+const AuthedUsersRoute = AuthedUsersRouteImport.update({
+  id: '/users',
+  path: '/users',
+  getParentRoute: () => AuthedRoute,
+} as any)
+const AuthedProductsIndexRoute = AuthedProductsIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AuthedProductsRouteRoute,
+} as any)
+const AuthedProductsProductIdRoute = AuthedProductsProductIdRouteImport.update({
+  id: '/$productId',
+  path: '/$productId',
+  getParentRoute: () => AuthedProductsRouteRoute,
+} as any)
+const AuthedProductsNewRoute = AuthedProductsNewRouteImport.update({
+  id: '/new',
+  path: '/new',
+  getParentRoute: () => AuthedProductsRouteRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof AuthedIndexRoute
   '/forbidden': typeof ForbiddenRoute
   '/login': typeof LoginRoute
+  '/products': typeof AuthedProductsRouteRouteWithChildren
+  '/users': typeof AuthedUsersRoute
+  '/products/$productId': typeof AuthedProductsProductIdRoute
+  '/products/new': typeof AuthedProductsNewRoute
+  '/products/': typeof AuthedProductsIndexRoute
 }
 export interface FileRoutesByTo {
   '/forbidden': typeof ForbiddenRoute
   '/login': typeof LoginRoute
+  '/users': typeof AuthedUsersRoute
   '/': typeof AuthedIndexRoute
+  '/products/$productId': typeof AuthedProductsProductIdRoute
+  '/products/new': typeof AuthedProductsNewRoute
+  '/products': typeof AuthedProductsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_authed': typeof AuthedRouteWithChildren
   '/forbidden': typeof ForbiddenRoute
   '/login': typeof LoginRoute
+  '/_authed/products': typeof AuthedProductsRouteRouteWithChildren
+  '/_authed/users': typeof AuthedUsersRoute
   '/_authed/': typeof AuthedIndexRoute
+  '/_authed/products/$productId': typeof AuthedProductsProductIdRoute
+  '/_authed/products/new': typeof AuthedProductsNewRoute
+  '/_authed/products/': typeof AuthedProductsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/forbidden' | '/login'
+  fullPaths:
+    | '/'
+    | '/forbidden'
+    | '/login'
+    | '/products'
+    | '/users'
+    | '/products/$productId'
+    | '/products/new'
+    | '/products/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/forbidden' | '/login' | '/'
-  id: '__root__' | '/_authed' | '/forbidden' | '/login' | '/_authed/'
+  to:
+    | '/forbidden'
+    | '/login'
+    | '/users'
+    | '/'
+    | '/products/$productId'
+    | '/products/new'
+    | '/products'
+  id:
+    | '__root__'
+    | '/_authed'
+    | '/forbidden'
+    | '/login'
+    | '/_authed/products'
+    | '/_authed/users'
+    | '/_authed/'
+    | '/_authed/products/$productId'
+    | '/_authed/products/new'
+    | '/_authed/products/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -95,14 +164,68 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthedIndexRouteImport
       parentRoute: typeof AuthedRoute
     }
+    '/_authed/products': {
+      id: '/_authed/products'
+      path: '/products'
+      fullPath: '/products'
+      preLoaderRoute: typeof AuthedProductsRouteRouteImport
+      parentRoute: typeof AuthedRoute
+    }
+    '/_authed/users': {
+      id: '/_authed/users'
+      path: '/users'
+      fullPath: '/users'
+      preLoaderRoute: typeof AuthedUsersRouteImport
+      parentRoute: typeof AuthedRoute
+    }
+    '/_authed/products/': {
+      id: '/_authed/products/'
+      path: '/'
+      fullPath: '/products/'
+      preLoaderRoute: typeof AuthedProductsIndexRouteImport
+      parentRoute: typeof AuthedProductsRouteRoute
+    }
+    '/_authed/products/$productId': {
+      id: '/_authed/products/$productId'
+      path: '/$productId'
+      fullPath: '/products/$productId'
+      preLoaderRoute: typeof AuthedProductsProductIdRouteImport
+      parentRoute: typeof AuthedProductsRouteRoute
+    }
+    '/_authed/products/new': {
+      id: '/_authed/products/new'
+      path: '/new'
+      fullPath: '/products/new'
+      preLoaderRoute: typeof AuthedProductsNewRouteImport
+      parentRoute: typeof AuthedProductsRouteRoute
+    }
   }
 }
 
+interface AuthedProductsRouteRouteChildren {
+  AuthedProductsProductIdRoute: typeof AuthedProductsProductIdRoute
+  AuthedProductsNewRoute: typeof AuthedProductsNewRoute
+  AuthedProductsIndexRoute: typeof AuthedProductsIndexRoute
+}
+
+const AuthedProductsRouteRouteChildren: AuthedProductsRouteRouteChildren = {
+  AuthedProductsProductIdRoute: AuthedProductsProductIdRoute,
+  AuthedProductsNewRoute: AuthedProductsNewRoute,
+  AuthedProductsIndexRoute: AuthedProductsIndexRoute,
+}
+
+const AuthedProductsRouteRouteWithChildren =
+  AuthedProductsRouteRoute._addFileChildren(AuthedProductsRouteRouteChildren)
+
 interface AuthedRouteChildren {
+  AuthedProductsRouteRoute: typeof AuthedProductsRouteRouteWithChildren
+  AuthedUsersRoute: typeof AuthedUsersRoute
   AuthedIndexRoute: typeof AuthedIndexRoute
 }
 
 const AuthedRouteChildren: AuthedRouteChildren = {
+  AuthedProductsRouteRoute: AuthedProductsRouteRouteWithChildren,
+  AuthedUsersRoute: AuthedUsersRoute,
   AuthedIndexRoute: AuthedIndexRoute,
 }
 
