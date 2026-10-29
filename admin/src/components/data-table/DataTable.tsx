@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react"
+import { Fragment, useMemo, useState } from "react"
 import {
   flexRender,
   getCoreRowModel,
@@ -10,7 +10,13 @@ import {
   type SortingState,
   type VisibilityState,
 } from "@tanstack/react-table"
-import { ArrowDown, ArrowUp, ChevronsUpDown } from "lucide-react"
+import {
+  ArrowDown,
+  ArrowUp,
+  ChevronDown,
+  ChevronRight,
+  ChevronsUpDown,
+} from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -53,6 +59,11 @@ type Props<TData> = {
   renderBulkBar?: (selectedIds: string[], clear: () => void) => React.ReactNode
   /** Extra controls in the toolbar (filters, export). */
   toolbar?: React.ReactNode
+  /**
+   * Expandable rows: a disclosure button in a leading column; `render` returns the detail for a row
+   * (or `null` when that row has nothing to expand: the button is then not rendered).
+   */
+  renderSubRow?: (row: TData) => React.ReactNode
   caption: string
 }
 
@@ -78,40 +89,71 @@ export function DataTable<TData>({
   selectable,
   renderBulkBar,
   toolbar,
+  renderSubRow,
   caption,
 }: Props<TData>) {
+  const [expanded, setExpanded] = useState<Record<string, boolean>>({})
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({})
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
 
-  const allColumns = useMemo<ColumnDef<TData>[]>(
-    () =>
-      selectable
-        ? [
-            {
-              id: "select",
-              enableSorting: false,
-              enableHiding: false,
-              header: ({ table }) => (
-                <Checkbox
-                  aria-label="Select all rows on this page"
-                  checked={table.getIsAllPageRowsSelected()}
-                  indeterminate={table.getIsSomePageRowsSelected()}
-                  onCheckedChange={(v) => table.toggleAllPageRowsSelected(!!v)}
-                />
+  const allColumns = useMemo<ColumnDef<TData>[]>(() => {
+    const base: ColumnDef<TData>[] = renderSubRow
+      ? [
+          {
+            id: "expand",
+            enableSorting: false,
+            enableHiding: false,
+            header: () => <span className="sr-only">Details</span>,
+            cell: ({ row }) =>
+              renderSubRow(row.original) === null ? null : (
+                <Button
+                  variant="ghost"
+                  size="icon-xs"
+                  aria-expanded={!!expanded[row.id]}
+                  aria-label={
+                    expanded[row.id] ? "Hide details" : "Show details"
+                  }
+                  onClick={() =>
+                    setExpanded((e) => ({ ...e, [row.id]: !e[row.id] }))
+                  }
+                >
+                  {expanded[row.id] ? (
+                    <ChevronDown aria-hidden />
+                  ) : (
+                    <ChevronRight aria-hidden />
+                  )}
+                </Button>
               ),
-              cell: ({ row }) => (
-                <Checkbox
-                  aria-label={`Select row ${row.index + 1}`}
-                  checked={row.getIsSelected()}
-                  onCheckedChange={(v) => row.toggleSelected(!!v)}
-                />
-              ),
-            },
-            ...columns,
-          ]
-        : columns,
-    [columns, selectable]
-  )
+          },
+          ...columns,
+        ]
+      : columns
+    return selectable
+      ? [
+          {
+            id: "select",
+            enableSorting: false,
+            enableHiding: false,
+            header: ({ table }) => (
+              <Checkbox
+                aria-label="Select all rows on this page"
+                checked={table.getIsAllPageRowsSelected()}
+                indeterminate={table.getIsSomePageRowsSelected()}
+                onCheckedChange={(v) => table.toggleAllPageRowsSelected(!!v)}
+              />
+            ),
+            cell: ({ row }) => (
+              <Checkbox
+                aria-label={`Select row ${row.index + 1}`}
+                checked={row.getIsSelected()}
+                onCheckedChange={(v) => row.toggleSelected(!!v)}
+              />
+            ),
+          },
+          ...base,
+        ]
+      : base
+  }, [columns, selectable, renderSubRow, expanded])
 
   const table = useReactTable({
     data,
@@ -264,19 +306,30 @@ export function DataTable<TData>({
               </TableRow>
             ) : (
               rows.map((row) => (
-                <TableRow
-                  key={row.id}
-                  data-state={row.getIsSelected() ? "selected" : undefined}
-                >
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext()
-                      )}
-                    </TableCell>
-                  ))}
-                </TableRow>
+                <Fragment key={row.id}>
+                  <TableRow
+                    data-state={row.getIsSelected() ? "selected" : undefined}
+                  >
+                    {row.getVisibleCells().map((cell) => (
+                      <TableCell key={cell.id}>
+                        {flexRender(
+                          cell.column.columnDef.cell,
+                          cell.getContext()
+                        )}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                  {renderSubRow && expanded[row.id] ? (
+                    <TableRow>
+                      <TableCell
+                        colSpan={allColumns.length}
+                        className="bg-muted/30"
+                      >
+                        {renderSubRow(row.original)}
+                      </TableCell>
+                    </TableRow>
+                  ) : null}
+                </Fragment>
               ))
             )}
           </TableBody>

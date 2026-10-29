@@ -13,6 +13,7 @@ export type ProductListParams = {
   category?: string
   brand?: string
   lowStock?: boolean
+  seller?: string
   sort: string
   order: string
   page: number

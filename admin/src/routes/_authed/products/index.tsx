@@ -60,6 +60,12 @@ const searchSchema = z.object({
   status: z.enum(["active", "draft", "archived"]).optional().catch(undefined),
   category: z.string().optional().catch(undefined),
   lowStock: z.boolean().optional().catch(undefined),
+  // Admin only (the seller detail page links here): the API ignores it for sellers.
+  seller: z
+    .string()
+    .regex(/^[0-9a-f]{24}$/i)
+    .optional()
+    .catch(undefined),
 })
 
 export const Route = createFileRoute("/_authed/products/")({
@@ -78,6 +84,7 @@ const toParams = (s: Search) => ({
   status: s.status,
   category: s.category,
   lowStock: s.lowStock || undefined,
+  seller: s.seller,
   sort: s.sort,
   order: s.order,
   page: s.page,

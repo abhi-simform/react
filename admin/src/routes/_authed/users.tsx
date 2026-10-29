@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react"
-import { createFileRoute, useNavigate } from "@tanstack/react-router"
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router"
 import {
   keepPreviousData,
   queryOptions,
@@ -128,7 +128,22 @@ function UsersPage() {
 
   const columns = useMemo<ColumnDef<AdminUser>[]>(
     () => [
-      { accessorKey: "name", header: "Name" },
+      {
+        accessorKey: "name",
+        header: "Name",
+        cell: ({ row }) =>
+          row.original.role === "seller" ? (
+            <Link
+              to="/sellers/$sellerId"
+              params={{ sellerId: row.original.id }}
+              className="underline-offset-2 hover:underline"
+            >
+              {row.original.name}
+            </Link>
+          ) : (
+            row.original.name
+          ),
+      },
       { accessorKey: "email", header: "Email" },
       {
         id: "role",
