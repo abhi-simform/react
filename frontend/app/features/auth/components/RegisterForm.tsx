@@ -122,6 +122,17 @@ export function RegisterForm() {
           />
         )}
       </FormField>
+      <p className="text-sm">
+        Read the{" "}
+        <Link className="underline" to={paths.policy("terms")}>
+          terms of use
+        </Link>{" "}
+        and the{" "}
+        <Link className="underline" to={paths.policy("privacy")}>
+          privacy policy
+        </Link>
+        .
+      </p>
       <FormField label="I accept the terms" error={errors.acceptTerms?.message}>
         {(control) => (
           <input

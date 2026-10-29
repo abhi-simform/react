@@ -1,4 +1,4 @@
-// 13.9: writes public/sitemap.xml (home, listing, deals, help, every category, every active product) and
+// 13.9: writes public/sitemap.xml (home, listing, deals, help, the legal pages, every category, every active product) and
 // public/robots.txt (which points at it) from the live API. Run it against a running backend:
 //   VITE_SITE_URL=https://shop.example npm run sitemap
 // A static site cannot ask the API per request, so the sitemap is regenerated when the catalog changes
@@ -53,6 +53,24 @@ try {
     { loc: "/products", changefreq: "daily", priority: "0.8", lastmod: today },
     { loc: "/deals", changefreq: "hourly", priority: "0.7", lastmod: today },
     { loc: "/help", changefreq: "monthly", priority: "0.3", lastmod: today },
+    {
+      loc: "/policies/privacy",
+      changefreq: "yearly",
+      priority: "0.2",
+      lastmod: today,
+    },
+    {
+      loc: "/policies/returns",
+      changefreq: "yearly",
+      priority: "0.2",
+      lastmod: today,
+    },
+    {
+      loc: "/policies/terms",
+      changefreq: "yearly",
+      priority: "0.2",
+      lastmod: today,
+    },
     ...slugs.map((s) => ({
       loc: `/c/${s}`,
       changefreq: "daily",
@@ -92,6 +110,7 @@ Disallow: /verify-email
 Disallow: /auth/
 Disallow: /offline
 Disallow: /dev
+Disallow: /debug
 # Internal search results are thin duplicates of the listing.
 Disallow: /*?search=
 

@@ -96,3 +96,28 @@ test("no source map is served publicly", async ({ request, page }) => {
     "sourceMappingURL"
   )
 })
+
+test("legal pages: the prerendered HTML carries the metadata, the page shows the real text, an unknown policy is branded", async ({
+  request,
+  page,
+}) => {
+  // Prerendering in SPA mode writes the <head> (title, description, canonical); the body is the SPA shell until
+  // JavaScript runs (13.9: only SSR would put the text in the HTML).
+  for (const [slug, title] of [
+    ["privacy", "Privacy policy"],
+    ["returns", "Returns and refunds"],
+    ["terms", "Terms of use"],
+  ]) {
+    const html = await (await request.get(`/policies/${slug}`)).text()
+    expect(html, slug).toContain(`<title>${title} | ShopSphere</title>`)
+    await page.goto(`/policies/${slug}`)
+    await expect(
+      page.getByRole("heading", { level: 1, name: title })
+    ).toBeVisible()
+    await expect(page.getByText(/last updated/i)).toBeVisible()
+  }
+  await page.goto("/policies/shipping")
+  await expect(
+    page.getByRole("heading", { name: /not found/i }).first()
+  ).toBeVisible()
+})

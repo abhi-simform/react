@@ -10,6 +10,7 @@ export function Footer() {
         <Link to={paths.help()}>Help</Link>
         <Link to={paths.policy("returns")}>Returns</Link>
         <Link to={paths.policy("privacy")}>Privacy</Link>
+        <Link to={paths.policy("terms")}>Terms</Link>
         <InstallButton />
       </nav>
     </footer>
