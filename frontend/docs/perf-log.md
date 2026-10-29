@@ -290,3 +290,39 @@ Verification:
 - Cost: precache = 101 files, 1.6 MB uncompressed (about a third of that over the wire), installed in the background after the first load (`register` runs on `load`). It is the price of "the cart route opens offline".
 - **Repeat visit on Slow 4G + 4x CPU** (`scripts/perf/repeat-visit.mjs /products`, median of 3, second navigation in the same context): without a worker LCP **752 ms**, with the worker **540 ms** (-28%), 70 of 72 responses from the worker. Honest reading: the HTTP cache is already warm in this test (the build's assets are `immutable`, the API is `max-age`), so the worker's gain over it is modest; its real contribution is offline use, resilience to HTTP-cache eviction and installability.
 - Harness note: with `context.route` installed (the suite's per-test client IP header), Chromium does not let a service worker answer a navigation while the context is offline; so the offline and update tests use Playwright's plain `test` (the app is fine, the combination is a harness effect).
+
+## 13.11 Network performance: caching headers and request hygiene
+
+Tools: `scripts/perf/http-cache.mjs` (how each API GET was answered over 6 page loads), `scripts/perf/requests.mjs` (every request in the first seconds: duplicates, waterfalls), `scripts/perf/repeat-visit.mjs`.
+
+**Headers before / after B12** (`curl`, same endpoints):
+
+| Endpoint | Before | After |
+| --- | --- | --- |
+| `/categories`, `/brands` | ETag only | `public, max-age=300, stale-while-revalidate=3600` + ETag |
+| `/products?...` list | ETag only | `public, max-age=10, stale-while-revalidate=60` + ETag |
+| `/products/:slug` | ETag only | `public, max-age=10, swr=60` + ETag |
+| `/banners` | ETag only | `public, max-age=60, swr=300` + ETag |
+| `/cart`, `/users/me` | ETag only | `private, no-cache` |
+| `/time`, errors, writes | none | `no-store` |
+
+All five sampled endpoints were already gzip'd and answer `If-None-Match` with `304` (Express's default weak ETag); B12 added the freshness policy. **Measured in a browser** (frontend build against the pre-B12 API vs the real stack; 6 full page loads, home / listing / PDP twice): before = 32 API GETs, 0 from cache, 32 full 200s, **55.7 kB** over the network; after = 32 GETs, **15 from the disk cache (no request at all)**, 17 full 200s, **38.7 kB (-31%)**. 304 flows (`e2e/http.spec.ts`): 6 public endpoints answer `If-None-Match` with an empty `304`, and after an admin price change the same validator gets a `200` with the new price. Honest limit: I could not make headless Chromium send `If-None-Match` for the app's CORS `fetch` in this harness (cache hits worked, explicit revalidation did not show), so the 304 proof is at HTTP level, not a DevTools screenshot.
+
+**Request hygiene.** No duplicate identical GETs in the first 5 s of home (guest and signed in; asserted). **Waterfall removed**: the bell's `GET /notifications/unread-count` started ~440 ms after navigation (lazy bell chunk downloads, renders, then asks); the unread count is now prefetched as soon as the session exists: ~140-155 ms (right after `/auth/refresh`), -290 ms. Remaining dependent chains are real data dependencies (PDP detail -> related/similar). The listing asks for `limit=60` (price histogram) and the page request in parallel: two requests for overlapping data, noted, not changed. `preconnect` to the API origin (credentialed pool) is in `<head>` (13.5). Static hosting headers (`public/_headers`): hashed assets immutable for a year, `index.html` and `sw.js` `no-cache`.
+
+**Two caches, one rule.** TanStack Query `staleTime` says how long the app trusts data it already holds in memory (no request at all); HTTP `max-age` says how long the browser may reuse a stored response without asking the server (also across reloads). A query refetch after `staleTime` goes to the browser's HTTP cache first: if `max-age` is still fresh, no network. So the effective freshness is roughly the LONGER of the two for public catalog data; keep `max-age` short where stock/price matter (10 s) and let ETag/304 make revalidation cheap.
+
+## Final Lighthouse (production build, median of 3 runs, baseline -> final)
+
+| Page | Perf | LCP | CLS | TBT | SEO | A11y | Image KB |
+|---|---|---|---|---|---|---|---|
+| home-mobile | 81 -> 82 | 5.2 -> 4.9 s | 0.022 -> 0.019 | 11 -> 11 ms | 92 -> 100 | 96 -> 100 | 580 -> 175 |
+| home-desktop | 96 -> 98 | 1.4 -> 1.1 s | 0.013 -> 0.013 | 0 -> 0 ms | 92 -> 100 | 96 -> 100 | 1205 -> 275 |
+| listing-mobile | 80 -> 81 | 5.4 -> 5.1 s | 0.011 -> 0 | 0 -> 19 ms | 92 -> 100 | 95 -> 99 | 968 -> 197 |
+| listing-desktop | 95 -> 99 | 1.5 -> 1.0 s | 0.016 -> 0.02 | 0 -> 0 ms | 92 -> 100 | 97 -> 100 | 967 -> 120 |
+| pdp-mobile | 78 -> 80 | 6.0 -> 5.6 s | 0.024 -> 0 | 30 -> 13 ms | 83 -> 100 | 97 -> 100 | 363 -> 165 |
+| pdp-desktop | 78 -> 98 | 1.2 -> 1.2 s | 0.414 -> 0.027 | 0 -> 0 ms | 83 -> 100 | 97 -> 100 | 1305 -> 220 |
+| cart-mobile | 87 -> 84 | 4.1 -> 4.5 s | 0.009 -> 0 | 0 -> 0 ms | 82 -> 54 | 96 -> 100 | 0 -> 0 |
+| cart-desktop | 100 -> 99 | 0.2 -> 0.9 s | 0.001 -> 0.002 | 0 -> 0 ms | 82 -> 54 | 96 -> 100 | 0 -> 0 |
+
+Reading it: **PDP desktop CLS 0.414 -> 0.027 and score 78 -> 98; images -70 to -90%; SEO 83-92 -> 100; accessibility 95-97 -> 99-100; fonts 131 -> 47 kB.** Mobile LCP improved only 0.3-0.6 s: it is bounded by the client-rendered chain (HTML -> ~340 kB JS -> API -> image), not by image bytes; the real lever is SSR/prerendered data (Stage 14). Initial JS is about +20 kB versus the pre-Stage-13 baseline (Compiler +29, i18n +20, minus lazy loading); cart mobile LCP is noisy (its LCP candidate flips between an early text and the late content). Cart SEO 54 is the `noindex` working. Raw runs: `docs/perf/lighthouse-baseline.json`, `lighthouse-final.json`.

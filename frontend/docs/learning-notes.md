@@ -1035,3 +1035,10 @@ Backend B1 was built first (separate `backend B1:` commits): `GET /categories` n
 - Lighthouse 13 has no PWA score; Chrome's `Page.getInstallabilityErrors` (CDP) says why an app is not installable.
 - Playwright: requests made by a service worker are invisible to `context.route`; with `route` active, offline navigations are not answered by the worker. Block workers in general specs, allow them in the PWA spec, and keep those tests free of `route`.
 - Documented for debugging: DevTools > Application > Clear site data (+ unregister), or the console snippet in `docs/pwa.md`.
+
+## 13.11 Network performance
+
+- Two caches: Query `staleTime` (memory, per tab) and HTTP `max-age` (browser, across reloads). Public catalog data gets both; user data is `private, no-cache`. ETag + `If-None-Match` makes revalidation a header-only `304`.
+- Measure the benefit from the browser, not from curl: 15 of 32 API GETs never left the machine (-31% bytes).
+- A lazy chunk adds a hidden waterfall (chunk, render, request): start the request earlier (`prefetchQuery`) in the eager wrapper.
+- Playwright traps: `context.route` disables the HTTP cache and hides service-worker traffic; use plain tests for cache/SW behaviour.

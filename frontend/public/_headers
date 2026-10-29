@@ -7,3 +7,21 @@
   X-Content-Type-Options: nosniff
   Referrer-Policy: strict-origin-when-cross-origin
   Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=(self "https://checkout.razorpay.com")
+
+# Caching (13.11). Hashed build files never change for a given URL: cache for a year. Everything that CAN change
+# under a fixed URL must be revalidated: the HTML shell (it names the current hashed files) and the service worker
+# (a stale sw.js would pin users to old code; browsers also cap its HTTP caching at 24 h, but do not rely on it).
+/assets/*
+  Cache-Control: public, max-age=31536000, immutable
+/index.html
+  Cache-Control: no-cache
+/sw.js
+  Cache-Control: no-cache
+/manifest.webmanifest
+  Cache-Control: public, max-age=86400
+/icons/*
+  Cache-Control: public, max-age=604800
+/sitemap.xml
+  Cache-Control: public, max-age=3600
+/robots.txt
+  Cache-Control: public, max-age=3600

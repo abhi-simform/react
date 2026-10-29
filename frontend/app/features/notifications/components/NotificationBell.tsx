@@ -1,8 +1,11 @@
 import { Bell as BellIcon } from "lucide-react"
-import { Suspense } from "react"
+import { useQueryClient } from "@tanstack/react-query"
+import { Suspense, useEffect } from "react"
 
 import { useAuth } from "@/features/auth"
 import { lazyNamed } from "@/lib/lazyNamed"
+
+import { notificationQueries } from "../queries"
 
 // 13.3: the popover (base-ui floating-ui, ~75 kB raw), the rows and the mutations are loaded after the
 // page, and never for a guest. The fallback is the same button, so the header does not move.
@@ -13,6 +16,13 @@ const BellMenu = lazyNamed(() => import("./BellMenu"), "BellMenu")
  */
 export function NotificationBell() {
   const { status } = useAuth()
+  const queryClient = useQueryClient()
+  // 13.11: the unread count is requested NOW, in parallel with the bell's lazy chunk, instead of after it.
+  // (Before: chunk download, then render, then the request: a waterfall of ~300 ms; the badge now arrives with the chunk.)
+  useEffect(() => {
+    if (status === "authenticated")
+      void queryClient.prefetchQuery(notificationQueries.unreadCount())
+  }, [status, queryClient])
   if (status !== "authenticated") return null
   return (
     <Suspense fallback={<BellPlaceholder />}>
