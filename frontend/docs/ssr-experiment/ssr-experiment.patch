@@ -1,4 +1,4 @@
-From ffd7f6b88b23e0170048be98a8cb25450fa09edf Mon Sep 17 00:00:00 2001
+From 9d208bdb7c9a26f2d18ccf9a770442936a5c4a25 Mon Sep 17 00:00:00 2001
 From: Abhishek Sawant <abhishek.sawant@simformsolutions.com>
 Date: Thu, 29 Oct 2026 07:47:27 +0530
 Subject: [PATCH 1/2] 14.8 SSR experiment: ssr true, server loaders (PDP,
@@ -698,7 +698,7 @@ index 907a829..c122a91 100644
    const mainRef = useRef<HTMLElement>(null)
    const liveRef = useRef<HTMLDivElement>(null)
 diff --git a/frontend/package.json b/frontend/package.json
-index ea20d89..de4b383 100644
+index 54aa356..4e7a622 100644
 --- a/frontend/package.json
 +++ b/frontend/package.json
 @@ -3,9 +3,10 @@
@@ -715,7 +715,7 @@ index ea20d89..de4b383 100644
      "typecheck": "react-router typegen && tsc",
      "format": "prettier --write \"**/*.{ts,tsx}\"",
 diff --git a/frontend/react-router.config.ts b/frontend/react-router.config.ts
-index 9daac2a..5ccf245 100644
+index 1d30f52..4dfbace 100644
 --- a/frontend/react-router.config.ts
 +++ b/frontend/react-router.config.ts
 @@ -2,7 +2,7 @@ import type { Config } from "@react-router/dev/config"
@@ -725,8 +725,8 @@ index 9daac2a..5ccf245 100644
 -  ssr: false,
 +  ssr: true,
    // 13.9: static routes rendered to HTML at build time (their <head> tags are in the file crawlers fetch).
-   prerender: ["/", "/help", "/deals", "/policies/privacy", "/policies/returns"],
- } satisfies Config
+   prerender: [
+     "/",
 diff --git a/frontend/scripts/ssr-check.mjs b/frontend/scripts/ssr-check.mjs
 new file mode 100644
 index 0000000..e9e1530
@@ -807,7 +807,7 @@ index 0000000..e9e1530
 2.54.0
 
 
-From 14e53b08568bf24f22125fad3e0e9a9eb379f6dc Mon Sep 17 00:00:00 2001
+From 6e556ac76ad42691eef7a7b3b1e37cb4e97d678f Mon Sep 17 00:00:00 2001
 From: Abhishek Sawant <abhishek.sawant@simformsolutions.com>
 Date: Thu, 29 Oct 2026 07:54:22 +0530
 Subject: [PATCH 2/2] 14.8 SSR experiment: locale snapshot for hydration
