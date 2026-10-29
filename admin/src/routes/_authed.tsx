@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button"
 import { can, isStaff, type Permission } from "@/lib/auth/can"
 import { getUser, subscribe } from "@/lib/auth/session"
 import { useSignOut } from "@/lib/auth/useSignOut"
+import { useLiveOrders, useUnseenOrders } from "@/features/orders/useLiveOrders"
 
 // The guard. Every route under `_authed/` runs this BEFORE its loader and before anything renders:
 // 1. restore the session (one POST /auth/refresh after a reload),
@@ -29,12 +30,21 @@ export const Route = createFileRoute("/_authed")({
 })
 
 type NavItem = {
-  to: "/" | "/products" | "/categories" | "/brands" | "/users"
+  to:
+    | "/"
+    | "/products"
+    | "/categories"
+    | "/brands"
+    | "/users"
+    | "/orders"
+    | "/returns"
   label: string
   permission: Permission
 }
 const NAV: NavItem[] = [
   { to: "/", label: "Dashboard", permission: "dashboard:view" },
+  { to: "/orders", label: "Orders", permission: "orders:read" },
+  { to: "/returns", label: "Returns", permission: "returns:manage" },
   { to: "/products", label: "Products", permission: "products:read" },
   { to: "/categories", label: "Categories", permission: "categories:manage" },
   { to: "/brands", label: "Brands", permission: "brands:manage" },
@@ -45,6 +55,9 @@ function Shell() {
   // Subscribed, not read once: a sign-out in another tab/handler updates the topbar.
   const user = useSyncExternalStore(subscribe, getUser, getUser)
   const signOut = useSignOut()
+  // Admins get live order pushes over the staff socket (sellers have no staff room).
+  useLiveOrders(user?.role === "admin")
+  const unseen = useUnseenOrders()
   const matches = useMatches()
   const crumbs = matches.flatMap((m) =>
     m.staticData.crumb
@@ -65,6 +78,14 @@ function Shell() {
                 className="block rounded px-2 py-1 hover:bg-muted [&.active]:bg-muted [&.active]:font-medium"
               >
                 {i.label}
+                {i.to === "/orders" && unseen > 0 ? (
+                  <span
+                    className="ml-2 rounded-full bg-primary px-1.5 text-xs text-primary-foreground"
+                    aria-label={`${unseen} new orders`}
+                  >
+                    {unseen}
+                  </span>
+                ) : null}
               </Link>
             </li>
           ))}

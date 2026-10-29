@@ -13,3 +13,6 @@
 | A.3 | Money formatting | `Intl.NumberFormat("en-IN")` helper written a third time (storefront `money.ts`, plus this one). |
 
 Five things I would extract into a shared package in a larger codebase are listed at the end of the track (A.8).
+| A.4 | `canTransition` / `TRANSITIONS` (from the API) | Copied by hand into `features/orders/transitions.ts`; the storefront has its own `canCancel`. Three copies of the state machine now (API, storefront, admin): add a state and three files must change; only the API's is enforced. |
+| A.4 | `socket.io-client` wiring (token in handshake, expiry, reconnect) | Rewritten smaller (staff events only). The storefront's realtime module has the same refresh-and-reconnect logic in a different shape. |
+| A.4 | `Intl` date and rupee formatters | Fourth copy of `formatRupees`/date helpers across the two apps' modules. |

@@ -8,12 +8,21 @@ export const PERMISSIONS = [
   "categories:manage",
   "brands:manage",
   "users:manage",
+  "orders:read",
+  "orders:update", // status moves, notes, refunds
+  "returns:manage",
+  "marketing:manage", // coupons, deals, banners
+  "moderation:manage", // reviews, Q&A
+  "sellers:manage", // seller applications and detail
+  "audit:view",
+  "system:view", // health + settings
 ] as const
 export type Permission = (typeof PERMISSIONS)[number]
 
 const BY_ROLE: Record<Role, readonly Permission[]> = {
   admin: PERMISSIONS,
-  seller: ["products:read", "products:write"], // own products only: enforced by the API
+  // Own products, own order lines (read-only) and own numbers: all enforced by the API.
+  seller: ["dashboard:view", "products:read", "products:write", "orders:read"],
   customer: [],
 }
 

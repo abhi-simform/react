@@ -24,4 +24,41 @@ export const qk = {
     all: () => [scope(), "users"] as const,
     list: (params: object) => [scope(), "users", "list", params] as const,
   },
+  orders: {
+    all: () => [scope(), "orders"] as const,
+    list: (params: object) => [scope(), "orders", "list", params] as const,
+    detail: (id: string) => [scope(), "orders", "detail", id] as const,
+    returns: (params: object) =>
+      [scope(), "orders", "returns", params] as const,
+  },
+  marketing: {
+    coupons: () => [scope(), "marketing", "coupons"] as const,
+    deals: () => [scope(), "marketing", "deals"] as const,
+    banners: () => [scope(), "marketing", "banners"] as const,
+  },
+  moderation: {
+    all: () => [scope(), "moderation"] as const,
+    reviews: (params: object) =>
+      [scope(), "moderation", "reviews", params] as const,
+    questions: (params: object) =>
+      [scope(), "moderation", "questions", params] as const,
+  },
+  analytics: {
+    all: () => [scope(), "analytics"] as const,
+    one: (name: string, params: object) =>
+      [scope(), "analytics", name, params] as const,
+  },
+  sellers: {
+    applications: (params: object) =>
+      [scope(), "sellers", "applications", params] as const,
+    detail: (id: string) => [scope(), "sellers", "detail", id] as const,
+    all: () => [scope(), "sellers"] as const,
+  },
+  audit: {
+    list: (params: object) => [scope(), "audit", "list", params] as const,
+  },
+  system: {
+    health: () => [scope(), "system", "health"] as const,
+    settings: () => [scope(), "system", "settings"] as const,
+  },
 }

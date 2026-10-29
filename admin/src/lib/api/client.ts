@@ -29,6 +29,8 @@ type Options = {
   method?: Method
   query?: Record<string, unknown>
   body?: unknown
+  /** Extra request headers (e.g. `Idempotency-Key` on a refund). */
+  headers?: Record<string, string>
   signal?: AbortSignal
   timeoutMs?: number
 }
@@ -46,7 +48,7 @@ const errorName = (e: unknown) => (e as { name?: string } | null)?.name
 async function request(path: string, o: Options, accept: string) {
   const deadline = AbortSignal.timeout(o.timeoutMs ?? 15_000)
   const signal = o.signal ? AbortSignal.any([o.signal, deadline]) : deadline
-  const headers: Record<string, string> = { Accept: accept }
+  const headers: Record<string, string> = { Accept: accept, ...o.headers }
   let body: BodyInit | undefined
   if (o.body !== undefined) {
     body = JSON.stringify(o.body)
