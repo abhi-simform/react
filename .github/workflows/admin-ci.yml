@@ -1,0 +1,109 @@
+# A.8: quality gates for the admin console (same commands you run locally). Branch protection: require
+# "Admin / checks", "Admin / e2e" and "Admin / docker".
+name: Admin
+
+on:
+  push:
+    branches: [master]
+    paths: ["admin/**", "backend/**", ".github/workflows/admin-ci.yml", "docker-compose.yml"]
+  pull_request:
+    paths: ["admin/**", "backend/**", ".github/workflows/admin-ci.yml", "docker-compose.yml"]
+
+concurrency:
+  group: admin-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  NODE_VERSION: "24"
+  VITE_API_URL: http://localhost:4000/api/v1
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: admin
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: admin/package-lock.json
+      - run: npm ci
+      - run: npm run format:check
+      - run: npm run lint
+      - run: npm run typecheck
+      - name: Component and unit tests (Vitest + MSW + axe)
+        run: npm test
+      - run: npm run build
+      - uses: actions/upload-artifact@v4
+        with:
+          name: admin-build
+          path: admin/dist/client
+          retention-days: 7
+
+  e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      CI: "true"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: |
+            admin/package-lock.json
+            backend/package-lock.json
+            frontend/package-lock.json
+      - name: MongoDB replica set + Mailpit
+        run: docker compose up -d --wait mongo mailpit
+      - name: Backend deps and env
+        working-directory: backend
+        run: |
+          npm ci
+          cp .env.example .env
+      - name: Storefront deps and env
+        working-directory: frontend
+        run: |
+          npm ci
+          echo "VITE_API_URL=$VITE_API_URL" > .env.local
+      - name: Admin deps and env
+        working-directory: admin
+        run: |
+          npm ci
+          echo "VITE_API_URL=$VITE_API_URL" > .env.local
+          npx playwright install --with-deps chromium
+      # Playwright starts the API, the admin dev server and the storefront build; global-setup resets and seeds.
+      - name: Cross-app, access and axe specs
+        working-directory: admin
+        run: npx playwright test
+      - uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: admin-playwright-report
+          path: |
+            admin/playwright-report
+            admin/e2e/.results
+          retention-days: 14
+
+  docker:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker build -t shopsphere-admin --build-arg "VITE_API_URL=$VITE_API_URL" admin
+      - name: Must serve deep links and 404 missing assets
+        run: |
+          docker run -d --rm --name adm -p 8080:8080 shopsphere-admin
+          sleep 2
+          test "$(curl -s -o /dev/null -w '%{http_code}' localhost:8080/orders/abc)" = 200
+          test "$(curl -s -o /dev/null -w '%{http_code}' localhost:8080/assets/missing.js)" = 404
+          curl -sI localhost:8080/ | grep -i '^cache-control: no-cache'
+          docker stop adm

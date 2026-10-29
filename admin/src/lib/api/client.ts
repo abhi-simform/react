@@ -101,6 +101,10 @@ const TOKEN_PROBLEMS = new Set([
 const isAuthPath = (p: string) => /^\/auth\/(login|refresh|logout)/.test(p)
 
 async function send(path: string, o: Options, accept: string) {
+  // The token THIS request is about to carry. It must be read now, not in the catch block: by the time a
+  // second parallel 401 arrives, another request may already have refreshed, and reading the "current"
+  // token then would make a stale request look fresh (and trigger a second, replayed refresh).
+  const usedToken = config.getAccessToken?.() ?? null
   try {
     return await request(path, o, accept)
   } catch (err) {
@@ -111,8 +115,7 @@ async function send(path: string, o: Options, accept: string) {
       !isAuthPath(path)
     ) {
       // `TOKEN_EXPIRED` -> the single-flight refresh in lib/auth/session.ts, then ONE retry.
-      const token = config.getAccessToken?.() ?? null
-      if ((await config.onUnauthorized?.({ token })) === true)
+      if ((await config.onUnauthorized?.({ token: usedToken })) === true)
         return request(path, o, accept)
     }
     throw err
@@ -153,6 +156,7 @@ export async function apiUpload<T>(
     signal,
   }: { onProgress?: (fraction: number) => void; signal?: AbortSignal } = {}
 ): Promise<T> {
+  const usedToken = config.getAccessToken?.() ?? null
   const attempt = () =>
     new Promise<{ data: T }>((resolve, reject) => {
       if (signal?.aborted) return reject(signal.reason)
@@ -212,8 +216,7 @@ export async function apiUpload<T>(
       err.status === 401 &&
       TOKEN_PROBLEMS.has(err.code)
     ) {
-      const token = config.getAccessToken?.() ?? null
-      if ((await config.onUnauthorized?.({ token })) === true)
+      if ((await config.onUnauthorized?.({ token: usedToken })) === true)
         return (await attempt()).data
     }
     throw err
