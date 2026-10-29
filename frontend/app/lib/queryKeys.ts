@@ -79,6 +79,8 @@ export const orderKeys = {
   list: (filters: Filters) => [...orderKeys.lists(), filters] as const,
   details: () => [...orderKeys.all, "detail"] as const,
   detail: (id: string) => [...orderKeys.details(), id] as const,
+  /** "My spending" (account page chart): a prefix of `all`, so any order change refreshes it. */
+  spending: (months: number) => [...orderKeys.all, "spending", months] as const,
 }
 
 export const paymentKeys = {

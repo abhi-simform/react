@@ -4,6 +4,7 @@ import { STALE } from "@/lib/query-client"
 import { orderKeys } from "@/lib/queryKeys"
 
 import { getOrder, getOrders, type OrdersFilter } from "./orders.api"
+import { getSpending } from "./spending.api"
 import type { OrderStatus } from "@/types/domain"
 
 import { isTerminal } from "./status"
@@ -41,6 +42,13 @@ function pollInterval(
 }
 
 export const orderQueries = {
+  /** Spending per month for the account page chart (B11). */
+  spending: (months = 6) =>
+    queryOptions({
+      queryKey: orderKeys.spending(months),
+      queryFn: ({ signal }) => getSpending(months, signal),
+      staleTime: STALE.orders,
+    }),
   /** The orders list, "load more" style, filtered by status/search (both live in the URL). */
   infinite: (filter: OrdersFilter) =>
     infiniteQueryOptions({

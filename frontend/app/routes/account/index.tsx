@@ -4,7 +4,11 @@ import { Link } from "react-router"
 import { addressQueries } from "@/features/account"
 import { useAuth } from "@/features/auth"
 import { notificationQueries } from "@/features/notifications"
-import { OrderStatusBadge, orderQueries } from "@/features/orders"
+import {
+  OrderStatusBadge,
+  SpendingChart,
+  orderQueries,
+} from "@/features/orders"
 import { toApiError } from "@/lib/api/errors"
 import { formatDate, formatRupees } from "@/lib/format"
 import { noindexMeta } from "@/lib/seo"
@@ -22,6 +26,7 @@ export default function AccountIndexRoute() {
     <div className="flex flex-col gap-6">
       <h1 className="text-xl font-medium">Hello, {user?.name ?? "there"}</h1>
       <RecentOrders />
+      <SpendingChart />
       <div className="grid gap-6 md:grid-cols-2">
         <NotificationsSummary />
         <DefaultAddress />

@@ -20,3 +20,4 @@ export {
   PENDING_POLL_MS,
   restartPendingPolling,
 } from "./queries"
+export { SpendingChart, scaleBars } from "./components/SpendingChart"

@@ -18,3 +18,4 @@ Five things I would extract into a shared package in a larger codebase are liste
 | A.4 | `Intl` date and rupee formatters | Fourth copy of `formatRupees`/date helpers across the two apps' modules. |
 | A.5 | Banner image upload + same-site-path rule | The same `apiUpload` and the same regex exist in the API, the storefront and the admin: the rule "links stay on our own site" lives in three files. |
 | A.5 | Rupee/date display helpers | `Intl.DateTimeFormat` + IST conversion helpers are new here; the storefront's countdown code has its own IST handling. A shared `@shopsphere/time` would have one tested implementation. |
+| A.6 | `formatRupees` + a compact variant | Written a fourth/fifth time. The storefront's account page chart could not reuse the admin's Recharts code (no shared package, and the storefront should not pay for the library), so the two "spending/revenue" visualisations are separate implementations of the same idea. |
