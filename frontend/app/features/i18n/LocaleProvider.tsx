@@ -43,11 +43,18 @@ const LocaleContext = createContext<LocaleValue | null>(null)
  * - sets `<html lang>` and `dir` (right-to-left languages mirror the layout);
  * - fetches the display rates once (`GET /config/public`, cached an hour) and hands them to the store.
  */
+/** What the SERVER renders (it cannot see localStorage or `navigator.language`): a constant object, as required. */
+const SERVER_LOCALE = { language: "en", currency: "INR" } as const
+
 export function LocaleProvider({ children }: { children: React.ReactNode }) {
+  // 14.8: the third argument is the snapshot used during SERVER rendering AND while hydrating. It must be what the
+  // server rendered ("en"/INR), not the stored choice: React does not patch attributes such as a <select>'s value
+  // at hydration, so the language picker kept saying "English" after a reload in Hindi. useSyncExternalStore then
+  // notices the client snapshot differs and re-renders with the stored choice, without a mismatch.
   const { language, currency } = useSyncExternalStore(
     subscribeLocale,
     getLocale,
-    getLocale
+    () => SERVER_LOCALE
   )
 
   useEffect(() => {
