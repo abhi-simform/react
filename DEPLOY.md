@@ -1,6 +1,6 @@
 # Deploying ShopSphere
 
-This is the recipe. **Nothing here was deployed for real**: there is no cloud account behind this repository, so every file below was validated locally (YAML/JSON parsed, `docker build` + `docker run` of both images, the same commands as CI run on a laptop) and the live steps (Atlas, Render, Vercel, DNS, Razorpay and Google dashboards, a phone on 4G) are an unchecked list for whoever owns the accounts. No secret is in git; every value you must supply is named `<LIKE_THIS>` below.
+This is the recipe. **Nothing here was deployed for real**: there is no cloud account behind this repository, so every file below was validated locally as far as this machine allowed (YAML/JSON parsed, the same commands as CI run on a laptop, the production behaviour of the static host checked with `npm start`, the API's production guards booted). The two Docker images WERE built and run locally (frontend 25 MB, non-root, `nginx -t` ok, deep links and headers checked; the API image runs non-root and the full compose stack passed the browser checks); the live steps (Atlas, Render, Vercel, DNS, Razorpay and Google dashboards, a phone on 4G) are an unchecked list for whoever owns the accounts. No secret is in git; every value you must supply is named `<LIKE_THIS>` below.
 
 ```mermaid
 flowchart LR
@@ -84,7 +84,7 @@ docker compose --profile app up -d --build      # mongo + mailpit + API + storef
 docker build -t shopsphere-frontend --build-arg VITE_API_URL=https://api.<DOMAIN>/api/v1 frontend
 docker build -t shopsphere-backend backend
 ```
-Run the two images behind any TLS terminator (Caddy, Traefik, a cloud load balancer). The frontend image is nginx only (about 50 MB, non-root, port 8080, `/healthz`); the API image is non-root, port from `PORT`, `HEALTHCHECK` on `/api/v1/health`.
+Run the two images behind any TLS terminator (Caddy, Traefik, a cloud load balancer). The frontend image is nginx only (25 MB, non-root, port 8080, `/healthz`); the API image is non-root, port from `PORT`, `HEALTHCHECK` on `/api/v1/health`.
 
 ## 5. Third parties that need the public URL
 

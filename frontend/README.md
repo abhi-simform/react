@@ -65,3 +65,21 @@ runs `lint-staged`: Prettier and ESLint on the staged `.ts/.tsx` files; a lint e
 Emergency bypass: `git commit --no-verify` (CI still runs `npm run check`).
 
 Docs: `docs/a11y-audit.md`, `docs/debug-log.md`.
+
+## Commands (Stage 14)
+
+| Command | What it does |
+| --- | --- |
+| `npm run dev` | development server with HMR (unbundled modules, StrictMode double effects, dev-only helpers) |
+| `npm run build` | production build to `build/client` (static files), then fills the security headers (`scripts/build-headers.mjs`) and builds the service worker |
+| `npm start` | serves `build/client` like a static host: SPA fallback, `_headers` honoured, gzip (`scripts/serve-spa.mjs`); `PORT` picks the port |
+| `npm run preview` | `build` + `start` |
+| `npm run check` | the local gate: format check, lint, typecheck, unit/component tests, build |
+| `npm run e2e` | Playwright against the real stack (needs `docker compose up -d`) |
+| `npm run check:bundle-secrets` | fails if the build contains secret names, credential shapes or source maps |
+| `npm run check:console` | loads 25 pages of the production build and fails on any console problem |
+| `npm run verify:sentry` | error pipeline end to end against a fake Sentry (needs the API running) |
+| `npm run headers:vercel` | regenerates `vercel.json` from `public/_headers` (set `VITE_API_URL` first) |
+| `npm run sitemap` | regenerates `public/sitemap.xml` / `robots.txt` from the live API |
+
+Docs: `docs/environments.md` (variables, cookies, CORS), `docs/observability.md`, `docs/runbook.md`, `docs/testing.md`, `docs/adr/`, `../DEPLOY.md`.
