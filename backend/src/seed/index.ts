@@ -13,6 +13,7 @@ import { WishlistItem } from "../modules/wishlist/wishlist.model.js"
 import { Cart } from "../modules/cart/cart.model.js"
 import { Coupon } from "../modules/coupons/coupon.model.js"
 import { Deal } from "../modules/deals/deal.model.js"
+import { SellerApplication } from "../modules/sellers/sellerApplication.model.js"
 import { Banner } from "../modules/banners/banner.model.js"
 import { Payment, WebhookEvent } from "../modules/payments/payment.model.js"
 import { Order, type OrderStatus } from "../modules/orders/order.model.js"
@@ -77,6 +78,7 @@ async function main() {
     WebhookEvent.syncIndexes(),
     RecentlyViewed.syncIndexes(),
     Notification.syncIndexes(),
+    SellerApplication.syncIndexes(),
   ])
 
   // Users
@@ -948,6 +950,40 @@ async function main() {
         { upsert: true }
       )
     }
+  }
+
+  // B11: seller applications for the admin review queue (three waiting, one rejected, one approved).
+  {
+    const people = await User.find({ email: /^visitor\d+@/ })
+      .sort({ email: 1 })
+      .limit(5)
+      .lean()
+    const rows = [
+      ["Kiran Crafts", "pending", "Handmade home decor and gifts."],
+      ["Blue Whale Books", "pending", "Second-hand and new books, pan-India shipping."],
+      ["Urban Stride", "pending", "Running shoes and activewear."],
+      ["FastFix Mobiles", "rejected", "Refurbished phones."],
+      ["Green Leaf Organics", "approved", "Organic groceries."],
+    ] as const
+    await SellerApplication.insertMany(
+      rows.map(([businessName, status, about], i) => ({
+        user: status === "approved" ? seller2!._id : people[i]!._id,
+        businessName,
+        phone: `98765${String(10000 + i)}`,
+        gstin: i % 2 === 0 ? `27AAPFU0939F1Z${i}` : undefined,
+        about,
+        status,
+        ...(status !== "pending"
+          ? {
+              reviewedAt: new Date(Date.now() - (i + 2) * 86_400_000),
+              reviewNote:
+                status === "rejected"
+                  ? "Refurbished phones need a GSTIN and warranty terms."
+                  : undefined,
+            }
+          : {}),
+      }))
+    )
   }
 
   // B9: the dev customer's notification history, built from their seeded orders with the SAME

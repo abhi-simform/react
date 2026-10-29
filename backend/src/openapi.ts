@@ -1575,7 +1575,7 @@ export const openApiDocument = {
       get: {
         tags: ["Admin"],
         summary:
-          "Audit trail of staff writes, newest first. Filters: actor, target (an id in the path), action (prefix), from, to",
+          "Audit trail of staff writes, newest first. Filters: actor, target (an id in the path), entity (products|orders|users|...), action (prefix), from, to. `changes` holds { field: { before, after } } for the writes that record one",
         security: bearer,
         parameters: queryParams(listAuditSchema.query as z.ZodObject),
         responses: {

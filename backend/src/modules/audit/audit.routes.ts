@@ -24,6 +24,7 @@ adminAuditRoutes.get("/", validate(listAuditSchema), async (req, res) => {
   const filter: Record<string, unknown> = {}
   if (q.actor) filter.actor = q.actor
   if (q.target) filter.targets = q.target
+  if (q.entity) filter.path = new RegExp(`/(admin|seller)/${q.entity}(/|$)`)
   if (q.action) filter.action = new RegExp(`^${escape(q.action)}`)
   if (q.from || q.to)
     filter.createdAt = {
@@ -52,6 +53,7 @@ adminAuditRoutes.get("/", validate(listAuditSchema), async (req, res) => {
       status: r.status,
       ip: r.ip ?? null,
       requestId: r.requestId ?? null,
+      changes: (r.meta as { changes?: unknown } | undefined)?.changes ?? null,
     })),
     pageMeta(q.page, q.limit, total)
   )
