@@ -13,11 +13,16 @@ import { Route as AuthedRouteImport } from './routes/_authed'
 import { Route as ForbiddenRouteImport } from './routes/forbidden'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as AuthedIndexRouteImport } from './routes/_authed/index'
+import { Route as AuthedBannersRouteImport } from './routes/_authed/banners'
 import { Route as AuthedBrandsRouteImport } from './routes/_authed/brands'
 import { Route as AuthedCategoriesRouteImport } from './routes/_authed/categories'
+import { Route as AuthedCouponsRouteImport } from './routes/_authed/coupons'
+import { Route as AuthedDealsRouteImport } from './routes/_authed/deals'
 import { Route as AuthedOrdersRouteRouteImport } from './routes/_authed/orders/route'
 import { Route as AuthedProductsRouteRouteImport } from './routes/_authed/products/route'
+import { Route as AuthedQuestionsRouteImport } from './routes/_authed/questions'
 import { Route as AuthedReturnsRouteImport } from './routes/_authed/returns'
+import { Route as AuthedReviewsRouteImport } from './routes/_authed/reviews'
 import { Route as AuthedUsersRouteImport } from './routes/_authed/users'
 import { Route as AuthedOrdersIndexRouteImport } from './routes/_authed/orders/index'
 import { Route as AuthedOrdersOrderIdRouteImport } from './routes/_authed/orders/$orderId'
@@ -44,6 +49,11 @@ const AuthedIndexRoute = AuthedIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AuthedRoute,
 } as any)
+const AuthedBannersRoute = AuthedBannersRouteImport.update({
+  id: '/banners',
+  path: '/banners',
+  getParentRoute: () => AuthedRoute,
+} as any)
 const AuthedBrandsRoute = AuthedBrandsRouteImport.update({
   id: '/brands',
   path: '/brands',
@@ -52,6 +62,16 @@ const AuthedBrandsRoute = AuthedBrandsRouteImport.update({
 const AuthedCategoriesRoute = AuthedCategoriesRouteImport.update({
   id: '/categories',
   path: '/categories',
+  getParentRoute: () => AuthedRoute,
+} as any)
+const AuthedCouponsRoute = AuthedCouponsRouteImport.update({
+  id: '/coupons',
+  path: '/coupons',
+  getParentRoute: () => AuthedRoute,
+} as any)
+const AuthedDealsRoute = AuthedDealsRouteImport.update({
+  id: '/deals',
+  path: '/deals',
   getParentRoute: () => AuthedRoute,
 } as any)
 const AuthedOrdersRouteRoute = AuthedOrdersRouteRouteImport.update({
@@ -64,9 +84,19 @@ const AuthedProductsRouteRoute = AuthedProductsRouteRouteImport.update({
   path: '/products',
   getParentRoute: () => AuthedRoute,
 } as any)
+const AuthedQuestionsRoute = AuthedQuestionsRouteImport.update({
+  id: '/questions',
+  path: '/questions',
+  getParentRoute: () => AuthedRoute,
+} as any)
 const AuthedReturnsRoute = AuthedReturnsRouteImport.update({
   id: '/returns',
   path: '/returns',
+  getParentRoute: () => AuthedRoute,
+} as any)
+const AuthedReviewsRoute = AuthedReviewsRouteImport.update({
+  id: '/reviews',
+  path: '/reviews',
   getParentRoute: () => AuthedRoute,
 } as any)
 const AuthedUsersRoute = AuthedUsersRouteImport.update({
@@ -106,9 +136,14 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/orders': typeof AuthedOrdersRouteRouteWithChildren
   '/products': typeof AuthedProductsRouteRouteWithChildren
+  '/banners': typeof AuthedBannersRoute
   '/brands': typeof AuthedBrandsRoute
   '/categories': typeof AuthedCategoriesRoute
+  '/coupons': typeof AuthedCouponsRoute
+  '/deals': typeof AuthedDealsRoute
+  '/questions': typeof AuthedQuestionsRoute
   '/returns': typeof AuthedReturnsRoute
+  '/reviews': typeof AuthedReviewsRoute
   '/users': typeof AuthedUsersRoute
   '/orders/$orderId': typeof AuthedOrdersOrderIdRoute
   '/products/$productId': typeof AuthedProductsProductIdRoute
@@ -119,9 +154,14 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/forbidden': typeof ForbiddenRoute
   '/login': typeof LoginRoute
+  '/banners': typeof AuthedBannersRoute
   '/brands': typeof AuthedBrandsRoute
   '/categories': typeof AuthedCategoriesRoute
+  '/coupons': typeof AuthedCouponsRoute
+  '/deals': typeof AuthedDealsRoute
+  '/questions': typeof AuthedQuestionsRoute
   '/returns': typeof AuthedReturnsRoute
+  '/reviews': typeof AuthedReviewsRoute
   '/users': typeof AuthedUsersRoute
   '/': typeof AuthedIndexRoute
   '/orders/$orderId': typeof AuthedOrdersOrderIdRoute
@@ -137,9 +177,14 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/_authed/orders': typeof AuthedOrdersRouteRouteWithChildren
   '/_authed/products': typeof AuthedProductsRouteRouteWithChildren
+  '/_authed/banners': typeof AuthedBannersRoute
   '/_authed/brands': typeof AuthedBrandsRoute
   '/_authed/categories': typeof AuthedCategoriesRoute
+  '/_authed/coupons': typeof AuthedCouponsRoute
+  '/_authed/deals': typeof AuthedDealsRoute
+  '/_authed/questions': typeof AuthedQuestionsRoute
   '/_authed/returns': typeof AuthedReturnsRoute
+  '/_authed/reviews': typeof AuthedReviewsRoute
   '/_authed/users': typeof AuthedUsersRoute
   '/_authed/': typeof AuthedIndexRoute
   '/_authed/orders/$orderId': typeof AuthedOrdersOrderIdRoute
@@ -156,9 +201,14 @@ export interface FileRouteTypes {
     | '/login'
     | '/orders'
     | '/products'
+    | '/banners'
     | '/brands'
     | '/categories'
+    | '/coupons'
+    | '/deals'
+    | '/questions'
     | '/returns'
+    | '/reviews'
     | '/users'
     | '/orders/$orderId'
     | '/products/$productId'
@@ -169,9 +219,14 @@ export interface FileRouteTypes {
   to:
     | '/forbidden'
     | '/login'
+    | '/banners'
     | '/brands'
     | '/categories'
+    | '/coupons'
+    | '/deals'
+    | '/questions'
     | '/returns'
+    | '/reviews'
     | '/users'
     | '/'
     | '/orders/$orderId'
@@ -186,9 +241,14 @@ export interface FileRouteTypes {
     | '/login'
     | '/_authed/orders'
     | '/_authed/products'
+    | '/_authed/banners'
     | '/_authed/brands'
     | '/_authed/categories'
+    | '/_authed/coupons'
+    | '/_authed/deals'
+    | '/_authed/questions'
     | '/_authed/returns'
+    | '/_authed/reviews'
     | '/_authed/users'
     | '/_authed/'
     | '/_authed/orders/$orderId'
@@ -234,6 +294,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthedIndexRouteImport
       parentRoute: typeof AuthedRoute
     }
+    '/_authed/banners': {
+      id: '/_authed/banners'
+      path: '/banners'
+      fullPath: '/banners'
+      preLoaderRoute: typeof AuthedBannersRouteImport
+      parentRoute: typeof AuthedRoute
+    }
     '/_authed/brands': {
       id: '/_authed/brands'
       path: '/brands'
@@ -246,6 +313,20 @@ declare module '@tanstack/react-router' {
       path: '/categories'
       fullPath: '/categories'
       preLoaderRoute: typeof AuthedCategoriesRouteImport
+      parentRoute: typeof AuthedRoute
+    }
+    '/_authed/coupons': {
+      id: '/_authed/coupons'
+      path: '/coupons'
+      fullPath: '/coupons'
+      preLoaderRoute: typeof AuthedCouponsRouteImport
+      parentRoute: typeof AuthedRoute
+    }
+    '/_authed/deals': {
+      id: '/_authed/deals'
+      path: '/deals'
+      fullPath: '/deals'
+      preLoaderRoute: typeof AuthedDealsRouteImport
       parentRoute: typeof AuthedRoute
     }
     '/_authed/orders': {
@@ -262,11 +343,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthedProductsRouteRouteImport
       parentRoute: typeof AuthedRoute
     }
+    '/_authed/questions': {
+      id: '/_authed/questions'
+      path: '/questions'
+      fullPath: '/questions'
+      preLoaderRoute: typeof AuthedQuestionsRouteImport
+      parentRoute: typeof AuthedRoute
+    }
     '/_authed/returns': {
       id: '/_authed/returns'
       path: '/returns'
       fullPath: '/returns'
       preLoaderRoute: typeof AuthedReturnsRouteImport
+      parentRoute: typeof AuthedRoute
+    }
+    '/_authed/reviews': {
+      id: '/_authed/reviews'
+      path: '/reviews'
+      fullPath: '/reviews'
+      preLoaderRoute: typeof AuthedReviewsRouteImport
       parentRoute: typeof AuthedRoute
     }
     '/_authed/users': {
@@ -345,9 +440,14 @@ const AuthedProductsRouteRouteWithChildren =
 interface AuthedRouteChildren {
   AuthedOrdersRouteRoute: typeof AuthedOrdersRouteRouteWithChildren
   AuthedProductsRouteRoute: typeof AuthedProductsRouteRouteWithChildren
+  AuthedBannersRoute: typeof AuthedBannersRoute
   AuthedBrandsRoute: typeof AuthedBrandsRoute
   AuthedCategoriesRoute: typeof AuthedCategoriesRoute
+  AuthedCouponsRoute: typeof AuthedCouponsRoute
+  AuthedDealsRoute: typeof AuthedDealsRoute
+  AuthedQuestionsRoute: typeof AuthedQuestionsRoute
   AuthedReturnsRoute: typeof AuthedReturnsRoute
+  AuthedReviewsRoute: typeof AuthedReviewsRoute
   AuthedUsersRoute: typeof AuthedUsersRoute
   AuthedIndexRoute: typeof AuthedIndexRoute
 }
@@ -355,9 +455,14 @@ interface AuthedRouteChildren {
 const AuthedRouteChildren: AuthedRouteChildren = {
   AuthedOrdersRouteRoute: AuthedOrdersRouteRouteWithChildren,
   AuthedProductsRouteRoute: AuthedProductsRouteRouteWithChildren,
+  AuthedBannersRoute: AuthedBannersRoute,
   AuthedBrandsRoute: AuthedBrandsRoute,
   AuthedCategoriesRoute: AuthedCategoriesRoute,
+  AuthedCouponsRoute: AuthedCouponsRoute,
+  AuthedDealsRoute: AuthedDealsRoute,
+  AuthedQuestionsRoute: AuthedQuestionsRoute,
   AuthedReturnsRoute: AuthedReturnsRoute,
+  AuthedReviewsRoute: AuthedReviewsRoute,
   AuthedUsersRoute: AuthedUsersRoute,
   AuthedIndexRoute: AuthedIndexRoute,
 }

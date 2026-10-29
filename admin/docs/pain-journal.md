@@ -16,3 +16,5 @@ Five things I would extract into a shared package in a larger codebase are liste
 | A.4 | `canTransition` / `TRANSITIONS` (from the API) | Copied by hand into `features/orders/transitions.ts`; the storefront has its own `canCancel`. Three copies of the state machine now (API, storefront, admin): add a state and three files must change; only the API's is enforced. |
 | A.4 | `socket.io-client` wiring (token in handshake, expiry, reconnect) | Rewritten smaller (staff events only). The storefront's realtime module has the same refresh-and-reconnect logic in a different shape. |
 | A.4 | `Intl` date and rupee formatters | Fourth copy of `formatRupees`/date helpers across the two apps' modules. |
+| A.5 | Banner image upload + same-site-path rule | The same `apiUpload` and the same regex exist in the API, the storefront and the admin: the rule "links stay on our own site" lives in three files. |
+| A.5 | Rupee/date display helpers | `Intl.DateTimeFormat` + IST conversion helpers are new here; the storefront's countdown code has its own IST handling. A shared `@shopsphere/time` would have one tested implementation. |

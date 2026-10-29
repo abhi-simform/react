@@ -38,6 +38,11 @@ type NavItem = {
     | "/users"
     | "/orders"
     | "/returns"
+    | "/coupons"
+    | "/deals"
+    | "/banners"
+    | "/reviews"
+    | "/questions"
   label: string
   permission: Permission
 }
@@ -49,6 +54,11 @@ const NAV: NavItem[] = [
   { to: "/categories", label: "Categories", permission: "categories:manage" },
   { to: "/brands", label: "Brands", permission: "brands:manage" },
   { to: "/users", label: "Users", permission: "users:manage" },
+  { to: "/coupons", label: "Coupons", permission: "marketing:manage" },
+  { to: "/deals", label: "Deals", permission: "marketing:manage" },
+  { to: "/banners", label: "Banners", permission: "marketing:manage" },
+  { to: "/reviews", label: "Reviews", permission: "moderation:manage" },
+  { to: "/questions", label: "Q&A", permission: "moderation:manage" },
 ]
 
 function Shell() {
