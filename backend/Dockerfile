@@ -23,5 +23,5 @@ COPY package.json ./
 RUN mkdir -p uploads && chown -R node:node /app
 USER node
 EXPOSE 4000
-HEALTHCHECK --interval=30s --timeout=3s CMD wget -qO- http://localhost:4000/api/v1/health || exit 1
+HEALTHCHECK --interval=30s --timeout=3s CMD wget -qO- "http://localhost:${PORT:-4000}/api/v1/health" || exit 1
 CMD ["node", "dist/server.js"]

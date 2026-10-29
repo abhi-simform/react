@@ -8,7 +8,10 @@ const transport = isTest
   : nodemailer.createTransport({
       host: env.SMTP_HOST,
       port: env.SMTP_PORT,
-      secure: false,
+      secure: env.SMTP_SECURE,
+      ...(env.SMTP_USER
+        ? { auth: { user: env.SMTP_USER, pass: env.SMTP_PASS ?? "" } }
+        : {}),
     })
 
 type EmailJob = { to: string; subject: string; html: string }

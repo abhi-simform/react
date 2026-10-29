@@ -22,13 +22,18 @@ import { Notification } from "../modules/notifications/notification.model.js"
 import { orderTemplate } from "../modules/notifications/notification.templates.js"
 import { slugify } from "../utils/slugify.js"
 import { CATALOG } from "./catalog.js"
+import { resolveSeedSafety } from "./guard.js"
 
-// Dev-only accounts (never used outside local seeds).
-const DEV_PASSWORD = "Password123"
+// Dev accounts. Password: the development one for a local database, SEED_PASSWORD otherwise (guard.ts, 14.5).
 const PRODUCTS_PER_LEAF = 22
 
 async function main() {
   const reset = process.argv.includes("--reset")
+  const { password: DEV_PASSWORD, local } = resolveSeedSafety({
+    uri: process.env.MONGODB_URI ?? "",
+    argv: process.argv,
+    seedPassword: process.env.SEED_PASSWORD,
+  })
   await connectDb()
   faker.seed(42) // deterministic: same data every run
 
@@ -764,7 +769,7 @@ async function main() {
     `Seeded ${total} products, ${await Category.countDocuments()} categories, 3 users`
   )
   logger.info(
-    `Dev logins: admin@/seller@/customer@shopsphere.dev  password: ${DEV_PASSWORD}`
+    `Dev logins: admin@/seller@/customer@shopsphere.dev  password: ${local ? DEV_PASSWORD : "(SEED_PASSWORD)"}`
   )
   await disconnectDb()
 }

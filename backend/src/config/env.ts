@@ -1,5 +1,7 @@
 import { z } from "zod"
 
+import { productionConfigProblems } from "./prodChecks.js"
+
 // Validate environment ONCE at boot. A bad/missing variable crashes the process with a
 // readable message instead of causing a confusing failure later at 2 a.m.
 const schema = z.object({
@@ -25,6 +27,9 @@ const schema = z.object({
     .enum(["true", "false"])
     .default("false")
     .transform((v) => v === "true"),
+  // Optional (14.2). Empty = a host-only cookie (only the API's own host gets it): right when the frontend is on a
+  // sibling subdomain (same-site). Set `.example.com` only if ANOTHER subdomain must read the cookie too.
+  COOKIE_DOMAIN: z.string().optional(),
 
   // Google sign-in (B10). Without GOOGLE_CLIENT_ID the backend falls back to a built-in MOCK
   // Google (a local consent page) outside production, so the flow works with no credentials.
@@ -47,6 +52,13 @@ const schema = z.object({
 
   SMTP_HOST: z.string().default("localhost"),
   SMTP_PORT: z.coerce.number().int().default(1025),
+  // Production SMTP providers need a login, and implicit TLS on port 465 (587 = STARTTLS, leave `false`).
+  SMTP_USER: z.string().optional(),
+  SMTP_PASS: z.string().optional(),
+  SMTP_SECURE: z
+    .enum(["true", "false"])
+    .default("false")
+    .transform((v) => v === "true"),
   EMAIL_FROM: z.string().default("ShopSphere <no-reply@shopsphere.local>"),
 
   // Image uploads (B7). Local disk for development; the ImageStorage interface in
@@ -85,6 +97,13 @@ const parsed = schema.safeParse(process.env)
 if (!parsed.success) {
   // eslint-disable-next-line no-console
   console.error("Invalid environment configuration:\n", z.prettifyError(parsed.error))
+  process.exit(1)
+}
+
+const problems = productionConfigProblems(parsed.data)
+if (problems.length) {
+  // eslint-disable-next-line no-console
+  console.error(`Unsafe production configuration:\n- ${problems.join("\n- ")}`)
   process.exit(1)
 }
 

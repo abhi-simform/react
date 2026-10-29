@@ -23,6 +23,8 @@ const cookieOptions: CookieOptions = {
   httpOnly: true,
   secure: env.COOKIE_SECURE,
   sameSite: env.COOKIE_SAMESITE,
+  // `domain` must be IDENTICAL when setting and clearing, or the browser keeps the old cookie (logout would not log out).
+  ...(env.COOKIE_DOMAIN ? { domain: env.COOKIE_DOMAIN } : {}),
   path: `${API_PREFIX}/auth`,
   maxAge: env.REFRESH_TOKEN_TTL_DAYS * 24 * 60 * 60 * 1000,
 }
