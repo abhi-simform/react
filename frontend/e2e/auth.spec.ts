@@ -30,6 +30,9 @@ test.describe("accounts", () => {
     await expect(page.getByText(/verified/i).first()).toBeVisible()
 
     // sign out and in again through the UI (the one place the login form is exercised)
+    // Let the page's own silent refresh finish first: its response ROTATES the refresh cookie, and one landing
+    // after clearCookies() restored the session and bounced /login to the home page (a flake found in 14.9).
+    await page.waitForLoadState("networkidle")
     await page.context().clearCookies()
     await page.evaluate(() => localStorage.clear())
     const login = new LoginPage(page)

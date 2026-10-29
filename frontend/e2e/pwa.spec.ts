@@ -190,8 +190,12 @@ plain(
       ).toBeVisible()
       await page.getByRole("button", { name: "Reload" }).click()
       // The waiting worker takes over and the page reloads itself.
+      // `evaluate` rejects while the page is navigating ("Execution context was destroyed"): that IS the reload
+      // happening, so a rejected poll attempt counts as "not changed yet" (an order-dependent flake found in 13.10).
       await expect
-        .poll(() => page.evaluate(() => performance.timeOrigin))
+        .poll(() =>
+          page.evaluate(() => performance.timeOrigin).catch(() => before)
+        )
         .not.toBe(before)
       await expect(
         page.getByText("A new version of ShopSphere is available")
