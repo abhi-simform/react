@@ -1,0 +1,82 @@
+# 14.5: Render Blueprint for the API (+ optional Redis). Create it with: Dashboard > New > Blueprint > this repository.
+# No secret is in this file: every `sync: false` value is typed into the dashboard once (or via the Render API), and
+# `generateValue: true` makes Render create a random one. See DEPLOY.md for the order of steps and the smoke checklist.
+#
+# The frontend is NOT here: it is a static site on Vercel (frontend/vercel.json) or Netlify (frontend/netlify.toml).
+# The database is MongoDB Atlas (a replica set: transactions are used by orders and stock). Render has no managed Mongo.
+services:
+  - type: web
+    name: shopsphere-api
+    runtime: docker
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    region: singapore # pick the region closest to your Atlas cluster and your users
+    plan: starter # the free plan sleeps after 15 min idle (a cold start of ~30 s on the first request): fine for a demo
+    healthCheckPath: /api/v1/health
+    autoDeploy: false # deploy from CI / by hand after the checks are green; flip to true for a staging service
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: LOG_LEVEL
+        value: info
+      # --- database (secret) ---
+      - key: MONGODB_URI
+        sync: false # mongodb+srv://USER:PASSWORD@CLUSTER.mongodb.net/shopsphere?retryWrites=true&w=majority
+      # --- auth ---
+      - key: JWT_ACCESS_SECRET
+        generateValue: true
+      - key: COOKIE_SECURE
+        value: "true"
+      - key: COOKIE_SAMESITE
+        value: lax # same registrable domain (shop.example.com + api.example.com). `none` only for the cross-site demo.
+      # --- origins: the storefront's public origin(s), explicit, no wildcard ---
+      - key: CORS_ORIGINS
+        sync: false # https://shop.example.com   (comma separated; add https://admin.example.com when it ships)
+      - key: CLIENT_URL
+        sync: false # https://shop.example.com
+      # --- payments: TEST mode keys only ---
+      - key: RAZORPAY_KEY_ID
+        sync: false
+      - key: RAZORPAY_KEY_SECRET
+        sync: false
+      - key: RAZORPAY_WEBHOOK_SECRET
+        sync: false
+      # --- Google sign-in (optional; without it the button reports "not configured") ---
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: GOOGLE_CLIENT_SECRET
+        sync: false
+      - key: GOOGLE_REDIRECT_URI
+        sync: false # https://api.example.com/api/v1/auth/google/callback
+      # --- e-mail: a real SMTP provider (Resend, Brevo, SES, Mailgun) ---
+      - key: SMTP_HOST
+        sync: false
+      - key: SMTP_PORT
+        value: "587"
+      - key: SMTP_USER
+        sync: false
+      - key: SMTP_PASS
+        sync: false
+      - key: EMAIL_FROM
+        sync: false # "ShopSphere <no-reply@example.com>" (a sender the provider has verified)
+      # --- cache / rate-limit counters / job queue: Redis when there is more than one instance ---
+      - key: REDIS_URL
+        fromService:
+          type: keyvalue
+          name: shopsphere-redis
+          property: connectionString
+    # Uploaded images are written to local disk (backend/src/modules/uploads). A container's disk is wiped on every
+    # deploy, so avatars would vanish. Either attach a persistent disk (paid plans; needs the process to be able to
+    # write there: mount it at /app/uploads and keep UPLOAD_DIR=uploads), or swap the ImageStorage adapter for an
+    # object store (the interface exists for that). Left commented because a disk pins the service to ONE instance.
+    # disk:
+    #   name: uploads
+    #   mountPath: /app/uploads
+    #   sizeGB: 1
+
+  - type: keyvalue
+    name: shopsphere-redis
+    plan: free
+    region: singapore
+    maxmemoryPolicy: noeviction # BullMQ keeps jobs in Redis: an eviction policy would silently drop them
+    ipAllowList: [] # internal network only; nothing on the public internet can reach it

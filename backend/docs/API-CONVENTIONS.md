@@ -463,3 +463,14 @@ Env: `REDIS_URL`, `CACHE_ENABLED` (true), `CACHE_TTL_SECONDS` (30), `JOBS_ENABLE
 - Seed: the dev customer now also has 2,000 older read notifications (one per hour, every 7th with a long body) for the virtualised list; the unread badge is still 4.
 
 Not built (out of B12 scope here): idempotency keys beyond orders, soft-delete, cursor pagination, Sentry, load test, deploy config (Stage 14).
+
+## Production configuration (Stage 14)
+
+No new endpoints. Configuration only (full table: `frontend/docs/environments.md`, steps: `DEPLOY.md`):
+
+- `COOKIE_DOMAIN` (optional). Empty = host-only refresh cookie. It is applied on set AND clear, otherwise logout would leave the cookie behind.
+- `SMTP_USER`, `SMTP_PASS`, `SMTP_SECURE` for a real e-mail provider (Mailpit needs none).
+- **Boot guard** (`src/config/prodChecks.ts`): with `NODE_ENV=production` the process exits with a list of problems unless `COOKIE_SECURE=true`, `JWT_ACCESS_SECRET` is not a development placeholder, `CORS_ORIGINS` has no wildcard and only `https://` origins (a `http://localhost` origin is tolerated for a staging API used from a local frontend), and `CLIENT_URL` is `https://`.
+- **Seed guard** (`src/seed/guard.ts`): `npm run seed` is idempotent. Against a non-local `MONGODB_URI`, `--reset` (drops the database) additionally requires `--i-know-this-wipes-the-database`, and the seeded accounts get `SEED_PASSWORD` (12+ characters) instead of the public development password.
+- Every response carries `x-request-id` (exposed to browsers by CORS); the frontend puts it on error reports (tag `request_id`) and on the error page ("Reference"), and the same id is in the pino log line of that request (`req.id`).
+- `GET /api/v1/health` is the liveness check for hosts and uptime monitors (`"db":"up"` when MongoDB answers).
