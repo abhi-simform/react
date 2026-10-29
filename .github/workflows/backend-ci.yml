@@ -1,0 +1,56 @@
+# 14.4: quality gates for the API. Tests run against a real MongoDB replica set (transactions are used by orders and
+# stock), started from the same docker-compose.yml developers use.
+name: Backend
+
+on:
+  push:
+    branches: [master]
+    paths: ["backend/**", ".github/workflows/backend-ci.yml", "docker-compose.yml"]
+  pull_request:
+    paths: ["backend/**", ".github/workflows/backend-ci.yml", "docker-compose.yml"]
+
+concurrency:
+  group: backend-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  checks:
+    name: checks
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+      - name: MongoDB replica set
+        working-directory: .
+        run: docker compose up -d --wait mongo
+      - run: npm ci
+      - name: Lint
+        run: npm run lint
+      - name: Typecheck
+        run: npm run typecheck
+      - name: Tests
+        run: npm test
+      - name: Build
+        run: npm run build
+
+  docker:
+    name: docker
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build the API image
+        run: docker build -t shopsphere-backend backend
+      - name: Image runs as non-root
+        run: test "$(docker run --rm --entrypoint id shopsphere-backend -u)" != 0

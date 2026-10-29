@@ -10,6 +10,12 @@
 [build.environment]
   NODE_VERSION = "24"
 
+# A missing hashed asset is a 404, not the HTML shell.
+[[redirects]]
+  from = "/assets/*"
+  to = "/404.html"
+  status = 404
+
 # Real files win over a rewrite (force = false): assets, prerendered pages and sw.js are served as they are.
 # The SPA shell answers every other extension-less URL; a missing /assets/x.js stays a 404.
 [[redirects]]

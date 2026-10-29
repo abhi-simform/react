@@ -1,0 +1,128 @@
+# 14.4: quality gates for the storefront. The same commands you run locally (`npm run check`), split into jobs so a
+# failure names the step and the slow e2e job runs in parallel with the fast checks.
+# Branch protection (repository settings): require the "Frontend / checks", "Frontend / e2e" and "Frontend / docker"
+# status checks before merging to master.
+name: Frontend
+
+on:
+  push:
+    branches: [master]
+    paths: ["frontend/**", ".github/workflows/frontend-ci.yml", "docker-compose.yml"]
+  pull_request:
+    paths: ["frontend/**", "backend/**", ".github/workflows/frontend-ci.yml", "docker-compose.yml"]
+
+# A newer push to the same branch makes the older run pointless: cancel it (saves minutes and queue time).
+concurrency:
+  group: frontend-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  NODE_VERSION: "24"
+  # Public, build-time values. A real deploy sets the production API URL in the host, not here.
+  VITE_API_URL: http://localhost:4000/api/v1
+  VITE_SITE_URL: http://localhost:5173
+  VITE_RELEASE: ${{ github.sha }}
+
+jobs:
+  checks:
+    name: checks
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: npm ci
+      - name: Format
+        run: npm run format:check
+      - name: Lint
+        run: npm run lint
+      - name: Typecheck
+        run: npm run typecheck
+      - name: Unit and component tests
+        run: npm test
+      - name: Build
+        run: npm run build
+      - name: No secret or source map in the production bundle
+        run: npm run check:bundle-secrets
+      - name: Upload the production build
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-build
+          path: frontend/build/client
+          retention-days: 7
+
+  e2e:
+    name: e2e
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      CI: "true"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: |
+            frontend/package-lock.json
+            backend/package-lock.json
+      - name: Infrastructure (MongoDB replica set + Mailpit) from docker compose
+        run: docker compose up -d --wait mongo mailpit
+      - name: Backend dependencies and env
+        working-directory: backend
+        run: |
+          npm ci
+          cp .env.example .env
+      - name: Frontend dependencies
+        working-directory: frontend
+        run: npm ci
+      - name: Browsers
+        working-directory: frontend
+        run: npx playwright install --with-deps chromium
+      # Playwright starts the API (`npm run dev` in ../backend) and builds + serves the storefront itself, and
+      # `global-setup.ts` resets and seeds the database.
+      - name: End-to-end tests
+        working-directory: frontend
+        run: npx playwright test
+      - name: Upload the HTML report and traces
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: |
+            frontend/playwright-report
+            frontend/e2e/.results
+          retention-days: 14
+      - name: Logs when the stack misbehaves
+        if: failure()
+        run: docker compose logs --no-color --tail=100 mongo mailpit
+
+  docker:
+    name: docker
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build the static image
+        run: docker build -t shopsphere-frontend --build-arg VITE_API_URL=$VITE_API_URL --build-arg VITE_RELEASE=$VITE_RELEASE frontend
+      - name: Image must be small and must serve deep links
+        run: |
+          size=$(docker image inspect shopsphere-frontend --format '{{.Size}}')
+          echo "image size: $((size / 1024 / 1024)) MB"
+          test "$size" -lt $((60 * 1024 * 1024))
+          docker run -d --rm --name fe -p 8080:8080 shopsphere-frontend
+          sleep 2
+          test "$(curl -s -o /dev/null -w '%{http_code}' localhost:8080/p/some-product)" = 200
+          test "$(curl -s -o /dev/null -w '%{http_code}' localhost:8080/assets/missing.js)" = 404
+          curl -sI localhost:8080/ | grep -i '^cache-control: no-cache'
+          docker stop fe
