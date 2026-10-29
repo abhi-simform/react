@@ -505,3 +505,18 @@ No new endpoints. Configuration only (full table: `frontend/docs/environments.md
 - **Seed guard** (`src/seed/guard.ts`): `npm run seed` is idempotent. Against a non-local `MONGODB_URI`, `--reset` (drops the database) additionally requires `--i-know-this-wipes-the-database`, and the seeded accounts get `SEED_PASSWORD` (12+ characters) instead of the public development password.
 - Every response carries `x-request-id` (exposed to browsers by CORS); the frontend puts it on error reports (tag `request_id`) and on the error page ("Reference"), and the same id is in the pino log line of that request (`req.id`).
 - `GET /api/v1/health` is the liveness check for hosts and uptime monitors (`"db":"up"` when MongoDB answers).
+
+### Analytics (B11, admin dashboard + seller view + "My spending")
+
+All GETs, Bearer. `/admin/analytics/*` is admin only (platform-wide); `/seller/analytics/*` is seller or admin and is **pinned to the caller's own products and order lines** (a seller's "revenue" is the sum of their lines, never the order total, shipping or another seller's lines). The seller set has no `/funnel`.
+
+Range on every endpoint except `low-stock`: `?days=7|30|90|...` (a preset ending now, default 30) **or** `?from=YYYY-MM-DD&to=YYYY-MM-DD` (inclusive, India calendar days; `to` defaults to today). `from > to` is `422`. Days are IST (UTC+5:30), money is whole rupees. "Sold" orders = placed, packed, shipped, out_for_delivery, delivered, return_requested (not unpaid, cancelled, returned, refunded).
+
+- `GET /overview` -> `{ range, revenue, orders, averageOrderValue, unitsSold, newCustomers (null for sellers) }` each `{ value, previous, deltaPct }` (previous = the equal-length period right before; `deltaPct` is `null` when previous is 0 and value is not), plus `attention: { toShip, returnsOpen, lowStock, lowStockThreshold }`.
+- `GET /revenue` -> `{ range, total, points: [{ date, revenue, orders }] }`, one point per day, zeros filled.
+- `GET /orders-by-status` -> `[{ status, count, amount }]` (every status, including cancelled/unpaid).
+- `GET /top-products?limit(<=20, default 5)&by=revenue|units` -> `[{ productId, name, slug, sku, image, stock, revenue, units }]`.
+- `GET /category-share` -> `[{ categoryId, name, slug, revenue, sharePct }]` rolled up to the **root** category.
+- `GET /low-stock?threshold&limit` -> `{ threshold, total, items }` (active products, `stock <= threshold`; default threshold = the `lowStockThreshold` platform setting).
+- `GET /funnel` (admin) -> `{ range, steps: [{ key: viewed|cart|checkout|paid, label, count, ofPrevious, ofFirst }] }`. Counts are **distinct signed-in shoppers** (guests are not tracked): recently-viewed rows, non-empty carts touched in range, shoppers with any order, shoppers with a non-cancelled paid-or-COD order. A step can exceed the previous one if data is odd, so rates are `null`-safe percentages, not guarantees.
+- `GET /me/spending?months=6` (any signed-in user) -> `{ months, total, orders, points: [{ month: "2026-10", spent, orders }] }`, the account page chart.

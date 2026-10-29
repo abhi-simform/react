@@ -720,6 +720,236 @@ async function main() {
     }
   }
 
+  // B11: three months of mixed-status orders from the reviewer accounts, so the admin dashboard has a
+  // trend to draw, plus views and carts for the conversion funnel and a few paid online orders
+  // (with a Payment row) to try refunds on. Historical snapshots: stock/soldCount are not touched.
+  {
+    const buyers = await User.find({ email: /^reviewer\d+@/ }).lean()
+    const pool = await Product.find({ status: "active" })
+      .sort({ soldCount: -1 })
+      .limit(120)
+      .lean()
+    const day = 86_400_000
+    const mix: [OrderStatus, number][] = [
+      ["delivered", 52],
+      ["delivered", 0],
+      ["shipped", 8],
+      ["packed", 6],
+      ["placed", 9],
+      ["cancelled", 7],
+      ["return_requested", 3],
+      ["pending_payment", 3],
+      ["returned", 2],
+      ["refunded", 2],
+    ]
+    const statuses = mix.flatMap(([st, w]) => Array<OrderStatus>(w).fill(st))
+    const flowTo = (st: OrderStatus): OrderStatus[] => {
+      const base: OrderStatus[] = [
+        "placed",
+        "packed",
+        "shipped",
+        "out_for_delivery",
+        "delivered",
+      ]
+      if (st === "pending_payment") return ["pending_payment"]
+      if (st === "cancelled") return ["placed", "cancelled"]
+      if (st === "return_requested") return [...base, "return_requested"]
+      if (st === "returned") return [...base, "return_requested", "returned"]
+      if (st === "refunded") return [...base, "return_requested", "returned", "refunded"]
+      return base.slice(0, base.indexOf(st) + 1)
+    }
+    const rows: Record<string, unknown>[] = []
+    const payments: Record<string, unknown>[] = []
+    let n = 0
+    for (let d = 89; d >= 0; d--) {
+      // A gentle upward trend with weekend bumps: 1-3 orders a day early on, 3-6 lately.
+      const perDay =
+        faker.number.int({ min: 1, max: 3 }) +
+        Math.round((90 - d) / 30) +
+        (d % 7 < 2 ? 1 : 0)
+      for (let k = 0; k < perDay; k++) {
+        const buyer = faker.helpers.arrayElement(buyers)
+        let status = faker.helpers.arrayElement(statuses)
+        // Recent days have not had time to be delivered/returned.
+        if (
+          d < 2 &&
+          ["delivered", "returned", "refunded", "return_requested"].includes(status)
+        )
+          status = faker.helpers.arrayElement<OrderStatus>([
+            "placed",
+            "packed",
+            "shipped",
+          ])
+        const basket = faker.helpers.arrayElements(
+          pool,
+          faker.number.int({ min: 1, max: 3 })
+        )
+        const items = basket.map((p) => {
+          const qty = faker.number.int({ min: 1, max: 2 })
+          return {
+            product: p._id,
+            sku: p.sku,
+            title: p.name,
+            image: p.images[0]?.url,
+            unitPrice: p.price,
+            mrp: p.mrp,
+            qty,
+            lineTotal: p.price * qty,
+          }
+        })
+        const subtotal = items.reduce((t, i) => t + i.lineTotal, 0)
+        const shipping = subtotal > 499 ? 0 : 40
+        const tax = Math.round(subtotal * 0.18)
+        const createdAt = new Date(
+          Date.now() - d * day - faker.number.int({ min: 0, max: 20 }) * 3_600_000
+        )
+        const online = faker.datatype.boolean({ probability: 0.4 })
+        const flow = flowTo(status)
+        const at = (i: number) => new Date(createdAt.getTime() + i * 8 * 3_600_000)
+        const paid = !["pending_payment", "cancelled"].includes(status)
+        const delivered = flow.includes("delivered")
+        const id = new mongoose.Types.ObjectId()
+        const num = `SS-SEED-B11-${String(++n).padStart(5, "0")}`
+        rows.push({
+          _id: id,
+          orderNumber: num,
+          user: buyer._id,
+          items,
+          addressSnapshot: {
+            fullName: buyer.name,
+            phone: "9876500000",
+            line1: "12 Park Street",
+            city: "Mumbai",
+            state: "Maharashtra",
+            pincode: "400001",
+            type: "home",
+          },
+          delivery: { method: "standard" },
+          status,
+          statusHistory: flow.map((st, i) => ({ status: st, at: at(i) })),
+          pricing: {
+            subtotal,
+            discount: 0,
+            shipping,
+            tax,
+            total: subtotal + shipping + tax,
+          },
+          payment: {
+            method: online ? "razorpay" : "cod",
+            status:
+              status === "refunded"
+                ? "refunded"
+                : paid && (online || delivered)
+                  ? "paid"
+                  : "pending",
+          },
+          ...(status === "cancelled"
+            ? { cancelledAt: at(1), cancelReason: "Changed my mind" }
+            : {}),
+          ...(delivered ? { deliveredAt: at(4) } : {}),
+          ...(["return_requested", "returned", "refunded"].includes(status)
+            ? {
+                returnRequest: {
+                  reason: "DAMAGED",
+                  note: "Arrived with a cracked corner",
+                  requestedAt: at(5),
+                  status:
+                    status === "return_requested"
+                      ? "requested"
+                      : status === "returned"
+                        ? "approved"
+                        : "refunded",
+                  refundAmount: items[0]!.lineTotal,
+                  items: [
+                    {
+                      product: items[0]!.product,
+                      title: items[0]!.title,
+                      qty: items[0]!.qty,
+                      unitPrice: items[0]!.unitPrice,
+                    },
+                  ],
+                  photos: [],
+                  history: [
+                    {
+                      status: "requested",
+                      at: at(5),
+                      note: "Arrived with a cracked corner",
+                    },
+                  ],
+                },
+              }
+            : {}),
+          createdAt,
+          updatedAt: at(flow.length),
+        })
+        if (online && paid) {
+          const total = subtotal + shipping + tax
+          payments.push({
+            order: id,
+            user: buyer._id,
+            orderNumber: num,
+            provider: "mock",
+            providerOrderId: `order_seed_${n}`,
+            providerPaymentId: `pay_seed_${n}`,
+            amount: total,
+            status: "paid",
+            method: faker.helpers.arrayElement(["card", "upi", "netbanking"]),
+            attempts: 1,
+            paidAt: at(0),
+            refundedAmount: status === "refunded" ? items[0]!.lineTotal : 0,
+            refunds:
+              status === "refunded"
+                ? [
+                    {
+                      providerRefundId: `rfnd_seed_${n}`,
+                      amount: items[0]!.lineTotal,
+                      status: "processed",
+                      reason: "Return refunded",
+                      createdAt: at(7),
+                      processedAt: at(7),
+                    },
+                  ]
+                : [],
+            createdAt: at(0),
+            updatedAt: at(0),
+          })
+        }
+      }
+    }
+    await Order.insertMany(rows, { timestamps: false })
+    await Payment.insertMany(payments, { timestamps: false })
+    // Funnel inputs: 25 more shoppers who only browse, every buyer browsed too, and about half of everyone
+    // has something sitting in a cart (the order rows above are the checkout and paid steps).
+    const visitors = await User.insertMany(
+      Array.from({ length: 25 }, (_, i) => ({
+        name: `Visitor ${i + 1}`,
+        email: `visitor${String(i + 1).padStart(2, "0")}@shopsphere.dev`,
+        role: "customer" as const,
+        emailVerified: true,
+        passwordHash,
+      }))
+    )
+    const shoppers = [...buyers, ...visitors]
+    const since = (hours: number) => new Date(Date.now() - hours * 3_600_000)
+    await RecentlyViewed.insertMany(
+      shoppers.flatMap((b) =>
+        faker.helpers.arrayElements(pool, 3).map((p) => ({
+          user: b._id,
+          product: p._id,
+          viewedAt: since(faker.number.int({ min: 1, max: 24 * 28 })),
+        }))
+      )
+    )
+    for (const b of faker.helpers.arrayElements(shoppers, 22)) {
+      const p = faker.helpers.arrayElement(pool)
+      await Cart.updateOne(
+        { user: b._id },
+        { $setOnInsert: { items: [{ product: p._id, qty: 1, priceAtAdd: p.price }] } },
+        { upsert: true }
+      )
+    }
+  }
+
   // B9: the dev customer's notification history, built from their seeded orders with the SAME
   // templates the live system uses. Older ones are read; the newest few are unread (bell badge).
   if (customer) {

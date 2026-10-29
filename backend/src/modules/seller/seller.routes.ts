@@ -2,6 +2,7 @@ import { Router } from "express"
 import { authenticate, authorize } from "../../middleware/auth.js"
 import { ok } from "../../utils/response.js"
 import { staffProductRoutes } from "../products/product.admin.routes.js"
+import { analyticsRoutes } from "../analytics/analytics.routes.js"
 import { Product } from "../products/product.model.js"
 
 // Placeholder for the seller portal API (B11). It exists in B10 so the role gate can be
@@ -14,3 +15,5 @@ sellerRoutes.get("/me", async (req, res) => {
 })
 // Seller catalog: the same handlers as /admin/products, pinned to the caller's own products.
 sellerRoutes.use("/products", staffProductRoutes("own"))
+// Seller analytics: the same aggregations, only over the caller's own products and order lines.
+sellerRoutes.use("/analytics", analyticsRoutes("own"))

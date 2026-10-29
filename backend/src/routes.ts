@@ -47,6 +47,10 @@ import { configRoutes } from "./modules/config/config.routes.js"
 import { adminMetricsRoutes, metricsRoutes } from "./modules/metrics/metrics.routes.js"
 import { optionalAuth } from "./middleware/auth.js"
 import { staffWriteLimiter } from "./middleware/rateLimit.js"
+import {
+  adminAnalyticsRoutes,
+  spendingRoutes,
+} from "./modules/analytics/analytics.routes.js"
 import { userRoutes } from "./modules/users/user.routes.js"
 import { adminUserRoutes } from "./modules/users/user.admin.routes.js"
 
@@ -60,6 +64,8 @@ routes.use("/config", configRoutes)
 routes.use("/metrics", metricsRoutes)
 routes.use("/admin/metrics", adminMetricsRoutes)
 routes.use("/admin/audit-logs", adminAuditRoutes)
+routes.use("/admin/analytics", adminAnalyticsRoutes)
+routes.use("/me/spending", spendingRoutes)
 routes.use("/admin/products", adminProductRoutes)
 routes.use("/admin/categories", adminCategoryRoutes)
 routes.use("/admin/brands", adminBrandRoutes)
