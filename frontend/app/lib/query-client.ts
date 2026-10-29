@@ -58,36 +58,39 @@ export function isUnexpected(error: unknown): boolean {
 }
 
 /**
- * ONE QueryClient for the whole app, created at module scope: a client created inside a
- * component body would be rebuilt (and its cache lost) on every render. The app runs in SPA
- * mode, so a module singleton is safe; with SSR each request would need its own client
- * (otherwise one user's cache leaks into the next response).
+ * 14.8 (SSR experiment): a FACTORY. In the browser there is one client for the page's lifetime (below). On the server
+ * a module-level client would be shared by every request: one user's cached cart or profile could end up in the next
+ * user's HTML. `root.tsx` therefore builds a fresh client per server render.
  */
-export const queryClient = new QueryClient({
-  // The global mutation error handler (9.4): one consistent toast for unexpected failures. A
-  // fixed toast `id` makes Sonner REPLACE it instead of stacking, so a burst of failures (or a
-  // handler that also toasts) still shows exactly one. `meta: { silent: true }` opts out.
-  mutationCache: new MutationCache({
-    onError: (error, _variables, _context, mutation) => {
-      if (mutation.meta?.silent || !isUnexpected(error)) return
-      toast.error("Something went wrong on our side", {
-        id: "mutation-error",
-        description: error instanceof ApiError ? error.message : undefined,
-      })
+export const createQueryClient = () =>
+  new QueryClient({
+    // The global mutation error handler (9.4): one consistent toast for unexpected failures. A
+    // fixed toast `id` makes Sonner REPLACE it instead of stacking, so a burst of failures (or a
+    // handler that also toasts) still shows exactly one. `meta: { silent: true }` opts out.
+    mutationCache: new MutationCache({
+      onError: (error, _variables, _context, mutation) => {
+        if (mutation.meta?.silent || !isUnexpected(error)) return
+        toast.error("Something went wrong on our side", {
+          id: "mutation-error",
+          description: error instanceof ApiError ? error.message : undefined,
+        })
+      },
+    }),
+    defaultOptions: {
+      queries: {
+        // A middle default; every feature picks its own from `STALE` (see queries.ts files).
+        staleTime: STALE.catalog,
+        // Inactive data is kept 5 minutes after its LAST observer unmounts (the v5 default, said out loud).
+        gcTime: 5 * MINUTE,
+        retry: shouldRetry,
+        refetchOnWindowFocus: true,
+        refetchOnReconnect: true,
+      },
     },
-  }),
-  defaultOptions: {
-    queries: {
-      // A middle default; every feature picks its own from `STALE` (see queries.ts files).
-      staleTime: STALE.catalog,
-      // Inactive data is kept 5 minutes after its LAST observer unmounts (the v5 default, said out loud).
-      gcTime: 5 * MINUTE,
-      retry: shouldRetry,
-      refetchOnWindowFocus: true,
-      refetchOnReconnect: true,
-    },
-  },
-})
+  })
+
+/** The browser's one client (module scope: a client made inside a component would be rebuilt on every render). */
+export const queryClient = createQueryClient()
 
 // Dev only: `window.queryClient.invalidateQueries(...)` from the console (9.2).
 if (import.meta.env.DEV && typeof window !== "undefined") {

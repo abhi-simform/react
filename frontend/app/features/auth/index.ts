@@ -20,4 +20,4 @@ export {
 } from "./session"
 export { broadcastAuth } from "./authChannel"
 export type { AuthStatus, AuthUser, Role } from "./types"
-export { passwordField } from "./schemas"
+export { loginSchema, passwordField } from "./schemas"

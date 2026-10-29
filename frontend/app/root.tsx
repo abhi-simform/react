@@ -1,6 +1,6 @@
 import { QueryClientProvider } from "@tanstack/react-query"
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools"
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
 import { Links, Meta, Outlet, Scripts, ScrollRestoration } from "react-router"
 
 import type { Route } from "./+types/root"
@@ -17,7 +17,7 @@ import { ToastProvider } from "@/features/toast"
 import { env } from "@/lib/env"
 import { installGlobalErrorReporting } from "@/lib/globalErrors"
 import { canonicalUrl, pageMeta } from "@/lib/seo"
-import { queryClient } from "@/lib/query-client"
+import { createQueryClient, queryClient } from "@/lib/query-client"
 import { initObservability } from "@/lib/observability"
 import { reportWebVitals } from "@/lib/vitals"
 
@@ -65,8 +65,10 @@ export function meta() {
 }
 
 export function Layout({ children }: { children: React.ReactNode }) {
+  // 14.8: the inline theme script sets class/style/color-scheme on <html> BEFORE hydration (no flash of the wrong
+  // theme): a deliberate server/client difference, so React must not warn about it (only this one element).
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -98,6 +100,10 @@ export function Layout({ children }: { children: React.ReactNode }) {
 }
 
 export default function App() {
+  // 14.8: one QueryClient per SERVER render (never shared between requests), the module singleton in the browser.
+  const [client] = useState(() =>
+    typeof window === "undefined" ? createQueryClient() : queryClient
+  )
   // Errors no boundary can catch (event handlers, timers, forgotten promises): reported once each.
   useEffect(() => installGlobalErrorReporting(), [])
   // Field Web Vitals (13.1): once per page load, console in dev, a beacon to the API in production.
@@ -112,7 +118,7 @@ export default function App() {
   // Order = dependency order: theme first (toasts read it), auth before anything that needs the
   // user (wishlist). Each one is a separate, small context: no mega-context.
   return (
-    <QueryClientProvider client={queryClient}>
+    <QueryClientProvider client={client}>
       <LocaleProvider>
         <ThemeProvider>
           <AuthProvider>

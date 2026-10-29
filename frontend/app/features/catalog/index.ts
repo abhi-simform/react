@@ -13,6 +13,7 @@ export {
 export type { PriceBucket, SortKey } from "./utils"
 export { getProduct, getProducts } from "./api"
 export {
+  categoryNodeSchema,
   productDetailSchema,
   productQuerySchema,
   productSchema,

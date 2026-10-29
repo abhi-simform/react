@@ -8,7 +8,7 @@ import { useDocumentTitle } from "@/hooks/useDocumentTitle"
 import { NotFoundError } from "@/lib/notFound"
 import { paths } from "@/lib/paths"
 
-import { toProductDetailVM } from "@/features/catalog"
+import { toProductDetailVM, type ProductDetail } from "@/features/catalog"
 import {
   AlsoBoughtRail,
   RecentlyViewedRail,
@@ -50,12 +50,26 @@ function RelatedProducts({
 }
 
 /** The PDP: fetch by slug, then loading / not found / error / content. */
-export function ProductDetailPage({ slug }: { slug: string }) {
+export function ProductDetailPage({
+  slug,
+  initialProduct,
+  initialLoadedAt,
+}: {
+  slug: string
+  /** 14.8: the product the server loader already fetched (SSR); omitted in SPA mode. */
+  initialProduct?: ProductDetail
+  initialLoadedAt?: number
+}) {
   // 3.5 bug demo: add ?bug-no-key to render WITHOUT the key and see product A's
   // selection, quantity and gallery index leak into product B.
   const [searchParams] = useSearchParams()
   const withoutKey = searchParams.has("bug-no-key")
-  const state = useProduct(slug)
+  const state = useProduct(
+    slug,
+    initialProduct && initialLoadedAt !== undefined
+      ? { product: initialProduct, loadedAt: initialLoadedAt }
+      : undefined
+  )
   // Generic title from the route's `meta` until the product is known, then its name.
   useDocumentTitle(state.status === "success" ? state.data.name : "Product")
 

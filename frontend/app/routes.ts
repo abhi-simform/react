@@ -27,6 +27,8 @@ export default [
     route("offline", "routes/offline.tsx"),
     // 14.6: the error-pipeline lab. Renders only in a build that has a Sentry DSN.
     route("debug/sentry", "routes/debug-sentry.tsx"),
+    // 14.8 (SSR experiment): the login form as a server action.
+    route("login-action", "routes/login-action.tsx"),
 
     // PublicOnly: signed-in users are bounced away from these.
     layout("routes/guards/public-only.tsx", [

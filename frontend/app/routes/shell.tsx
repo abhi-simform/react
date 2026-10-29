@@ -1,4 +1,5 @@
-import { Fragment, useRef } from "react"
+import { useQueryClient } from "@tanstack/react-query"
+import { Fragment, useRef, useState } from "react"
 import { Outlet, useMatches } from "react-router"
 
 import { OfflineBanner } from "@/components/common/OfflineBanner"
@@ -12,25 +13,40 @@ import { useLocale } from "@/features/i18n"
 import { CompareTray } from "@/features/compare"
 import { useRouteFocus } from "@/hooks/useRouteFocus"
 
-import { categoryQueries } from "@/features/catalog"
-import { queryClient } from "@/lib/query-client"
+import { categoryNodeSchema } from "@/features/catalog"
+import { categoryKeys } from "@/lib/queryKeys"
+import { serverGet } from "@/lib/serverApi.server"
+import { z } from "@/lib/zod"
 import { getBreadcrumb } from "@/types/route-handle"
 
 import type { Route } from "./+types/shell"
 
 /**
- * Prefetch at app start (9.7): the category tree is needed by the header menu on EVERY page, so
- * its request starts as soon as the shell route is matched, before the header renders. NOT
- * awaited (returning the promise would hold the whole page behind it); `prefetchQuery` never
- * throws, and the header's own `useQuery` joins the same in-flight request.
+ * 14.8 (SSR experiment). In SPA mode this route had a `clientLoader` that started the category request early (9.7).
+ * With SSR a route that has a `clientLoader` and NO server `loader` is NOT rendered on the server at all (React Router
+ * renders its `HydrateFallback`, i.e. nothing, and runs the clientLoader after hydration): every page's HTML was an
+ * empty body until this changed. A server `loader` fixes it: the header's category menu is in the HTML.
+ * It must never take the page down: if the API is slow or fails, `categories` is null and the client fetches as before.
  */
-export function clientLoader() {
-  void queryClient.prefetchQuery(categoryQueries.tree())
-  return null
+export async function loader() {
+  const categories = await serverGet(
+    "/categories",
+    z.array(categoryNodeSchema)
+  ).catch(() => null)
+  return { categories, loadedAt: Date.now() }
 }
 
 /** Landmarks: header (banner), nav (inside Header), main, footer (contentinfo). */
-export default function ShellLayout() {
+export default function ShellLayout({ loaderData }: Route.ComponentProps) {
+  // Seed the (per-request on the server) query cache once, before the header renders and calls useQuery.
+  const client = useQueryClient()
+  useState(() => {
+    const key = categoryKeys.tree()
+    // `loaderData` is undefined when the component is rendered by a test router that has no loaders.
+    const seed = loaderData as typeof loaderData | undefined
+    if (seed?.categories && !client.getQueryData(key))
+      client.setQueryData(key, seed.categories, { updatedAt: seed.loadedAt })
+  })
   const { version } = useLocale()
   const mainRef = useRef<HTMLElement>(null)
   const liveRef = useRef<HTMLDivElement>(null)

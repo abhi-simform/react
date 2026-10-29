@@ -103,7 +103,9 @@ export function ProductDetailView({
             })}
           </p>
         )}
-        <p className="text-xs text-muted-foreground">
+        {/* 14.8: a date and a "9 minutes ago" depend on the viewer's language and on WHEN they are computed: the server
+            and the browser legitimately differ, so this one text node is exempt from the hydration check. */}
+        <p className="text-xs text-muted-foreground" suppressHydrationWarning>
           {t("listed", {
             listed: product.listedOn,
             updated: product.updatedAgo,

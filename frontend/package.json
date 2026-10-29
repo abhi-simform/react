@@ -3,9 +3,10 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "react-router build && node scripts/build-headers.mjs && node scripts/build-sw.mjs",
+    "build": "react-router build",
     "dev": "react-router dev",
-    "start": "node scripts/serve-spa.mjs",
+    "start": "react-router-serve ./build/server/index.js",
+    "ssr:check": "node scripts/ssr-check.mjs",
     "preview": "npm run build && npm start",
     "typecheck": "react-router typegen && tsc",
     "format": "prettier --write \"**/*.{ts,tsx}\"",
