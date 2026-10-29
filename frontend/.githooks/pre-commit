@@ -1,4 +1,9 @@
 #!/bin/sh
 # Stage 12.10: format + lint ONLY the staged TypeScript files, block the commit on errors.
 # (Bypass in an emergency with `git commit --no-verify`; CI runs `npm run check` anyway.)
-cd "$(git rev-parse --show-toplevel)/frontend" && npx lint-staged
+# Admin track: /admin is a separate app with its own lint-staged config; each app only sees ITS staged files.
+root="$(git rev-parse --show-toplevel)"
+cd "$root/frontend" && npx lint-staged || exit 1
+if [ -d "$root/admin/node_modules" ]; then
+  cd "$root/admin" && npx lint-staged || exit 1
+fi

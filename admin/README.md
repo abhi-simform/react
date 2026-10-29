@@ -1,21 +1,14 @@
-# TanStack Start + shadcn/ui
+# ShopSphere Admin (TanStack Start + Router + Query + Table + shadcn)
 
-This is a template for a new TanStack Start project with React, TypeScript, and shadcn/ui.
-
-## Adding components
-
-To add components to your app, run the following command:
+Admin and seller console for the ShopSphere API. Pages render in the browser only (`src/start.ts`: `defaultSsr: false`).
 
 ```bash
-npx shadcn@latest add button
+cp .env.example .env.local        # VITE_API_URL=http://localhost:4000/api/v1
+npm install
+npm run dev                       # http://localhost:3000 (the API's CORS allows it)
+npm run typecheck && npm run lint && npm run build
 ```
 
-This will place the ui components in the `components` directory.
+Dev logins (after `npm run seed` in `/backend`): `admin@shopsphere.dev`, `seller@shopsphere.dev`, `seller2@shopsphere.dev` (password printed by the seed). A `customer@` login is refused by the shell.
 
-## Using components
-
-To use the components in your app, import them as follows:
-
-```tsx
-import { Button } from "@/components/ui/button";
-```
+Notes: `docs/learning-notes.md`, `docs/pain-journal.md`.
