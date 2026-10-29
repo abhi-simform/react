@@ -1,0 +1,846 @@
+From ffd7f6b88b23e0170048be98a8cb25450fa09edf Mon Sep 17 00:00:00 2001
+From: Abhishek Sawant <abhishek.sawant@simformsolutions.com>
+Date: Thu, 29 Oct 2026 07:47:27 +0530
+Subject: [PATCH 1/2] 14.8 SSR experiment: ssr true, server loaders (PDP,
+ shell), per-request QueryClient, login as a server action, hydration fixes,
+ ssr-check script
+
+---
+ frontend/app/features/auth/index.ts           |   2 +-
+ frontend/app/features/catalog/index.ts        |   1 +
+ .../product/components/ProductDetailPage.tsx  |  20 ++-
+ .../product/components/ProductDetailView.tsx  |   4 +-
+ .../app/features/product/hooks/useProduct.ts  |  16 ++-
+ .../app/features/theme/themeScript.test.tsx   |   2 +-
+ frontend/app/hooks/useInView.ts               |  25 ++--
+ frontend/app/lib/query-client.ts              |  59 ++++----
+ frontend/app/lib/serverApi.server.ts          |  70 ++++++++++
+ frontend/app/root.tsx                         |  14 +-
+ frontend/app/routes.ts                        |   2 +
+ frontend/app/routes/login-action.tsx          | 130 ++++++++++++++++++
+ frontend/app/routes/product-detail.tsx        |  54 +++++++-
+ frontend/app/routes/shell.tsx                 |  38 +++--
+ frontend/package.json                         |   5 +-
+ frontend/react-router.config.ts               |   2 +-
+ frontend/scripts/ssr-check.mjs                |  70 ++++++++++
+ 17 files changed, 447 insertions(+), 67 deletions(-)
+ create mode 100644 frontend/app/lib/serverApi.server.ts
+ create mode 100644 frontend/app/routes/login-action.tsx
+ create mode 100644 frontend/scripts/ssr-check.mjs
+
+diff --git a/frontend/app/features/auth/index.ts b/frontend/app/features/auth/index.ts
+index 7502682..86d97f9 100644
+--- a/frontend/app/features/auth/index.ts
++++ b/frontend/app/features/auth/index.ts
+@@ -20,4 +20,4 @@ export {
+ } from "./session"
+ export { broadcastAuth } from "./authChannel"
+ export type { AuthStatus, AuthUser, Role } from "./types"
+-export { passwordField } from "./schemas"
++export { loginSchema, passwordField } from "./schemas"
+diff --git a/frontend/app/features/catalog/index.ts b/frontend/app/features/catalog/index.ts
+index b98968b..e4f92cf 100644
+--- a/frontend/app/features/catalog/index.ts
++++ b/frontend/app/features/catalog/index.ts
+@@ -13,6 +13,7 @@ export {
+ export type { PriceBucket, SortKey } from "./utils"
+ export { getProduct, getProducts } from "./api"
+ export {
++  categoryNodeSchema,
+   productDetailSchema,
+   productQuerySchema,
+   productSchema,
+diff --git a/frontend/app/features/product/components/ProductDetailPage.tsx b/frontend/app/features/product/components/ProductDetailPage.tsx
+index 8616c88..ca9df7e 100644
+--- a/frontend/app/features/product/components/ProductDetailPage.tsx
++++ b/frontend/app/features/product/components/ProductDetailPage.tsx
+@@ -8,7 +8,7 @@ import { useDocumentTitle } from "@/hooks/useDocumentTitle"
+ import { NotFoundError } from "@/lib/notFound"
+ import { paths } from "@/lib/paths"
+ 
+-import { toProductDetailVM } from "@/features/catalog"
++import { toProductDetailVM, type ProductDetail } from "@/features/catalog"
+ import {
+   AlsoBoughtRail,
+   RecentlyViewedRail,
+@@ -50,12 +50,26 @@ function RelatedProducts({
+ }
+ 
+ /** The PDP: fetch by slug, then loading / not found / error / content. */
+-export function ProductDetailPage({ slug }: { slug: string }) {
++export function ProductDetailPage({
++  slug,
++  initialProduct,
++  initialLoadedAt,
++}: {
++  slug: string
++  /** 14.8: the product the server loader already fetched (SSR); omitted in SPA mode. */
++  initialProduct?: ProductDetail
++  initialLoadedAt?: number
++}) {
+   // 3.5 bug demo: add ?bug-no-key to render WITHOUT the key and see product A's
+   // selection, quantity and gallery index leak into product B.
+   const [searchParams] = useSearchParams()
+   const withoutKey = searchParams.has("bug-no-key")
+-  const state = useProduct(slug)
++  const state = useProduct(
++    slug,
++    initialProduct && initialLoadedAt !== undefined
++      ? { product: initialProduct, loadedAt: initialLoadedAt }
++      : undefined
++  )
+   // Generic title from the route's `meta` until the product is known, then its name.
+   useDocumentTitle(state.status === "success" ? state.data.name : "Product")
+ 
+diff --git a/frontend/app/features/product/components/ProductDetailView.tsx b/frontend/app/features/product/components/ProductDetailView.tsx
+index eef1c31..2249a91 100644
+--- a/frontend/app/features/product/components/ProductDetailView.tsx
++++ b/frontend/app/features/product/components/ProductDetailView.tsx
+@@ -102,7 +102,9 @@ export function ProductDetailView({
+             })}
+           </p>
+         )}
+-        <p className="text-xs text-muted-foreground">
++        {/* 14.8: a date and a "9 minutes ago" depend on the viewer's language and on WHEN they are computed: the server
++            and the browser legitimately differ, so this one text node is exempt from the hydration check. */}
++        <p className="text-xs text-muted-foreground" suppressHydrationWarning>
+           {t("listed", {
+             listed: product.listedOn,
+             updated: product.updatedAgo,
+diff --git a/frontend/app/features/product/hooks/useProduct.ts b/frontend/app/features/product/hooks/useProduct.ts
+index fd37c9d..f48794c 100644
+--- a/frontend/app/features/product/hooks/useProduct.ts
++++ b/frontend/app/features/product/hooks/useProduct.ts
+@@ -1,6 +1,10 @@
+ import { useQuery, useQueryClient } from "@tanstack/react-query"
+ 
+-import { findProductInCache, productQueries } from "@/features/catalog"
++import {
++  findProductInCache,
++  productQueries,
++  type ProductDetail,
++} from "@/features/catalog"
+ import { toAsyncState } from "@/lib/queryState"
+ 
+ import { relatedQueries } from "../queries"
+@@ -11,10 +15,18 @@ import { relatedQueries } from "../queries"
+  * the same product (9.7); `isPlaceholder` tells the page the long-form fields are not here yet.
+  * Placeholder data is NOT written to the cache and the request is always made.
+  */
+-export function useProduct(slug: string) {
++export function useProduct(
++  slug: string,
++  seed?: { product: ProductDetail; loadedAt: number }
++) {
+   const queryClient = useQueryClient()
+   const query = useQuery({
+     ...productQueries.detail(slug),
++    // 14.8: the server already fetched it. `initialDataUpdatedAt` = when, so `staleTime` counts from the server fetch
++    // (no immediate refetch on mount, no duplicate request) and the data is revalidated once it is stale.
++    ...(seed
++      ? { initialData: seed.product, initialDataUpdatedAt: seed.loadedAt }
++      : {}),
+     placeholderData: () => findProductInCache(queryClient, slug),
+   })
+   return { ...toAsyncState(query), isPlaceholder: query.isPlaceholderData }
+diff --git a/frontend/app/features/theme/themeScript.test.tsx b/frontend/app/features/theme/themeScript.test.tsx
+index 26f3b80..d34045f 100644
+--- a/frontend/app/features/theme/themeScript.test.tsx
++++ b/frontend/app/features/theme/themeScript.test.tsx
+@@ -63,7 +63,7 @@ describe("themeInitScript (no flash of the wrong theme)", () => {
+     const built = existsSync("build/client/_headers")
+       ? readFileSync("build/client/_headers", "utf8")
+       : null
+-    if (built) {
++    if (built && !built.includes("__SCRIPT_HASHES__")) {
+       const hash = createHash("sha256").update(themeInitScript).digest("base64")
+       expect(built).toContain(`'sha256-${hash}'`)
+     }
+diff --git a/frontend/app/hooks/useInView.ts b/frontend/app/hooks/useInView.ts
+index 72ea2bf..8dd0aa1 100644
+--- a/frontend/app/hooks/useInView.ts
++++ b/frontend/app/hooks/useInView.ts
+@@ -1,4 +1,6 @@
+-import { useEffect, useRef, useState } from "react"
++import { useEffect, useRef, useState, useSyncExternalStore } from "react"
++
++const noopSubscribe = () => () => undefined
+ 
+ /**
+  * `true` once the element has come within `rootMargin` of the viewport (IntersectionObserver).
+@@ -11,26 +13,33 @@ export function useInView<T extends Element>({
+   once = true,
+ }: { rootMargin?: string; once?: boolean } = {}) {
+   const ref = useRef<T>(null)
+-  const [inView, setInView] = useState(
+-    () => typeof IntersectionObserver === "undefined"
++  // 14.8: the server (no IntersectionObserver) and the browser must render the SAME first HTML. `supported` uses
++  // useSyncExternalStore: the server snapshot is `true` (like the browser's), so the first client render matches the
++  // HTML; only then, if the browser really has no IntersectionObserver, React re-renders with `false` and the content
++  // counts as visible. (Deciding from `typeof IntersectionObserver` during render was a hydration mismatch.)
++  const supported = useSyncExternalStore(
++    noopSubscribe,
++    () => typeof IntersectionObserver !== "undefined",
++    () => true
+   )
++  const [observed, setObserved] = useState(false)
+ 
+   useEffect(() => {
+     const el = ref.current
+-    if (!el || typeof IntersectionObserver === "undefined") return
++    if (!el || !supported) return
+     const observer = new IntersectionObserver(
+       ([entry]) => {
+         if (!entry) return
+         if (entry.isIntersecting) {
+-          setInView(true)
++          setObserved(true)
+           if (once) observer.disconnect()
+-        } else if (!once) setInView(false)
++        } else if (!once) setObserved(false)
+       },
+       { rootMargin }
+     )
+     observer.observe(el)
+     return () => observer.disconnect()
+-  }, [rootMargin, once])
++  }, [rootMargin, once, supported])
+ 
+-  return [ref, inView] as const
++  return [ref, observed || !supported] as const
+ }
+diff --git a/frontend/app/lib/query-client.ts b/frontend/app/lib/query-client.ts
+index 11c9962..7db0aae 100644
+--- a/frontend/app/lib/query-client.ts
++++ b/frontend/app/lib/query-client.ts
+@@ -58,36 +58,39 @@ export function isUnexpected(error: unknown): boolean {
+ }
+ 
+ /**
+- * ONE QueryClient for the whole app, created at module scope: a client created inside a
+- * component body would be rebuilt (and its cache lost) on every render. The app runs in SPA
+- * mode, so a module singleton is safe; with SSR each request would need its own client
+- * (otherwise one user's cache leaks into the next response).
++ * 14.8 (SSR experiment): a FACTORY. In the browser there is one client for the page's lifetime (below). On the server
++ * a module-level client would be shared by every request: one user's cached cart or profile could end up in the next
++ * user's HTML. `root.tsx` therefore builds a fresh client per server render.
+  */
+-export const queryClient = new QueryClient({
+-  // The global mutation error handler (9.4): one consistent toast for unexpected failures. A
+-  // fixed toast `id` makes Sonner REPLACE it instead of stacking, so a burst of failures (or a
+-  // handler that also toasts) still shows exactly one. `meta: { silent: true }` opts out.
+-  mutationCache: new MutationCache({
+-    onError: (error, _variables, _context, mutation) => {
+-      if (mutation.meta?.silent || !isUnexpected(error)) return
+-      toast.error("Something went wrong on our side", {
+-        id: "mutation-error",
+-        description: error instanceof ApiError ? error.message : undefined,
+-      })
++export const createQueryClient = () =>
++  new QueryClient({
++    // The global mutation error handler (9.4): one consistent toast for unexpected failures. A
++    // fixed toast `id` makes Sonner REPLACE it instead of stacking, so a burst of failures (or a
++    // handler that also toasts) still shows exactly one. `meta: { silent: true }` opts out.
++    mutationCache: new MutationCache({
++      onError: (error, _variables, _context, mutation) => {
++        if (mutation.meta?.silent || !isUnexpected(error)) return
++        toast.error("Something went wrong on our side", {
++          id: "mutation-error",
++          description: error instanceof ApiError ? error.message : undefined,
++        })
++      },
++    }),
++    defaultOptions: {
++      queries: {
++        // A middle default; every feature picks its own from `STALE` (see queries.ts files).
++        staleTime: STALE.catalog,
++        // Inactive data is kept 5 minutes after its LAST observer unmounts (the v5 default, said out loud).
++        gcTime: 5 * MINUTE,
++        retry: shouldRetry,
++        refetchOnWindowFocus: true,
++        refetchOnReconnect: true,
++      },
+     },
+-  }),
+-  defaultOptions: {
+-    queries: {
+-      // A middle default; every feature picks its own from `STALE` (see queries.ts files).
+-      staleTime: STALE.catalog,
+-      // Inactive data is kept 5 minutes after its LAST observer unmounts (the v5 default, said out loud).
+-      gcTime: 5 * MINUTE,
+-      retry: shouldRetry,
+-      refetchOnWindowFocus: true,
+-      refetchOnReconnect: true,
+-    },
+-  },
+-})
++  })
++
++/** The browser's one client (module scope: a client made inside a component would be rebuilt on every render). */
++export const queryClient = createQueryClient()
+ 
+ // Dev only: `window.queryClient.invalidateQueries(...)` from the console (9.2).
+ if (import.meta.env.DEV && typeof window !== "undefined") {
+diff --git a/frontend/app/lib/serverApi.server.ts b/frontend/app/lib/serverApi.server.ts
+new file mode 100644
+index 0000000..63e372c
+--- /dev/null
++++ b/frontend/app/lib/serverApi.server.ts
+@@ -0,0 +1,70 @@
++import { ApiError } from "@/lib/api/errors"
++import { getJson } from "@/lib/api/getJson"
++import { isApiSuccess } from "@/lib/api/envelope"
++import type { z } from "zod"
++
++/**
++ * 14.8 (SSR experiment): the API as seen from the Node server. `.server.ts` = React Router drops this file from the
++ * browser bundle (importing it from client code is a build error), so nothing here can leak to a visitor.
++ *
++ * - The base URL may differ from the browser's: inside Docker/Render the server reaches the API over the private
++ *   network (`API_INTERNAL_URL=http://backend:4000/api/v1`), while the browser needs the public `VITE_API_URL`.
++ * - It reuses `getJson` (still the only `fetch` in the app: timeouts, ApiError mapping) and validates EVERY response
++ *   with the same Zod schema: on the server a contract change should fail loudly in the log, not render `undefined`.
++ * - No cookies are forwarded: the refresh cookie belongs to the API origin, so the server never has it (14.8 notes).
++ */
++const base = () =>
++  (process.env.API_INTERNAL_URL ?? import.meta.env.VITE_API_URL).replace(
++    /\/$/,
++    ""
++  )
++
++export async function serverGet<S extends z.ZodType>(
++  path: string,
++  schema: S,
++  init: { headers?: Record<string, string>; signal?: AbortSignal } = {}
++): Promise<z.output<S>> {
++  const { body } = await getJson(`${base()}${path}`, {
++    headers: { Accept: "application/json", ...init.headers },
++    signal: init.signal,
++    timeoutMs: 4000, // a server render must not wait 10 s for a slow API
++  })
++  if (!isApiSuccess(body))
++    throw new ApiError({
++      status: 200,
++      code: "BAD_ENVELOPE",
++      message: "Not a success envelope",
++    })
++  return schema.parse(body.data)
++}
++
++export { base as serverApiBase }
++
++/**
++ * A POST whose RESPONSE HEADERS matter (login: the API's `Set-Cookie`), so it cannot go through `getJson`
++ * (which returns status + body only). The one other `fetch` in the app, allowed because it lives in a server-only
++ * file. `clientIp` is passed on as `X-Forwarded-For`: the API's rate limiter keys on the caller's IP, and without it
++ * every login from every visitor would look like the SSR server's address (one shared bucket, locked out together).
++ */
++export async function serverPost(
++  path: string,
++  body: unknown,
++  meta: { clientIp?: string; userAgent?: string | null } = {}
++): Promise<{ status: number; json: unknown; setCookies: string[] }> {
++  const response = await fetch(`${base()}${path}`, {
++    method: "POST",
++    headers: {
++      "Content-Type": "application/json",
++      Accept: "application/json",
++      ...(meta.clientIp ? { "X-Forwarded-For": meta.clientIp } : {}),
++      ...(meta.userAgent ? { "User-Agent": meta.userAgent } : {}),
++    },
++    body: JSON.stringify(body),
++    signal: AbortSignal.timeout(8000),
++  })
++  return {
++    status: response.status,
++    json: await response.json().catch(() => undefined),
++    setCookies: response.headers.getSetCookie(),
++  }
++}
+diff --git a/frontend/app/root.tsx b/frontend/app/root.tsx
+index 5bc1fa5..a2a49d8 100644
+--- a/frontend/app/root.tsx
++++ b/frontend/app/root.tsx
+@@ -1,6 +1,6 @@
+ import { QueryClientProvider } from "@tanstack/react-query"
+ import { ReactQueryDevtools } from "@tanstack/react-query-devtools"
+-import { useEffect } from "react"
++import { useEffect, useState } from "react"
+ import { Links, Meta, Outlet, Scripts, ScrollRestoration } from "react-router"
+ 
+ import type { Route } from "./+types/root"
+@@ -17,7 +17,7 @@ import { ToastProvider } from "@/features/toast"
+ import { env } from "@/lib/env"
+ import { installGlobalErrorReporting } from "@/lib/globalErrors"
+ import { canonicalUrl, pageMeta } from "@/lib/seo"
+-import { queryClient } from "@/lib/query-client"
++import { createQueryClient, queryClient } from "@/lib/query-client"
+ import { initObservability } from "@/lib/observability"
+ import { reportWebVitals } from "@/lib/vitals"
+ 
+@@ -65,8 +65,10 @@ export function meta() {
+ }
+ 
+ export function Layout({ children }: { children: React.ReactNode }) {
++  // 14.8: the inline theme script sets class/style/color-scheme on <html> BEFORE hydration (no flash of the wrong
++  // theme): a deliberate server/client difference, so React must not warn about it (only this one element).
+   return (
+-    <html lang="en">
++    <html lang="en" suppressHydrationWarning>
+       <head>
+         <meta charSet="utf-8" />
+         <meta name="viewport" content="width=device-width, initial-scale=1" />
+@@ -98,6 +100,10 @@ export function Layout({ children }: { children: React.ReactNode }) {
+ }
+ 
+ export default function App() {
++  // 14.8: one QueryClient per SERVER render (never shared between requests), the module singleton in the browser.
++  const [client] = useState(() =>
++    typeof window === "undefined" ? createQueryClient() : queryClient
++  )
+   // Errors no boundary can catch (event handlers, timers, forgotten promises): reported once each.
+   useEffect(() => installGlobalErrorReporting(), [])
+   // Field Web Vitals (13.1): once per page load, console in dev, a beacon to the API in production.
+@@ -112,7 +118,7 @@ export default function App() {
+   // Order = dependency order: theme first (toasts read it), auth before anything that needs the
+   // user (wishlist). Each one is a separate, small context: no mega-context.
+   return (
+-    <QueryClientProvider client={queryClient}>
++    <QueryClientProvider client={client}>
+       <LocaleProvider>
+         <ThemeProvider>
+           <AuthProvider>
+diff --git a/frontend/app/routes.ts b/frontend/app/routes.ts
+index add558a..49b2c69 100644
+--- a/frontend/app/routes.ts
++++ b/frontend/app/routes.ts
+@@ -27,6 +27,8 @@ export default [
+     route("offline", "routes/offline.tsx"),
+     // 14.6: the error-pipeline lab. Renders only in a build that has a Sentry DSN.
+     route("debug/sentry", "routes/debug-sentry.tsx"),
++    // 14.8 (SSR experiment): the login form as a server action.
++    route("login-action", "routes/login-action.tsx"),
+ 
+     // PublicOnly: signed-in users are bounced away from these.
+     layout("routes/guards/public-only.tsx", [
+diff --git a/frontend/app/routes/login-action.tsx b/frontend/app/routes/login-action.tsx
+new file mode 100644
+index 0000000..2cc8477
+--- /dev/null
++++ b/frontend/app/routes/login-action.tsx
+@@ -0,0 +1,130 @@
++import { Form, Link, data, redirect, useNavigation } from "react-router"
++
++import { loginSchema } from "@/features/auth"
++import { isApiError } from "@/lib/api/envelope"
++import { serverPost } from "@/lib/serverApi.server"
++import { noindexMeta } from "@/lib/seo"
++
++import type { Route } from "./+types/login-action"
++
++/**
++ * 14.8 (SSR experiment): the login form as a React Router `action` + `<Form>`, to compare with the RHF + mutation
++ * version (`features/auth/components/LoginForm.tsx`).
++ *
++ * What it gains: it works WITHOUT JavaScript (a plain HTML form POST: progressive enhancement), the browser never
++ * holds the password in app state, validation runs on the server with the SAME Zod schema, and there is no loading
++ * state to build (`useNavigation`).
++ * What it loses: instant field validation as you type/blur (RHF), the single-flight and error-mapping helpers, and
++ * the access token: the action runs on the server, so the in-memory token model (10.x) does not apply. This version
++ * only forwards the API's refresh cookie; the page's silent `refresh` call then gets the session, as after a reload.
++ *
++ * Auth caveat that matters in production: the cookie below is set by the SSR server for ITS host. It reaches the API
++ * only if the API is on the same host/site AND the cookie's Domain/Path allow it (works on localhost, where cookies
++ * ignore ports; on `shop.` + `api.` subdomains the Set-Cookie would need `Domain=.example.com`). See the ADR.
++ */
++type FieldErrors = Record<string, string | undefined>
++
++export async function action({ request }: Route.ActionArgs) {
++  const form = await request.formData()
++  const parsed = loginSchema.safeParse({
++    email: form.get("email"),
++    password: form.get("password"),
++  })
++  if (!parsed.success) {
++    const fieldErrors: FieldErrors = {}
++    for (const issue of parsed.error.issues) {
++      const key = String(issue.path[0] ?? "form")
++      fieldErrors[key] ??= issue.message
++    }
++    return data({ fieldErrors, formError: null }, { status: 422 })
++  }
++
++  const result = await serverPost("/auth/login", parsed.data, {
++    clientIp: request.headers.get("x-forwarded-for")?.split(",")[0]?.trim(),
++    userAgent: request.headers.get("user-agent"),
++  })
++  if (result.status >= 200 && result.status < 300) {
++    const headers = new Headers()
++    for (const cookie of result.setCookies) headers.append("Set-Cookie", cookie)
++    const from = new URL(request.url).searchParams.get("from")
++    // Same-origin relative paths only (10.8): `//evil.com` and `https://...` collapse to the home page.
++    const to = from && /^\/(?![/\\])/.test(from) ? from : "/"
++    return redirect(to, { headers })
++  }
++  const code = isApiError(result.json) ? result.json.error.code : "UNKNOWN"
++  return data(
++    {
++      fieldErrors: {} as FieldErrors,
++      formError:
++        code === "INVALID_CREDENTIALS"
++          ? "Incorrect email or password."
++          : code === "AUTH_RATE_LIMITED"
++            ? "Too many attempts. Wait a few minutes and try again."
++            : "Could not sign in. Try again.",
++    },
++    { status: result.status === 429 ? 429 : 400 }
++  )
++}
++
++export default function LoginActionRoute({ actionData }: Route.ComponentProps) {
++  const navigation = useNavigation()
++  const busy = navigation.state === "submitting"
++  return (
++    <div className="mx-auto max-w-sm p-4">
++      <h1 className="mb-3 text-xl font-medium">
++        Log in (server action version)
++      </h1>
++      <Form method="post" className="flex flex-col gap-3" noValidate>
++        {actionData?.formError && (
++          <p role="alert" className="text-sm text-destructive">
++            {actionData.formError}
++          </p>
++        )}
++        <label className="flex flex-col gap-1 text-sm">
++          Email
++          <input
++            name="email"
++            type="email"
++            autoComplete="email"
++            className="rounded border px-2 py-1"
++            aria-invalid={Boolean(actionData?.fieldErrors.email)}
++          />
++          {actionData?.fieldErrors.email && (
++            <span role="alert" className="text-destructive">
++              {actionData.fieldErrors.email}
++            </span>
++          )}
++        </label>
++        <label className="flex flex-col gap-1 text-sm">
++          Password
++          <input
++            name="password"
++            type="password"
++            autoComplete="current-password"
++            className="rounded border px-2 py-1"
++            aria-invalid={Boolean(actionData?.fieldErrors.password)}
++          />
++          {actionData?.fieldErrors.password && (
++            <span role="alert" className="text-destructive">
++              {actionData.fieldErrors.password}
++            </span>
++          )}
++        </label>
++        <button
++          type="submit"
++          disabled={busy}
++          className="rounded bg-primary px-3 py-1 text-primary-foreground"
++        >
++          {busy ? "Signing in..." : "Log in"}
++        </button>
++        <Link to="/login" className="text-sm underline">
++          The client-side form
++        </Link>
++      </Form>
++    </div>
++  )
++}
++
++export function meta() {
++  return noindexMeta("Log in")
++}
+diff --git a/frontend/app/routes/product-detail.tsx b/frontend/app/routes/product-detail.tsx
+index 650a09f..4097037 100644
+--- a/frontend/app/routes/product-detail.tsx
++++ b/frontend/app/routes/product-detail.tsx
+@@ -1,13 +1,57 @@
++import { data } from "react-router"
++
+ import { ProductDetailPage } from "@/features/product"
++import { productDetailSchema } from "@/features/catalog"
+ 
+ import { RouteErrorView } from "@/components/common/RouteErrorView"
++import { ApiError } from "@/lib/api/errors"
++import { serverGet } from "@/lib/serverApi.server"
+ 
+ import type { Route } from "./+types/product-detail"
+ 
+-// Thin route: read the param, hand it to the feature.
++/**
++ * 14.8 (SSR experiment). The `loader` runs ON THE SERVER for a document request (and on a client-side navigation it
++ * is called through a `.data` request to the server, so the browser never needs the internal API URL).
++ * - the product is in the HTML: title, description, canonical, price, JSON-LD (View Source shows them)
++ * - a slug that does not exist is a real HTTP 404 (the SPA answers 200 with a "not found" screen: a soft 404)
++ * - the page seeds TanStack Query with it (`initialProduct`), so the client does not fetch it again
++ * Reviews, recommendations and everything user-specific stay client-side Query, as the plan says.
++ */
++export async function loader({ params }: Route.LoaderArgs) {
++  try {
++    const product = await serverGet(
++      `/products/${encodeURIComponent(params.productSlug)}`,
++      productDetailSchema
++    )
++    return { product, loadedAt: Date.now() }
++  } catch (error) {
++    if (error instanceof ApiError && error.status === 404)
++      throw data(null, { status: 404, statusText: "Product not found" })
++    throw error
++  }
++}
++
++/** The HTML of a product page does not depend on who asks: let a CDN keep it briefly (stock and price move). */
++export function headers() {
++  return {
++    "Cache-Control":
++      "public, max-age=0, s-maxage=30, stale-while-revalidate=60",
++  }
++}
+ 
+-export default function ProductDetailRoute({ params }: Route.ComponentProps) {
+-  return <ProductDetailPage slug={params.productSlug} />
++export default function ProductDetailRoute({
++  params,
++  loaderData,
++}: Route.ComponentProps) {
++  // `loaderData` is undefined when a test router renders this component without the loader.
++  const seed = loaderData as typeof loaderData | undefined
++  return (
++    <ProductDetailPage
++      slug={params.productSlug}
++      initialProduct={seed?.product}
++      initialLoadedAt={seed?.loadedAt}
++    />
++  )
+ }
+ 
+ // Below the shell: header and footer stay, only this slot shows the error.
+@@ -15,8 +59,8 @@ export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
+   return <RouteErrorView error={error} />
+ }
+ 
+-// The title, description, canonical, Open Graph and JSON-LD come from the product itself: see ProductSeo
+-// (rendered by the page once the product is loaded). Returning no tags here avoids a second <title>.
++// The title, description, canonical, Open Graph and JSON-LD are rendered by ProductSeo from the loader data (React 19
++// hoists them into <head> during the server render). Returning no tags here avoids a second <title>.
+ export function meta() {
+   return []
+ }
+diff --git a/frontend/app/routes/shell.tsx b/frontend/app/routes/shell.tsx
+index 907a829..c122a91 100644
+--- a/frontend/app/routes/shell.tsx
++++ b/frontend/app/routes/shell.tsx
+@@ -1,4 +1,5 @@
+-import { Fragment, useRef } from "react"
++import { useQueryClient } from "@tanstack/react-query"
++import { Fragment, useRef, useState } from "react"
+ import { Outlet, useMatches } from "react-router"
+ 
+ import { OfflineBanner } from "@/components/common/OfflineBanner"
+@@ -12,25 +13,40 @@ import { useLocale } from "@/features/i18n"
+ import { CompareTray } from "@/features/compare"
+ import { useRouteFocus } from "@/hooks/useRouteFocus"
+ 
+-import { categoryQueries } from "@/features/catalog"
+-import { queryClient } from "@/lib/query-client"
++import { categoryNodeSchema } from "@/features/catalog"
++import { categoryKeys } from "@/lib/queryKeys"
++import { serverGet } from "@/lib/serverApi.server"
++import { z } from "@/lib/zod"
+ import { getBreadcrumb } from "@/types/route-handle"
+ 
+ import type { Route } from "./+types/shell"
+ 
+ /**
+- * Prefetch at app start (9.7): the category tree is needed by the header menu on EVERY page, so
+- * its request starts as soon as the shell route is matched, before the header renders. NOT
+- * awaited (returning the promise would hold the whole page behind it); `prefetchQuery` never
+- * throws, and the header's own `useQuery` joins the same in-flight request.
++ * 14.8 (SSR experiment). In SPA mode this route had a `clientLoader` that started the category request early (9.7).
++ * With SSR a route that has a `clientLoader` and NO server `loader` is NOT rendered on the server at all (React Router
++ * renders its `HydrateFallback`, i.e. nothing, and runs the clientLoader after hydration): every page's HTML was an
++ * empty body until this changed. A server `loader` fixes it: the header's category menu is in the HTML.
++ * It must never take the page down: if the API is slow or fails, `categories` is null and the client fetches as before.
+  */
+-export function clientLoader() {
+-  void queryClient.prefetchQuery(categoryQueries.tree())
+-  return null
++export async function loader() {
++  const categories = await serverGet(
++    "/categories",
++    z.array(categoryNodeSchema)
++  ).catch(() => null)
++  return { categories, loadedAt: Date.now() }
+ }
+ 
+ /** Landmarks: header (banner), nav (inside Header), main, footer (contentinfo). */
+-export default function ShellLayout() {
++export default function ShellLayout({ loaderData }: Route.ComponentProps) {
++  // Seed the (per-request on the server) query cache once, before the header renders and calls useQuery.
++  const client = useQueryClient()
++  useState(() => {
++    const key = categoryKeys.tree()
++    // `loaderData` is undefined when the component is rendered by a test router that has no loaders.
++    const seed = loaderData as typeof loaderData | undefined
++    if (seed?.categories && !client.getQueryData(key))
++      client.setQueryData(key, seed.categories, { updatedAt: seed.loadedAt })
++  })
+   const { version } = useLocale()
+   const mainRef = useRef<HTMLElement>(null)
+   const liveRef = useRef<HTMLDivElement>(null)
+diff --git a/frontend/package.json b/frontend/package.json
+index ea20d89..de4b383 100644
+--- a/frontend/package.json
++++ b/frontend/package.json
+@@ -3,9 +3,10 @@
+   "private": true,
+   "type": "module",
+   "scripts": {
+-    "build": "react-router build && node scripts/build-headers.mjs && node scripts/build-sw.mjs",
++    "build": "react-router build",
+     "dev": "react-router dev",
+-    "start": "node scripts/serve-spa.mjs",
++    "start": "react-router-serve ./build/server/index.js",
++    "ssr:check": "node scripts/ssr-check.mjs",
+     "preview": "npm run build && npm start",
+     "typecheck": "react-router typegen && tsc",
+     "format": "prettier --write \"**/*.{ts,tsx}\"",
+diff --git a/frontend/react-router.config.ts b/frontend/react-router.config.ts
+index 9daac2a..5ccf245 100644
+--- a/frontend/react-router.config.ts
++++ b/frontend/react-router.config.ts
+@@ -2,7 +2,7 @@ import type { Config } from "@react-router/dev/config"
+ 
+ export default {
+   // SPA mode (client-side rendering). Set to true to enable server-side rendering (see learning-plan.md, final stage)
+-  ssr: false,
++  ssr: true,
+   // 13.9: static routes rendered to HTML at build time (their <head> tags are in the file crawlers fetch).
+   prerender: ["/", "/help", "/deals", "/policies/privacy", "/policies/returns"],
+ } satisfies Config
+diff --git a/frontend/scripts/ssr-check.mjs b/frontend/scripts/ssr-check.mjs
+new file mode 100644
+index 0000000..e9e1530
+--- /dev/null
++++ b/frontend/scripts/ssr-check.mjs
+@@ -0,0 +1,70 @@
++// 14.8 (experiment): load routes against the SSR server in Chromium and report hydration problems.
++//   node scripts/ssr-check.mjs [--base http://localhost:5173]
++// React logs hydration mismatches as console errors: "Hydration failed", "Minified React error #418/#423/#425".
++import { chromium } from "@playwright/test"
++
++const base = process.argv.includes("--base")
++  ? process.argv[process.argv.indexOf("--base") + 1]
++  : "http://localhost:5173"
++const SLUG = "the-ordinary-j63-night-cream-ski-00200"
++const routes = [
++  "/",
++  "/products",
++  "/products?search=cream",
++  `/p/${SLUG}`,
++  "/c/electronics",
++  "/cart",
++  "/login",
++  "/deals",
++  "/help",
++  "/policies/privacy",
++  "/compare",
++  "/offline",
++  "/nope",
++]
++const browser = await chromium.launch()
++let bad = 0
++// Visitors whose stored preferences differ from what the server rendered (the server cannot see localStorage).
++const PREFS = {
++  "en-US": null,
++  "hi-IN": null,
++  "stored: dark + USD + Hindi": {
++    theme: "dark",
++    locale: { language: "hi", currency: "USD" },
++  },
++}
++for (const [lang, prefs] of Object.entries(PREFS)) {
++  for (const route of routes) {
++    const context = await browser.newContext({
++      locale: lang.startsWith("stored") ? "en-US" : lang,
++      serviceWorkers: "block",
++    })
++    if (prefs)
++      await context.addInitScript((p) => {
++        localStorage.setItem("shopsphere.theme", JSON.stringify(p.theme))
++        localStorage.setItem("shopsphere.locale", JSON.stringify(p.locale))
++      }, prefs)
++    const page = await context.newPage()
++    const problems = []
++    page.on("console", (m) => {
++      if (
++        ["error", "warning"].includes(m.type()) &&
++        !/Failed to load resource|Service Worker registration blocked/.test(
++          m.text()
++        )
++      )
++        problems.push(`${m.type()}: ${m.text().slice(0, 160)}`)
++    })
++    page.on("pageerror", (e) =>
++      problems.push(`pageerror: ${e.message.slice(0, 160)}`)
++    )
++    await page.goto(base + route, { waitUntil: "networkidle" })
++    await context.close()
++    if (problems.length) bad++
++    console.log(
++      `${problems.length ? "FAIL" : "ok  "} ${lang} ${route}${problems.length ? "\n      " + [...new Set(problems)].join("\n      ") : ""}`
++    )
++  }
++}
++await browser.close()
++process.exit(bad ? 1 : 0)
+-- 
+2.54.0
+
+
+From 14e53b08568bf24f22125fad3e0e9a9eb379f6dc Mon Sep 17 00:00:00 2001
+From: Abhishek Sawant <abhishek.sawant@simformsolutions.com>
+Date: Thu, 29 Oct 2026 07:54:22 +0530
+Subject: [PATCH 2/2] 14.8 SSR experiment: locale snapshot for hydration
+ (select value was not patched)
+
+---
+ frontend/app/features/i18n/LocaleProvider.tsx | 9 ++++++++-
+ 1 file changed, 8 insertions(+), 1 deletion(-)
+
+diff --git a/frontend/app/features/i18n/LocaleProvider.tsx b/frontend/app/features/i18n/LocaleProvider.tsx
+index 29bb021..7db1e34 100644
+--- a/frontend/app/features/i18n/LocaleProvider.tsx
++++ b/frontend/app/features/i18n/LocaleProvider.tsx
+@@ -43,11 +43,18 @@ const LocaleContext = createContext<LocaleValue | null>(null)
+  * - sets `<html lang>` and `dir` (right-to-left languages mirror the layout);
+  * - fetches the display rates once (`GET /config/public`, cached an hour) and hands them to the store.
+  */
++/** What the SERVER renders (it cannot see localStorage or `navigator.language`): a constant object, as required. */
++const SERVER_LOCALE = { language: "en", currency: "INR" } as const
++
+ export function LocaleProvider({ children }: { children: React.ReactNode }) {
++  // 14.8: the third argument is the snapshot used during SERVER rendering AND while hydrating. It must be what the
++  // server rendered ("en"/INR), not the stored choice: React does not patch attributes such as a <select>'s value
++  // at hydration, so the language picker kept saying "English" after a reload in Hindi. useSyncExternalStore then
++  // notices the client snapshot differs and re-renders with the stored choice, without a mismatch.
+   const { language, currency } = useSyncExternalStore(
+     subscribeLocale,
+     getLocale,
+-    getLocale
++    () => SERVER_LOCALE
+   )
+ 
+   useEffect(() => {
+-- 
+2.54.0
+
