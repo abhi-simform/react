@@ -1,4 +1,16 @@
+# Keep the build context small and the build reproducible: only sources go into the image build.
 .react-router
 build
 node_modules
-README.md
+coverage
+e2e
+docs
+scratch
+playwright-report
+test-results
+.env*
+!.env.example
+.DS_Store
+*.md
+.git
+.githooks
