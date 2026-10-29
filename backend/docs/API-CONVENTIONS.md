@@ -115,6 +115,37 @@ Response: `data` = array, `meta` = `PageMeta`. Stable ordering is guaranteed acr
 
 Facets are **disjunctive**: each one is computed with every active filter EXCEPT its own, so after ticking Apple the Samsung count still shows how many Samsung products match the other filters (search, category, price, rating, stock). Otherwise ticking one brand would zero every other brand and the user could never widen the OR. `price` ignores `minPrice/maxPrice` so the slider keeps its full range.
 
+### Catalog write API and admin users (B1 admin side, B11 part)
+
+Audience: the admin portal (`/admin` app). All of it needs a Bearer token; every successful write is audited (B12). A wrong role is `403 FORBIDDEN`, no token `401`.
+
+**Products.** One handler set, mounted twice:
+
+| Mount              | Who           | Scope                                              |
+| ------------------ | ------------- | -------------------------------------------------- |
+| `/admin/products`  | admin         | every product, any status                          |
+| `/seller/products` | seller, admin | ONLY the caller's own products (`seller` = caller) |
+
+A product outside your scope is **404** (not 403) on read, edit, archive; bulk silently skips ids that are not yours (`matched < requested`). Sellers cannot set `isFeatured` or `sellerId`.
+
+- `GET /…/products?search&status&category(id, subtree)&brand&seller(admin)&lowStock&sort(createdAt|updatedAt|name|price|stock|soldCount)&order&page&limit(<=100)` -> `Product[]` (no description/specs/variants) + page meta. `search` is a partial, case-insensitive match on name, sku and brand.
+- `GET /…/products/export.csv` same filters (no paging, max 5000 rows). Cells starting with `= + - @` are prefixed with `'`.
+- `GET /…/products/:id` -> full product (`category` and `seller` populated).
+- `POST /…/products` -> 201. Body: `name, brand, categoryId, price, mrp, sku` required; optional `description, highlights[], tags[], stock, images[{url,alt}], specs[{key,value}], variants[{sku,color?,size?,price,stock}], status (default draft), slug, isFeatured*, sellerId*` (*admin). **Prices are integer rupees; `price <= mrp`.** With variants, `stock` is the sum of variant stock (and sending `stock` on a PATCH is 422).
+- `PATCH /…/products/:id` partial (only the keys you send change; arrays are replaced whole). A price drop queues the same wishlist alert job as `PATCH /admin/products/:id/price`.
+- `DELETE /…/products/:id` -> archives (`status: "archived"`), returns the product.
+- `POST /…/products/bulk` `{ ids[<=100], status }` -> `{ requested, matched, modified }`.
+
+Errors: `422 VALIDATION_ERROR` with `details[].path` in dot form (`variants.1.sku`, `specs.0.value`, `categoryId`, `price`); duplicate SKU/slug is `409 SKU_TAKEN | SLUG_TAKEN` and also carries `details[0].path` so a form can place it. Images are plain URLs: use `POST /uploads/images` first and send the returned `url`.
+
+**Categories** (admin): `GET /admin/categories` (flat, inactive included, `productCount` = direct products), `POST` `{name, parentId?, image?, sortOrder?, isActive?, slug?}`, `PATCH /:id` (same keys; `parentId` moves it: descendants' `ancestors` and products' `categoryPath` are rewritten; moving under itself or a descendant is `422` path `parentId`), `PUT /admin/categories/reorder` `{ parentId|null, ids[] }` (must list ALL children of that parent; sortOrder = index), `DELETE /:id` (204; `409 CATEGORY_NOT_EMPTY` while it has sub-categories or products). Public tree/brand caches are invalidated at once.
+
+**Brands** (admin): `GET /admin/brands?search` -> `[{ _id, name, slug, logo, productCount }]` (brands already used by products are backfilled), `POST {name, logo?}` (`409 BRAND_EXISTS`, case-insensitive), `PATCH /:id` (a rename rewrites `Product.brand`), `DELETE /:id` (`409 BRAND_IN_USE`). Creating/editing a product with a new brand name creates its Brand row. The public `GET /brands` is unchanged (derived from active products).
+
+**Users** (admin): `GET /admin/users?search&role&isActive&sort(createdAt|name|email|lastLoginAt)&order&page&limit` -> `{ id, name, email, role, phone, emailVerified, isActive, providers, lastLoginAt, createdAt }[]` + page meta; `GET /:id`; `PATCH /:id/role` `{role}`; `PATCH /:id/status` `{isActive}`. Both writes refuse your own account (`409 SELF_MODIFICATION`) and revoke the target's refresh tokens (an already-issued access token lives until `JWT_ACCESS_EXPIRES_IN`; deactivated users cannot log in or refresh).
+
+Seed additions: `seller2@shopsphere.dev` owns every 5th product; every 8th product has S/M/L variants; a `Brand` row per brand.
+
 ### Wishlist, addresses, delivery (B2)
 
 All wishlist and address endpoints need `Authorization: Bearer <accessToken>` (401 otherwise). Dev customer: `customer@shopsphere.dev` / `Password123` (seeded with 2 addresses + 3 wishlisted products).

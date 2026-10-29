@@ -1,4 +1,5 @@
 import { z } from "zod"
+import { staffPaths } from "./openapi.staff.js"
 import {
   registerSchema,
   loginSchema,
@@ -100,6 +101,7 @@ export const openApiDocument = {
     },
   },
   paths: {
+    ...staffPaths,
     "/health": {
       get: {
         tags: ["Health"],

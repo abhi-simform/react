@@ -1,6 +1,11 @@
 import { Router } from "express"
 import { authRoutes } from "./modules/auth/auth.routes.js"
-import { brandRoutes, categoryRoutes } from "./modules/categories/category.routes.js"
+import {
+  adminBrandRoutes,
+  adminCategoryRoutes,
+  brandRoutes,
+  categoryRoutes,
+} from "./modules/categories/category.routes.js"
 import { healthRoutes } from "./modules/health/health.routes.js"
 import { adminProductRoutes, productRoutes } from "./modules/products/product.routes.js"
 import { addressRoutes } from "./modules/addresses/address.routes.js"
@@ -43,6 +48,7 @@ import { adminMetricsRoutes, metricsRoutes } from "./modules/metrics/metrics.rou
 import { optionalAuth } from "./middleware/auth.js"
 import { staffWriteLimiter } from "./middleware/rateLimit.js"
 import { userRoutes } from "./modules/users/user.routes.js"
+import { adminUserRoutes } from "./modules/users/user.admin.routes.js"
 
 // Every feature module mounts here. New module = new line.
 export const routes = Router()
@@ -55,6 +61,9 @@ routes.use("/metrics", metricsRoutes)
 routes.use("/admin/metrics", adminMetricsRoutes)
 routes.use("/admin/audit-logs", adminAuditRoutes)
 routes.use("/admin/products", adminProductRoutes)
+routes.use("/admin/categories", adminCategoryRoutes)
+routes.use("/admin/brands", adminBrandRoutes)
+routes.use("/admin/users", adminUserRoutes)
 routes.use("/auth", authRoutes)
 routes.use("/users", userRoutes)
 routes.use("/categories", categoryRoutes)

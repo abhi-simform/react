@@ -19,6 +19,18 @@ const productSchema = new Schema(
     stock: { type: Number, default: 0, min: 0 },
     sku: { type: String, required: true, unique: true },
     specs: [{ key: String, value: String, _id: false }],
+    // Optional sellable options (B1). The storefront still sells the product as a whole at `price`;
+    // when variants exist `stock` is the SUM of their stock (kept in the pre-validate hook).
+    variants: [
+      {
+        sku: { type: String, required: true },
+        color: String,
+        size: String,
+        price: { type: Number, required: true, min: 0 },
+        stock: { type: Number, default: 0, min: 0 },
+        _id: false,
+      },
+    ],
     ratingAvg: { type: Number, default: 0, min: 0, max: 5 },
     ratingCount: { type: Number, default: 0 },
     soldCount: { type: Number, default: 0 },
@@ -42,6 +54,7 @@ productSchema.pre("validate", function () {
         : 0
   }
   if (!this.slug && this.name) this.slug = slugify(this.name)
+  if (this.variants?.length) this.stock = this.variants.reduce((n, v) => n + v.stock, 0)
 })
 
 // Full-text search with relevance weights (name matters most).

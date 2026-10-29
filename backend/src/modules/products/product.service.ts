@@ -126,7 +126,13 @@ export async function listProducts(q: ListQuery) {
 
   const projection = q.search ? { score: { $meta: "textScore" as const } } : {}
   const [items, total] = await Promise.all([
-    Product.find(filter, { ...projection, description: 0, specs: 0, highlights: 0 })
+    Product.find(filter, {
+      ...projection,
+      description: 0,
+      specs: 0,
+      highlights: 0,
+      variants: 0,
+    })
       .sort(sortWithTie)
       .skip((q.page - 1) * q.limit)
       .limit(q.limit)

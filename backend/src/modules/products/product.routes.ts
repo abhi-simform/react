@@ -2,6 +2,7 @@ import { Router } from "express"
 import { authenticate, authorize } from "../../middleware/auth.js"
 import { publicCache } from "../../middleware/httpCache.js"
 import { validate } from "../../middleware/validate.js"
+import { staffProductRoutes } from "./product.admin.routes.js"
 import { getOne, list, setPrice } from "./product.controller.js"
 import { getProductSchema, listProductsSchema, setPriceSchema } from "./product.schema.js"
 
@@ -15,3 +16,4 @@ productRoutes.get("/:idOrSlug", publicCache(10, 60), validate(getProductSchema),
 export const adminProductRoutes = Router()
 adminProductRoutes.use(authenticate, authorize("admin"))
 adminProductRoutes.patch("/:id/price", validate(setPriceSchema), setPrice)
+adminProductRoutes.use(staffProductRoutes("all"))

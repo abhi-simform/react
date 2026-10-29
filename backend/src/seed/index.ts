@@ -3,6 +3,7 @@ import bcrypt from "bcryptjs"
 import mongoose from "mongoose"
 import { connectDb, disconnectDb } from "../config/db.js"
 import { logger } from "../config/logger.js"
+import { Brand } from "../modules/categories/brand.model.js"
 import { Category } from "../modules/categories/category.model.js"
 import { Product } from "../modules/products/product.model.js"
 import { User } from "../modules/users/user.model.js"
@@ -27,6 +28,17 @@ import { resolveSeedSafety } from "./guard.js"
 // Dev accounts. Password: the development one for a local database, SEED_PASSWORD otherwise (guard.ts, 14.5).
 const PRODUCTS_PER_LEAF = 22
 
+// Three size options; the product's stock is their sum (the model keeps that invariant on save).
+function sizeVariants(sku: string, price: number) {
+  const variants = ["S", "M", "L"].map((size) => ({
+    sku: `${sku}-${size}`,
+    size,
+    price,
+    stock: faker.number.int({ min: 0, max: 40 }),
+  }))
+  return { variants, stock: variants.reduce((n, v) => n + v.stock, 0) }
+}
+
 async function main() {
   const reset = process.argv.includes("--reset")
   const { password: DEV_PASSWORD, local } = resolveSeedSafety({
@@ -48,6 +60,7 @@ async function main() {
     Product.syncIndexes(),
     User.syncIndexes(),
     Category.syncIndexes(),
+    Brand.syncIndexes(),
     RefreshToken.syncIndexes(),
     Address.syncIndexes(),
     WishlistItem.syncIndexes(),
@@ -84,6 +97,14 @@ async function main() {
       passwordHash,
     },
     {
+      // A second seller so "a seller sees only their own products" can be seen working (B11).
+      name: "Sia Seller",
+      email: "seller2@shopsphere.dev",
+      role: "seller",
+      emailVerified: true,
+      passwordHash,
+    },
+    {
       name: "Casey Customer",
       email: "customer@shopsphere.dev",
       role: "customer",
@@ -91,7 +112,8 @@ async function main() {
       passwordHash,
     },
   ])
-  const seller = await User.findOne({ role: "seller" })
+  const seller = await User.findOne({ email: "seller@shopsphere.dev" })
+  const seller2 = await User.findOne({ email: "seller2@shopsphere.dev" })
 
   // Categories + products
   let total = 0
@@ -167,13 +189,18 @@ async function main() {
           ratingCount: faker.number.int({ min: 0, max: 8000 }),
           soldCount: faker.number.int({ min: 0, max: 20000 }),
           isFeatured: faker.datatype.boolean({ probability: 0.12 }),
-          seller: seller?._id,
+          // Every 5th product belongs to the second seller; every 8th has size variants (B1).
+          seller: (total + n) % 5 === 4 ? seller2?._id : seller?._id,
+          ...((total + n) % 8 === 0 ? sizeVariants(sku, price) : {}),
         }
       })
       await Product.insertMany(docs)
       total += docs.length
     }
   }
+  // B1: the managed brand list (product.brand stays a string; admins rename brands here).
+  const brandNames = (await Product.distinct("brand")) as string[]
+  await Brand.insertMany(brandNames.map((name) => ({ name, slug: slugify(name) })))
   // B2: the dev customer gets two addresses and three wishlisted products.
   const customer = await User.findOne({ email: "customer@shopsphere.dev" })
   if (customer) {
