@@ -13,6 +13,8 @@ import { Route as AuthedRouteImport } from './routes/_authed'
 import { Route as ForbiddenRouteImport } from './routes/forbidden'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as AuthedIndexRouteImport } from './routes/_authed/index'
+import { Route as AuthedBrandsRouteImport } from './routes/_authed/brands'
+import { Route as AuthedCategoriesRouteImport } from './routes/_authed/categories'
 import { Route as AuthedProductsRouteRouteImport } from './routes/_authed/products/route'
 import { Route as AuthedUsersRouteImport } from './routes/_authed/users'
 import { Route as AuthedProductsIndexRouteImport } from './routes/_authed/products/index'
@@ -36,6 +38,16 @@ const LoginRoute = LoginRouteImport.update({
 const AuthedIndexRoute = AuthedIndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => AuthedRoute,
+} as any)
+const AuthedBrandsRoute = AuthedBrandsRouteImport.update({
+  id: '/brands',
+  path: '/brands',
+  getParentRoute: () => AuthedRoute,
+} as any)
+const AuthedCategoriesRoute = AuthedCategoriesRouteImport.update({
+  id: '/categories',
+  path: '/categories',
   getParentRoute: () => AuthedRoute,
 } as any)
 const AuthedProductsRouteRoute = AuthedProductsRouteRouteImport.update({
@@ -69,6 +81,8 @@ export interface FileRoutesByFullPath {
   '/forbidden': typeof ForbiddenRoute
   '/login': typeof LoginRoute
   '/products': typeof AuthedProductsRouteRouteWithChildren
+  '/brands': typeof AuthedBrandsRoute
+  '/categories': typeof AuthedCategoriesRoute
   '/users': typeof AuthedUsersRoute
   '/products/$productId': typeof AuthedProductsProductIdRoute
   '/products/new': typeof AuthedProductsNewRoute
@@ -77,6 +91,8 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/forbidden': typeof ForbiddenRoute
   '/login': typeof LoginRoute
+  '/brands': typeof AuthedBrandsRoute
+  '/categories': typeof AuthedCategoriesRoute
   '/users': typeof AuthedUsersRoute
   '/': typeof AuthedIndexRoute
   '/products/$productId': typeof AuthedProductsProductIdRoute
@@ -89,6 +105,8 @@ export interface FileRoutesById {
   '/forbidden': typeof ForbiddenRoute
   '/login': typeof LoginRoute
   '/_authed/products': typeof AuthedProductsRouteRouteWithChildren
+  '/_authed/brands': typeof AuthedBrandsRoute
+  '/_authed/categories': typeof AuthedCategoriesRoute
   '/_authed/users': typeof AuthedUsersRoute
   '/_authed/': typeof AuthedIndexRoute
   '/_authed/products/$productId': typeof AuthedProductsProductIdRoute
@@ -102,6 +120,8 @@ export interface FileRouteTypes {
     | '/forbidden'
     | '/login'
     | '/products'
+    | '/brands'
+    | '/categories'
     | '/users'
     | '/products/$productId'
     | '/products/new'
@@ -110,6 +130,8 @@ export interface FileRouteTypes {
   to:
     | '/forbidden'
     | '/login'
+    | '/brands'
+    | '/categories'
     | '/users'
     | '/'
     | '/products/$productId'
@@ -121,6 +143,8 @@ export interface FileRouteTypes {
     | '/forbidden'
     | '/login'
     | '/_authed/products'
+    | '/_authed/brands'
+    | '/_authed/categories'
     | '/_authed/users'
     | '/_authed/'
     | '/_authed/products/$productId'
@@ -162,6 +186,20 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof AuthedIndexRouteImport
+      parentRoute: typeof AuthedRoute
+    }
+    '/_authed/brands': {
+      id: '/_authed/brands'
+      path: '/brands'
+      fullPath: '/brands'
+      preLoaderRoute: typeof AuthedBrandsRouteImport
+      parentRoute: typeof AuthedRoute
+    }
+    '/_authed/categories': {
+      id: '/_authed/categories'
+      path: '/categories'
+      fullPath: '/categories'
+      preLoaderRoute: typeof AuthedCategoriesRouteImport
       parentRoute: typeof AuthedRoute
     }
     '/_authed/products': {
@@ -219,12 +257,16 @@ const AuthedProductsRouteRouteWithChildren =
 
 interface AuthedRouteChildren {
   AuthedProductsRouteRoute: typeof AuthedProductsRouteRouteWithChildren
+  AuthedBrandsRoute: typeof AuthedBrandsRoute
+  AuthedCategoriesRoute: typeof AuthedCategoriesRoute
   AuthedUsersRoute: typeof AuthedUsersRoute
   AuthedIndexRoute: typeof AuthedIndexRoute
 }
 
 const AuthedRouteChildren: AuthedRouteChildren = {
   AuthedProductsRouteRoute: AuthedProductsRouteRouteWithChildren,
+  AuthedBrandsRoute: AuthedBrandsRoute,
+  AuthedCategoriesRoute: AuthedCategoriesRoute,
   AuthedUsersRoute: AuthedUsersRoute,
   AuthedIndexRoute: AuthedIndexRoute,
 }

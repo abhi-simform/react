@@ -29,13 +29,15 @@ export const Route = createFileRoute("/_authed")({
 })
 
 type NavItem = {
-  to: "/" | "/products" | "/users"
+  to: "/" | "/products" | "/categories" | "/brands" | "/users"
   label: string
   permission: Permission
 }
 const NAV: NavItem[] = [
   { to: "/", label: "Dashboard", permission: "dashboard:view" },
   { to: "/products", label: "Products", permission: "products:read" },
+  { to: "/categories", label: "Categories", permission: "categories:manage" },
+  { to: "/brands", label: "Brands", permission: "brands:manage" },
   { to: "/users", label: "Users", permission: "users:manage" },
 ]
 
