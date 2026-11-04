@@ -63,7 +63,7 @@ export function VariantPicker({
                     className={cn(
                       "block cursor-pointer rounded border px-3 py-1 text-sm peer-focus-visible:ring-2",
                       selected && "border-black bg-black text-white",
-                      !fits && !selected && "text-neutral-400 line-through",
+                      !fits && !selected && "text-neutral-500 line-through",
                       !exists && "cursor-not-allowed"
                     )}
                   >

@@ -9,6 +9,17 @@ import { variantsFixture } from "@/test/fixtures/variants"
 
 import type { Route } from "./+types/product-detail"
 
+export function meta({ params }: Route.MetaArgs) {
+  const product = productDetailFixture(params.productSlug)
+  return [
+    {
+      title: product
+        ? `${product.name} | ShopSphere`
+        : "Product not found | ShopSphere",
+    },
+  ]
+}
+
 // Static PDP (Stage 3): reads from the fixture, no fetching yet.
 export default function ProductDetailRoute({ params }: Route.ComponentProps) {
   // 3.5 bug demo: add ?bug-no-key to render WITHOUT the key and see product A's
@@ -19,14 +30,14 @@ export default function ProductDetailRoute({ params }: Route.ComponentProps) {
   const variants = product ? variantsFixture(product) : []
   if (!product) {
     return (
-      <main className="p-4">
+      <div className="p-4">
         <h1>Product not found</h1>
         <Link to="/scratch/grid">Back to the grid</Link>
-      </main>
+      </div>
     )
   }
   return (
-    <main className="mx-auto max-w-5xl p-4">
+    <div className="mx-auto max-w-5xl p-4">
       {/* key = identity: a new slug is a new component, so all state resets. */}
       <ProductDetailView
         key={withoutKey ? undefined : product.slug}
@@ -48,6 +59,6 @@ export default function ProductDetailRoute({ params }: Route.ComponentProps) {
           ))}
         </ul>
       </nav>
-    </main>
+    </div>
   )
 }

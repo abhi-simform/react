@@ -15,7 +15,7 @@ export default function ScratchGrid() {
   const products = sortProducts(first24, sort)
 
   return (
-    <main className="p-4">
+    <div className="p-4">
       <h1 className="mb-2 text-xl font-medium">
         ProductGrid (24 from fixture)
       </h1>
@@ -53,6 +53,6 @@ export default function ScratchGrid() {
           onAddToCart={(p) => console.log("add to cart", p.slug)}
         />
       )}
-    </main>
+    </div>
   )
 }

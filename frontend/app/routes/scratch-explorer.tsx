@@ -183,7 +183,7 @@ export default function ScratchExplorer() {
   }
 
   return (
-    <main className="grid gap-4 p-4 md:grid-cols-[16rem_1fr]">
+    <div className="grid gap-4 p-4 md:grid-cols-[16rem_1fr]">
       <aside className="flex flex-col gap-3 text-sm">
         <label className="flex flex-col">
           Search
@@ -312,6 +312,6 @@ export default function ScratchExplorer() {
       </section>
       <TypedLab />
       <AsyncLab />
-    </main>
+    </div>
   )
 }
