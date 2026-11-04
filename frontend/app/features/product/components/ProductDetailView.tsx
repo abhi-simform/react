@@ -2,6 +2,7 @@ import { useState } from "react"
 
 import { Price } from "@/components/common/Price"
 import { Rating } from "@/components/common/Rating"
+import { QuantityStepper } from "@/components/common/QuantityStepper"
 import { Button } from "@/components/ui/button"
 import type { ProductDetail } from "@/features/catalog"
 import type { Variant } from "@/types/domain"
@@ -22,10 +23,15 @@ export function ProductDetailView({
 }: ProductDetailViewProps) {
   // State: only the chosen attribute values. Everything below is derived.
   const [selection, setSelection] = useState<Selection>({})
+  const [qty, setQty] = useState(1)
   const variant = findVariant(variants, selection)
   const price = variant?.price ?? product.price
   const mrp = variant?.mrp ?? product.mrp
   const canBuy = variant !== undefined && variant.stock > 0
+  // Derived: if a variant with less stock is picked, the shown quantity is
+  // capped in render. No effect to "fix up" state afterwards.
+  const maxQty = Math.max(1, variant?.stock ?? 1)
+  const quantity = Math.min(qty, maxQty)
 
   return (
     <div className="grid gap-6 md:grid-cols-2">
@@ -41,9 +47,10 @@ export function ProductDetailView({
           onSelectionChange={setSelection}
         />
         <p role="status">{stockMessage(variant)}</p>
+        <QuantityStepper value={quantity} onValueChange={setQty} max={maxQty} />
         <Button
           disabled={!canBuy}
-          onClick={() => console.log("add to cart", variant?.sku)}
+          onClick={() => console.log("add to cart", variant?.sku, quantity)}
         >
           Add to cart
         </Button>

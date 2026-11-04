@@ -1,6 +1,8 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import type { ProductDetail } from "@/features/catalog"
 
+import { ReviewForm } from "./ReviewForm"
+
 export function ProductTabs({ product }: { product: ProductDetail }) {
   return (
     <Tabs defaultValue="description">
@@ -29,8 +31,12 @@ export function ProductTabs({ product }: { product: ProductDetail }) {
         </dl>
       </TabsContent>
       <TabsContent value="reviews" className="text-sm">
-        {product.ratingCount.toLocaleString("en-IN")} ratings, average{" "}
-        {product.ratingAvg}. Review list arrives with the reviews backend phase.
+        <p className="mb-4">
+          {product.ratingCount.toLocaleString("en-IN")} ratings, average{" "}
+          {product.ratingAvg}. The review list arrives with the reviews backend
+          phase.
+        </p>
+        <ReviewForm />
       </TabsContent>
       <TabsContent value="qa" className="text-sm">
         No questions yet.
