@@ -147,3 +147,18 @@ What stopped compiling when `getJson` returned `unknown` (`tsc` output): `homeDa
 - `z.coerce.number()` for query strings, and its pitfall: it runs `Number(input)`, and `Number("")` is `0`, so an empty `?minPrice=` becomes "minimum price 0" and passes silently (`naiveMinPriceSchema.parse("") === 0`, asserted). `productQuerySchema` guards it with `z.preprocess` (`queryNumber`: "" becomes undefined before coercion); `.optional()`/`.default()` must be inside the preprocess, otherwise the undefined turns into `NaN` and fails (hit this while writing it).
 - Zod 4 notes: `z.url()`, `z.iso.datetime()` are top-level now (not `z.string().url()`); error objects expose `.issues`; unknown keys are stripped by default (`__v` disappears from `Product`).
 - Verified: `npm run typecheck`, `npm run build`, `npm run check:scratch` (all 12 scratch scripts), and the `/scratch/explorer` page in the browser (fixture parsed by Zod, validated live API calls from the async lab, no console errors apart from the expected 404 of the deliberately wrong route).
+
+# Stage 3: React fundamentals refresh
+
+Scope: reusable components (`ProductCard`, `ProductGrid`, `Gallery`, `VariantPicker`, `Tabs`, `QuantityStepper`, review box, `CartDrawer`) and a static PDP at `/p/:productSlug` fed from the fixture. Added shadcn `card`, `tabs`, `sheet` (base-ui); each `shadcn add` writes `import { cn } from "cn"`, which I changed to `@/lib/utils` by hand every time.
+
+## 3.1 Components, JSX, composition: ProductCard
+
+- `features/catalog/components/ProductCard.tsx` takes a `ProductCardProduct` (`ProductCardData` + `_id`, `brand`, `stock`, `ratingCount`) and `children` as a slot: `<ProductCard.Badge>` is a static property on the function, rendered over the image. `ProductGrid` is generic (`T extends ProductCardProduct`) so it accepts full `Product`s without losing the type. `Price` (rupees, MRP struck through, discount badge) and `Rating` live in `components/common/` and are reused.
+- Single link target: the title is the only `<Link>`; it is stretched over the card with `after:absolute after:inset-0`, and the heart and "Add to cart" buttons are siblings with `relative z-10`, so there is no `<button>` inside an `<a>`. The image is `alt=""` (decorative: the title link names it); the box is `aspect-square` so nothing shifts when images load. Out of stock (31 of the 308 products have `stock: 0`): image dimmed, "Notify me" replaces "Add to cart".
+- Data deviation: the plan's card has "title", "variants", "MRP"; the real API has `name`, one `price`/`mrp` in whole rupees and `discountPercent`. `lib/format.ts` gained `formatRupees` (the existing `formatCurrency` takes paise for the cart layer).
+- Demo route `/scratch/grid`: 24 fixture products, 2/3/4/5 columns (`grid-cols-2 md:3 lg:4 xl:5`).
+
+## 3.2 Lists and keys (key-bug demo)
+
+`ProductCard` owns `liked` state. `app/scratch/key-bug/IndexKeyGrid.tsx` is the deliberately broken grid (`key={index}`); `ProductGrid` (in use everywhere) uses `key={product._id}`. Observed on `/scratch/grid`: liked card 1 ("The Ordinary J63"), switched sort to price ascending. With index keys the heart stayed on position 1 and now sat on a different product ("Hachette N35 Novel"); with id keys the heart moved with its product to position 7. React matches state by key, and with an index key "the item at position 0" is the same instance whatever product it renders. (My first try liked position 3 and looked fine: that product was coincidentally also the third cheapest, a good reminder that a demo needs a case that actually moves.) No `key` warnings in the console.
