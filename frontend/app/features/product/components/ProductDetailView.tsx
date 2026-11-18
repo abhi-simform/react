@@ -81,8 +81,9 @@ export function ProductDetailView({
   return (
     <div className="grid gap-6 md:grid-cols-2">
       <Gallery images={product.images} productName={product.name} />
-      {/* Desktop: the buy box stays in view while the (long) tabs scroll past on the left/below. */}
-      <div className="flex flex-col gap-3 md:sticky md:top-4 md:self-start">
+      {/* Not sticky: the box is taller than a desktop viewport and, being sticky within the whole
+          grid, it slid down over the full-width tabs row (offers overlapped the description). */}
+      <div className="flex flex-col gap-3 md:self-start">
         <p className="text-sm text-neutral-500">{product.brand}</p>
         <h1 className="text-xl font-medium">{product.name}</h1>
         {product.rating ? (
